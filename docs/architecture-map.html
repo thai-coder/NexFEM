@@ -1,0 +1,646 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bản đồ kiến trúc NexFEM</title>
+<style>
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --surface-2: #eef0f4;
+  --border: #d5d9e0;
+  --text: #1c1f24;
+  --muted: #5d6573;
+  --link: #8a93a3;
+  --accent: #2f6fe0;
+  --c-ui: #2f6fe0;
+  --c-pkg: #0f8f86;
+  --c-rust: #c46b0a;
+  --c-csi: #8a4fd8;
+  --c-code: #c0392b;
+  --c-road: #3d8b2f;
+  --c-infra: #607089;
+  --select: #e0a800;
+  --shadow: 0 1px 2px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.06);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #17181b; --surface: #1e1f22; --surface-2: #26282c; --border: #3a3d43;
+    --text: #e6e8eb; --muted: #9aa2ad; --link: #5a616c; --accent: #6aa6ff;
+    --c-ui: #6aa6ff; --c-pkg: #3cc7bb; --c-rust: #f0a64a; --c-csi: #b58cff;
+    --c-code: #ff7a6b; --c-road: #7fcf6a; --c-infra: #9aabc4; --select: #ffd400;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.3);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #17181b; --surface: #1e1f22; --surface-2: #26282c; --border: #3a3d43;
+  --text: #e6e8eb; --muted: #9aa2ad; --link: #5a616c; --accent: #6aa6ff;
+  --c-ui: #6aa6ff; --c-pkg: #3cc7bb; --c-rust: #f0a64a; --c-csi: #b58cff;
+  --c-code: #ff7a6b; --c-road: #7fcf6a; --c-infra: #9aabc4; --select: #ffd400;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.3);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--bg); color: var(--text);
+  font: 14px/1.5 "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+header {
+  display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between;
+  padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--surface);
+}
+h1 { font-size: 18px; margin: 0; }
+header p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+.tabs { display: flex; gap: 4px; background: var(--surface-2); padding: 3px; border-radius: 8px; }
+.tabs button, .tool {
+  font: inherit; font-size: 13px; color: var(--text); background: transparent;
+  border: 0; border-radius: 6px; padding: 6px 12px; cursor: pointer;
+}
+.tabs button[aria-selected="true"] { background: var(--surface); box-shadow: var(--shadow); font-weight: 600; }
+.tool { border: 1px solid var(--border); background: var(--surface); padding: 5px 10px; }
+.tool:hover, .tabs button:hover { color: var(--accent); }
+.toolbar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+main { padding: 16px 20px 32px; }
+.view { display: none; }
+.view.active { display: block; }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; }
+@media (max-width: 860px) { .layout { grid-template-columns: 1fr; } }
+.canvas {
+  position: relative; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; overflow: hidden; height: min(74vh, 760px); min-height: 420px;
+  touch-action: none;
+}
+.canvas svg { width: 100%; height: 100%; display: block; cursor: grab; user-select: none; }
+.canvas svg.dragging { cursor: grabbing; }
+.canvas .hint {
+  position: absolute; left: 10px; bottom: 8px; font-size: 12px; color: var(--muted);
+  background: var(--surface); padding: 2px 6px; border-radius: 4px; pointer-events: none;
+}
+.canvas .tools { position: absolute; right: 10px; top: 10px; display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+aside {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px;
+  align-self: start;
+}
+aside h2 { font-size: 16px; margin: 0 0 4px; }
+aside .path { font: 12px/1.4 ui-monospace, "Cascadia Mono", Consolas, monospace; color: var(--muted); word-break: break-all; }
+aside .tag { display: inline-block; font-size: 12px; padding: 1px 8px; border-radius: 99px; background: var(--surface-2); margin: 8px 6px 0 0; }
+aside p { margin: 10px 0 0; }
+aside ul { margin: 8px 0 0; padding-left: 18px; }
+.legend { display: flex; flex-wrap: wrap; gap: 10px 16px; margin-top: 12px; font-size: 13px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+
+/* mindmap */
+.link { fill: none; stroke-width: 1.6; opacity: .55; }
+.link.hl { opacity: 1; stroke-width: 2.6; }
+.node rect { stroke-width: 1.4; }
+.node text { fill: var(--text); font-size: 13px; dominant-baseline: central; pointer-events: none; }
+.node.root text { font-size: 17px; font-weight: 700; }
+.node.d1 text { font-weight: 600; font-size: 14px; }
+.node { cursor: pointer; }
+.node.sel rect { stroke: var(--select); stroke-width: 3; }
+.node.dim { opacity: .35; }
+.toggle circle { fill: var(--surface); stroke-width: 1.4; cursor: pointer; }
+.toggle text { font-size: 12px; font-weight: 700; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+
+/* dataflow */
+.flow .box rect { stroke-width: 1.4; }
+.flow .box text { fill: var(--text); font-size: 13px; text-anchor: middle; dominant-baseline: central; }
+.flow .box .sub { fill: var(--muted); font-size: 10.5px; font-family: ui-monospace, Consolas, monospace; }
+.flow .frame { fill: none; stroke: var(--border); stroke-width: 1.4; }
+.flow .lane { fill: var(--muted); font-size: 12px; font-weight: 600; letter-spacing: .02em; }
+.flow .arrow { fill: none; stroke: var(--muted); stroke-width: 1.6; }
+.flow .arrow.dash { stroke-dasharray: 5 4; }
+.flow .lbl { fill: var(--muted); font-size: 11px; }
+.flow .step circle { fill: var(--accent); }
+.flow .step text { fill: #fff; font-size: 11px; font-weight: 700; text-anchor: middle; dominant-baseline: central; }
+.flow .box { cursor: pointer; }
+.flow .box.sel rect { stroke: var(--select); stroke-width: 3; }
+.steps { counter-reset: s; list-style: none; padding: 0; margin: 12px 0 0; }
+.steps li { counter-increment: s; position: relative; padding-left: 30px; margin: 6px 0; }
+.steps li::before {
+  content: counter(s); position: absolute; left: 0; top: 1px; width: 20px; height: 20px; border-radius: 50%;
+  background: var(--accent); color: #fff; font-size: 11px; font-weight: 700; display: grid; place-items: center;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .flow .step text, :root:not([data-theme="light"]) .steps li::before { color: #10131a; } }
+:root[data-theme="dark"] .flow .step text, :root[data-theme="dark"] .steps li::before { color: #10131a; }
+@media (max-width: 600px) {
+  header, main { padding-left: 16px; padding-right: 16px; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Bản đồ kiến trúc NexFEM</h1>
+    <p>Sơ đồ tư duy các khối của phần mềm và đường đi của dữ liệu. Nguồn: <code>docs/ROADMAP.md</code>, <code>docs/ux/ui-architecture.md</code>, <code>docs/adr/</code>.</p>
+  </div>
+  <div class="toolbar">
+    <div class="tabs" role="tablist">
+      <button role="tab" aria-selected="true" data-view="mind">Sơ đồ tư duy</button>
+      <button role="tab" aria-selected="false" data-view="flow">Luồng dữ liệu</button>
+    </div>
+    <button class="tool" id="theme">Đổi nền</button>
+  </div>
+</header>
+
+<main>
+  <section class="view active" id="view-mind">
+    <div class="layout">
+      <div>
+        <div class="canvas" id="mindCanvas">
+          <svg id="mind" aria-label="Sơ đồ tư duy kiến trúc NexFEM"></svg>
+          <div class="tools">
+            <button class="tool" id="expandAll">Mở hết</button>
+            <button class="tool" id="collapseAll">Thu gọn</button>
+            <button class="tool" id="fit">Vừa khung</button>
+          </div>
+          <div class="hint">Kéo để di chuyển · lăn chuột để phóng to · bấm ⊕/⊖ để mở/thu nhánh</div>
+        </div>
+        <div class="legend" id="legend"></div>
+      </div>
+      <aside id="detail"></aside>
+    </div>
+  </section>
+
+  <section class="view" id="view-flow">
+    <div class="layout">
+      <div>
+        <div class="canvas" style="height:auto;min-height:0">
+          <svg id="flow" class="flow" viewBox="0 0 1110 640" style="cursor:default;height:auto" aria-label="Luồng dữ liệu NexFEM"></svg>
+        </div>
+      </div>
+      <aside id="flowDetail">
+        <h2>Đường đi của một lần phân tích</h2>
+        <ol class="steps">
+          <li>Kỹ sư vẽ hoặc gán trên giao diện; mỗi thao tác là một lệnh trong <code>model-core</code> (có Undo/Redo).</li>
+          <li><code>viewer</code> vẽ lại mô hình 2D/3D từ kho mô hình.</li>
+          <li>Bấm Run (F5): <code>analysis-client</code> đóng gói mô hình.</li>
+          <li>Gọi lệnh Tauri <code>run_analysis</code> sang backend Rust.</li>
+          <li>Chia lưới, lắp ma trận độ cứng và giải trong <code>fem-mesh</code>, <code>fem-core</code>, <code>fem-solver</code>.</li>
+          <li><code>fem-post</code> tính nội lực, chuyển vị, drift; <code>design-codes</code> kiểm tra theo tiêu chuẩn.</li>
+          <li>Kết quả quay về giao diện: biểu đồ trên view và bảng kết quả.</li>
+        </ol>
+        <p style="color:var(--muted);margin-top:12px">Đường nét đứt: liên thông ETABS/SAP2000 qua file <code>.e2k/.s2k</code> hoặc qua cầu nối OAPI chạy trên Windows. Bấm vào một khối để xem chi tiết.</p>
+        <div id="flowBox"></div>
+      </aside>
+    </div>
+  </section>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---------- data ----------
+  const G = {
+    ui:   { label: "Giao diện", color: "--c-ui" },
+    pkg:  { label: "Thư viện TypeScript", color: "--c-pkg" },
+    rust: { label: "Lõi Rust", color: "--c-rust" },
+    csi:  { label: "Liên thông ETABS/SAP2000", color: "--c-csi" },
+    code: { label: "Tiêu chuẩn", color: "--c-code" },
+    road: { label: "Lộ trình", color: "--c-road" },
+    infra:{ label: "Hạ tầng & kiểm thử", color: "--c-infra" }
+  };
+
+  const n = (t, o, c) => Object.assign({ t }, o || {}, c ? { c } : {});
+
+  const tree = n("NexFEM", { d: "Phần mềm desktop phân tích và thiết kế kết cấu cho Windows 10/11. Tauri 2 + React + Rust.", p: "thai-coder/NexFEM" }, [
+    n("Giao diện", { g: "ui", side: 1, p: "apps/desktop/", ph: "GĐ 1–4", d: "Ứng dụng Tauri: frontend React chạy trong WebView2, backend Rust trong src-tauri. Đóng gói .msi/.exe." }, [
+      n("Shell", { p: "apps/desktop/src/shell/", d: "Khung cửa sổ: TitleBar, MenuBar, Ribbon, StatusBar, DockLayout (Dockview)." }, [
+        n("Menu chính", { d: "File, Edit, View, Define, Draw, Select, Assign, Analyze, Display, Design, Tools, Help." }),
+        n("Ribbon", { d: "Tab theo ngữ cảnh: Modeling, Loads, Analysis, Results, Design. Ô chọn tầng ▲▼." }),
+        n("Status bar", { d: "Toạ độ con trỏ, bắt điểm, số đối tượng chọn, khóa mô hình, đơn vị." })
+      ]),
+      n("Panels", { p: "apps/desktop/src/panels/", d: "Các panel dock được, lưu layout theo người dùng." }, [
+        n("Model Explorer", { d: "Cây mô hình 3 tab Model / Display / Tables. Phím F2." }),
+        n("Viewport", { d: "1/2/4 ô: Plan, Elevation, 3D. Phím Ctrl+1/2/4." }),
+        n("Properties", { d: "Thuộc tính của đối tượng đang chọn, <varies> khi chọn nhiều. Phím F4." }),
+        n("Console · Tables", { d: "Console lệnh, Messages, Results Table, Analysis Log. Phím F8." })
+      ]),
+      n("Dialogs", { p: "apps/desktop/src/dialogs/", d: "Hộp thoại theo menu, dùng khuôn danh sách trái + form phải." }, [
+        n("Define", { d: "Grids, Stories, Materials, Sections, Load patterns/cases/combos." }),
+        n("Assign", { d: "Restraints, releases, frame loads, shell loads." }),
+        n("Analyze", { d: "Check model, Run analysis (F5), Unlock (F6)." }),
+        n("Settings", { d: "Preferences, đơn vị, phím tắt, ngôn ngữ VI/EN." })
+      ]),
+      n("Tools · Commands", { p: "apps/desktop/src/tools/ · commands/", d: "Công cụ vẽ (Beam B, Column C, Brace R, Slab S, Wall W), command palette Ctrl+Shift+P." }),
+      n("Stores · Services", { p: "apps/desktop/src/stores/ · services/", d: "Zustand: selection, layout, active view. Services: file-io, solver-bridge, updater." }),
+      n("src-tauri", { p: "apps/desktop/src-tauri/", d: "Backend Rust của app: lệnh open_project, save_project, run_analysis; gọi sidecar cầu nối CSI." })
+    ]),
+    n("Thư viện TS", { g: "pkg", side: 1, p: "packages/", ph: "GĐ 0–6", d: "Thư viện dùng chung. Phụ thuộc một chiều: ui → viewer → model-core." }, [
+      n("ui", { p: "packages/ui/", d: "Design system: Button, NumberField có đơn vị, Tree, Grid, Dialog; tokens theme tối/sáng." }),
+      n("model-core", { p: "packages/model-core/", d: "Mô hình kết cấu thuần TypeScript, không phụ thuộc React/Three.js." }, [
+        n("entities", { d: "Joint, Frame, Shell, Grid, Story, Material, Section, LoadPattern…" }),
+        n("commands", { d: "Thao tác có Undo/Redo: AddFrame, AssignSection, Replicate…" }),
+        n("validation", { d: "Nút trùng, thanh trùng, thiếu gối." }),
+        n("serialization .nxf", { d: "Đọc/ghi file dự án .nxf, schema có version và migration." })
+      ]),
+      n("viewer", { p: "packages/viewer/", d: "Render 2D/3D bằng Three.js, không phụ thuộc React." }, [
+        n("scene · views", { d: "Model → scene graph (InstancedMesh); PlanView, ElevationView, View3D." }),
+        n("picking · snapping", { d: "GPU picking, chọn window/crossing; bắt điểm lưới, đầu mút, trung điểm." }),
+        n("results", { d: "Biểu đồ M/V/N, biến dạng, contour shell, animation mode." })
+      ]),
+      n("analysis-client", { p: "packages/analysis-client/", d: "API TS gọi solver (native qua Tauri hoặc WASM) và kiểu dữ liệu kết quả." }),
+      n("tables", { p: "packages/tables/", d: "Định nghĩa bảng nhập/xuất, xuất Excel/CSV." }),
+      n("io-formats", { p: "packages/io-formats/", d: "Nhập/xuất định dạng ngoài." }, [
+        n("csi .e2k/.s2k", { p: "packages/io-formats/csi/", d: "Đọc/ghi file văn bản ETABS/SAP2000, không cần cài CSI." }),
+        n("DXF · IFC · Excel", { d: "Giai đoạn sau." })
+      ])
+    ]),
+    n("Lõi Rust", { g: "rust", side: 1, p: "crates/", ph: "GĐ 5, 8, 9+", d: "Cargo workspace chứa toàn bộ phần tính toán." }, [
+      n("fem-core", { p: "crates/fem-core/", d: "Phần tử frame 3D (12 bậc tự do), shell, lắp ghép ma trận độ cứng." }),
+      n("fem-solver", { p: "crates/fem-solver/", d: "Giải tuyến tính thưa, trị riêng (modal), phổ phản ứng, P-Delta." }),
+      n("fem-mesh", { p: "crates/fem-mesh/", d: "Chia lưới sàn và vách." }),
+      n("fem-post", { p: "crates/fem-post/", d: "Nội lực, chuyển vị, drift tầng, phản lực." }),
+      n("design-codes", { p: "crates/design-codes/", d: "Kiểm tra cấu kiện theo tiêu chuẩn, trait DesignCode, kết quả ghi số điều khoản." }),
+      n("fem-wasm", { p: "crates/fem-wasm/", d: "Bindings WASM cho bản web sau này." })
+    ]),
+    n("ETABS/SAP2000", { g: "csi", side: -1, p: "docs/adr/0002-csi-interop.md", ph: "GĐ 7", d: "Hai kênh liên thông độc lập: file văn bản và CSI OAPI." }, [
+      n("Kênh file", { p: "packages/io-formats/csi/", d: "Đọc/ghi .e2k (ETABS), .s2k (SAP2000). Chạy được ở mọi nơi, kiểm thử trên CI." }, [
+        n("Nhập .e2k / .s2k", { d: "Mở mô hình ETABS/SAP2000 trong NexFEM." }),
+        n("Xuất .e2k / .s2k", { d: "Đưa mô hình NexFEM sang ETABS/SAP2000." })
+      ]),
+      n("Kênh OAPI", { p: "bridge/csi/", d: "Python + comtypes, đóng gói nexfem-csi-bridge.exe, chạy làm sidecar Tauri, trao đổi JSON qua stdin/stdout. Cần máy Windows có ETABS/SAP2000." }, [
+        n("Gắn phiên đang mở", { d: "Kết nối vào ETABS/SAP2000 đang chạy hoặc mở phiên mới." }),
+        n("Lấy / đẩy mô hình", { d: "Đồng bộ nút, phần tử, tiết diện, tải." }),
+        n("Chạy & lấy kết quả", { d: "Chạy phân tích trong CSI, lấy nội lực/chuyển vị về so sánh." })
+      ]),
+      n("workflows/", { p: "workflows/", d: "Script Python tự động hóa mẫu (vibe code): dựng mô hình theo tham số, chạy hàng loạt, xuất báo cáo." })
+    ]),
+    n("Tiêu chuẩn", { g: "code", side: -1, p: "docs/design-codes.md", ph: "GĐ 9+", d: "Lập trình công thức, không đưa nguyên văn. Làm theo đợt 1 → 3." }, [
+      n("TCVN", { p: "design-codes/src/tcvn/", d: "Hệ tiêu chuẩn làm trước." }, [
+        n("2737:2023 tải trọng", { d: "Đợt 1: tải trọng và tổ hợp." }),
+        n("5574:2018 BTCT", { d: "Đợt 1: dầm, cột, sàn, vách." }),
+        n("5575:2024 thép", { d: "Đợt 2." }),
+        n("9386:2012 động đất", { d: "Đợt 2." }),
+        n("10304:2014 móng cọc", { d: "Đợt 3." })
+      ]),
+      n("Eurocode", { p: "design-codes/src/eurocode/", d: "Đợt 2–3." }, [
+        n("EN 1990 · 1991", { d: "Cơ sở thiết kế, tải trọng." }),
+        n("EN 1992-1-1", { d: "Bê tông cốt thép." }),
+        n("EN 1993-1-1 · -1-8", { d: "Thép, liên kết." }),
+        n("EN 1998-1 · 1997-1", { d: "Động đất, địa kỹ thuật." })
+      ]),
+      n("Mỹ (ACI/AISC)", { p: "design-codes/src/us/", d: "Đợt 2–3." }, [
+        n("ASCE 7-22", { d: "Tải trọng, tổ hợp, gió, động đất." }),
+        n("ACI 318-19", { d: "Bê tông cốt thép (bổ sung 318-25)." }),
+        n("AISC 360-22 · 341-22", { d: "Thép, thép kháng chấn." })
+      ])
+    ]),
+    n("Lộ trình", { g: "road", side: -1, p: "docs/ROADMAP.md", d: "Mỗi giai đoạn kết thúc bằng một bản chạy được trên Windows." }, [
+      n("GĐ 0 Nền móng", { d: "Monorepo, schema mô hình, CI build bộ cài Windows." }),
+      n("GĐ 1 UI shell", { d: "v0.1-alpha: khung cửa sổ, panel, theme, phím tắt; dữ liệu giả." }),
+      n("GĐ 2 Định nghĩa", { d: "Grid/Story, vật liệu, tiết diện, tải; lưu/mở .nxf." }),
+      n("GĐ 3 View & vẽ", { d: "Plan/Elevation/3D, chọn, bắt điểm, công cụ vẽ." }),
+      n("GĐ 4 Assign", { d: "Gối, release, tải, Check model." }),
+      n("GĐ 5 Solver v1", { d: "v0.1: khung 3D tĩnh tuyến tính + bài toán mẫu." }),
+      n("GĐ 6 Kết quả", { d: "Biểu đồ nội lực, drift, bảng, xuất Excel." }),
+      n("GĐ 7 ETABS/SAP2000", { d: "v0.2: .e2k/.s2k + cầu nối OAPI + workflows." }),
+      n("GĐ 8 Phân tích mở rộng", { d: "v0.3: shell, modal, phổ phản ứng, P-Delta." }),
+      n("GĐ 9+ Thiết kế", { d: "v0.4+: tiêu chuẩn theo đợt, kiểm tra tự định nghĩa." })
+    ]),
+    n("Hạ tầng", { g: "infra", side: -1, ph: "GĐ 0", d: "Build, kiểm thử, tài liệu, tài nguyên." }, [
+      n("CI GitHub Actions", { p: ".github/workflows/", d: "Lint, test TS, cargo test, build bộ cài trên windows-latest." }),
+      n("tests/benchmarks", { p: "tests/benchmarks/", d: "Bài toán mẫu có đáp án (sách, SAP2000/ETABS), cả cho design-codes." }),
+      n("tests/e2e", { p: "tests/e2e/", d: "Playwright: vẽ → chạy → xem kết quả." }),
+      n("resources", { p: "resources/", d: "Thư viện vật liệu, tiết diện thép, template, icon." }),
+      n("docs", { p: "docs/", d: "ROADMAP, ux, adr, theory, design-codes và trang này." })
+    ])
+  ]);
+
+  // assign ids, parents, groups, depth
+  let uid = 0;
+  (function prep(node, parent, depth) {
+    node.id = "n" + (uid++);
+    node.parent = parent;
+    node.depth = depth;
+    if (parent && depth > 1) { node.g = parent.g; node.side = parent.side; }
+    node.collapsed = depth >= 2 && !!node.c;
+    (node.c || []).forEach(ch => prep(ch, node, depth + 1));
+  })(tree, null, 0);
+
+  // ---------- helpers ----------
+  const SVGNS = "http://www.w3.org/2000/svg";
+  const el = (tag, attrs, parent) => {
+    const e = document.createElementNS(SVGNS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  };
+  const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  const colorOf = node => node.g ? css(G[node.g].color) : css("--accent");
+  const ctx = document.createElement("canvas").getContext("2d");
+  const measure = (text, depth) => {
+    ctx.font = (depth === 0 ? "700 17px " : depth === 1 ? "600 14px " : "13px ") + 'Inter, system-ui, "Segoe UI", sans-serif';
+    return ctx.measureText(text).width;
+  };
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+  // ---------- mindmap ----------
+  const svg = document.getElementById("mind");
+  const ROW = 34, GAPX = 46, BRANCH_GAP = 14;
+  let view = null, selected = tree;
+
+  function visibleChildren(node) { return node.collapsed ? [] : (node.c || []); }
+
+  function layout() {
+    (function size(node) {
+      node.w = Math.ceil(measure(node.t, node.depth)) + (node.depth === 0 ? 40 : 24);
+      node.h = node.depth === 0 ? 44 : node.depth === 1 ? 32 : 28;
+      (node.c || []).forEach(size);
+    })(tree);
+
+    tree.x = 0; tree.y = 0;
+    for (const side of [1, -1]) {
+      const branches = tree.c.filter(b => b.side === side);
+      let cursor = 0;
+      const place = (node, x) => {
+        node.x = x;
+        const kids = visibleChildren(node);
+        if (!kids.length) { node.y = cursor; cursor += ROW; return; }
+        const outer = side === 1 ? x + node.w : x - node.w;
+        kids.forEach(k => place(k, outer + side * GAPX));
+        node.y = (kids[0].y + kids[kids.length - 1].y) / 2;
+      };
+      branches.forEach((b, i) => { if (i) cursor += BRANCH_GAP; place(b, side * (tree.w / 2 + GAPX + 20)); });
+      const shift = -(cursor - ROW) / 2;
+      const shiftAll = node => { node.y += shift; visibleChildren(node).forEach(shiftAll); };
+      branches.forEach(shiftAll);
+    }
+  }
+
+  function outerEdge(node) {
+    if (node.depth === 0) return null;
+    return node.side === 1 ? node.x + node.w : node.x - node.w;
+  }
+
+  function onPath(node) {
+    for (let s = selected; s; s = s.parent) if (s === node) return true;
+    return false;
+  }
+  function inSelectedSubtree(node) {
+    for (let s = node; s; s = s.parent) if (s === selected) return true;
+    return false;
+  }
+
+  function render() {
+    layout();
+    svg.textContent = "";
+    const gLinks = el("g", {}, svg), gNodes = el("g", {}, svg);
+    const focusMode = selected !== tree;
+
+    (function draw(node) {
+      const color = colorOf(node);
+      visibleChildren(node).forEach(ch => {
+        let x1, y1 = node.y;
+        if (node.depth === 0) x1 = ch.side === 1 ? node.w / 2 : -node.w / 2;
+        else x1 = outerEdge(node);
+        const x2 = ch.x, y2 = ch.y, mx = (x1 + x2) / 2;
+        const hl = onPath(ch) || inSelectedSubtree(ch);
+        el("path", { class: "link" + (focusMode && hl ? " hl" : ""), d: `M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`, stroke: colorOf(ch) }, gLinks);
+        draw(ch);
+      });
+
+      const dim = focusMode && !onPath(node) && !inSelectedSubtree(node);
+      const g = el("g", { class: `node d${Math.min(node.depth, 2)}${node.depth === 0 ? " root" : ""}${node === selected ? " sel" : ""}${dim ? " dim" : ""}`, tabindex: 0, role: "button", "aria-label": node.t }, gNodes);
+      const left = node.depth === 0 ? -node.w / 2 : node.side === 1 ? node.x : node.x - node.w;
+      const fillOpacity = node.depth === 0 ? 0.18 : node.depth === 1 ? 0.16 : 0.07;
+      el("rect", { x: left, y: node.y - node.h / 2, width: node.w, height: node.h, rx: node.depth === 0 ? 12 : 7, fill: color, "fill-opacity": fillOpacity, stroke: color }, g);
+      const tx = el("text", { x: left + node.w / 2, y: node.y, "text-anchor": "middle" }, g);
+      tx.textContent = node.t;
+      g.addEventListener("click", e => { e.stopPropagation(); select(node); });
+      g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(node); if (node.c) toggle(node); } });
+
+      if (node.c && node.depth > 0) {
+        const cx = outerEdge(node) + node.side * 9;
+        const t = el("g", { class: "toggle" + (dim ? " dim" : "") }, gNodes);
+        el("circle", { cx, cy: node.y, r: 8, stroke: color }, t);
+        const s = el("text", { x: cx, y: node.y + 0.5, fill: color }, t);
+        s.textContent = node.collapsed ? "+" : "−";
+        el("title", {}, t).textContent = node.collapsed ? "Mở nhánh" : "Thu nhánh";
+        t.addEventListener("click", e => { e.stopPropagation(); toggle(node); });
+        if (dim) t.style.opacity = .35;
+      }
+    })(tree);
+
+    if (!view) fit();
+    applyView();
+  }
+
+  function toggle(node) { node.collapsed = !node.collapsed; render(); }
+
+  function select(node) {
+    selected = node;
+    showDetail(node);
+    render();
+  }
+
+  function showDetail(node) {
+    const box = document.getElementById("detail");
+    const color = colorOf(node);
+    const crumbs = [];
+    for (let s = node; s; s = s.parent) crumbs.unshift(s.t);
+    const grp = node.g ? G[node.g].label : "Toàn hệ thống";
+    let html = `<div style="height:4px;border-radius:2px;background:${color};margin:-4px 0 12px"></div>`;
+    html += `<h2>${esc(node.t)}</h2>`;
+    if (node.p) html += `<div class="path">${esc(node.p)}</div>`;
+    html += `<span class="tag">${esc(grp)}</span>`;
+    const ph = node.ph || (node.parent && node.parent.ph) || (node.parent && node.parent.parent && node.parent.parent.ph);
+    if (ph) html += `<span class="tag">${esc(ph)}</span>`;
+    if (node.d) html += `<p>${esc(node.d)}</p>`;
+    if (node.c) html += `<p style="color:var(--muted);margin-top:12px">Gồm ${node.c.length} mục:</p><ul>${node.c.map(c => `<li>${esc(c.t)}</li>`).join("")}</ul>`;
+    html += `<p style="color:var(--muted);font-size:12px;margin-top:14px">${crumbs.map(esc).join(" › ")}</p>`;
+    box.innerHTML = html;
+  }
+
+  // view box / pan / zoom
+  function bounds() {
+    let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+    (function walk(node) {
+      const left = node.depth === 0 ? -node.w / 2 : node.side === 1 ? node.x : node.x - node.w;
+      x0 = Math.min(x0, left - 20); x1 = Math.max(x1, left + node.w + 20);
+      y0 = Math.min(y0, node.y - node.h); y1 = Math.max(y1, node.y + node.h);
+      visibleChildren(node).forEach(walk);
+    })(tree);
+    return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+  }
+  function fit() {
+    layout();
+    const b = bounds(), r = svg.getBoundingClientRect();
+    const aspect = (r.width || 1000) / (r.height || 600);
+    let w = b.w + 40, h = b.h + 40;
+    if (w / h > aspect) h = w / aspect; else w = h * aspect;
+    view = { x: b.x + b.w / 2 - w / 2, y: b.y + b.h / 2 - h / 2, w, h };
+    applyView();
+  }
+  function applyView() { if (view) svg.setAttribute("viewBox", `${view.x} ${view.y} ${view.w} ${view.h}`); }
+
+  svg.addEventListener("wheel", e => {
+    e.preventDefault();
+    const r = svg.getBoundingClientRect();
+    const px = view.x + (e.clientX - r.left) / r.width * view.w;
+    const py = view.y + (e.clientY - r.top) / r.height * view.h;
+    const k = Math.exp(e.deltaY * 0.0015);
+    const nw = Math.min(Math.max(view.w * k, 200), 20000), f = nw / view.w;
+    view = { x: px - (px - view.x) * f, y: py - (py - view.y) * f, w: nw, h: view.h * f };
+    applyView();
+  }, { passive: false });
+
+  let drag = null;
+  svg.addEventListener("pointerdown", e => {
+    if (e.target.closest(".node, .toggle")) return;
+    drag = { x: e.clientX, y: e.clientY, v: Object.assign({}, view), moved: false };
+    svg.setPointerCapture(e.pointerId);
+    svg.classList.add("dragging");
+  });
+  svg.addEventListener("pointermove", e => {
+    if (!drag) return;
+    const r = svg.getBoundingClientRect();
+    const dx = (e.clientX - drag.x) / r.width * drag.v.w, dy = (e.clientY - drag.y) / r.height * drag.v.h;
+    if (Math.abs(e.clientX - drag.x) + Math.abs(e.clientY - drag.y) > 3) drag.moved = true;
+    view = Object.assign({}, drag.v, { x: drag.v.x - dx, y: drag.v.y - dy });
+    applyView();
+  });
+  const endDrag = () => {
+    if (drag && !drag.moved && selected !== tree) select(tree);
+    drag = null; svg.classList.remove("dragging");
+  };
+  svg.addEventListener("pointerup", endDrag);
+  svg.addEventListener("pointercancel", endDrag);
+
+  const setAll = v => (function walk(node) { if (node.c && node.depth > 0) node.collapsed = v; (node.c || []).forEach(walk); })(tree);
+  document.getElementById("expandAll").onclick = () => { setAll(false); render(); fit(); };
+  document.getElementById("collapseAll").onclick = () => { setAll(true); render(); fit(); };
+  document.getElementById("fit").onclick = fit;
+  window.addEventListener("resize", () => { if (document.getElementById("view-mind").classList.contains("active")) fit(); });
+
+  // legend
+  document.getElementById("legend").innerHTML = Object.keys(G)
+    .map(k => `<span><i style="background:var(${G[k].color})"></i>${esc(G[k].label)}</span>`).join("");
+
+  // ---------- dataflow ----------
+  const flow = document.getElementById("flow");
+  const boxes = {
+    user:   { x: 20,  y: 90,  w: 130, h: 56, t: "Kỹ sư",            s: "người dùng",            g: "infra", d: "Dựng mô hình, chạy phân tích, đọc kết quả trên NexFEM." },
+    ui:     { x: 200, y: 90,  w: 170, h: 56, t: "Giao diện React",  s: "apps/desktop/src",      g: "ui",    d: "Menu, ribbon, panel, hộp thoại, công cụ vẽ." },
+    model:  { x: 420, y: 90,  w: 170, h: 56, t: "model-core",       s: "packages/model-core",   g: "pkg",   d: "Kho mô hình duy nhất; mọi thao tác là lệnh có Undo/Redo." },
+    viewer: { x: 620, y: 90,  w: 160, h: 56, t: "viewer 2D/3D",     s: "packages/viewer",       g: "pkg",   d: "Vẽ mô hình và kết quả bằng Three.js." },
+    tables: { x: 200, y: 200, w: 170, h: 56, t: "tables",           s: "packages/tables",       g: "pkg",   d: "Bảng nhập/xuất, Results Table, xuất Excel/CSV." },
+    client: { x: 420, y: 200, w: 170, h: 56, t: "analysis-client",  s: "packages/analysis-client", g: "pkg", d: "Đóng gói mô hình, gọi solver, nhận kết quả có kiểu." },
+    io:     { x: 620, y: 200, w: 160, h: 56, t: "io-formats",       s: "csi .e2k/.s2k",         g: "pkg",   d: "Đọc/ghi file văn bản ETABS/SAP2000." },
+    mesh:   { x: 200, y: 370, w: 170, h: 56, t: "fem-mesh",         s: "crates/fem-mesh",       g: "rust",  d: "Chia lưới sàn, vách." },
+    tauri:  { x: 420, y: 370, w: 170, h: 56, t: "Tauri commands",   s: "src-tauri",             g: "rust",  d: "open/save_project, run_analysis; quản lý sidecar cầu nối CSI." },
+    solver: { x: 200, y: 480, w: 170, h: 56, t: "fem-core · solver", s: "crates/fem-*",         g: "rust",  d: "Ma trận độ cứng, giải tuyến tính thưa, modal, phổ phản ứng." },
+    post:   { x: 420, y: 480, w: 170, h: 56, t: "fem-post",         s: "crates/fem-post",       g: "rust",  d: "Nội lực, chuyển vị, drift, phản lực." },
+    codes:  { x: 620, y: 480, w: 160, h: 56, t: "design-codes",     s: "TCVN · EC · ACI/AISC",  g: "code",  d: "Kiểm tra cấu kiện, kết quả ghi số điều khoản." },
+    nxf:    { x: 870, y: 90,  w: 190, h: 56, t: "File dự án .nxf",  s: "zip: JSON + kết quả",   g: "infra", d: "Lưu/mở dự án NexFEM." },
+    e2k:    { x: 870, y: 200, w: 190, h: 56, t: "File .e2k / .s2k", s: "văn bản CSI",           g: "csi",   d: "Trao đổi mô hình với ETABS/SAP2000 không cần cài CSI." },
+    wf:     { x: 870, y: 290, w: 190, h: 50, t: "workflows/",       s: "script Python",         g: "csi",   d: "Script tự động hóa mẫu, dùng chung cầu nối." },
+    bridge: { x: 870, y: 370, w: 190, h: 56, t: "nexfem-csi-bridge", s: "Python comtypes · sidecar", g: "csi", d: "Gọi CSI OAPI, trao đổi JSON qua stdin/stdout với Tauri." },
+    csi:    { x: 870, y: 480, w: 190, h: 56, t: "ETABS / SAP2000",  s: "cài trên máy Windows",  g: "csi",   d: "Phần mềm CSI có giấy phép, chỉ chạy trên Windows." }
+  };
+  const C = (k, side) => {
+    const b = boxes[k];
+    return { l: [b.x, b.y + b.h / 2], r: [b.x + b.w, b.y + b.h / 2], t: [b.x + b.w / 2, b.y], b: [b.x + b.w / 2, b.y + b.h] }[side];
+  };
+  const arrows = [
+    { d: [C("user", "r"), C("ui", "l")], step: 1 },
+    { d: [C("ui", "r"), C("model", "l")], step: 1 },
+    { d: [C("model", "r"), C("viewer", "l")], step: 2 },
+    { d: [C("model", "b"), C("client", "t")], step: 3 },
+    { d: [[C("client", "b")[0] - 20, C("client", "b")[1]], [C("tauri", "t")[0] - 20, C("tauri", "t")[1]]], step: 4, lbl: "run_analysis", lx: 470, ly: 318, anchor: "end" },
+    { d: [[C("tauri", "t")[0] + 20, C("tauri", "t")[1]], [C("client", "b")[0] + 20, C("client", "b")[1]]], dash: true, step: 7, lbl: "kết quả", lx: 534, ly: 318, anchor: "start" },
+    { d: [C("tauri", "l"), C("mesh", "r")], step: 5 },
+    { d: [C("mesh", "b"), C("solver", "t")] },
+    { d: [C("solver", "r"), C("post", "l")], step: 6 },
+    { d: [C("post", "t"), C("tauri", "b")] },
+    { d: [C("post", "r"), C("codes", "l")] },
+    { d: [C("client", "l"), C("tables", "r")] },
+    { path: `M560,200 L680,146`, step: 7 },
+    { path: `M505,90 V66 H965 V90`, lbl: "lưu / mở", lx: 735, ly: 60 },
+    { d: [C("io", "r"), C("e2k", "l")], dash: true },
+    { path: `M590,398 C640,398 640,340 700,330 L870,398`, skip: true },
+    { d: [C("tauri", "r"), C("bridge", "l")], dash: true, lbl: "sidecar · JSON", lx: 730, ly: 390 },
+    { d: [C("wf", "b"), C("bridge", "t")], dash: true },
+    { d: [C("bridge", "b"), C("csi", "t")], dash: true, lbl: "COM / OAPI", lx: 975, ly: 455, anchor: "start" },
+    { path: `M1060,228 H1092 V508 H1060`, dash: true, lbl: "xuất / nhập", lx: 1098, ly: 370, rot: true }
+  ];
+
+  function renderFlow() {
+    flow.textContent = "";
+    const defs = el("defs", {}, flow);
+    const mk = el("marker", { id: "ah", viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: "auto-start-reverse" }, defs);
+    el("path", { d: "M0,0 L10,5 L0,10 z", fill: css("--muted") }, mk);
+
+    el("rect", { class: "frame", x: 170, y: 20, width: 640, height: 600, rx: 12 }, flow);
+    el("rect", { class: "frame", x: 840, y: 20, width: 250, height: 600, rx: 12, "stroke-dasharray": "6 5" }, flow);
+    el("line", { x1: 180, x2: 800, y1: 300, y2: 300, stroke: css("--border"), "stroke-dasharray": "4 4" }, flow);
+    [["NEXFEM · FRONTEND (WebView2, TypeScript)", 186, 44], ["NEXFEM · BACKEND (Rust)", 186, 330], ["BÊN NGOÀI APP", 856, 44]].forEach(([t, x, y]) => {
+      el("text", { class: "lane", x, y }, flow).textContent = t;
+    });
+
+    arrows.forEach(a => {
+      if (a.skip) return;
+      const d = a.path || `M${a.d[0][0]},${a.d[0][1]} L${a.d[1][0]},${a.d[1][1]}`;
+      el("path", { class: "arrow" + (a.dash ? " dash" : ""), d, "marker-end": "url(#ah)" }, flow);
+      if (a.lbl) {
+        let lx = a.lx, ly = a.ly;
+        if (lx === undefined) { lx = (a.d[0][0] + a.d[1][0]) / 2 + 26; ly = (a.d[0][1] + a.d[1][1]) / 2 + 4; }
+        const t = el("text", { class: "lbl", x: lx, y: ly, "text-anchor": a.anchor || (a.lx === undefined ? "start" : "middle") }, flow);
+        if (a.rot) t.setAttribute("transform", `rotate(90 ${lx} ${ly})`);
+        t.textContent = a.lbl;
+      }
+    });
+
+    Object.keys(boxes).forEach(k => {
+      const b = boxes[k], color = css(G[b.g].color);
+      const g = el("g", { class: "box", tabindex: 0, role: "button", "aria-label": b.t }, flow);
+      el("rect", { x: b.x, y: b.y, width: b.w, height: b.h, rx: 8, fill: color, "fill-opacity": 0.12, stroke: color }, g);
+      el("text", { x: b.x + b.w / 2, y: b.y + b.h / 2 - 8 }, g).textContent = b.t;
+      el("text", { class: "sub", x: b.x + b.w / 2, y: b.y + b.h / 2 + 11 }, g).textContent = b.s;
+      const pick = () => {
+        flow.querySelectorAll(".box.sel").forEach(x => x.classList.remove("sel"));
+        g.classList.add("sel");
+        document.getElementById("flowBox").innerHTML =
+          `<div style="border-top:1px solid var(--border);margin-top:14px;padding-top:12px"><h2>${esc(b.t)}</h2><div class="path">${esc(b.s)}</div><p>${esc(b.d)}</p></div>`;
+      };
+      g.addEventListener("click", pick);
+      g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(); } });
+    });
+
+    // step badges
+    [[1, 185, 104], [2, 605, 104], [3, 520, 172], [4, 452, 340], [5, 395, 384], [6, 395, 494], [7, 630, 170]].forEach(([s, x, y]) => {
+      const g = el("g", { class: "step" }, flow);
+      el("circle", { cx: x, cy: y, r: 10 }, g);
+      el("text", { x, y: y + 0.5 }, g).textContent = s;
+    });
+  }
+
+  // ---------- tabs & theme ----------
+  document.querySelectorAll(".tabs button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".tabs button").forEach(b => b.setAttribute("aria-selected", String(b === btn)));
+      document.querySelectorAll(".view").forEach(v => v.classList.toggle("active", v.id === "view-" + btn.dataset.view));
+      if (btn.dataset.view === "mind") fit();
+    });
+  });
+  document.getElementById("theme").addEventListener("click", () => {
+    const root = document.documentElement;
+    const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    root.dataset.theme = dark ? "light" : "dark";
+    render(); renderFlow();
+  });
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { render(); renderFlow(); });
+
+  showDetail(tree);
+  render();
+  renderFlow();
+})();
+</script>
+</body>
+</html>

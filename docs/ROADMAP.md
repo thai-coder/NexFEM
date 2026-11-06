@@ -5,6 +5,7 @@ Cập nhật: 06/11/2026
 NexFEM là phần mềm desktop phân tích và thiết kế kết cấu cho **Windows 10/11**, cách thao tác quen thuộc với người dùng ETABS/SAP2000 nhưng có giao diện và định dạng riêng.
 
 Tài liệu liên quan:
+- Bản đồ kiến trúc trực quan (sơ đồ tư duy + luồng dữ liệu): [`docs/architecture-map.html`](architecture-map.html)
 - Thiết kế giao diện và cây thư mục: [`docs/ux/ui-architecture.md`](ux/ui-architecture.md)
 - Phạm vi tiêu chuẩn thiết kế: [`docs/design-codes.md`](design-codes.md)
 - Các quyết định kiến trúc: [`docs/adr/`](adr/)
