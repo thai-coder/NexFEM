@@ -19,4 +19,4 @@ NexFEM là phần mềm desktop phân tích kết cấu, người dùng chính l
 
 - Giao diện chạy được trong trình duyệt khi phát triển, nên kiểm thử tự động bằng Playwright được trên Linux.
 - Solver Rust nhanh và an toàn bộ nhớ, nhưng viết chậm hơn Python; bù lại bằng bộ bài toán mẫu chặt chẽ.
-- Script tự động hóa của người dùng viết bằng Python (xem ADR 0002) giao tiếp với NexFEM qua file `.nxf` hoặc API cục bộ, không nhúng Python vào app.
+- Script tự động hóa của người dùng viết bằng Python, giao tiếp với NexFEM qua API cục bộ và SDK (ADR 0004), không nhúng Python vào app. Cầu nối ETABS/SAP2000 viết bằng C# .NET 10 (ADR 0002).

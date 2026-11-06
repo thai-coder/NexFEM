@@ -7,4 +7,5 @@ NexFEM Designer is an intuitive structural analysis FEA software you can master 
 - [Lộ trình](docs/ROADMAP.md)
 - [Thiết kế giao diện & cây thư mục](docs/ux/ui-architecture.md)
 - [Phạm vi tiêu chuẩn thiết kế (TCVN, Eurocode, ACI/AISC)](docs/design-codes.md)
+- [API cục bộ và MCP](docs/api-mcp.md)
 - [Quyết định kiến trúc (ADR)](docs/adr/)
