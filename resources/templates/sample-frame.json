@@ -1,0 +1,3038 @@
+{
+  "schemaVersion": 1,
+  "name": "Toa_nha_A",
+  "units": {
+    "force": "kN",
+    "length": "m",
+    "temperature": "C"
+  },
+  "designCodes": {
+    "concrete": "TCVN 5574:2018",
+    "loads": "TCVN 2737:2023"
+  },
+  "grids": [
+    {
+      "id": "grid-main",
+      "name": "Lưới chính",
+      "x": [
+        {
+          "id": "gx-0",
+          "label": "A",
+          "coord": 0
+        },
+        {
+          "id": "gx-1",
+          "label": "B",
+          "coord": 6
+        },
+        {
+          "id": "gx-2",
+          "label": "C",
+          "coord": 12
+        },
+        {
+          "id": "gx-3",
+          "label": "D",
+          "coord": 18
+        }
+      ],
+      "y": [
+        {
+          "id": "gy-0",
+          "label": "1",
+          "coord": 0
+        },
+        {
+          "id": "gy-1",
+          "label": "2",
+          "coord": 7.2
+        },
+        {
+          "id": "gy-2",
+          "label": "3",
+          "coord": 14.4
+        }
+      ]
+    }
+  ],
+  "stories": [
+    {
+      "id": "story-0",
+      "name": "Base",
+      "elevation": 0,
+      "height": 0,
+      "masterStory": false
+    },
+    {
+      "id": "story-1",
+      "name": "Tầng 1",
+      "elevation": 3.9,
+      "height": 3.9,
+      "masterStory": true
+    },
+    {
+      "id": "story-2",
+      "name": "Tầng 2",
+      "elevation": 7.5,
+      "height": 3.6,
+      "masterStory": false,
+      "similarTo": "story-1"
+    },
+    {
+      "id": "story-3",
+      "name": "Tầng 3",
+      "elevation": 11.1,
+      "height": 3.6,
+      "masterStory": false,
+      "similarTo": "story-1"
+    },
+    {
+      "id": "story-4",
+      "name": "Tầng 4",
+      "elevation": 14.7,
+      "height": 3.6,
+      "masterStory": false,
+      "similarTo": "story-1"
+    },
+    {
+      "id": "story-5",
+      "name": "Tầng 5",
+      "elevation": 18.3,
+      "height": 3.6,
+      "masterStory": false,
+      "similarTo": "story-1"
+    }
+  ],
+  "materials": [
+    {
+      "id": "mat-b25",
+      "name": "B25",
+      "type": "concrete",
+      "E": 30000000,
+      "nu": 0.2,
+      "gamma": 25,
+      "strength": 14500,
+      "code": "TCVN 5574:2018"
+    },
+    {
+      "id": "mat-cb400-v",
+      "name": "CB400-V",
+      "type": "rebar",
+      "E": 200000000,
+      "nu": 0.3,
+      "gamma": 78.5,
+      "strength": 350000,
+      "code": "TCVN 5574:2018"
+    }
+  ],
+  "frameSections": [
+    {
+      "id": "sec-col",
+      "name": "C400x400",
+      "material": "mat-b25",
+      "geometry": {
+        "shape": "rect",
+        "b": 0.4,
+        "h": 0.4
+      }
+    },
+    {
+      "id": "sec-beam",
+      "name": "D300x600",
+      "material": "mat-b25",
+      "geometry": {
+        "shape": "rect",
+        "b": 0.3,
+        "h": 0.6
+      }
+    }
+  ],
+  "shellSections": [
+    {
+      "id": "sec-slab",
+      "name": "S120",
+      "material": "mat-b25",
+      "kind": "slab",
+      "formulation": "shell-thin",
+      "thickness": 0.12
+    }
+  ],
+  "joints": [
+    {
+      "id": "j-0-0-0",
+      "label": "1",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "story": "story-0",
+      "restraint": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "id": "j-1-0-0",
+      "label": "2",
+      "x": 6,
+      "y": 0,
+      "z": 0,
+      "story": "story-0",
+      "restraint": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "id": "j-2-0-0",
+      "label": "3",
+      "x": 12,
+      "y": 0,
+      "z": 0,
+      "story": "story-0",
+      "restraint": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "id": "j-3-0-0",
+      "label": "4",
+      "x": 18,
+      "y": 0,
+      "z": 0,
+      "story": "story-0",
+      "restraint": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "id": "j-0-1-0",
+      "label": "5",
+      "x": 0,
+      "y": 7.2,
+      "z": 0,
+      "story": "story-0",
+      "restraint": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "id": "j-1-1-0",
+      "label": "6",
+      "x": 6,
+      "y": 7.2,
+      "z": 0,
+      "story": "story-0",
+      "restraint": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "id": "j-2-1-0",
+      "label": "7",
+      "x": 12,
+      "y": 7.2,
+      "z": 0,
+      "story": "story-0",
+      "restraint": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "id": "j-3-1-0",
+      "label": "8",
+      "x": 18,
+      "y": 7.2,
+      "z": 0,
+      "story": "story-0",
+      "restraint": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "id": "j-0-2-0",
+      "label": "9",
+      "x": 0,
+      "y": 14.4,
+      "z": 0,
+      "story": "story-0",
+      "restraint": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "id": "j-1-2-0",
+      "label": "10",
+      "x": 6,
+      "y": 14.4,
+      "z": 0,
+      "story": "story-0",
+      "restraint": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "id": "j-2-2-0",
+      "label": "11",
+      "x": 12,
+      "y": 14.4,
+      "z": 0,
+      "story": "story-0",
+      "restraint": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "id": "j-3-2-0",
+      "label": "12",
+      "x": 18,
+      "y": 14.4,
+      "z": 0,
+      "story": "story-0",
+      "restraint": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "id": "j-0-0-1",
+      "label": "13",
+      "x": 0,
+      "y": 0,
+      "z": 3.9,
+      "story": "story-1"
+    },
+    {
+      "id": "j-1-0-1",
+      "label": "14",
+      "x": 6,
+      "y": 0,
+      "z": 3.9,
+      "story": "story-1"
+    },
+    {
+      "id": "j-2-0-1",
+      "label": "15",
+      "x": 12,
+      "y": 0,
+      "z": 3.9,
+      "story": "story-1"
+    },
+    {
+      "id": "j-3-0-1",
+      "label": "16",
+      "x": 18,
+      "y": 0,
+      "z": 3.9,
+      "story": "story-1"
+    },
+    {
+      "id": "j-0-1-1",
+      "label": "17",
+      "x": 0,
+      "y": 7.2,
+      "z": 3.9,
+      "story": "story-1"
+    },
+    {
+      "id": "j-1-1-1",
+      "label": "18",
+      "x": 6,
+      "y": 7.2,
+      "z": 3.9,
+      "story": "story-1"
+    },
+    {
+      "id": "j-2-1-1",
+      "label": "19",
+      "x": 12,
+      "y": 7.2,
+      "z": 3.9,
+      "story": "story-1"
+    },
+    {
+      "id": "j-3-1-1",
+      "label": "20",
+      "x": 18,
+      "y": 7.2,
+      "z": 3.9,
+      "story": "story-1"
+    },
+    {
+      "id": "j-0-2-1",
+      "label": "21",
+      "x": 0,
+      "y": 14.4,
+      "z": 3.9,
+      "story": "story-1"
+    },
+    {
+      "id": "j-1-2-1",
+      "label": "22",
+      "x": 6,
+      "y": 14.4,
+      "z": 3.9,
+      "story": "story-1"
+    },
+    {
+      "id": "j-2-2-1",
+      "label": "23",
+      "x": 12,
+      "y": 14.4,
+      "z": 3.9,
+      "story": "story-1"
+    },
+    {
+      "id": "j-3-2-1",
+      "label": "24",
+      "x": 18,
+      "y": 14.4,
+      "z": 3.9,
+      "story": "story-1"
+    },
+    {
+      "id": "j-0-0-2",
+      "label": "25",
+      "x": 0,
+      "y": 0,
+      "z": 7.5,
+      "story": "story-2"
+    },
+    {
+      "id": "j-1-0-2",
+      "label": "26",
+      "x": 6,
+      "y": 0,
+      "z": 7.5,
+      "story": "story-2"
+    },
+    {
+      "id": "j-2-0-2",
+      "label": "27",
+      "x": 12,
+      "y": 0,
+      "z": 7.5,
+      "story": "story-2"
+    },
+    {
+      "id": "j-3-0-2",
+      "label": "28",
+      "x": 18,
+      "y": 0,
+      "z": 7.5,
+      "story": "story-2"
+    },
+    {
+      "id": "j-0-1-2",
+      "label": "29",
+      "x": 0,
+      "y": 7.2,
+      "z": 7.5,
+      "story": "story-2"
+    },
+    {
+      "id": "j-1-1-2",
+      "label": "30",
+      "x": 6,
+      "y": 7.2,
+      "z": 7.5,
+      "story": "story-2"
+    },
+    {
+      "id": "j-2-1-2",
+      "label": "31",
+      "x": 12,
+      "y": 7.2,
+      "z": 7.5,
+      "story": "story-2"
+    },
+    {
+      "id": "j-3-1-2",
+      "label": "32",
+      "x": 18,
+      "y": 7.2,
+      "z": 7.5,
+      "story": "story-2"
+    },
+    {
+      "id": "j-0-2-2",
+      "label": "33",
+      "x": 0,
+      "y": 14.4,
+      "z": 7.5,
+      "story": "story-2"
+    },
+    {
+      "id": "j-1-2-2",
+      "label": "34",
+      "x": 6,
+      "y": 14.4,
+      "z": 7.5,
+      "story": "story-2"
+    },
+    {
+      "id": "j-2-2-2",
+      "label": "35",
+      "x": 12,
+      "y": 14.4,
+      "z": 7.5,
+      "story": "story-2"
+    },
+    {
+      "id": "j-3-2-2",
+      "label": "36",
+      "x": 18,
+      "y": 14.4,
+      "z": 7.5,
+      "story": "story-2"
+    },
+    {
+      "id": "j-0-0-3",
+      "label": "37",
+      "x": 0,
+      "y": 0,
+      "z": 11.1,
+      "story": "story-3"
+    },
+    {
+      "id": "j-1-0-3",
+      "label": "38",
+      "x": 6,
+      "y": 0,
+      "z": 11.1,
+      "story": "story-3"
+    },
+    {
+      "id": "j-2-0-3",
+      "label": "39",
+      "x": 12,
+      "y": 0,
+      "z": 11.1,
+      "story": "story-3"
+    },
+    {
+      "id": "j-3-0-3",
+      "label": "40",
+      "x": 18,
+      "y": 0,
+      "z": 11.1,
+      "story": "story-3"
+    },
+    {
+      "id": "j-0-1-3",
+      "label": "41",
+      "x": 0,
+      "y": 7.2,
+      "z": 11.1,
+      "story": "story-3"
+    },
+    {
+      "id": "j-1-1-3",
+      "label": "42",
+      "x": 6,
+      "y": 7.2,
+      "z": 11.1,
+      "story": "story-3"
+    },
+    {
+      "id": "j-2-1-3",
+      "label": "43",
+      "x": 12,
+      "y": 7.2,
+      "z": 11.1,
+      "story": "story-3"
+    },
+    {
+      "id": "j-3-1-3",
+      "label": "44",
+      "x": 18,
+      "y": 7.2,
+      "z": 11.1,
+      "story": "story-3"
+    },
+    {
+      "id": "j-0-2-3",
+      "label": "45",
+      "x": 0,
+      "y": 14.4,
+      "z": 11.1,
+      "story": "story-3"
+    },
+    {
+      "id": "j-1-2-3",
+      "label": "46",
+      "x": 6,
+      "y": 14.4,
+      "z": 11.1,
+      "story": "story-3"
+    },
+    {
+      "id": "j-2-2-3",
+      "label": "47",
+      "x": 12,
+      "y": 14.4,
+      "z": 11.1,
+      "story": "story-3"
+    },
+    {
+      "id": "j-3-2-3",
+      "label": "48",
+      "x": 18,
+      "y": 14.4,
+      "z": 11.1,
+      "story": "story-3"
+    },
+    {
+      "id": "j-0-0-4",
+      "label": "49",
+      "x": 0,
+      "y": 0,
+      "z": 14.7,
+      "story": "story-4"
+    },
+    {
+      "id": "j-1-0-4",
+      "label": "50",
+      "x": 6,
+      "y": 0,
+      "z": 14.7,
+      "story": "story-4"
+    },
+    {
+      "id": "j-2-0-4",
+      "label": "51",
+      "x": 12,
+      "y": 0,
+      "z": 14.7,
+      "story": "story-4"
+    },
+    {
+      "id": "j-3-0-4",
+      "label": "52",
+      "x": 18,
+      "y": 0,
+      "z": 14.7,
+      "story": "story-4"
+    },
+    {
+      "id": "j-0-1-4",
+      "label": "53",
+      "x": 0,
+      "y": 7.2,
+      "z": 14.7,
+      "story": "story-4"
+    },
+    {
+      "id": "j-1-1-4",
+      "label": "54",
+      "x": 6,
+      "y": 7.2,
+      "z": 14.7,
+      "story": "story-4"
+    },
+    {
+      "id": "j-2-1-4",
+      "label": "55",
+      "x": 12,
+      "y": 7.2,
+      "z": 14.7,
+      "story": "story-4"
+    },
+    {
+      "id": "j-3-1-4",
+      "label": "56",
+      "x": 18,
+      "y": 7.2,
+      "z": 14.7,
+      "story": "story-4"
+    },
+    {
+      "id": "j-0-2-4",
+      "label": "57",
+      "x": 0,
+      "y": 14.4,
+      "z": 14.7,
+      "story": "story-4"
+    },
+    {
+      "id": "j-1-2-4",
+      "label": "58",
+      "x": 6,
+      "y": 14.4,
+      "z": 14.7,
+      "story": "story-4"
+    },
+    {
+      "id": "j-2-2-4",
+      "label": "59",
+      "x": 12,
+      "y": 14.4,
+      "z": 14.7,
+      "story": "story-4"
+    },
+    {
+      "id": "j-3-2-4",
+      "label": "60",
+      "x": 18,
+      "y": 14.4,
+      "z": 14.7,
+      "story": "story-4"
+    },
+    {
+      "id": "j-0-0-5",
+      "label": "61",
+      "x": 0,
+      "y": 0,
+      "z": 18.3,
+      "story": "story-5"
+    },
+    {
+      "id": "j-1-0-5",
+      "label": "62",
+      "x": 6,
+      "y": 0,
+      "z": 18.3,
+      "story": "story-5"
+    },
+    {
+      "id": "j-2-0-5",
+      "label": "63",
+      "x": 12,
+      "y": 0,
+      "z": 18.3,
+      "story": "story-5"
+    },
+    {
+      "id": "j-3-0-5",
+      "label": "64",
+      "x": 18,
+      "y": 0,
+      "z": 18.3,
+      "story": "story-5"
+    },
+    {
+      "id": "j-0-1-5",
+      "label": "65",
+      "x": 0,
+      "y": 7.2,
+      "z": 18.3,
+      "story": "story-5"
+    },
+    {
+      "id": "j-1-1-5",
+      "label": "66",
+      "x": 6,
+      "y": 7.2,
+      "z": 18.3,
+      "story": "story-5"
+    },
+    {
+      "id": "j-2-1-5",
+      "label": "67",
+      "x": 12,
+      "y": 7.2,
+      "z": 18.3,
+      "story": "story-5"
+    },
+    {
+      "id": "j-3-1-5",
+      "label": "68",
+      "x": 18,
+      "y": 7.2,
+      "z": 18.3,
+      "story": "story-5"
+    },
+    {
+      "id": "j-0-2-5",
+      "label": "69",
+      "x": 0,
+      "y": 14.4,
+      "z": 18.3,
+      "story": "story-5"
+    },
+    {
+      "id": "j-1-2-5",
+      "label": "70",
+      "x": 6,
+      "y": 14.4,
+      "z": 18.3,
+      "story": "story-5"
+    },
+    {
+      "id": "j-2-2-5",
+      "label": "71",
+      "x": 12,
+      "y": 14.4,
+      "z": 18.3,
+      "story": "story-5"
+    },
+    {
+      "id": "j-3-2-5",
+      "label": "72",
+      "x": 18,
+      "y": 14.4,
+      "z": 18.3,
+      "story": "story-5"
+    }
+  ],
+  "frames": [
+    {
+      "id": "c-0-0-1",
+      "label": "C1",
+      "kind": "column",
+      "i": "j-0-0-0",
+      "j": "j-0-0-1",
+      "section": "sec-col",
+      "story": "story-1"
+    },
+    {
+      "id": "c-1-0-1",
+      "label": "C2",
+      "kind": "column",
+      "i": "j-1-0-0",
+      "j": "j-1-0-1",
+      "section": "sec-col",
+      "story": "story-1"
+    },
+    {
+      "id": "c-2-0-1",
+      "label": "C3",
+      "kind": "column",
+      "i": "j-2-0-0",
+      "j": "j-2-0-1",
+      "section": "sec-col",
+      "story": "story-1"
+    },
+    {
+      "id": "c-3-0-1",
+      "label": "C4",
+      "kind": "column",
+      "i": "j-3-0-0",
+      "j": "j-3-0-1",
+      "section": "sec-col",
+      "story": "story-1"
+    },
+    {
+      "id": "c-0-1-1",
+      "label": "C5",
+      "kind": "column",
+      "i": "j-0-1-0",
+      "j": "j-0-1-1",
+      "section": "sec-col",
+      "story": "story-1"
+    },
+    {
+      "id": "c-1-1-1",
+      "label": "C6",
+      "kind": "column",
+      "i": "j-1-1-0",
+      "j": "j-1-1-1",
+      "section": "sec-col",
+      "story": "story-1"
+    },
+    {
+      "id": "c-2-1-1",
+      "label": "C7",
+      "kind": "column",
+      "i": "j-2-1-0",
+      "j": "j-2-1-1",
+      "section": "sec-col",
+      "story": "story-1"
+    },
+    {
+      "id": "c-3-1-1",
+      "label": "C8",
+      "kind": "column",
+      "i": "j-3-1-0",
+      "j": "j-3-1-1",
+      "section": "sec-col",
+      "story": "story-1"
+    },
+    {
+      "id": "c-0-2-1",
+      "label": "C9",
+      "kind": "column",
+      "i": "j-0-2-0",
+      "j": "j-0-2-1",
+      "section": "sec-col",
+      "story": "story-1"
+    },
+    {
+      "id": "c-1-2-1",
+      "label": "C10",
+      "kind": "column",
+      "i": "j-1-2-0",
+      "j": "j-1-2-1",
+      "section": "sec-col",
+      "story": "story-1"
+    },
+    {
+      "id": "c-2-2-1",
+      "label": "C11",
+      "kind": "column",
+      "i": "j-2-2-0",
+      "j": "j-2-2-1",
+      "section": "sec-col",
+      "story": "story-1"
+    },
+    {
+      "id": "c-3-2-1",
+      "label": "C12",
+      "kind": "column",
+      "i": "j-3-2-0",
+      "j": "j-3-2-1",
+      "section": "sec-col",
+      "story": "story-1"
+    },
+    {
+      "id": "bx-0-0-1",
+      "label": "B1",
+      "kind": "beam",
+      "i": "j-0-0-1",
+      "j": "j-1-0-1",
+      "section": "sec-beam",
+      "story": "story-1"
+    },
+    {
+      "id": "bx-1-0-1",
+      "label": "B2",
+      "kind": "beam",
+      "i": "j-1-0-1",
+      "j": "j-2-0-1",
+      "section": "sec-beam",
+      "story": "story-1"
+    },
+    {
+      "id": "bx-2-0-1",
+      "label": "B3",
+      "kind": "beam",
+      "i": "j-2-0-1",
+      "j": "j-3-0-1",
+      "section": "sec-beam",
+      "story": "story-1"
+    },
+    {
+      "id": "bx-0-1-1",
+      "label": "B4",
+      "kind": "beam",
+      "i": "j-0-1-1",
+      "j": "j-1-1-1",
+      "section": "sec-beam",
+      "story": "story-1"
+    },
+    {
+      "id": "bx-1-1-1",
+      "label": "B5",
+      "kind": "beam",
+      "i": "j-1-1-1",
+      "j": "j-2-1-1",
+      "section": "sec-beam",
+      "story": "story-1"
+    },
+    {
+      "id": "bx-2-1-1",
+      "label": "B6",
+      "kind": "beam",
+      "i": "j-2-1-1",
+      "j": "j-3-1-1",
+      "section": "sec-beam",
+      "story": "story-1"
+    },
+    {
+      "id": "bx-0-2-1",
+      "label": "B7",
+      "kind": "beam",
+      "i": "j-0-2-1",
+      "j": "j-1-2-1",
+      "section": "sec-beam",
+      "story": "story-1"
+    },
+    {
+      "id": "bx-1-2-1",
+      "label": "B8",
+      "kind": "beam",
+      "i": "j-1-2-1",
+      "j": "j-2-2-1",
+      "section": "sec-beam",
+      "story": "story-1"
+    },
+    {
+      "id": "bx-2-2-1",
+      "label": "B9",
+      "kind": "beam",
+      "i": "j-2-2-1",
+      "j": "j-3-2-1",
+      "section": "sec-beam",
+      "story": "story-1"
+    },
+    {
+      "id": "by-0-0-1",
+      "label": "B10",
+      "kind": "beam",
+      "i": "j-0-0-1",
+      "j": "j-0-1-1",
+      "section": "sec-beam",
+      "story": "story-1"
+    },
+    {
+      "id": "by-0-1-1",
+      "label": "B11",
+      "kind": "beam",
+      "i": "j-0-1-1",
+      "j": "j-0-2-1",
+      "section": "sec-beam",
+      "story": "story-1"
+    },
+    {
+      "id": "by-1-0-1",
+      "label": "B12",
+      "kind": "beam",
+      "i": "j-1-0-1",
+      "j": "j-1-1-1",
+      "section": "sec-beam",
+      "story": "story-1"
+    },
+    {
+      "id": "by-1-1-1",
+      "label": "B13",
+      "kind": "beam",
+      "i": "j-1-1-1",
+      "j": "j-1-2-1",
+      "section": "sec-beam",
+      "story": "story-1"
+    },
+    {
+      "id": "by-2-0-1",
+      "label": "B14",
+      "kind": "beam",
+      "i": "j-2-0-1",
+      "j": "j-2-1-1",
+      "section": "sec-beam",
+      "story": "story-1"
+    },
+    {
+      "id": "by-2-1-1",
+      "label": "B15",
+      "kind": "beam",
+      "i": "j-2-1-1",
+      "j": "j-2-2-1",
+      "section": "sec-beam",
+      "story": "story-1"
+    },
+    {
+      "id": "by-3-0-1",
+      "label": "B16",
+      "kind": "beam",
+      "i": "j-3-0-1",
+      "j": "j-3-1-1",
+      "section": "sec-beam",
+      "story": "story-1"
+    },
+    {
+      "id": "by-3-1-1",
+      "label": "B17",
+      "kind": "beam",
+      "i": "j-3-1-1",
+      "j": "j-3-2-1",
+      "section": "sec-beam",
+      "story": "story-1"
+    },
+    {
+      "id": "c-0-0-2",
+      "label": "C13",
+      "kind": "column",
+      "i": "j-0-0-1",
+      "j": "j-0-0-2",
+      "section": "sec-col",
+      "story": "story-2"
+    },
+    {
+      "id": "c-1-0-2",
+      "label": "C14",
+      "kind": "column",
+      "i": "j-1-0-1",
+      "j": "j-1-0-2",
+      "section": "sec-col",
+      "story": "story-2"
+    },
+    {
+      "id": "c-2-0-2",
+      "label": "C15",
+      "kind": "column",
+      "i": "j-2-0-1",
+      "j": "j-2-0-2",
+      "section": "sec-col",
+      "story": "story-2"
+    },
+    {
+      "id": "c-3-0-2",
+      "label": "C16",
+      "kind": "column",
+      "i": "j-3-0-1",
+      "j": "j-3-0-2",
+      "section": "sec-col",
+      "story": "story-2"
+    },
+    {
+      "id": "c-0-1-2",
+      "label": "C17",
+      "kind": "column",
+      "i": "j-0-1-1",
+      "j": "j-0-1-2",
+      "section": "sec-col",
+      "story": "story-2"
+    },
+    {
+      "id": "c-1-1-2",
+      "label": "C18",
+      "kind": "column",
+      "i": "j-1-1-1",
+      "j": "j-1-1-2",
+      "section": "sec-col",
+      "story": "story-2"
+    },
+    {
+      "id": "c-2-1-2",
+      "label": "C19",
+      "kind": "column",
+      "i": "j-2-1-1",
+      "j": "j-2-1-2",
+      "section": "sec-col",
+      "story": "story-2"
+    },
+    {
+      "id": "c-3-1-2",
+      "label": "C20",
+      "kind": "column",
+      "i": "j-3-1-1",
+      "j": "j-3-1-2",
+      "section": "sec-col",
+      "story": "story-2"
+    },
+    {
+      "id": "c-0-2-2",
+      "label": "C21",
+      "kind": "column",
+      "i": "j-0-2-1",
+      "j": "j-0-2-2",
+      "section": "sec-col",
+      "story": "story-2"
+    },
+    {
+      "id": "c-1-2-2",
+      "label": "C22",
+      "kind": "column",
+      "i": "j-1-2-1",
+      "j": "j-1-2-2",
+      "section": "sec-col",
+      "story": "story-2"
+    },
+    {
+      "id": "c-2-2-2",
+      "label": "C23",
+      "kind": "column",
+      "i": "j-2-2-1",
+      "j": "j-2-2-2",
+      "section": "sec-col",
+      "story": "story-2"
+    },
+    {
+      "id": "c-3-2-2",
+      "label": "C24",
+      "kind": "column",
+      "i": "j-3-2-1",
+      "j": "j-3-2-2",
+      "section": "sec-col",
+      "story": "story-2"
+    },
+    {
+      "id": "bx-0-0-2",
+      "label": "B18",
+      "kind": "beam",
+      "i": "j-0-0-2",
+      "j": "j-1-0-2",
+      "section": "sec-beam",
+      "story": "story-2"
+    },
+    {
+      "id": "bx-1-0-2",
+      "label": "B19",
+      "kind": "beam",
+      "i": "j-1-0-2",
+      "j": "j-2-0-2",
+      "section": "sec-beam",
+      "story": "story-2"
+    },
+    {
+      "id": "bx-2-0-2",
+      "label": "B20",
+      "kind": "beam",
+      "i": "j-2-0-2",
+      "j": "j-3-0-2",
+      "section": "sec-beam",
+      "story": "story-2"
+    },
+    {
+      "id": "bx-0-1-2",
+      "label": "B21",
+      "kind": "beam",
+      "i": "j-0-1-2",
+      "j": "j-1-1-2",
+      "section": "sec-beam",
+      "story": "story-2"
+    },
+    {
+      "id": "bx-1-1-2",
+      "label": "B22",
+      "kind": "beam",
+      "i": "j-1-1-2",
+      "j": "j-2-1-2",
+      "section": "sec-beam",
+      "story": "story-2"
+    },
+    {
+      "id": "bx-2-1-2",
+      "label": "B23",
+      "kind": "beam",
+      "i": "j-2-1-2",
+      "j": "j-3-1-2",
+      "section": "sec-beam",
+      "story": "story-2"
+    },
+    {
+      "id": "bx-0-2-2",
+      "label": "B24",
+      "kind": "beam",
+      "i": "j-0-2-2",
+      "j": "j-1-2-2",
+      "section": "sec-beam",
+      "story": "story-2"
+    },
+    {
+      "id": "bx-1-2-2",
+      "label": "B25",
+      "kind": "beam",
+      "i": "j-1-2-2",
+      "j": "j-2-2-2",
+      "section": "sec-beam",
+      "story": "story-2"
+    },
+    {
+      "id": "bx-2-2-2",
+      "label": "B26",
+      "kind": "beam",
+      "i": "j-2-2-2",
+      "j": "j-3-2-2",
+      "section": "sec-beam",
+      "story": "story-2"
+    },
+    {
+      "id": "by-0-0-2",
+      "label": "B27",
+      "kind": "beam",
+      "i": "j-0-0-2",
+      "j": "j-0-1-2",
+      "section": "sec-beam",
+      "story": "story-2"
+    },
+    {
+      "id": "by-0-1-2",
+      "label": "B28",
+      "kind": "beam",
+      "i": "j-0-1-2",
+      "j": "j-0-2-2",
+      "section": "sec-beam",
+      "story": "story-2"
+    },
+    {
+      "id": "by-1-0-2",
+      "label": "B29",
+      "kind": "beam",
+      "i": "j-1-0-2",
+      "j": "j-1-1-2",
+      "section": "sec-beam",
+      "story": "story-2"
+    },
+    {
+      "id": "by-1-1-2",
+      "label": "B30",
+      "kind": "beam",
+      "i": "j-1-1-2",
+      "j": "j-1-2-2",
+      "section": "sec-beam",
+      "story": "story-2"
+    },
+    {
+      "id": "by-2-0-2",
+      "label": "B31",
+      "kind": "beam",
+      "i": "j-2-0-2",
+      "j": "j-2-1-2",
+      "section": "sec-beam",
+      "story": "story-2"
+    },
+    {
+      "id": "by-2-1-2",
+      "label": "B32",
+      "kind": "beam",
+      "i": "j-2-1-2",
+      "j": "j-2-2-2",
+      "section": "sec-beam",
+      "story": "story-2"
+    },
+    {
+      "id": "by-3-0-2",
+      "label": "B33",
+      "kind": "beam",
+      "i": "j-3-0-2",
+      "j": "j-3-1-2",
+      "section": "sec-beam",
+      "story": "story-2"
+    },
+    {
+      "id": "by-3-1-2",
+      "label": "B34",
+      "kind": "beam",
+      "i": "j-3-1-2",
+      "j": "j-3-2-2",
+      "section": "sec-beam",
+      "story": "story-2"
+    },
+    {
+      "id": "c-0-0-3",
+      "label": "C25",
+      "kind": "column",
+      "i": "j-0-0-2",
+      "j": "j-0-0-3",
+      "section": "sec-col",
+      "story": "story-3"
+    },
+    {
+      "id": "c-1-0-3",
+      "label": "C26",
+      "kind": "column",
+      "i": "j-1-0-2",
+      "j": "j-1-0-3",
+      "section": "sec-col",
+      "story": "story-3"
+    },
+    {
+      "id": "c-2-0-3",
+      "label": "C27",
+      "kind": "column",
+      "i": "j-2-0-2",
+      "j": "j-2-0-3",
+      "section": "sec-col",
+      "story": "story-3"
+    },
+    {
+      "id": "c-3-0-3",
+      "label": "C28",
+      "kind": "column",
+      "i": "j-3-0-2",
+      "j": "j-3-0-3",
+      "section": "sec-col",
+      "story": "story-3"
+    },
+    {
+      "id": "c-0-1-3",
+      "label": "C29",
+      "kind": "column",
+      "i": "j-0-1-2",
+      "j": "j-0-1-3",
+      "section": "sec-col",
+      "story": "story-3"
+    },
+    {
+      "id": "c-1-1-3",
+      "label": "C30",
+      "kind": "column",
+      "i": "j-1-1-2",
+      "j": "j-1-1-3",
+      "section": "sec-col",
+      "story": "story-3"
+    },
+    {
+      "id": "c-2-1-3",
+      "label": "C31",
+      "kind": "column",
+      "i": "j-2-1-2",
+      "j": "j-2-1-3",
+      "section": "sec-col",
+      "story": "story-3"
+    },
+    {
+      "id": "c-3-1-3",
+      "label": "C32",
+      "kind": "column",
+      "i": "j-3-1-2",
+      "j": "j-3-1-3",
+      "section": "sec-col",
+      "story": "story-3"
+    },
+    {
+      "id": "c-0-2-3",
+      "label": "C33",
+      "kind": "column",
+      "i": "j-0-2-2",
+      "j": "j-0-2-3",
+      "section": "sec-col",
+      "story": "story-3"
+    },
+    {
+      "id": "c-1-2-3",
+      "label": "C34",
+      "kind": "column",
+      "i": "j-1-2-2",
+      "j": "j-1-2-3",
+      "section": "sec-col",
+      "story": "story-3"
+    },
+    {
+      "id": "c-2-2-3",
+      "label": "C35",
+      "kind": "column",
+      "i": "j-2-2-2",
+      "j": "j-2-2-3",
+      "section": "sec-col",
+      "story": "story-3"
+    },
+    {
+      "id": "c-3-2-3",
+      "label": "C36",
+      "kind": "column",
+      "i": "j-3-2-2",
+      "j": "j-3-2-3",
+      "section": "sec-col",
+      "story": "story-3"
+    },
+    {
+      "id": "bx-0-0-3",
+      "label": "B35",
+      "kind": "beam",
+      "i": "j-0-0-3",
+      "j": "j-1-0-3",
+      "section": "sec-beam",
+      "story": "story-3"
+    },
+    {
+      "id": "bx-1-0-3",
+      "label": "B36",
+      "kind": "beam",
+      "i": "j-1-0-3",
+      "j": "j-2-0-3",
+      "section": "sec-beam",
+      "story": "story-3"
+    },
+    {
+      "id": "bx-2-0-3",
+      "label": "B37",
+      "kind": "beam",
+      "i": "j-2-0-3",
+      "j": "j-3-0-3",
+      "section": "sec-beam",
+      "story": "story-3"
+    },
+    {
+      "id": "bx-0-1-3",
+      "label": "B38",
+      "kind": "beam",
+      "i": "j-0-1-3",
+      "j": "j-1-1-3",
+      "section": "sec-beam",
+      "story": "story-3"
+    },
+    {
+      "id": "bx-1-1-3",
+      "label": "B39",
+      "kind": "beam",
+      "i": "j-1-1-3",
+      "j": "j-2-1-3",
+      "section": "sec-beam",
+      "story": "story-3"
+    },
+    {
+      "id": "bx-2-1-3",
+      "label": "B40",
+      "kind": "beam",
+      "i": "j-2-1-3",
+      "j": "j-3-1-3",
+      "section": "sec-beam",
+      "story": "story-3"
+    },
+    {
+      "id": "bx-0-2-3",
+      "label": "B41",
+      "kind": "beam",
+      "i": "j-0-2-3",
+      "j": "j-1-2-3",
+      "section": "sec-beam",
+      "story": "story-3"
+    },
+    {
+      "id": "bx-1-2-3",
+      "label": "B42",
+      "kind": "beam",
+      "i": "j-1-2-3",
+      "j": "j-2-2-3",
+      "section": "sec-beam",
+      "story": "story-3"
+    },
+    {
+      "id": "bx-2-2-3",
+      "label": "B43",
+      "kind": "beam",
+      "i": "j-2-2-3",
+      "j": "j-3-2-3",
+      "section": "sec-beam",
+      "story": "story-3"
+    },
+    {
+      "id": "by-0-0-3",
+      "label": "B44",
+      "kind": "beam",
+      "i": "j-0-0-3",
+      "j": "j-0-1-3",
+      "section": "sec-beam",
+      "story": "story-3"
+    },
+    {
+      "id": "by-0-1-3",
+      "label": "B45",
+      "kind": "beam",
+      "i": "j-0-1-3",
+      "j": "j-0-2-3",
+      "section": "sec-beam",
+      "story": "story-3"
+    },
+    {
+      "id": "by-1-0-3",
+      "label": "B46",
+      "kind": "beam",
+      "i": "j-1-0-3",
+      "j": "j-1-1-3",
+      "section": "sec-beam",
+      "story": "story-3"
+    },
+    {
+      "id": "by-1-1-3",
+      "label": "B47",
+      "kind": "beam",
+      "i": "j-1-1-3",
+      "j": "j-1-2-3",
+      "section": "sec-beam",
+      "story": "story-3"
+    },
+    {
+      "id": "by-2-0-3",
+      "label": "B48",
+      "kind": "beam",
+      "i": "j-2-0-3",
+      "j": "j-2-1-3",
+      "section": "sec-beam",
+      "story": "story-3"
+    },
+    {
+      "id": "by-2-1-3",
+      "label": "B49",
+      "kind": "beam",
+      "i": "j-2-1-3",
+      "j": "j-2-2-3",
+      "section": "sec-beam",
+      "story": "story-3"
+    },
+    {
+      "id": "by-3-0-3",
+      "label": "B50",
+      "kind": "beam",
+      "i": "j-3-0-3",
+      "j": "j-3-1-3",
+      "section": "sec-beam",
+      "story": "story-3"
+    },
+    {
+      "id": "by-3-1-3",
+      "label": "B51",
+      "kind": "beam",
+      "i": "j-3-1-3",
+      "j": "j-3-2-3",
+      "section": "sec-beam",
+      "story": "story-3"
+    },
+    {
+      "id": "c-0-0-4",
+      "label": "C37",
+      "kind": "column",
+      "i": "j-0-0-3",
+      "j": "j-0-0-4",
+      "section": "sec-col",
+      "story": "story-4"
+    },
+    {
+      "id": "c-1-0-4",
+      "label": "C38",
+      "kind": "column",
+      "i": "j-1-0-3",
+      "j": "j-1-0-4",
+      "section": "sec-col",
+      "story": "story-4"
+    },
+    {
+      "id": "c-2-0-4",
+      "label": "C39",
+      "kind": "column",
+      "i": "j-2-0-3",
+      "j": "j-2-0-4",
+      "section": "sec-col",
+      "story": "story-4"
+    },
+    {
+      "id": "c-3-0-4",
+      "label": "C40",
+      "kind": "column",
+      "i": "j-3-0-3",
+      "j": "j-3-0-4",
+      "section": "sec-col",
+      "story": "story-4"
+    },
+    {
+      "id": "c-0-1-4",
+      "label": "C41",
+      "kind": "column",
+      "i": "j-0-1-3",
+      "j": "j-0-1-4",
+      "section": "sec-col",
+      "story": "story-4"
+    },
+    {
+      "id": "c-1-1-4",
+      "label": "C42",
+      "kind": "column",
+      "i": "j-1-1-3",
+      "j": "j-1-1-4",
+      "section": "sec-col",
+      "story": "story-4"
+    },
+    {
+      "id": "c-2-1-4",
+      "label": "C43",
+      "kind": "column",
+      "i": "j-2-1-3",
+      "j": "j-2-1-4",
+      "section": "sec-col",
+      "story": "story-4"
+    },
+    {
+      "id": "c-3-1-4",
+      "label": "C44",
+      "kind": "column",
+      "i": "j-3-1-3",
+      "j": "j-3-1-4",
+      "section": "sec-col",
+      "story": "story-4"
+    },
+    {
+      "id": "c-0-2-4",
+      "label": "C45",
+      "kind": "column",
+      "i": "j-0-2-3",
+      "j": "j-0-2-4",
+      "section": "sec-col",
+      "story": "story-4"
+    },
+    {
+      "id": "c-1-2-4",
+      "label": "C46",
+      "kind": "column",
+      "i": "j-1-2-3",
+      "j": "j-1-2-4",
+      "section": "sec-col",
+      "story": "story-4"
+    },
+    {
+      "id": "c-2-2-4",
+      "label": "C47",
+      "kind": "column",
+      "i": "j-2-2-3",
+      "j": "j-2-2-4",
+      "section": "sec-col",
+      "story": "story-4"
+    },
+    {
+      "id": "c-3-2-4",
+      "label": "C48",
+      "kind": "column",
+      "i": "j-3-2-3",
+      "j": "j-3-2-4",
+      "section": "sec-col",
+      "story": "story-4"
+    },
+    {
+      "id": "bx-0-0-4",
+      "label": "B52",
+      "kind": "beam",
+      "i": "j-0-0-4",
+      "j": "j-1-0-4",
+      "section": "sec-beam",
+      "story": "story-4"
+    },
+    {
+      "id": "bx-1-0-4",
+      "label": "B53",
+      "kind": "beam",
+      "i": "j-1-0-4",
+      "j": "j-2-0-4",
+      "section": "sec-beam",
+      "story": "story-4"
+    },
+    {
+      "id": "bx-2-0-4",
+      "label": "B54",
+      "kind": "beam",
+      "i": "j-2-0-4",
+      "j": "j-3-0-4",
+      "section": "sec-beam",
+      "story": "story-4"
+    },
+    {
+      "id": "bx-0-1-4",
+      "label": "B55",
+      "kind": "beam",
+      "i": "j-0-1-4",
+      "j": "j-1-1-4",
+      "section": "sec-beam",
+      "story": "story-4"
+    },
+    {
+      "id": "bx-1-1-4",
+      "label": "B56",
+      "kind": "beam",
+      "i": "j-1-1-4",
+      "j": "j-2-1-4",
+      "section": "sec-beam",
+      "story": "story-4"
+    },
+    {
+      "id": "bx-2-1-4",
+      "label": "B57",
+      "kind": "beam",
+      "i": "j-2-1-4",
+      "j": "j-3-1-4",
+      "section": "sec-beam",
+      "story": "story-4"
+    },
+    {
+      "id": "bx-0-2-4",
+      "label": "B58",
+      "kind": "beam",
+      "i": "j-0-2-4",
+      "j": "j-1-2-4",
+      "section": "sec-beam",
+      "story": "story-4"
+    },
+    {
+      "id": "bx-1-2-4",
+      "label": "B59",
+      "kind": "beam",
+      "i": "j-1-2-4",
+      "j": "j-2-2-4",
+      "section": "sec-beam",
+      "story": "story-4"
+    },
+    {
+      "id": "bx-2-2-4",
+      "label": "B60",
+      "kind": "beam",
+      "i": "j-2-2-4",
+      "j": "j-3-2-4",
+      "section": "sec-beam",
+      "story": "story-4"
+    },
+    {
+      "id": "by-0-0-4",
+      "label": "B61",
+      "kind": "beam",
+      "i": "j-0-0-4",
+      "j": "j-0-1-4",
+      "section": "sec-beam",
+      "story": "story-4"
+    },
+    {
+      "id": "by-0-1-4",
+      "label": "B62",
+      "kind": "beam",
+      "i": "j-0-1-4",
+      "j": "j-0-2-4",
+      "section": "sec-beam",
+      "story": "story-4"
+    },
+    {
+      "id": "by-1-0-4",
+      "label": "B63",
+      "kind": "beam",
+      "i": "j-1-0-4",
+      "j": "j-1-1-4",
+      "section": "sec-beam",
+      "story": "story-4"
+    },
+    {
+      "id": "by-1-1-4",
+      "label": "B64",
+      "kind": "beam",
+      "i": "j-1-1-4",
+      "j": "j-1-2-4",
+      "section": "sec-beam",
+      "story": "story-4"
+    },
+    {
+      "id": "by-2-0-4",
+      "label": "B65",
+      "kind": "beam",
+      "i": "j-2-0-4",
+      "j": "j-2-1-4",
+      "section": "sec-beam",
+      "story": "story-4"
+    },
+    {
+      "id": "by-2-1-4",
+      "label": "B66",
+      "kind": "beam",
+      "i": "j-2-1-4",
+      "j": "j-2-2-4",
+      "section": "sec-beam",
+      "story": "story-4"
+    },
+    {
+      "id": "by-3-0-4",
+      "label": "B67",
+      "kind": "beam",
+      "i": "j-3-0-4",
+      "j": "j-3-1-4",
+      "section": "sec-beam",
+      "story": "story-4"
+    },
+    {
+      "id": "by-3-1-4",
+      "label": "B68",
+      "kind": "beam",
+      "i": "j-3-1-4",
+      "j": "j-3-2-4",
+      "section": "sec-beam",
+      "story": "story-4"
+    },
+    {
+      "id": "c-0-0-5",
+      "label": "C49",
+      "kind": "column",
+      "i": "j-0-0-4",
+      "j": "j-0-0-5",
+      "section": "sec-col",
+      "story": "story-5"
+    },
+    {
+      "id": "c-1-0-5",
+      "label": "C50",
+      "kind": "column",
+      "i": "j-1-0-4",
+      "j": "j-1-0-5",
+      "section": "sec-col",
+      "story": "story-5"
+    },
+    {
+      "id": "c-2-0-5",
+      "label": "C51",
+      "kind": "column",
+      "i": "j-2-0-4",
+      "j": "j-2-0-5",
+      "section": "sec-col",
+      "story": "story-5"
+    },
+    {
+      "id": "c-3-0-5",
+      "label": "C52",
+      "kind": "column",
+      "i": "j-3-0-4",
+      "j": "j-3-0-5",
+      "section": "sec-col",
+      "story": "story-5"
+    },
+    {
+      "id": "c-0-1-5",
+      "label": "C53",
+      "kind": "column",
+      "i": "j-0-1-4",
+      "j": "j-0-1-5",
+      "section": "sec-col",
+      "story": "story-5"
+    },
+    {
+      "id": "c-1-1-5",
+      "label": "C54",
+      "kind": "column",
+      "i": "j-1-1-4",
+      "j": "j-1-1-5",
+      "section": "sec-col",
+      "story": "story-5"
+    },
+    {
+      "id": "c-2-1-5",
+      "label": "C55",
+      "kind": "column",
+      "i": "j-2-1-4",
+      "j": "j-2-1-5",
+      "section": "sec-col",
+      "story": "story-5"
+    },
+    {
+      "id": "c-3-1-5",
+      "label": "C56",
+      "kind": "column",
+      "i": "j-3-1-4",
+      "j": "j-3-1-5",
+      "section": "sec-col",
+      "story": "story-5"
+    },
+    {
+      "id": "c-0-2-5",
+      "label": "C57",
+      "kind": "column",
+      "i": "j-0-2-4",
+      "j": "j-0-2-5",
+      "section": "sec-col",
+      "story": "story-5"
+    },
+    {
+      "id": "c-1-2-5",
+      "label": "C58",
+      "kind": "column",
+      "i": "j-1-2-4",
+      "j": "j-1-2-5",
+      "section": "sec-col",
+      "story": "story-5"
+    },
+    {
+      "id": "c-2-2-5",
+      "label": "C59",
+      "kind": "column",
+      "i": "j-2-2-4",
+      "j": "j-2-2-5",
+      "section": "sec-col",
+      "story": "story-5"
+    },
+    {
+      "id": "c-3-2-5",
+      "label": "C60",
+      "kind": "column",
+      "i": "j-3-2-4",
+      "j": "j-3-2-5",
+      "section": "sec-col",
+      "story": "story-5"
+    },
+    {
+      "id": "bx-0-0-5",
+      "label": "B69",
+      "kind": "beam",
+      "i": "j-0-0-5",
+      "j": "j-1-0-5",
+      "section": "sec-beam",
+      "story": "story-5"
+    },
+    {
+      "id": "bx-1-0-5",
+      "label": "B70",
+      "kind": "beam",
+      "i": "j-1-0-5",
+      "j": "j-2-0-5",
+      "section": "sec-beam",
+      "story": "story-5"
+    },
+    {
+      "id": "bx-2-0-5",
+      "label": "B71",
+      "kind": "beam",
+      "i": "j-2-0-5",
+      "j": "j-3-0-5",
+      "section": "sec-beam",
+      "story": "story-5"
+    },
+    {
+      "id": "bx-0-1-5",
+      "label": "B72",
+      "kind": "beam",
+      "i": "j-0-1-5",
+      "j": "j-1-1-5",
+      "section": "sec-beam",
+      "story": "story-5"
+    },
+    {
+      "id": "bx-1-1-5",
+      "label": "B73",
+      "kind": "beam",
+      "i": "j-1-1-5",
+      "j": "j-2-1-5",
+      "section": "sec-beam",
+      "story": "story-5"
+    },
+    {
+      "id": "bx-2-1-5",
+      "label": "B74",
+      "kind": "beam",
+      "i": "j-2-1-5",
+      "j": "j-3-1-5",
+      "section": "sec-beam",
+      "story": "story-5"
+    },
+    {
+      "id": "bx-0-2-5",
+      "label": "B75",
+      "kind": "beam",
+      "i": "j-0-2-5",
+      "j": "j-1-2-5",
+      "section": "sec-beam",
+      "story": "story-5"
+    },
+    {
+      "id": "bx-1-2-5",
+      "label": "B76",
+      "kind": "beam",
+      "i": "j-1-2-5",
+      "j": "j-2-2-5",
+      "section": "sec-beam",
+      "story": "story-5"
+    },
+    {
+      "id": "bx-2-2-5",
+      "label": "B77",
+      "kind": "beam",
+      "i": "j-2-2-5",
+      "j": "j-3-2-5",
+      "section": "sec-beam",
+      "story": "story-5"
+    },
+    {
+      "id": "by-0-0-5",
+      "label": "B78",
+      "kind": "beam",
+      "i": "j-0-0-5",
+      "j": "j-0-1-5",
+      "section": "sec-beam",
+      "story": "story-5"
+    },
+    {
+      "id": "by-0-1-5",
+      "label": "B79",
+      "kind": "beam",
+      "i": "j-0-1-5",
+      "j": "j-0-2-5",
+      "section": "sec-beam",
+      "story": "story-5"
+    },
+    {
+      "id": "by-1-0-5",
+      "label": "B80",
+      "kind": "beam",
+      "i": "j-1-0-5",
+      "j": "j-1-1-5",
+      "section": "sec-beam",
+      "story": "story-5"
+    },
+    {
+      "id": "by-1-1-5",
+      "label": "B81",
+      "kind": "beam",
+      "i": "j-1-1-5",
+      "j": "j-1-2-5",
+      "section": "sec-beam",
+      "story": "story-5"
+    },
+    {
+      "id": "by-2-0-5",
+      "label": "B82",
+      "kind": "beam",
+      "i": "j-2-0-5",
+      "j": "j-2-1-5",
+      "section": "sec-beam",
+      "story": "story-5"
+    },
+    {
+      "id": "by-2-1-5",
+      "label": "B83",
+      "kind": "beam",
+      "i": "j-2-1-5",
+      "j": "j-2-2-5",
+      "section": "sec-beam",
+      "story": "story-5"
+    },
+    {
+      "id": "by-3-0-5",
+      "label": "B84",
+      "kind": "beam",
+      "i": "j-3-0-5",
+      "j": "j-3-1-5",
+      "section": "sec-beam",
+      "story": "story-5"
+    },
+    {
+      "id": "by-3-1-5",
+      "label": "B85",
+      "kind": "beam",
+      "i": "j-3-1-5",
+      "j": "j-3-2-5",
+      "section": "sec-beam",
+      "story": "story-5"
+    }
+  ],
+  "shells": [
+    {
+      "id": "s-0-0-1",
+      "label": "F1",
+      "kind": "slab",
+      "joints": [
+        "j-0-0-1",
+        "j-1-0-1",
+        "j-1-1-1",
+        "j-0-1-1"
+      ],
+      "section": "sec-slab",
+      "story": "story-1"
+    },
+    {
+      "id": "s-1-0-1",
+      "label": "F2",
+      "kind": "slab",
+      "joints": [
+        "j-1-0-1",
+        "j-2-0-1",
+        "j-2-1-1",
+        "j-1-1-1"
+      ],
+      "section": "sec-slab",
+      "story": "story-1"
+    },
+    {
+      "id": "s-2-0-1",
+      "label": "F3",
+      "kind": "slab",
+      "joints": [
+        "j-2-0-1",
+        "j-3-0-1",
+        "j-3-1-1",
+        "j-2-1-1"
+      ],
+      "section": "sec-slab",
+      "story": "story-1"
+    },
+    {
+      "id": "s-0-1-1",
+      "label": "F4",
+      "kind": "slab",
+      "joints": [
+        "j-0-1-1",
+        "j-1-1-1",
+        "j-1-2-1",
+        "j-0-2-1"
+      ],
+      "section": "sec-slab",
+      "story": "story-1"
+    },
+    {
+      "id": "s-1-1-1",
+      "label": "F5",
+      "kind": "slab",
+      "joints": [
+        "j-1-1-1",
+        "j-2-1-1",
+        "j-2-2-1",
+        "j-1-2-1"
+      ],
+      "section": "sec-slab",
+      "story": "story-1"
+    },
+    {
+      "id": "s-2-1-1",
+      "label": "F6",
+      "kind": "slab",
+      "joints": [
+        "j-2-1-1",
+        "j-3-1-1",
+        "j-3-2-1",
+        "j-2-2-1"
+      ],
+      "section": "sec-slab",
+      "story": "story-1"
+    },
+    {
+      "id": "s-0-0-2",
+      "label": "F7",
+      "kind": "slab",
+      "joints": [
+        "j-0-0-2",
+        "j-1-0-2",
+        "j-1-1-2",
+        "j-0-1-2"
+      ],
+      "section": "sec-slab",
+      "story": "story-2"
+    },
+    {
+      "id": "s-1-0-2",
+      "label": "F8",
+      "kind": "slab",
+      "joints": [
+        "j-1-0-2",
+        "j-2-0-2",
+        "j-2-1-2",
+        "j-1-1-2"
+      ],
+      "section": "sec-slab",
+      "story": "story-2"
+    },
+    {
+      "id": "s-2-0-2",
+      "label": "F9",
+      "kind": "slab",
+      "joints": [
+        "j-2-0-2",
+        "j-3-0-2",
+        "j-3-1-2",
+        "j-2-1-2"
+      ],
+      "section": "sec-slab",
+      "story": "story-2"
+    },
+    {
+      "id": "s-0-1-2",
+      "label": "F10",
+      "kind": "slab",
+      "joints": [
+        "j-0-1-2",
+        "j-1-1-2",
+        "j-1-2-2",
+        "j-0-2-2"
+      ],
+      "section": "sec-slab",
+      "story": "story-2"
+    },
+    {
+      "id": "s-1-1-2",
+      "label": "F11",
+      "kind": "slab",
+      "joints": [
+        "j-1-1-2",
+        "j-2-1-2",
+        "j-2-2-2",
+        "j-1-2-2"
+      ],
+      "section": "sec-slab",
+      "story": "story-2"
+    },
+    {
+      "id": "s-2-1-2",
+      "label": "F12",
+      "kind": "slab",
+      "joints": [
+        "j-2-1-2",
+        "j-3-1-2",
+        "j-3-2-2",
+        "j-2-2-2"
+      ],
+      "section": "sec-slab",
+      "story": "story-2"
+    },
+    {
+      "id": "s-0-0-3",
+      "label": "F13",
+      "kind": "slab",
+      "joints": [
+        "j-0-0-3",
+        "j-1-0-3",
+        "j-1-1-3",
+        "j-0-1-3"
+      ],
+      "section": "sec-slab",
+      "story": "story-3"
+    },
+    {
+      "id": "s-1-0-3",
+      "label": "F14",
+      "kind": "slab",
+      "joints": [
+        "j-1-0-3",
+        "j-2-0-3",
+        "j-2-1-3",
+        "j-1-1-3"
+      ],
+      "section": "sec-slab",
+      "story": "story-3"
+    },
+    {
+      "id": "s-2-0-3",
+      "label": "F15",
+      "kind": "slab",
+      "joints": [
+        "j-2-0-3",
+        "j-3-0-3",
+        "j-3-1-3",
+        "j-2-1-3"
+      ],
+      "section": "sec-slab",
+      "story": "story-3"
+    },
+    {
+      "id": "s-0-1-3",
+      "label": "F16",
+      "kind": "slab",
+      "joints": [
+        "j-0-1-3",
+        "j-1-1-3",
+        "j-1-2-3",
+        "j-0-2-3"
+      ],
+      "section": "sec-slab",
+      "story": "story-3"
+    },
+    {
+      "id": "s-1-1-3",
+      "label": "F17",
+      "kind": "slab",
+      "joints": [
+        "j-1-1-3",
+        "j-2-1-3",
+        "j-2-2-3",
+        "j-1-2-3"
+      ],
+      "section": "sec-slab",
+      "story": "story-3"
+    },
+    {
+      "id": "s-2-1-3",
+      "label": "F18",
+      "kind": "slab",
+      "joints": [
+        "j-2-1-3",
+        "j-3-1-3",
+        "j-3-2-3",
+        "j-2-2-3"
+      ],
+      "section": "sec-slab",
+      "story": "story-3"
+    },
+    {
+      "id": "s-0-0-4",
+      "label": "F19",
+      "kind": "slab",
+      "joints": [
+        "j-0-0-4",
+        "j-1-0-4",
+        "j-1-1-4",
+        "j-0-1-4"
+      ],
+      "section": "sec-slab",
+      "story": "story-4"
+    },
+    {
+      "id": "s-1-0-4",
+      "label": "F20",
+      "kind": "slab",
+      "joints": [
+        "j-1-0-4",
+        "j-2-0-4",
+        "j-2-1-4",
+        "j-1-1-4"
+      ],
+      "section": "sec-slab",
+      "story": "story-4"
+    },
+    {
+      "id": "s-2-0-4",
+      "label": "F21",
+      "kind": "slab",
+      "joints": [
+        "j-2-0-4",
+        "j-3-0-4",
+        "j-3-1-4",
+        "j-2-1-4"
+      ],
+      "section": "sec-slab",
+      "story": "story-4"
+    },
+    {
+      "id": "s-0-1-4",
+      "label": "F22",
+      "kind": "slab",
+      "joints": [
+        "j-0-1-4",
+        "j-1-1-4",
+        "j-1-2-4",
+        "j-0-2-4"
+      ],
+      "section": "sec-slab",
+      "story": "story-4"
+    },
+    {
+      "id": "s-1-1-4",
+      "label": "F23",
+      "kind": "slab",
+      "joints": [
+        "j-1-1-4",
+        "j-2-1-4",
+        "j-2-2-4",
+        "j-1-2-4"
+      ],
+      "section": "sec-slab",
+      "story": "story-4"
+    },
+    {
+      "id": "s-2-1-4",
+      "label": "F24",
+      "kind": "slab",
+      "joints": [
+        "j-2-1-4",
+        "j-3-1-4",
+        "j-3-2-4",
+        "j-2-2-4"
+      ],
+      "section": "sec-slab",
+      "story": "story-4"
+    },
+    {
+      "id": "s-0-0-5",
+      "label": "F25",
+      "kind": "slab",
+      "joints": [
+        "j-0-0-5",
+        "j-1-0-5",
+        "j-1-1-5",
+        "j-0-1-5"
+      ],
+      "section": "sec-slab",
+      "story": "story-5"
+    },
+    {
+      "id": "s-1-0-5",
+      "label": "F26",
+      "kind": "slab",
+      "joints": [
+        "j-1-0-5",
+        "j-2-0-5",
+        "j-2-1-5",
+        "j-1-1-5"
+      ],
+      "section": "sec-slab",
+      "story": "story-5"
+    },
+    {
+      "id": "s-2-0-5",
+      "label": "F27",
+      "kind": "slab",
+      "joints": [
+        "j-2-0-5",
+        "j-3-0-5",
+        "j-3-1-5",
+        "j-2-1-5"
+      ],
+      "section": "sec-slab",
+      "story": "story-5"
+    },
+    {
+      "id": "s-0-1-5",
+      "label": "F28",
+      "kind": "slab",
+      "joints": [
+        "j-0-1-5",
+        "j-1-1-5",
+        "j-1-2-5",
+        "j-0-2-5"
+      ],
+      "section": "sec-slab",
+      "story": "story-5"
+    },
+    {
+      "id": "s-1-1-5",
+      "label": "F29",
+      "kind": "slab",
+      "joints": [
+        "j-1-1-5",
+        "j-2-1-5",
+        "j-2-2-5",
+        "j-1-2-5"
+      ],
+      "section": "sec-slab",
+      "story": "story-5"
+    },
+    {
+      "id": "s-2-1-5",
+      "label": "F30",
+      "kind": "slab",
+      "joints": [
+        "j-2-1-5",
+        "j-3-1-5",
+        "j-3-2-5",
+        "j-2-2-5"
+      ],
+      "section": "sec-slab",
+      "story": "story-5"
+    }
+  ],
+  "loadPatterns": [
+    {
+      "id": "lp-dl",
+      "name": "DL",
+      "type": "dead",
+      "selfWeight": 1
+    },
+    {
+      "id": "lp-sdl",
+      "name": "SDL",
+      "type": "superDead",
+      "selfWeight": 0
+    },
+    {
+      "id": "lp-ll",
+      "name": "LL",
+      "type": "live",
+      "selfWeight": 0
+    }
+  ],
+  "loadCases": [
+    {
+      "id": "lc-dl",
+      "name": "DL",
+      "type": "linearStatic",
+      "loads": [
+        {
+          "pattern": "lp-dl",
+          "factor": 1
+        }
+      ]
+    },
+    {
+      "id": "lc-sdl",
+      "name": "SDL",
+      "type": "linearStatic",
+      "loads": [
+        {
+          "pattern": "lp-sdl",
+          "factor": 1
+        }
+      ]
+    },
+    {
+      "id": "lc-ll",
+      "name": "LL",
+      "type": "linearStatic",
+      "loads": [
+        {
+          "pattern": "lp-ll",
+          "factor": 1
+        }
+      ]
+    },
+    {
+      "id": "lc-modal",
+      "name": "Modal",
+      "type": "modal",
+      "loads": []
+    }
+  ],
+  "combos": [
+    {
+      "id": "co-service",
+      "name": "SERVICE",
+      "type": "linearAdd",
+      "items": [
+        {
+          "case": "lc-dl",
+          "factor": 1
+        },
+        {
+          "case": "lc-sdl",
+          "factor": 1
+        },
+        {
+          "case": "lc-ll",
+          "factor": 1
+        }
+      ]
+    }
+  ],
+  "frameLoads": [],
+  "shellLoads": [
+    {
+      "id": "sl-sdl-s-0-0-1",
+      "shell": "s-0-0-1",
+      "pattern": "lp-sdl",
+      "direction": "gravity",
+      "value": 1.5
+    },
+    {
+      "id": "sl-ll-s-0-0-1",
+      "shell": "s-0-0-1",
+      "pattern": "lp-ll",
+      "direction": "gravity",
+      "value": 2
+    },
+    {
+      "id": "sl-sdl-s-1-0-1",
+      "shell": "s-1-0-1",
+      "pattern": "lp-sdl",
+      "direction": "gravity",
+      "value": 1.5
+    },
+    {
+      "id": "sl-ll-s-1-0-1",
+      "shell": "s-1-0-1",
+      "pattern": "lp-ll",
+      "direction": "gravity",
+      "value": 2
+    },
+    {
+      "id": "sl-sdl-s-2-0-1",
+      "shell": "s-2-0-1",
+      "pattern": "lp-sdl",
+      "direction": "gravity",
+      "value": 1.5
+    },
+    {
+      "id": "sl-ll-s-2-0-1",
+      "shell": "s-2-0-1",
+      "pattern": "lp-ll",
+      "direction": "gravity",
+      "value": 2
+    },
+    {
+      "id": "sl-sdl-s-0-1-1",
+      "shell": "s-0-1-1",
+      "pattern": "lp-sdl",
+      "direction": "gravity",
+      "value": 1.5
+    },
+    {
+      "id": "sl-ll-s-0-1-1",
+      "shell": "s-0-1-1",
+      "pattern": "lp-ll",
+      "direction": "gravity",
+      "value": 2
+    },
+    {
+      "id": "sl-sdl-s-1-1-1",
+      "shell": "s-1-1-1",
+      "pattern": "lp-sdl",
+      "direction": "gravity",
+      "value": 1.5
+    },
+    {
+      "id": "sl-ll-s-1-1-1",
+      "shell": "s-1-1-1",
+      "pattern": "lp-ll",
+      "direction": "gravity",
+      "value": 2
+    },
+    {
+      "id": "sl-sdl-s-2-1-1",
+      "shell": "s-2-1-1",
+      "pattern": "lp-sdl",
+      "direction": "gravity",
+      "value": 1.5
+    },
+    {
+      "id": "sl-ll-s-2-1-1",
+      "shell": "s-2-1-1",
+      "pattern": "lp-ll",
+      "direction": "gravity",
+      "value": 2
+    },
+    {
+      "id": "sl-sdl-s-0-0-2",
+      "shell": "s-0-0-2",
+      "pattern": "lp-sdl",
+      "direction": "gravity",
+      "value": 1.5
+    },
+    {
+      "id": "sl-ll-s-0-0-2",
+      "shell": "s-0-0-2",
+      "pattern": "lp-ll",
+      "direction": "gravity",
+      "value": 2
+    },
+    {
+      "id": "sl-sdl-s-1-0-2",
+      "shell": "s-1-0-2",
+      "pattern": "lp-sdl",
+      "direction": "gravity",
+      "value": 1.5
+    },
+    {
+      "id": "sl-ll-s-1-0-2",
+      "shell": "s-1-0-2",
+      "pattern": "lp-ll",
+      "direction": "gravity",
+      "value": 2
+    },
+    {
+      "id": "sl-sdl-s-2-0-2",
+      "shell": "s-2-0-2",
+      "pattern": "lp-sdl",
+      "direction": "gravity",
+      "value": 1.5
+    },
+    {
+      "id": "sl-ll-s-2-0-2",
+      "shell": "s-2-0-2",
+      "pattern": "lp-ll",
+      "direction": "gravity",
+      "value": 2
+    },
+    {
+      "id": "sl-sdl-s-0-1-2",
+      "shell": "s-0-1-2",
+      "pattern": "lp-sdl",
+      "direction": "gravity",
+      "value": 1.5
+    },
+    {
+      "id": "sl-ll-s-0-1-2",
+      "shell": "s-0-1-2",
+      "pattern": "lp-ll",
+      "direction": "gravity",
+      "value": 2
+    },
+    {
+      "id": "sl-sdl-s-1-1-2",
+      "shell": "s-1-1-2",
+      "pattern": "lp-sdl",
+      "direction": "gravity",
+      "value": 1.5
+    },
+    {
+      "id": "sl-ll-s-1-1-2",
+      "shell": "s-1-1-2",
+      "pattern": "lp-ll",
+      "direction": "gravity",
+      "value": 2
+    },
+    {
+      "id": "sl-sdl-s-2-1-2",
+      "shell": "s-2-1-2",
+      "pattern": "lp-sdl",
+      "direction": "gravity",
+      "value": 1.5
+    },
+    {
+      "id": "sl-ll-s-2-1-2",
+      "shell": "s-2-1-2",
+      "pattern": "lp-ll",
+      "direction": "gravity",
+      "value": 2
+    },
+    {
+      "id": "sl-sdl-s-0-0-3",
+      "shell": "s-0-0-3",
+      "pattern": "lp-sdl",
+      "direction": "gravity",
+      "value": 1.5
+    },
+    {
+      "id": "sl-ll-s-0-0-3",
+      "shell": "s-0-0-3",
+      "pattern": "lp-ll",
+      "direction": "gravity",
+      "value": 2
+    },
+    {
+      "id": "sl-sdl-s-1-0-3",
+      "shell": "s-1-0-3",
+      "pattern": "lp-sdl",
+      "direction": "gravity",
+      "value": 1.5
+    },
+    {
+      "id": "sl-ll-s-1-0-3",
+      "shell": "s-1-0-3",
+      "pattern": "lp-ll",
+      "direction": "gravity",
+      "value": 2
+    },
+    {
+      "id": "sl-sdl-s-2-0-3",
+      "shell": "s-2-0-3",
+      "pattern": "lp-sdl",
+      "direction": "gravity",
+      "value": 1.5
+    },
+    {
+      "id": "sl-ll-s-2-0-3",
+      "shell": "s-2-0-3",
+      "pattern": "lp-ll",
+      "direction": "gravity",
+      "value": 2
+    },
+    {
+      "id": "sl-sdl-s-0-1-3",
+      "shell": "s-0-1-3",
+      "pattern": "lp-sdl",
+      "direction": "gravity",
+      "value": 1.5
+    },
+    {
+      "id": "sl-ll-s-0-1-3",
+      "shell": "s-0-1-3",
+      "pattern": "lp-ll",
+      "direction": "gravity",
+      "value": 2
+    },
+    {
+      "id": "sl-sdl-s-1-1-3",
+      "shell": "s-1-1-3",
+      "pattern": "lp-sdl",
+      "direction": "gravity",
+      "value": 1.5
+    },
+    {
+      "id": "sl-ll-s-1-1-3",
+      "shell": "s-1-1-3",
+      "pattern": "lp-ll",
+      "direction": "gravity",
+      "value": 2
+    },
+    {
+      "id": "sl-sdl-s-2-1-3",
+      "shell": "s-2-1-3",
+      "pattern": "lp-sdl",
+      "direction": "gravity",
+      "value": 1.5
+    },
+    {
+      "id": "sl-ll-s-2-1-3",
+      "shell": "s-2-1-3",
+      "pattern": "lp-ll",
+      "direction": "gravity",
+      "value": 2
+    },
+    {
+      "id": "sl-sdl-s-0-0-4",
+      "shell": "s-0-0-4",
+      "pattern": "lp-sdl",
+      "direction": "gravity",
+      "value": 1.5
+    },
+    {
+      "id": "sl-ll-s-0-0-4",
+      "shell": "s-0-0-4",
+      "pattern": "lp-ll",
+      "direction": "gravity",
+      "value": 2
+    },
+    {
+      "id": "sl-sdl-s-1-0-4",
+      "shell": "s-1-0-4",
+      "pattern": "lp-sdl",
+      "direction": "gravity",
+      "value": 1.5
+    },
+    {
+      "id": "sl-ll-s-1-0-4",
+      "shell": "s-1-0-4",
+      "pattern": "lp-ll",
+      "direction": "gravity",
+      "value": 2
+    },
+    {
+      "id": "sl-sdl-s-2-0-4",
+      "shell": "s-2-0-4",
+      "pattern": "lp-sdl",
+      "direction": "gravity",
+      "value": 1.5
+    },
+    {
+      "id": "sl-ll-s-2-0-4",
+      "shell": "s-2-0-4",
+      "pattern": "lp-ll",
+      "direction": "gravity",
+      "value": 2
+    },
+    {
+      "id": "sl-sdl-s-0-1-4",
+      "shell": "s-0-1-4",
+      "pattern": "lp-sdl",
+      "direction": "gravity",
+      "value": 1.5
+    },
+    {
+      "id": "sl-ll-s-0-1-4",
+      "shell": "s-0-1-4",
+      "pattern": "lp-ll",
+      "direction": "gravity",
+      "value": 2
+    },
+    {
+      "id": "sl-sdl-s-1-1-4",
+      "shell": "s-1-1-4",
+      "pattern": "lp-sdl",
+      "direction": "gravity",
+      "value": 1.5
+    },
+    {
+      "id": "sl-ll-s-1-1-4",
+      "shell": "s-1-1-4",
+      "pattern": "lp-ll",
+      "direction": "gravity",
+      "value": 2
+    },
+    {
+      "id": "sl-sdl-s-2-1-4",
+      "shell": "s-2-1-4",
+      "pattern": "lp-sdl",
+      "direction": "gravity",
+      "value": 1.5
+    },
+    {
+      "id": "sl-ll-s-2-1-4",
+      "shell": "s-2-1-4",
+      "pattern": "lp-ll",
+      "direction": "gravity",
+      "value": 2
+    },
+    {
+      "id": "sl-sdl-s-0-0-5",
+      "shell": "s-0-0-5",
+      "pattern": "lp-sdl",
+      "direction": "gravity",
+      "value": 1.5
+    },
+    {
+      "id": "sl-ll-s-0-0-5",
+      "shell": "s-0-0-5",
+      "pattern": "lp-ll",
+      "direction": "gravity",
+      "value": 2
+    },
+    {
+      "id": "sl-sdl-s-1-0-5",
+      "shell": "s-1-0-5",
+      "pattern": "lp-sdl",
+      "direction": "gravity",
+      "value": 1.5
+    },
+    {
+      "id": "sl-ll-s-1-0-5",
+      "shell": "s-1-0-5",
+      "pattern": "lp-ll",
+      "direction": "gravity",
+      "value": 2
+    },
+    {
+      "id": "sl-sdl-s-2-0-5",
+      "shell": "s-2-0-5",
+      "pattern": "lp-sdl",
+      "direction": "gravity",
+      "value": 1.5
+    },
+    {
+      "id": "sl-ll-s-2-0-5",
+      "shell": "s-2-0-5",
+      "pattern": "lp-ll",
+      "direction": "gravity",
+      "value": 2
+    },
+    {
+      "id": "sl-sdl-s-0-1-5",
+      "shell": "s-0-1-5",
+      "pattern": "lp-sdl",
+      "direction": "gravity",
+      "value": 1.5
+    },
+    {
+      "id": "sl-ll-s-0-1-5",
+      "shell": "s-0-1-5",
+      "pattern": "lp-ll",
+      "direction": "gravity",
+      "value": 2
+    },
+    {
+      "id": "sl-sdl-s-1-1-5",
+      "shell": "s-1-1-5",
+      "pattern": "lp-sdl",
+      "direction": "gravity",
+      "value": 1.5
+    },
+    {
+      "id": "sl-ll-s-1-1-5",
+      "shell": "s-1-1-5",
+      "pattern": "lp-ll",
+      "direction": "gravity",
+      "value": 2
+    },
+    {
+      "id": "sl-sdl-s-2-1-5",
+      "shell": "s-2-1-5",
+      "pattern": "lp-sdl",
+      "direction": "gravity",
+      "value": 1.5
+    },
+    {
+      "id": "sl-ll-s-2-1-5",
+      "shell": "s-2-1-5",
+      "pattern": "lp-ll",
+      "direction": "gravity",
+      "value": 2
+    }
+  ]
+}

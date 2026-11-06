@@ -1,0 +1,71 @@
+/* Design tokens của NexFEM. Đổi theme bằng thuộc tính data-theme trên <html>. */
+:root,
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-bg: #17181b;
+  --color-surface: #1e1f22;
+  --color-surface-2: #26282c;
+  --color-surface-3: #2f3237;
+  --color-border: #3a3d43;
+  --color-border-strong: #4a4e55;
+  --color-text: #e6e8eb;
+  --color-text-muted: #9aa2ad;
+  --color-text-faint: #6b727c;
+  --color-accent: #4c9aff;
+  --color-accent-strong: #2f7fe8;
+  --color-accent-soft: rgba(76, 154, 255, 0.16);
+  --color-on-accent: #ffffff;
+  --color-danger: #ff6b6b;
+  --color-warning: #f0b440;
+  --color-success: #5cc66f;
+  --color-info: #6aa6ff;
+  --color-selection: #ffd400;
+  --color-column: #e8a33d;
+  --color-beam: #4c9aff;
+  --color-brace: #b07cff;
+  --color-slab: #7fd18b;
+  --color-wall: #3cc7bb;
+  --shadow-popover: 0 8px 28px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --color-bg: #eceef1;
+  --color-surface: #ffffff;
+  --color-surface-2: #f4f5f7;
+  --color-surface-3: #e8eaee;
+  --color-border: #d5d9e0;
+  --color-border-strong: #b9bfc8;
+  --color-text: #1c1f24;
+  --color-text-muted: #5d6573;
+  --color-text-faint: #8a93a3;
+  --color-accent: #1f63d6;
+  --color-accent-strong: #174fae;
+  --color-accent-soft: rgba(31, 99, 214, 0.12);
+  --color-on-accent: #ffffff;
+  --color-danger: #c62f22;
+  --color-warning: #a96a00;
+  --color-success: #2f8a3a;
+  --color-info: #1f63d6;
+  --color-selection: #e0a800;
+  --color-column: #c46b0a;
+  --color-beam: #1f63d6;
+  --color-brace: #7a3fd0;
+  --color-slab: #3d8b2f;
+  --color-wall: #0f8f86;
+  --shadow-popover: 0 8px 28px rgba(15, 23, 42, 0.18), 0 0 0 1px rgba(15, 23, 42, 0.06);
+}
+
+:root {
+  --font-ui: "Inter", "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: "Cascadia Mono", "JetBrains Mono", Consolas, ui-monospace, monospace;
+  --font-size: 13px;
+  --font-size-sm: 12px;
+  --radius-sm: 4px;
+  --radius: 6px;
+  --radius-lg: 8px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+}

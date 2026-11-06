@@ -1,0 +1,104 @@
+import { CommandError, CommandStack, sampleModel, type Model } from "@nexfem/model-core";
+import { create } from "zustand";
+import { t } from "../i18n/index.ts";
+import { useUi } from "./ui.ts";
+
+export type SelectMode = "replace" | "toggle" | "add";
+
+interface ModelState {
+  model: Model;
+  fileName: string | null;
+  dirty: boolean;
+  locked: boolean;
+  canUndo: boolean;
+  canRedo: boolean;
+  undoTitle?: string;
+  redoTitle?: string;
+  selection: string[];
+
+  /** Chạy lệnh qua command registry. Trả về kết quả của lệnh, hoặc undefined nếu lỗi (đã ghi log). */
+  execute(name: string, args: unknown, source?: string): unknown;
+  undo(): void;
+  redo(): void;
+  select(ids: string[], mode?: SelectMode): void;
+  reset(model: Model, fileName?: string | null): void;
+}
+
+const stack = new CommandStack(sampleModel());
+
+function snapshot() {
+  return {
+    model: stack.model,
+    canUndo: stack.canUndo,
+    canRedo: stack.canRedo,
+    undoTitle: stack.undoTitle,
+    redoTitle: stack.redoTitle,
+  };
+}
+
+export const useModel = create<ModelState>((set, get) => ({
+  ...snapshot(),
+  fileName: null,
+  dirty: false,
+  locked: false,
+  selection: [],
+
+  execute(name, args, source = "ui") {
+    const log = useUi.getState().log;
+    if (get().locked) {
+      log("warning", t().props.locked, source);
+      return undefined;
+    }
+    try {
+      const r = stack.execute(name, args);
+      if (r.changed) {
+        const ids = new Set(objectIds(stack.model));
+        set({ ...snapshot(), dirty: true, selection: get().selection.filter((id) => ids.has(id)) });
+        log("command", t().fmt(t().log.executed, { title: stack.undoTitle ?? name }), source);
+      }
+      return r.result;
+    } catch (e) {
+      const message = e instanceof CommandError || e instanceof Error ? e.message : String(e);
+      log("error", t().fmt(t().log.failed, { message }), source);
+      return undefined;
+    }
+  },
+
+  undo() {
+    const title = stack.undoTitle;
+    if (get().locked || !stack.undo()) return;
+    set({ ...snapshot(), dirty: true });
+    useUi.getState().log("info", t().fmt(t().log.undo, { title: title ?? "" }));
+  },
+
+  redo() {
+    const title = stack.redoTitle;
+    if (get().locked || !stack.redo()) return;
+    set({ ...snapshot(), dirty: true });
+    useUi.getState().log("info", t().fmt(t().log.redo, { title: title ?? "" }));
+  },
+
+  select(ids, mode = "replace") {
+    const cur = get().selection;
+    if (mode === "replace") return set({ selection: [...new Set(ids)] });
+    const s = new Set(cur);
+    if (mode === "add") ids.forEach((id) => s.add(id));
+    else ids.forEach((id) => (s.has(id) ? s.delete(id) : s.add(id)));
+    set({ selection: [...s] });
+  },
+
+  reset(model, fileName = null) {
+    stack.reset(model);
+    set({ ...snapshot(), fileName, dirty: false, locked: false, selection: [] });
+    useUi.getState().set({ messages: null });
+  },
+}));
+
+function objectIds(m: Model): string[] {
+  return [...m.joints, ...m.frames, ...m.shells, ...m.materials, ...m.frameSections, ...m.shellSections].map((o) => o.id);
+}
+
+/** Truy cập ngăn xếp lệnh (cho kiểm thử, API sau này). */
+export function commandStack(): CommandStack {
+  return stack;
+}

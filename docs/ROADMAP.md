@@ -16,7 +16,7 @@ Tài liệu liên quan:
 | Mục | Lựa chọn | ADR |
 | --- | --- | --- |
 | Nền tảng | Desktop Windows 10/11 (Tauri 2 + WebView2), bộ cài `.msi`/`.exe` | [0001](adr/0001-tech-stack.md) |
-| Giao diện | React 18 + TypeScript + Vite, Dockview, Zustand, Three.js | [0001](adr/0001-tech-stack.md) |
+| Giao diện | React 19 + TypeScript + Vite, Dockview, Zustand, Three.js | [0001](adr/0001-tech-stack.md) |
 | Lõi tính toán | Rust (crates `fem-*`, `design-codes`) | [0001](adr/0001-tech-stack.md) |
 | Liên thông ETABS/SAP2000 | Đọc/ghi file `.e2k`/`.s2k` (không cần cài CSI) + cầu nối CSI OAPI bằng C# .NET 10, chạy trên máy có ETABS/SAP2000 | [0002](adr/0002-csi-interop.md) |
 | API & MCP | API cục bộ REST/SSE (`127.0.0.1`, token) + MCP server `nexfem-mcp` + SDK Python/TypeScript, dùng chung command registry với giao diện | [0004](adr/0004-api-mcp.md) |
@@ -33,14 +33,17 @@ Tài liệu liên quan:
 
 Mỗi giai đoạn kết thúc bằng một bản chạy được trên Windows.
 
-### Giai đoạn 0: Nền móng
+### Giai đoạn 0: Nền móng — ✅ xong (06/11/2026)
 - Monorepo pnpm + Turborepo + Cargo workspace theo cây thư mục trong `docs/ux/ui-architecture.md`.
-- Schema mô hình (JSON Schema) cho joint, frame, shell, grid, story, material, section, load pattern/case/combo; hệ đơn vị.
-- CI: lint, test TS, test Rust, `dotnet test`, build bộ cài Windows.
+- Schema mô hình (zod → JSON Schema `packages/model-core/schema/model.schema.json`) cho joint, frame, shell, grid, story, material, section, load pattern/case/combo; hệ đơn vị. Rust (`crates/fem-core`) đọc cùng định dạng, kiểm tra bằng mô hình mẫu chung `resources/templates/sample-frame.json`.
+- Command registry có schema và Undo/Redo (immer patches) — làm sớm từ Giai đoạn 2 vì giao diện cần ngay.
+- CI: kiểm tra kiểu TS, vitest, Playwright e2e, `cargo fmt`/`clippy`/`test`, build bộ cài Windows. (`dotnet test` thêm khi có cầu nối .NET ở Giai đoạn 8.)
 
-### Giai đoạn 1: Khung giao diện (UI shell) — v0.1-alpha
-- Cửa sổ chính: menu, ribbon, Model Explorer, viewport (1/2/4 ô), Properties, Console/Tables, status bar.
-- Theme tối/sáng, phím tắt, command palette, tiếng Việt/Anh. Dữ liệu giả.
+### Giai đoạn 1: Khung giao diện (UI shell) — ✅ xong, v0.1-alpha
+- Cửa sổ chính: menu, ribbon, Model Explorer, viewport (1/2/4 ô), Properties, Console/Messages/Bảng/Analysis Log, status bar.
+- Theme tối/sáng, phím tắt, command palette, tiếng Việt/Anh. Dữ liệu mẫu: khung BTCT 3×2 nhịp, 5 tầng.
+- Làm thêm sớm: viewer 2D/3D có chọn bằng click và kéo khung (window/crossing), sửa thuộc tính có Undo, Console gõ lệnh (`beam`, `column`, `select`, `cmd`), Check model.
+- Chưa làm (để đúng giai đoạn): hộp thoại Define, vẽ bằng chuột, Assign, lưu/mở file — các mục này hiện nhãn "GĐ n" trong menu.
 
 ### Giai đoạn 2: Định nghĩa mô hình
 - Command registry có schema cho mọi thao tác (nền cho API/MCP sau này).

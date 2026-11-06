@@ -1,0 +1,836 @@
+{
+  "title": "NexFEM model",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "type": "number",
+      "const": 1
+    },
+    "name": {
+      "type": "string"
+    },
+    "units": {
+      "type": "object",
+      "properties": {
+        "force": {
+          "type": "string",
+          "enum": [
+            "N",
+            "kN",
+            "kgf",
+            "tonf"
+          ]
+        },
+        "length": {
+          "type": "string",
+          "enum": [
+            "mm",
+            "cm",
+            "m"
+          ]
+        },
+        "temperature": {
+          "type": "string",
+          "enum": [
+            "C",
+            "F"
+          ]
+        }
+      },
+      "required": [
+        "force",
+        "length",
+        "temperature"
+      ]
+    },
+    "designCodes": {
+      "default": {},
+      "type": "object",
+      "properties": {
+        "concrete": {
+          "type": "string"
+        },
+        "steel": {
+          "type": "string"
+        },
+        "loads": {
+          "type": "string"
+        }
+      }
+    },
+    "grids": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string"
+          },
+          "x": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "label": {
+                  "type": "string"
+                },
+                "coord": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "id",
+                "label",
+                "coord"
+              ]
+            }
+          },
+          "y": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "label": {
+                  "type": "string"
+                },
+                "coord": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "id",
+                "label",
+                "coord"
+              ]
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "x",
+          "y"
+        ]
+      }
+    },
+    "stories": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string"
+          },
+          "elevation": {
+            "type": "number"
+          },
+          "height": {
+            "type": "number",
+            "minimum": 0
+          },
+          "masterStory": {
+            "default": false,
+            "type": "boolean"
+          },
+          "similarTo": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "elevation",
+          "height"
+        ]
+      }
+    },
+    "materials": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "concrete",
+              "steel",
+              "rebar",
+              "other"
+            ]
+          },
+          "E": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "nu": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 0.5
+          },
+          "gamma": {
+            "type": "number",
+            "minimum": 0
+          },
+          "strength": {
+            "type": "number",
+            "minimum": 0
+          },
+          "code": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type",
+          "E",
+          "nu",
+          "gamma"
+        ]
+      }
+    },
+    "frameSections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string"
+          },
+          "material": {
+            "type": "string",
+            "minLength": 1
+          },
+          "geometry": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "shape": {
+                    "type": "string",
+                    "const": "rect"
+                  },
+                  "b": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "h": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  }
+                },
+                "required": [
+                  "shape",
+                  "b",
+                  "h"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "shape": {
+                    "type": "string",
+                    "const": "circle"
+                  },
+                  "d": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  }
+                },
+                "required": [
+                  "shape",
+                  "d"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "shape": {
+                    "type": "string",
+                    "const": "I"
+                  },
+                  "h": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "bf": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "tf": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "tw": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  }
+                },
+                "required": [
+                  "shape",
+                  "h",
+                  "bf",
+                  "tf",
+                  "tw"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "shape": {
+                    "type": "string",
+                    "const": "box"
+                  },
+                  "h": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "b": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "t": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  }
+                },
+                "required": [
+                  "shape",
+                  "h",
+                  "b",
+                  "t"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "shape": {
+                    "type": "string",
+                    "const": "pipe"
+                  },
+                  "d": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "t": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  }
+                },
+                "required": [
+                  "shape",
+                  "d",
+                  "t"
+                ]
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "material",
+          "geometry"
+        ]
+      }
+    },
+    "shellSections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string"
+          },
+          "material": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "slab",
+              "wall"
+            ]
+          },
+          "formulation": {
+            "type": "string",
+            "enum": [
+              "shell-thin",
+              "shell-thick",
+              "membrane",
+              "plate"
+            ]
+          },
+          "thickness": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "material",
+          "kind",
+          "formulation",
+          "thickness"
+        ]
+      }
+    },
+    "joints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "label": {
+            "type": "string"
+          },
+          "x": {
+            "type": "number"
+          },
+          "y": {
+            "type": "number"
+          },
+          "z": {
+            "type": "number"
+          },
+          "story": {
+            "type": "string",
+            "minLength": 1
+          },
+          "restraint": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "boolean"
+              }
+            ],
+            "items": false,
+            "minItems": 6,
+            "maxItems": 6
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "x",
+          "y",
+          "z"
+        ]
+      }
+    },
+    "frames": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "label": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "beam",
+              "column",
+              "brace"
+            ]
+          },
+          "i": {
+            "type": "string",
+            "minLength": 1
+          },
+          "j": {
+            "type": "string",
+            "minLength": 1
+          },
+          "section": {
+            "type": "string",
+            "minLength": 1
+          },
+          "story": {
+            "type": "string",
+            "minLength": 1
+          },
+          "releases": {
+            "type": "object",
+            "properties": {
+              "i": {
+                "minItems": 6,
+                "maxItems": 6,
+                "type": "array",
+                "items": {
+                  "type": "boolean"
+                }
+              },
+              "j": {
+                "minItems": 6,
+                "maxItems": 6,
+                "type": "array",
+                "items": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "required": [
+              "i",
+              "j"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "kind",
+          "i",
+          "j",
+          "section"
+        ]
+      }
+    },
+    "shells": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "label": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "slab",
+              "wall"
+            ]
+          },
+          "joints": {
+            "minItems": 3,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "section": {
+            "type": "string",
+            "minLength": 1
+          },
+          "story": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "kind",
+          "joints",
+          "section"
+        ]
+      }
+    },
+    "loadPatterns": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "dead",
+              "superDead",
+              "live",
+              "wind",
+              "seismic",
+              "other"
+            ]
+          },
+          "selfWeight": {
+            "default": 0,
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type"
+        ]
+      }
+    },
+    "loadCases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "linearStatic",
+              "modal",
+              "responseSpectrum"
+            ]
+          },
+          "loads": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "pattern": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "factor": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "pattern",
+                "factor"
+              ]
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type"
+        ]
+      }
+    },
+    "combos": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "linearAdd",
+              "envelope",
+              "srss",
+              "absAdd"
+            ]
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "case": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "factor": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "case",
+                "factor"
+              ]
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type",
+          "items"
+        ]
+      }
+    },
+    "frameLoads": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "frame": {
+            "type": "string",
+            "minLength": 1
+          },
+          "pattern": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "distributed",
+              "point"
+            ]
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "gravity",
+              "localX",
+              "local2",
+              "local3",
+              "globalX",
+              "globalY",
+              "globalZ"
+            ]
+          },
+          "value": {
+            "type": "number"
+          },
+          "at": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        },
+        "required": [
+          "id",
+          "frame",
+          "pattern",
+          "kind",
+          "direction",
+          "value"
+        ]
+      }
+    },
+    "shellLoads": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "shell": {
+            "type": "string",
+            "minLength": 1
+          },
+          "pattern": {
+            "type": "string",
+            "minLength": 1
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "gravity",
+              "globalZ",
+              "local3"
+            ]
+          },
+          "value": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "shell",
+          "pattern",
+          "direction",
+          "value"
+        ]
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "name",
+    "units",
+    "grids",
+    "stories",
+    "materials",
+    "frameSections",
+    "shellSections",
+    "joints",
+    "frames",
+    "shells",
+    "loadPatterns",
+    "loadCases",
+    "combos"
+  ]
+}
