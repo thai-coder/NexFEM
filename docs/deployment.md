@@ -20,6 +20,8 @@ Tải ở mục **Artifacts** của lần chạy CI mới nhất (GitHub → Act
 | `NexFEM_<phiên bản>_x64_en-US.msi` | Triển khai hàng loạt qua Group Policy, Intune, SCCM |
 | `NexFEM_<phiên bản>_x64-setup.exe` | Cài tay từng máy |
 
+Mỗi bộ cài khoảng 220 MB vì đã gói sẵn WebView2 bản offline.
+
 ## Cài đặt
 
 **Cài tay:** chạy bộ cài bằng tài khoản quản trị → NexFEM xuất hiện trong Start Menu của mọi tài khoản.
@@ -59,7 +61,9 @@ Mỗi lần đẩy code, CI trên máy Windows thật:
 4. gỡ cài đặt và kiểm tra đã gỡ sạch;
 5. lặp lại với bộ cài NSIS.
 
-Kết quả ghi ở phần **Summary** của lần chạy CI. Script: [`scripts/ci/test-windows-install.ps1`](../scripts/ci/test-windows-install.ps1).
+Kết quả ghi ở phần **Summary** của lần chạy CI. Máy CI là Windows Server của GitHub Actions (đã có WebView2), nên chưa thay thế được một lần cài thử trên máy Windows 10/11 thật chưa có WebView2.
+
+Tài khoản thường được chạy thử bằng Task Scheduler để có phiên đăng nhập riêng, giống người dùng thật đăng nhập máy. Chạy bằng `runas`/`Start-Process -Credential` vào màn hình của người khác sẽ báo lỗi WebView2 "Access is denied" — đó là giới hạn của cách chạy, không phải lỗi cài đặt. Script: [`scripts/ci/test-windows-install.ps1`](../scripts/ci/test-windows-install.ps1).
 
 ## Kiểm tra bằng tay sau khi cài
 
