@@ -28,11 +28,11 @@ Add-Type -Namespace Win32 -Name Native -MemberDefinition '[DllImport("shell32.dl
 function Assert-FileInfo($path, $label, $descPattern) {
   $v = (Get-Item $path).VersionInfo
   Write-Host "$label | Company=$($v.CompanyName) | Description=$($v.FileDescription) | FileVersion=$($v.FileVersion) | Product=$($v.ProductName)"
-  if ($v.CompanyName -ne "lkat.vn") { throw "$label: CompanyName phải là lkat.vn (hiện là '$($v.CompanyName)')" }
-  if ($v.FileDescription -notlike $descPattern) { throw "$label: FileDescription '$($v.FileDescription)' không khớp '$descPattern'" }
-  if ($ExpectedVersion -and -not "$($v.FileVersion)".StartsWith($ExpectedVersion)) { throw "$label: FileVersion '$($v.FileVersion)' không bắt đầu bằng $ExpectedVersion" }
+  if ($v.CompanyName -ne "lkat.vn") { throw "${label}: CompanyName phải là lkat.vn (hiện là '$($v.CompanyName)')" }
+  if ($v.FileDescription -notlike $descPattern) { throw "${label}: FileDescription '$($v.FileDescription)' không khớp '$descPattern'" }
+  if ($ExpectedVersion -and -not "$($v.FileVersion)".StartsWith($ExpectedVersion)) { throw "${label}: FileVersion '$($v.FileVersion)' không bắt đầu bằng $ExpectedVersion" }
   $icons = [Win32.Native]::ExtractIconEx($path, -1, $null, $null, 0)
-  if ($icons -lt 1) { throw "$label: file không có biểu tượng (logo)" }
+  if ($icons -lt 1) { throw "${label}: file không có biểu tượng (logo)" }
   Write-Host "$label | biểu tượng: $icons"
 }
 
