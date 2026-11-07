@@ -1,7 +1,13 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Quyền của cửa sổ chính",
-  "windows": ["main"],
-  "permissions": ["core:default", "core:window:allow-set-title"]
+  "description": "Quy\u1ec1n c\u1ee7a c\u1eeda s\u1ed5 ch\u00ednh",
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "core:default",
+    "core:window:allow-set-title",
+    "dialog:default"
+  ]
 }

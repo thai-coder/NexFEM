@@ -1,9 +1,10 @@
-import { checkModel, sampleModel } from "@nexfem/model-core";
+import { checkModel } from "@nexfem/model-core";
 import type { ViewSpec } from "@nexfem/viewer";
 import { t } from "../i18n/index.ts";
 import type { Strings } from "../i18n/vi.ts";
 import { useModel } from "../stores/model.ts";
-import { useUi, type Tool } from "../stores/ui.ts";
+import { openProject, saveProject } from "../services/files.ts";
+import { useUi, type DialogKind, type Tool } from "../stores/ui.ts";
 
 export type CommandId = keyof Strings["cmd"];
 
@@ -37,6 +38,12 @@ export function currentStory(): string | undefined {
   if (plan?.kind === "plan") return plan.story;
   return model().model.stories.at(-1)?.id;
 }
+
+function dialog(kind: DialogKind, tab?: string) {
+  ui().set({ dialog: tab ? { kind, tab } : { kind }, paletteOpen: false });
+}
+
+const unlocked = () => !model().locked;
 
 function setActiveView(view: ViewSpec) {
   ui().setView(ui().activePane, view);
@@ -90,21 +97,10 @@ const later = (id: CommandId, phase: number, icon?: string, shortcut?: string, k
 });
 
 export const COMMANDS: AppCommand[] = [
-  {
-    id: "file.new",
-    icon: "new",
-    shortcut: "Ctrl+N",
-    keys: ["ctrl+n"],
-    run: () => {
-      if (model().dirty && !window.confirm(t().confirmNew)) return;
-      model().reset(sampleModel());
-      ui().log("success", t().log.newModel);
-      ui().set({ zoomSeq: ui().zoomSeq + 1 });
-    },
-  },
-  later("file.open", 2, "open", "Ctrl+O", ["ctrl+o"]),
-  later("file.save", 2, "save", "Ctrl+S", ["ctrl+s"]),
-  later("file.saveAs", 2, undefined, "Ctrl+Shift+S", ["ctrl+shift+s"]),
+  { id: "file.new", icon: "new", shortcut: "Ctrl+N", keys: ["ctrl+n"], run: () => dialog("newModel") },
+  { id: "file.open", icon: "open", shortcut: "Ctrl+O", keys: ["ctrl+o"], run: () => void openProject() },
+  { id: "file.save", icon: "save", shortcut: "Ctrl+S", keys: ["ctrl+s"], run: () => void saveProject(false) },
+  { id: "file.saveAs", shortcut: "Ctrl+Shift+S", keys: ["ctrl+shift+s"], run: () => void saveProject(true) },
   later("file.import", 8),
   later("file.export", 6),
 
@@ -186,14 +182,14 @@ export const COMMANDS: AppCommand[] = [
     run: () => window.dispatchEvent(new CustomEvent("nexfem:reset-layout")),
   },
 
-  later("define.grids", 2, "grid"),
-  later("define.stories", 2, "story"),
-  later("define.materials", 2, "material"),
-  later("define.frameSections", 2, "section"),
-  later("define.shellSections", 2, "slab"),
-  later("define.loadPatterns", 2, "load"),
-  later("define.loadCases", 2, "load"),
-  later("define.combos", 2, "combo"),
+  { id: "define.grids", icon: "grid", run: () => dialog("gridStory"), enabled: unlocked },
+  { id: "define.stories", icon: "story", run: () => dialog("gridStory"), enabled: unlocked },
+  { id: "define.materials", icon: "material", run: () => dialog("materials"), enabled: unlocked },
+  { id: "define.frameSections", icon: "section", run: () => dialog("frameSections"), enabled: unlocked },
+  { id: "define.shellSections", icon: "slab", run: () => dialog("shellSections"), enabled: unlocked },
+  { id: "define.loadPatterns", icon: "load", run: () => dialog("loads", "loadPatterns"), enabled: unlocked },
+  { id: "define.loadCases", icon: "load", run: () => dialog("loads", "loadCases"), enabled: unlocked },
+  { id: "define.combos", icon: "combo", run: () => dialog("loads", "combos"), enabled: unlocked },
 
   { ...draw("select", "select"), shortcut: "Esc", keys: ["escape"] },
   draw("joint", "joint"),
@@ -276,7 +272,7 @@ export const COMMANDS: AppCommand[] = [
     run: () => ui().setTheme(ui().theme === "dark" ? "light" : "dark"),
   },
   { id: "tools.language", icon: "language", run: () => ui().setLang(ui().lang === "vi" ? "en" : "vi") },
-  later("tools.preferences", 2),
+  { id: "tools.preferences", run: () => dialog("preferences") },
   { id: "help.shortcuts", icon: "keyboard", shortcut: "F1", keys: ["f1"], run: () => ui().set({ dialog: { kind: "shortcuts" } }) },
   { id: "help.about", icon: "info", run: () => ui().set({ dialog: { kind: "about" } }) },
 ];

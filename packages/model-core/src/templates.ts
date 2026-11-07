@@ -12,6 +12,13 @@ export interface RcFrameOptions {
   column?: { b: number; h: number };
   beam?: { b: number; h: number };
   slabThickness?: number;
+  /** Mác bê tông trong thư viện, mặc định B25. */
+  concrete?: string;
+  /** Có tạo sàn không (mặc định có). */
+  slabs?: boolean;
+  /** "frame": dựng cột, dầm, sàn; "grid": chỉ lưới trục, tầng và định nghĩa. */
+  objects?: "frame" | "grid";
+  units?: Model["units"];
 }
 
 const X_LABELS = "ABCDEFGHJKLMNPQRSTUVWXYZ";
@@ -29,7 +36,7 @@ const mm = (v: number) => Math.round(v * 1000);
  * Chân cột ngàm. Dùng làm mẫu "New model" và dữ liệu kiểm thử.
  */
 export function createRcFrameModel(opts: RcFrameOptions): Model {
-  const model = emptyModel(opts.name ?? "Khung BTCT");
+  const model = emptyModel(opts.name ?? "Khung BTCT", opts.units);
   model.designCodes = { concrete: "TCVN 5574:2018", loads: "TCVN 2737:2023" };
   const col = opts.column ?? { b: 0.4, h: 0.4 };
   const beam = opts.beam ?? { b: 0.3, h: 0.6 };
@@ -61,7 +68,7 @@ export function createRcFrameModel(opts: RcFrameOptions): Model {
     });
   });
 
-  const conc = material("B25");
+  const conc = material(opts.concrete ?? "B25");
   const reb = material("CB400-V");
   model.materials.push(conc, reb);
 
@@ -152,7 +159,7 @@ export function createRcFrameModel(opts: RcFrameOptions): Model {
     }
   }
   model.frames = frames;
-  model.shells = shells;
+  model.shells = opts.slabs === false ? [] : shells;
 
   model.loadPatterns.push(
     { id: "lp-dl", name: "DL", type: "dead", selfWeight: 1 },
@@ -176,9 +183,15 @@ export function createRcFrameModel(opts: RcFrameOptions): Model {
       { case: "lc-ll", factor: 1 },
     ],
   });
-  for (const s of shells) {
+  for (const s of model.shells) {
     model.shellLoads.push({ id: `sl-sdl-${s.id}`, shell: s.id, pattern: "lp-sdl", direction: "gravity", value: 1.5 });
     model.shellLoads.push({ id: `sl-ll-${s.id}`, shell: s.id, pattern: "lp-ll", direction: "gravity", value: 2.0 });
+  }
+  if (opts.objects === "grid") {
+    model.joints = [];
+    model.frames = [];
+    model.shells = [];
+    model.shellLoads = [];
   }
   return model;
 }

@@ -16,7 +16,7 @@ export const LENGTH_TO_M: Record<UnitSystem["length"], number> = {
   m: 1,
 };
 
-export type Quantity = "length" | "force" | "stress" | "moment" | "forcePerLength" | "area" | "inertia";
+export type Quantity = "length" | "force" | "stress" | "moment" | "forcePerLength" | "area" | "inertia" | "unitWeight" | "ratio";
 
 /** Hệ số đổi từ đơn vị nội bộ (kN, m) sang đơn vị hiển thị. */
 export function displayFactor(q: Quantity, u: UnitSystem): number {
@@ -37,6 +37,10 @@ export function displayFactor(q: Quantity, u: UnitSystem): number {
       return l * l;
     case "inertia":
       return l ** 4;
+    case "unitWeight":
+      return f / l ** 3;
+    case "ratio":
+      return 1;
   }
 }
 
@@ -56,6 +60,10 @@ export function unitLabel(q: Quantity, u: UnitSystem): string {
       return `${u.length}²`;
     case "inertia":
       return `${u.length}⁴`;
+    case "unitWeight":
+      return `${u.force}/${u.length}³`;
+    case "ratio":
+      return "";
   }
 }
 

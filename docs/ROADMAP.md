@@ -45,10 +45,14 @@ Mỗi giai đoạn kết thúc bằng một bản chạy được trên Windows.
 - Làm thêm sớm: viewer 2D/3D có chọn bằng click và kéo khung (window/crossing), sửa thuộc tính có Undo, Console gõ lệnh (`beam`, `column`, `select`, `cmd`), Check model.
 - Chưa làm (để đúng giai đoạn): hộp thoại Define, vẽ bằng chuột, Assign, lưu/mở file — các mục này hiện nhãn "GĐ n" trong menu.
 
-### Giai đoạn 2: Định nghĩa mô hình
-- Command registry có schema cho mọi thao tác (nền cho API/MCP sau này).
-- Hộp thoại Grid/Story, Materials (thư viện B15–B60, CB300–CB500, S235–S460, A992…), Frame/Shell Sections, Load patterns/cases/combos.
-- Undo/Redo, lưu/mở `.nxf`.
+### Giai đoạn 2: Định nghĩa mô hình — ✅ xong (07/11/2026)
+- Hộp thoại Mô hình mới: mẫu Khung BTCT / Chỉ lưới trục / Trống, nhập nhịp kiểu `3@6, 7.2`, chọn mác bê tông, kích thước cột/dầm/sàn, đơn vị; danh sách file mở gần đây (bản desktop).
+- Hộp thoại Lưới trục & Tầng: sửa toạ độ hoặc khoảng cách trục, thêm/xoá trục, nút dính trục tự dời theo; bảng tầng với cao tầng, cao độ, tầng chuẩn/giống tầng; hình xem trước.
+- Hộp thoại Vật liệu (thêm từ thư viện B15–B60, CB300–CB500, S235–S460), Tiết diện thanh (chữ nhật, tròn, I, hộp, ống; đặc trưng hình học và hình vẽ đúng tỉ lệ), Tiết diện sàn/vách, Tải trọng (mẫu tải, trường hợp tải, tổ hợp).
+- Mỗi lần OK/Áp dụng là một bước Undo; không xoá được định nghĩa đang dùng; trùng tên hoặc thiếu tham chiếu thì báo lỗi ngay trong hộp thoại.
+- Lưu/mở `.nxf` (zip: `manifest.json` + `model.json`), Ctrl+S / Ctrl+Shift+S / Ctrl+O, hỏi trước khi bỏ thay đổi chưa lưu. Bản desktop dùng hộp thoại hệ điều hành và ghi file an toàn (file tạm rồi đổi tên); bản trình duyệt lưu bằng tải xuống.
+- Hộp thoại Tuỳ chọn: ngôn ngữ, giao diện, đơn vị, khôi phục bố cục.
+- Chưa có (để đúng giai đoạn): thư viện tiết diện thép cán (A992/IPE/HEA…), sinh tổ hợp tự động theo tiêu chuẩn (Giai đoạn 10), modifiers/cốt thép của tiết diện.
 
 ### Giai đoạn 3: View 2D/3D và công cụ vẽ
 - Plan/Elevation/3D, chọn (window/crossing), bắt điểm, vẽ Beam/Column/Brace/Slab/Wall, Replicate.

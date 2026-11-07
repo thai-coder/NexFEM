@@ -94,3 +94,23 @@ export function nextLabel(labels: Iterable<string>, prefix: string): string {
   }
   return `${prefix}${max + 1}`;
 }
+
+/** Sinh id mới không trùng, dạng `<prefix>-<chuỗi ngắn>`. */
+export function uniqueId(prefix: string, existing: Iterable<string>): string {
+  const used = new Set(existing);
+  for (let i = 0; ; i++) {
+    const rand = Math.random().toString(36).slice(2, 8);
+    const id = `${prefix}-${rand}${i > 20 ? i : ""}`;
+    if (!used.has(id)) return id;
+  }
+}
+
+/** Tất cả id đang có trong mô hình (mọi bộ sưu tập). */
+export function allIds(model: Model): string[] {
+  const out: string[] = [];
+  for (const v of Object.values(model)) {
+    if (Array.isArray(v)) for (const o of v as { id?: string }[]) if (o.id) out.push(o.id);
+  }
+  for (const g of model.grids) for (const l of [...g.x, ...g.y]) out.push(l.id);
+  return out;
+}

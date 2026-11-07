@@ -20,3 +20,12 @@ export async function appInfo(): Promise<AppInfo | null> {
   const { invoke } = await import("@tauri-apps/api/core");
   return invoke<AppInfo>("app_info");
 }
+
+/** Đăng ký xử lý khi người dùng đóng cửa sổ; `allow()` trả về false để giữ cửa sổ. */
+export async function onCloseRequested(allow: () => boolean): Promise<() => void> {
+  if (!isTauri()) return () => {};
+  const { getCurrentWindow } = await import("@tauri-apps/api/window");
+  return getCurrentWindow().onCloseRequested((e) => {
+    if (!allow()) e.preventDefault();
+  });
+}

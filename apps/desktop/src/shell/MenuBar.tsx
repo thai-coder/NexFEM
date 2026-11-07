@@ -2,6 +2,7 @@ import { Icon } from "@nexfem/ui";
 import { useEffect, useRef, useState } from "react";
 import { MENUS, command, runCommand, type CommandId } from "../commands/app.ts";
 import { useT } from "../i18n/index.ts";
+import { basename } from "../services/files.ts";
 import { useModel } from "../stores/model.ts";
 import { useUi } from "../stores/ui.ts";
 
@@ -71,7 +72,7 @@ export function MenuBar() {
       ))}
       <div className="menubar-spacer" />
       <div className="project-name" title={fileName ?? undefined}>
-        {fileName ?? `${name}.nxf`}
+        {fileName ? basename(fileName) : `${name}.nxf`}
         {dirty && <span className="dirty-dot" aria-label="*" />}
       </div>
       <button className="icon-btn" title={`${T.cmd["tools.palette"]} (Ctrl+Shift+P)`} onClick={() => runCommand("tools.palette")}>

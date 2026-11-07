@@ -1,12 +1,13 @@
 import { CommandError, CommandStack, sampleModel, type Model } from "@nexfem/model-core";
 import { create } from "zustand";
 import { t } from "../i18n/index.ts";
-import { useUi } from "./ui.ts";
+import { defaultViewsFor, useUi } from "./ui.ts";
 
 export type SelectMode = "replace" | "toggle" | "add";
 
 interface ModelState {
   model: Model;
+  /** Đường dẫn file đang mở (bản desktop) hoặc tên file (bản trình duyệt). */
   fileName: string | null;
   dirty: boolean;
   locked: boolean;
@@ -18,6 +19,10 @@ interface ModelState {
 
   /** Chạy lệnh qua command registry. Trả về kết quả của lệnh, hoặc undefined nếu lỗi (đã ghi log). */
   execute(name: string, args: unknown, source?: string): unknown;
+  /** Chạy nhiều lệnh thành một bước Undo. Trả về thông báo lỗi nếu có (mô hình giữ nguyên). */
+  executeBatch(title: string, ops: { name: string; args: unknown }[], source?: string): string | null;
+  /** Đánh dấu đã lưu. */
+  markSaved(fileName: string): void;
   undo(): void;
   redo(): void;
   select(ids: string[], mode?: SelectMode): void;
@@ -64,6 +69,29 @@ export const useModel = create<ModelState>((set, get) => ({
     }
   },
 
+  executeBatch(title, ops, source = "ui") {
+    const log = useUi.getState().log;
+    if (get().locked) return t().props.locked;
+    if (!ops.length) return null;
+    try {
+      const r = stack.executeBatch(title, ops);
+      if (r.changed) {
+        const ids = new Set(objectIds(stack.model));
+        set({ ...snapshot(), dirty: true, selection: get().selection.filter((id) => ids.has(id)) });
+        log("command", title, source);
+      }
+      return null;
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      log("error", t().fmt(t().log.failed, { message }), source);
+      return message;
+    }
+  },
+
+  markSaved(fileName) {
+    set({ fileName, dirty: false });
+  },
+
   undo() {
     const title = stack.undoTitle;
     if (get().locked || !stack.undo()) return;
@@ -90,7 +118,7 @@ export const useModel = create<ModelState>((set, get) => ({
   reset(model, fileName = null) {
     stack.reset(model);
     set({ ...snapshot(), fileName, dirty: false, locked: false, selection: [] });
-    useUi.getState().set({ messages: null });
+    useUi.getState().set({ messages: null, views: defaultViewsFor(model), hover: null });
   },
 }));
 

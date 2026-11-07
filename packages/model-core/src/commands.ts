@@ -67,6 +67,12 @@ interface HistoryEntry {
   inverse: Patch[];
 }
 
+export interface BatchResult {
+  model: Model;
+  results: unknown[];
+  changed: boolean;
+}
+
 export interface ExecuteResult {
   model: Model;
   result: unknown;
@@ -110,21 +116,35 @@ export class CommandStack {
 
   execute(name: string, rawArgs: unknown): ExecuteResult {
     const def = getCommand(name);
-    if (!def) throw new CommandError(`Không có lệnh "${name}"`, "unknown_command");
-    const parsed = def.args.safeParse(rawArgs ?? {});
-    if (!parsed.success) {
-      throw new CommandError(`Tham số không hợp lệ cho ${name}: ${z.prettifyError(parsed.error)}`, "invalid_args");
-    }
-    let result: unknown;
-    const [next, patches, inverse] = produceWithPatches(this.#model, (draft) => {
-      result = def.run(draft as Model, parsed.data);
+    const r = this.executeBatch(def?.title ?? name, [{ name, args: rawArgs }]);
+    return { model: r.model, result: r.results[0], changed: r.changed };
+  }
+
+  /**
+   * Chạy nhiều lệnh trên cùng một bản nháp và ghi thành MỘT bước Undo (dùng cho nút OK/Apply của hộp thoại).
+   * Lệnh nào lỗi thì cả lô bị huỷ, mô hình giữ nguyên.
+   */
+  executeBatch(title: string, ops: { name: string; args: unknown }[]): BatchResult {
+    const prepared = ops.map((op) => {
+      const def = getCommand(op.name);
+      if (!def) throw new CommandError(`Không có lệnh "${op.name}"`, "unknown_command");
+      const parsed = def.args.safeParse(op.args ?? {});
+      if (!parsed.success) {
+        throw new CommandError(`Tham số không hợp lệ cho ${op.name}: ${z.prettifyError(parsed.error)}`, "invalid_args");
+      }
+      return { def, args: parsed.data };
     });
-    if (patches.length === 0) return { model: this.#model, result, changed: false };
+    const results: unknown[] = [];
+    const [next, patches, inverse] = produceWithPatches(this.#model, (draft) => {
+      for (const { def, args } of prepared) results.push(def.run(draft as Model, args));
+    });
+    if (patches.length === 0) return { model: this.#model, results, changed: false };
     this.#model = next;
-    this.#undo.push({ name, title: def.title, patches, inverse });
+    const name = ops.length === 1 ? ops[0]!.name : "batch";
+    this.#undo.push({ name, title, patches, inverse });
     if (this.#undo.length > this.limit) this.#undo.shift();
     this.#redo = [];
-    return { model: next, result, changed: true };
+    return { model: next, results, changed: true };
   }
 
   undo(): boolean {

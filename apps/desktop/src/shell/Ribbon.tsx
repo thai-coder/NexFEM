@@ -52,6 +52,12 @@ export function Ribbon() {
                 <Btn id="edit.undo" />
                 <Btn id="edit.redo" />
               </Group>
+              <Group label={T.ribbon.groupDefine}>
+                <Btn id="define.grids" />
+                <Btn id="define.materials" />
+                <Btn id="define.frameSections" />
+                <Btn id="define.shellSections" />
+              </Group>
               <Group label={T.ribbon.groupDraw}>
                 <Btn id="draw.select" big />
                 <Btn id="draw.joint" />

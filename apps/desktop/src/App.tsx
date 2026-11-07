@@ -15,7 +15,8 @@ import { BottomPanel } from "./panels/console/BottomPanel.tsx";
 import { ModelExplorer } from "./panels/model-explorer/ModelExplorer.tsx";
 import { Properties } from "./panels/properties/Properties.tsx";
 import { Viewport } from "./panels/viewport/Viewport.tsx";
-import { setWindowTitle } from "./services/tauri.ts";
+import { basename, confirmDiscard } from "./services/files.ts";
+import { onCloseRequested, setWindowTitle } from "./services/tauri.ts";
 import { CommandPalette } from "./shell/CommandPalette.tsx";
 import { Dialogs } from "./shell/Dialogs.tsx";
 import { ErrorBoundary } from "./shell/ErrorBoundary.tsx";
@@ -97,11 +98,26 @@ export function App() {
     document.documentElement.dataset.theme = theme;
   }, [theme]);
 
+  const fileName = useModel((s) => s.fileName);
   useEffect(() => {
-    const title = `NexFEM — ${name}.nxf${dirty ? " •" : ""}`;
+    const title = `NexFEM — ${fileName ? basename(fileName) : `${name}.nxf`}${dirty ? " •" : ""}`;
     document.title = title;
     void setWindowTitle(title);
-  }, [name, dirty]);
+  }, [name, dirty, fileName]);
+
+  // Hỏi trước khi đóng cửa sổ khi còn thay đổi chưa lưu.
+  useEffect(() => {
+    const before = (e: BeforeUnloadEvent) => {
+      if (useModel.getState().dirty) e.preventDefault();
+    };
+    window.addEventListener("beforeunload", before);
+    let unlisten: (() => void) | undefined;
+    void onCloseRequested(() => !useModel.getState().dirty || confirmDiscard()).then((u) => (unlisten = u));
+    return () => {
+      window.removeEventListener("beforeunload", before);
+      unlisten?.();
+    };
+  }, []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

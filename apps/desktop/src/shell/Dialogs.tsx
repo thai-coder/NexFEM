@@ -1,4 +1,8 @@
 import { COMMANDS } from "../commands/app.ts";
+import { FrameSectionsDialog, LoadsDialog, MaterialsDialog, ShellSectionsDialog } from "../dialogs/DefinitionDialogs.tsx";
+import { GridStoryDialog } from "../dialogs/GridStoryDialog.tsx";
+import { NewModelDialog } from "../dialogs/NewModelDialog.tsx";
+import { PreferencesDialog } from "../dialogs/PreferencesDialog.tsx";
 import { useT } from "../i18n/index.ts";
 import { useUi } from "../stores/ui.ts";
 
@@ -10,6 +14,24 @@ export function Dialogs() {
   const set = useUi((s) => s.set);
   if (!dialog) return null;
   const close = () => set({ dialog: null });
+  switch (dialog.kind) {
+    case "newModel":
+      return <NewModelDialog onClose={close} />;
+    case "gridStory":
+      return <GridStoryDialog onClose={close} />;
+    case "materials":
+      return <MaterialsDialog onClose={close} />;
+    case "frameSections":
+      return <FrameSectionsDialog onClose={close} />;
+    case "shellSections":
+      return <ShellSectionsDialog onClose={close} />;
+    case "loads":
+      return <LoadsDialog onClose={close} {...(dialog.tab ? { tab: dialog.tab } : {})} />;
+    case "preferences":
+      return <PreferencesDialog onClose={close} />;
+    default:
+      break;
+  }
   return (
     <div className="overlay" onMouseDown={close} onKeyDown={(e) => e.key === "Escape" && close()}>
       <div className="dialog" role="dialog" aria-modal="true" onMouseDown={(e) => e.stopPropagation()}>

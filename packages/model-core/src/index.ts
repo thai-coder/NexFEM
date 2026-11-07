@@ -6,3 +6,5 @@ export * from "./query.ts";
 export * from "./templates.ts";
 export * from "./commands.ts";
 export * from "./validation.ts";
+export * from "./definitions.ts";
+export * from "./project.ts";
