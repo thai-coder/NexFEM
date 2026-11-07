@@ -66,6 +66,12 @@ fn frontend_ready(app: tauri::AppHandle) -> Result<(), String> {
         "appLocalData": data_dir,
     });
     std::fs::write(&out, report.to_string()).map_err(|e| format!("{out}: {e}"))?;
+    // Trong phiên không có màn hình (Task Scheduler), WebView2 có thể giữ vòng lặp sự kiện
+    // không thoát; buộc thoát sau 5 giây để tiến trình không treo lại.
+    std::thread::spawn(|| {
+        std::thread::sleep(std::time::Duration::from_secs(5));
+        std::process::exit(0);
+    });
     app.exit(0);
     Ok(())
 }

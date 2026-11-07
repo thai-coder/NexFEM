@@ -95,6 +95,7 @@ function Invoke-SmokeAsStandardUser($exe) {
     Start-ScheduledTask -TaskName $task
     $ok = Wait-Report $out 180 { (Get-ScheduledTask -TaskName $task).State -eq "Running" }
     $info = Get-ScheduledTaskInfo -TaskName $task
+    Stop-ScheduledTask -TaskName $task -ErrorAction SilentlyContinue
     if (-not $ok) {
       Show-Panic $out
       throw "Tài khoản thường ${name}: app không ghi báo cáo (kết quả tác vụ $($info.LastTaskResult))"
