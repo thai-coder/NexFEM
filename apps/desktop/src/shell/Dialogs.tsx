@@ -15,7 +15,9 @@ import {
 import { useT } from "../i18n/index.ts";
 import { useUi } from "../stores/ui.ts";
 
-export const APP_VERSION = "0.1.0-alpha";
+export const APP_VERSION = __APP_VERSION__;
+export const APP_COMMIT = __APP_COMMIT__;
+export const APP_COMPANY = "lkat.vn";
 
 export function Dialogs() {
   const T = useT();
@@ -61,7 +63,7 @@ export function Dialogs() {
         {dialog.kind === "about" ? (
           <>
             <h2>NexFEM</h2>
-            <p>{T.fmt(T.about, { version: APP_VERSION })}</p>
+            <p data-testid="about-text">{T.fmt(T.about, { version: APP_COMMIT ? `${APP_VERSION} (${APP_COMMIT})` : APP_VERSION, company: APP_COMPANY })}</p>
           </>
         ) : (
           <>

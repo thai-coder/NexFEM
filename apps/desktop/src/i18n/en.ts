@@ -218,7 +218,7 @@ export const en: Strings = {
     orbitHint: "Right-drag (or Shift + middle-drag) to orbit around the point under the cursor",
   },
   phase: { badge: "Phase {n}" },
-  about: "NexFEM {version} · structural analysis for Windows. Phase 1: UI shell with sample data.",
+  about: "NexFEM {version} · structural analysis for Windows. © {company}",
   shortcuts: "Keyboard shortcuts",
   confirmNew: "Create a new model? Unsaved changes will be lost.",
   dlg: {

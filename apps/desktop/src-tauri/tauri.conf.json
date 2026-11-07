@@ -31,10 +31,10 @@
       "msi",
       "nsis"
     ],
-    "publisher": "NexFEM",
+    "publisher": "lkat.vn",
     "category": "Productivity",
-    "shortDescription": "Phân tích kết cấu",
-    "longDescription": "NexFEM — phần mềm phân tích và thiết kế kết cấu.",
+    "shortDescription": "NexFEM - Structural Analysis Application",
+    "longDescription": "NexFEM - structural analysis and design software for Windows.",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -51,13 +51,15 @@
         "installMode": "perMachine",
         "installerIcon": "icons/icon.ico",
         "headerImage": "installer/nsis-header.bmp",
-        "sidebarImage": "installer/nsis-sidebar.bmp"
+        "sidebarImage": "installer/nsis-sidebar.bmp",
+        "template": "installer/installer.nsi"
       },
       "wix": {
         "bannerPath": "installer/wix-banner.bmp",
         "dialogImagePath": "installer/wix-dialog.bmp"
       }
-    }
+    },
+    "copyright": "Copyright (c) lkat.vn. All rights reserved."
   },
   "mainBinaryName": "NexFEM"
 }

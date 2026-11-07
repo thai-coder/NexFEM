@@ -217,7 +217,7 @@ export const vi = {
     orbitHint: "Chuột phải kéo (hoặc Shift + chuột giữa) để xoay quanh điểm dưới con trỏ",
   },
   phase: { badge: "GĐ {n}" },
-  about: "NexFEM {version} · phân tích kết cấu cho Windows. Giai đoạn 1: khung giao diện với dữ liệu mẫu.",
+  about: "NexFEM {version} · phân tích kết cấu cho Windows. © {company}",
   shortcuts: "Phím tắt",
   confirmNew: "Tạo mô hình mới? Các thay đổi chưa lưu sẽ mất.",
   dlg: {

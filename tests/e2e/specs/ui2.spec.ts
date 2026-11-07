@@ -112,3 +112,11 @@ test("hiện nhãn nút và nhãn thanh trên khung nhìn", async ({ page }) => 
   await page.getByRole("menu").getByRole("menuitem", { name: "Hiện nhãn thanh" }).click();
   await expect(labels).toHaveCount(12 + 17);
 });
+
+test("Giới thiệu hiện số phiên bản và nhà phát hành lkat.vn", async ({ page }) => {
+  await page.getByRole("menuitem", { name: "Help", exact: true }).click();
+  await page.getByRole("menu").getByRole("menuitem", { name: "Giới thiệu NexFEM" }).click();
+  const text = page.getByTestId("about-text");
+  await expect(text).toContainText(/NexFEM \d+\.\d+\.\d+/);
+  await expect(text).toContainText("lkat.vn");
+});

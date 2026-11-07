@@ -11,7 +11,9 @@
 #>
 param(
   [Parameter(Mandatory)] [ValidateSet("msi", "nsis")] [string] $Kind,
-  [Parameter(Mandatory)] [string] $Installer
+  [Parameter(Mandatory)] [string] $Installer,
+  # Phiên bản mong đợi (ví dụ 0.1.16); để trống thì bỏ qua kiểm tra phiên bản.
+  [string] $ExpectedVersion = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -19,6 +21,20 @@ $InstallDir = Join-Path $env:ProgramFiles "NexFEM"
 $Results = [ordered]@{}
 
 function Step($name) { Write-Host "`n=== $name ===" -ForegroundColor Cyan }
+
+Add-Type -Namespace Win32 -Name Native -MemberDefinition '[DllImport("shell32.dll", CharSet=CharSet.Unicode)] public static extern uint ExtractIconEx(string file, int index, IntPtr[] large, IntPtr[] small, uint n);'
+
+# Kiểm tra thông tin hiển thị ở Properties > Details: công ty, mô tả, phiên bản, biểu tượng.
+function Assert-FileInfo($path, $label, $descPattern) {
+  $v = (Get-Item $path).VersionInfo
+  Write-Host "$label | Company=$($v.CompanyName) | Description=$($v.FileDescription) | FileVersion=$($v.FileVersion) | Product=$($v.ProductName)"
+  if ($v.CompanyName -ne "lkat.vn") { throw "$label: CompanyName phải là lkat.vn (hiện là '$($v.CompanyName)')" }
+  if ($v.FileDescription -notlike $descPattern) { throw "$label: FileDescription '$($v.FileDescription)' không khớp '$descPattern'" }
+  if ($ExpectedVersion -and -not "$($v.FileVersion)".StartsWith($ExpectedVersion)) { throw "$label: FileVersion '$($v.FileVersion)' không bắt đầu bằng $ExpectedVersion" }
+  $icons = [Win32.Native]::ExtractIconEx($path, -1, $null, $null, 0)
+  if ($icons -lt 1) { throw "$label: file không có biểu tượng (logo)" }
+  Write-Host "$label | biểu tượng: $icons"
+}
 
 function Find-Exe {
   $exe = Get-ChildItem $InstallDir -Filter *.exe -ErrorAction SilentlyContinue |
@@ -122,6 +138,9 @@ if ($Kind -eq "msi") {
 }
 $exe = Find-Exe
 Write-Host "Đã cài: $exe"
+if ($Kind -eq "nsis") { Assert-FileInfo $Installer "Bộ cài" "NexFEM*" }
+Assert-FileInfo $exe "NexFEM.exe" "NexFEM*"
+$Results["Công ty / mô tả / phiên bản / logo của file"] = "lkat.vn · $ExpectedVersion"
 $Results["Cài vào Program Files"] = $exe
 
 Step "Quyền truy cập cho mọi tài khoản"

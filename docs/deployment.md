@@ -13,7 +13,7 @@ Cập nhật: 07/11/2026 · Quyết định: [ADR 0005](adr/0005-deployment.md)
 
 ## Bộ cài
 
-Tải ở bản pre-release **latest-build** (GitHub → Releases), tự cập nhật mỗi lần CI đạt; hoặc nhánh `installer` (file cắt phần, ghép bằng `GHEP-BO-CAI.bat`); hoặc mục **Artifacts** của lần chạy CI. Có hai loại, chọn một:
+Tải ở bản phát hành mới nhất (GitHub → Releases → "Latest", tên `NexFEM 0.1.<số>`), mỗi lần CI đạt tự có một bản mới; hoặc nhánh `installer` (file cắt phần, ghép bằng `GHEP-BO-CAI.bat`); hoặc mục **Artifacts** của lần chạy CI. Có hai loại, chọn một:
 
 | File | Dùng khi |
 | --- | --- |
