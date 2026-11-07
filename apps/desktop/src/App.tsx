@@ -16,7 +16,7 @@ import { ModelExplorer } from "./panels/model-explorer/ModelExplorer.tsx";
 import { Properties } from "./panels/properties/Properties.tsx";
 import { Viewport } from "./panels/viewport/Viewport.tsx";
 import { basename, confirmDiscard } from "./services/files.ts";
-import { onCloseRequested, setWindowTitle } from "./services/tauri.ts";
+import { notifyReady, onCloseRequested, setWindowTitle } from "./services/tauri.ts";
 import { CommandPalette } from "./shell/CommandPalette.tsx";
 import { Dialogs } from "./shell/Dialogs.tsx";
 import { ErrorBoundary } from "./shell/ErrorBoundary.tsx";
@@ -104,6 +104,12 @@ export function App() {
     document.title = title;
     void setWindowTitle(title);
   }, [name, dirty, fileName]);
+
+  useEffect(() => {
+    // Đợi một khung hình để khung nhìn và panel đã vẽ xong.
+    const id = requestAnimationFrame(() => void notifyReady());
+    return () => cancelAnimationFrame(id);
+  }, []);
 
   // Hỏi trước khi đóng cửa sổ khi còn thay đổi chưa lưu.
   useEffect(() => {

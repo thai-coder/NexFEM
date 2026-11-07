@@ -42,6 +42,34 @@ fn model_stats(json: String) -> Result<ModelStats, String> {
     })
 }
 
+/// Frontend gọi lệnh này khi giao diện đã dựng xong.
+///
+/// Khi biến môi trường `NEXFEM_SMOKE_TEST` trỏ tới một file, app ghi thông tin khởi động
+/// (phiên bản, tài khoản Windows, thư mục dữ liệu riêng của tài khoản) vào file đó rồi thoát.
+/// CI dùng chế độ này để kiểm tra bản đã cài chạy được với từng tài khoản trên máy.
+#[tauri::command]
+fn frontend_ready(app: tauri::AppHandle) -> Result<(), String> {
+    use tauri::Manager;
+    let Ok(out) = std::env::var("NEXFEM_SMOKE_TEST") else {
+        return Ok(());
+    };
+    let data_dir = app
+        .path()
+        .app_local_data_dir()
+        .map(|p| p.display().to_string())
+        .unwrap_or_default();
+    let report = serde_json::json!({
+        "ok": true,
+        "version": env!("CARGO_PKG_VERSION"),
+        "user": std::env::var("USERNAME").or_else(|_| std::env::var("USER")).unwrap_or_default(),
+        "exe": std::env::current_exe().map(|p| p.display().to_string()).unwrap_or_default(),
+        "appLocalData": data_dir,
+    });
+    std::fs::write(&out, report.to_string()).map_err(|e| format!("{out}: {e}"))?;
+    app.exit(0);
+    Ok(())
+}
+
 const ALLOWED_EXTENSIONS: [&str; 2] = ["nxf", "json"];
 /// Giới hạn kích thước file dự án khi đọc (512 MB).
 const MAX_PROJECT_BYTES: u64 = 512 * 1024 * 1024;
@@ -110,6 +138,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             app_info,
             model_stats,
+            frontend_ready,
             read_project_file,
             write_project_file
         ])

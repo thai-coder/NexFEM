@@ -29,3 +29,10 @@ export async function onCloseRequested(allow: () => boolean): Promise<() => void
     if (!allow()) e.preventDefault();
   });
 }
+
+/** Báo cho backend biết giao diện đã sẵn sàng (dùng cho kiểm tra sau cài đặt). */
+export async function notifyReady(): Promise<void> {
+  if (!isTauri()) return;
+  const { invoke } = await import("@tauri-apps/api/core");
+  await invoke("frontend_ready").catch(() => undefined);
+}

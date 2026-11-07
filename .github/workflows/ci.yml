@@ -67,6 +67,16 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - run: pnpm install --frozen-lockfile
       - run: pnpm tauri build
+      - name: Kiểm tra bộ cài MSI (cài cho toàn máy, chạy bằng 2 tài khoản, gỡ cài)
+        shell: pwsh
+        run: |
+          $msi = (Get-ChildItem target/release/bundle/msi/*.msi | Select-Object -First 1).FullName
+          ./scripts/ci/test-windows-install.ps1 -Kind msi -Installer $msi
+      - name: Kiểm tra bộ cài NSIS (.exe)
+        shell: pwsh
+        run: |
+          $exe = (Get-ChildItem target/release/bundle/nsis/*.exe | Select-Object -First 1).FullName
+          ./scripts/ci/test-windows-install.ps1 -Kind nsis -Installer $exe
       - uses: actions/upload-artifact@v4
         with:
           name: nexfem-windows-${{ github.sha }}
