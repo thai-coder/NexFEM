@@ -318,6 +318,14 @@ export const commands = {
       const obj = list.find((o) => o.id === a.id);
       if (!obj) throw new CommandError(`Không tìm thấy ${a.id}`, "not_found");
       if ("id" in a.patch) throw new CommandError("Không được đổi id", "invalid_args");
+      if ("label" in a.patch && (a.collection === "joints" || a.collection === "frames" || a.collection === "shells")) {
+        const label = String(a.patch.label ?? "").trim();
+        if (!label) throw new CommandError("Nhãn không được để trống", "invalid_args");
+        if (list.some((o) => o.id !== a.id && String(o.label).toLowerCase() === label.toLowerCase())) {
+          throw new CommandError(`Nhãn "${label}" đã có`, "duplicate");
+        }
+        a.patch.label = label;
+      }
       Object.assign(obj, a.patch);
     },
   }),

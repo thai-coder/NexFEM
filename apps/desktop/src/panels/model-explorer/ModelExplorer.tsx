@@ -3,6 +3,7 @@ import { Icon } from "@nexfem/ui";
 import { viewTitle } from "@nexfem/viewer";
 import { useMemo, useState, type ReactNode } from "react";
 import { runCommand, type CommandId } from "../../commands/app.ts";
+import { openContextMenu } from "../../commands/context.ts";
 import { useT, type T as Strings } from "../../i18n/index.ts";
 import { useModel } from "../../stores/model.ts";
 import { useUi, type BottomTab } from "../../stores/ui.ts";
@@ -237,6 +238,12 @@ function TreeView({ nodes, forceOpen, defaultOpen }: { nodes: Node[]; forceOpen:
             if (n.select) useModel.getState().select(n.select, e.ctrlKey || e.metaKey ? "toggle" : "replace");
             else if (n.onClick) n.onClick();
             else if (hasKids) toggle(n.key);
+          }}
+          onContextMenu={(e) => {
+            e.preventDefault();
+            const ms = useModel.getState();
+            if (n.select && !(n.select.length === 1 && ms.selection.includes(n.select[0]!))) ms.select(n.select);
+            openContextMenu(e.clientX, e.clientY, { extra: n.define ? [n.define] : [] });
           }}
           onDoubleClick={() => {
             if (n.define) runCommand(n.define);

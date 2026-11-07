@@ -3,6 +3,7 @@ import { readToken } from "@nexfem/ui";
 import { DARK_THEME, LIGHT_THEME, StructureViewer, viewTitle, type ViewSpec, type ViewerTheme } from "@nexfem/viewer";
 import { useEffect, useRef } from "react";
 import { useT } from "../../i18n/index.ts";
+import { openContextMenu } from "../../commands/context.ts";
 import { canDrawIn, finish, handlePoint, isPolygonTool } from "../../tools/draw.ts";
 import { useModel } from "../../stores/model.ts";
 import { useUi } from "../../stores/ui.ts";
@@ -62,6 +63,9 @@ function Pane({ index }: { index: number }) {
   const drawPoints = useUi((s) => (s.drawPane === index ? s.drawPoints : null));
   const drawing = tool !== "select" && canDrawIn(view);
   const loadDisplay = useUi((s) => s.loadDisplay);
+  const display = useUi((s) => s.display);
+  const selectFilter = useUi((s) => s.selectFilter);
+  const zoomAll = useUi((s) => s.zoomAll);
 
   useEffect(() => {
     const el = host.current;
@@ -79,6 +83,16 @@ function Pane({ index }: { index: number }) {
         handlePoint(index, snap);
       },
       onFinish: () => finish(index),
+      onContextMenu: ({ clientX, clientY, hit, grid }) => {
+        const ui = useUi.getState();
+        ui.set({ activePane: index });
+        const ms = useModel.getState();
+        if (hit && !ms.selection.includes(hit.id)) ms.select([hit.id]);
+        openContextMenu(clientX, clientY, { grid });
+      },
+      onGridDoubleClick: () => {
+        if (!useModel.getState().locked) useUi.getState().set({ dialog: { kind: "gridStory" } });
+      },
     });
     viewer.current = v;
     // Cho kiểm thử e2e truy cập viewer.
@@ -103,10 +117,16 @@ function Pane({ index }: { index: number }) {
     viewer.current?.setSelection(selection);
   }, [selection]);
   useEffect(() => {
+    viewer.current?.setDisplay(display);
+  }, [display]);
+  useEffect(() => {
+    viewer.current?.setSelectFilter(selectFilter);
+  }, [selectFilter]);
+  useEffect(() => {
     viewer.current?.setLoadDisplay(loadDisplay && model.loadPatterns.some((p) => p.id === loadDisplay) ? loadDisplay : null);
   }, [loadDisplay, model]);
   useEffect(() => {
-    if (zoomSeq && active) viewer.current?.zoomExtents();
+    if (zoomSeq && (active || zoomAll)) viewer.current?.zoomExtents();
   }, [zoomSeq]);
   useEffect(() => {
     const T0 = T.draw.snapKinds;

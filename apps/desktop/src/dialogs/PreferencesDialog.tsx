@@ -1,4 +1,4 @@
-import { UNIT_PRESETS, unitsLabel } from "@nexfem/model-core";
+import { DESIGN_CODE_OPTIONS, UNIT_PRESETS, unitsLabel } from "@nexfem/model-core";
 import { Field } from "../components/fields.tsx";
 import { Modal } from "../components/Modal.tsx";
 import { useT } from "../i18n/index.ts";
@@ -12,6 +12,7 @@ export function PreferencesDialog({ onClose }: { onClose(): void }) {
   const theme = useUi((s) => s.theme);
   const units = useModel((s) => s.model.units);
   const execute = useModel((s) => s.execute);
+  const designCodes = useModel((s) => s.model.designCodes);
   return (
     <Modal
       title={P.title}
@@ -49,6 +50,18 @@ export function PreferencesDialog({ onClose }: { onClose(): void }) {
           ))}
         </select>
       </Field>
+      <h4 className="form-subtitle">{T.codes.title}</h4>
+      {(["concrete", "steel", "loads"] as const).map((k) => (
+        <Field key={k} label={T.codes[k]}>
+          <select value={designCodes[k] ?? ""} aria-label={T.codes[k]} onChange={(e) => execute("model.setDesignCodes", { [k]: e.target.value })}>
+            <option value="">{T.codes.none}</option>
+            {DESIGN_CODE_OPTIONS[k].map((o) => (
+              <option key={o}>{o}</option>
+            ))}
+          </select>
+        </Field>
+      ))}
+      <p className="form-hint">{T.codes.note}</p>
       <Field label={P.layout}>
         <button className="btn small" onClick={() => window.dispatchEvent(new CustomEvent("nexfem:reset-layout"))}>
           {T.cmd["view.resetLayout"]}

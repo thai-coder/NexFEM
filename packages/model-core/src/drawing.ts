@@ -147,6 +147,26 @@ export const drawingCommands = {
     },
   }),
 
+  moveJoint: defineCommand({
+    name: "joint.move",
+    title: "Di chuyển nút",
+    mutates: true,
+    args: z.object({ joint: z.string(), point: Point }),
+    run(d, a) {
+      const j = d.joints.find((x) => x.id === a.joint);
+      if (!j) throw new CommandError(`Không tìm thấy nút ${a.joint}`, "not_found");
+      const [x, y, z] = a.point;
+      const clash = d.joints.find((o) => o.id !== j.id && Math.abs(o.x - x) < TOL && Math.abs(o.y - y) < TOL && Math.abs(o.z - z) < TOL);
+      if (clash) throw new CommandError(`Đã có nút ${clash.label} tại vị trí này`, "duplicate");
+      j.x = x;
+      j.y = y;
+      j.z = z;
+      const st = storyAt(d, z);
+      if (st) j.story = st.id;
+      else delete j.story;
+    },
+  }),
+
   addShell: defineCommand({
     name: "shell.add",
     title: "Vẽ sàn/vách",

@@ -17,6 +17,7 @@ import {
   type Shell,
 } from "@nexfem/model-core";
 import { useEffect, useState, type ReactNode } from "react";
+import { NumberField } from "../../components/fields.tsx";
 import { runCommand } from "../../commands/app.ts";
 import { useT } from "../../i18n/index.ts";
 import { useModel } from "../../stores/model.ts";
@@ -268,34 +269,104 @@ function RestraintEditor({ value, onChange, disabled }: { value: Restraint; onCh
   );
 }
 
+/** Ô nhãn: Enter hoặc rời ô để lưu; báo lỗi (trùng, rỗng) ngay dưới ô. */
+function LabelField({ collection, id, label }: { collection: "joints" | "frames" | "shells"; id: string; label: string }) {
+  const T = useT();
+  const locked = useModel((s) => s.locked);
+  const [text, setText] = useState(label);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    setText(label);
+    setError(null);
+  }, [label, id]);
+  const commit = () => {
+    if (text.trim() === label) return setError(null);
+    const r = useModel.getState().run("object.update", { collection, id, patch: { label: text } }, T.rename.title);
+    if (!r.ok) setError(r.error);
+  };
+  return (
+    <div>
+      <input
+        value={text}
+        disabled={locked}
+        aria-label={T.props.label}
+        aria-invalid={!!error}
+        data-testid="label-input"
+        onChange={(e) => (setText(e.target.value), setError(null))}
+        onBlur={commit}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") commit();
+          if (e.key === "Escape") (setText(label), setError(null));
+        }}
+      />
+      {error && (
+        <div className="warn-text" role="alert">
+          {error}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function JointProps({ joint, model, locked }: { joint: Joint; model: Model; locked: boolean }) {
   const T = useT();
-  const num = useNum(model);
   const execute = useModel((s) => s.execute);
   const initial: Restraint = joint.restraint ?? PRESETS.free!;
   const [r, setR] = useState<Restraint>(initial);
+  const [pt, setPt] = useState<[number, number, number]>([joint.x, joint.y, joint.z]);
+  const [error, setError] = useState<string | null>(null);
   useEffect(() => {
     setR(joint.restraint ?? PRESETS.free!);
   }, [joint.restraint]);
-  const dirty = r.some((v, i) => v !== initial[i]);
+  useEffect(() => {
+    setPt([joint.x, joint.y, joint.z]);
+    setError(null);
+  }, [joint.x, joint.y, joint.z, joint.id]);
+  const moved = pt[0] !== joint.x || pt[1] !== joint.y || pt[2] !== joint.z;
+  const dirty = moved || r.some((v, i) => v !== initial[i]);
+  const setAxis = (k: 0 | 1 | 2, v: number) => setPt((p) => p.map((x, i) => (i === k ? v : x)) as [number, number, number]);
   return (
     <>
       <div className="prop-head">
         <span className="kind-dot joint" />
         {T.props.joint} {joint.label}
       </div>
-      <Section title={T.props.geometry}>
-        <Row label="X">{num(joint.x, "length")}</Row>
-        <Row label="Y">{num(joint.y, "length")}</Row>
-        <Row label="Z">{num(joint.z, "length")}</Row>
+      <Section title={T.props.general}>
+        <Row label={T.props.label}>
+          <LabelField collection="joints" id={joint.id} label={joint.label} />
+        </Row>
         <Row label={T.props.story}>{model.stories.find((s) => s.id === joint.story)?.name ?? "—"}</Row>
+      </Section>
+      <Section title={T.props.coords}>
+        {(["X", "Y", "Z"] as const).map((axis, k) => (
+          <Row key={axis} label={axis}>
+            <NumberField value={pt[k] ?? 0} onChange={(v) => setAxis(k as 0 | 1 | 2, v)} quantity="length" units={model.units} label={axis} testId={`joint-${axis.toLowerCase()}`} />
+          </Row>
+        ))}
       </Section>
       <Section title={T.props.restraint}>
         <div className="span2">
           <RestraintEditor value={r} onChange={setR} disabled={locked} />
         </div>
       </Section>
-      <ApplyBar dirty={dirty} locked={locked} onRevert={() => setR(initial)} onApply={() => execute("joint.assignRestraint", { joints: [joint.id], restraint: r })} />
+      {error && (
+        <div className="warn-text pad" role="alert">
+          {error}
+        </div>
+      )}
+      <ApplyBar
+        dirty={dirty}
+        locked={locked}
+        onRevert={() => (setR(initial), setPt([joint.x, joint.y, joint.z]), setError(null))}
+        onApply={() => {
+          if (moved) {
+            const res = useModel.getState().run("joint.move", { joint: joint.id, point: pt }, T.props.coords);
+            if (!res.ok) return setError(res.error);
+          }
+          if (r.some((v, i) => v !== initial[i])) execute("joint.assignRestraint", { joints: [joint.id], restraint: r });
+          setError(null);
+        }}
+      />
     </>
   );
 }
@@ -329,6 +400,9 @@ function ShellProps({ shell, model }: { shell: Shell; model: Model }) {
         {T.props[shell.kind]} {shell.label}
       </div>
       <Section title={T.props.general}>
+        <Row label={T.props.label}>
+          <LabelField collection="shells" id={shell.id} label={shell.label} />
+        </Row>
         <Row label={T.props.kind}>{T.props[shell.kind]}</Row>
         <Row label={T.props.story}>{model.stories.find((s) => s.id === shell.story)?.name ?? "—"}</Row>
         <Row label={T.props.section}>{sec?.name ?? "—"}</Row>

@@ -6,7 +6,7 @@ import { LineSegments2 } from "three/addons/lines/LineSegments2.js";
 import { LineSegmentsGeometry } from "three/addons/lines/LineSegmentsGeometry.js";
 import { CSS2DObject, CSS2DRenderer } from "three/addons/renderers/CSS2DRenderer.js";
 import { TOL, findGridLine, segmentIntersectsRect, visibleObjects, type ViewSpec, type VisibleSet } from "./filter.ts";
-import { gridLines, orthoLock, pickSnap, snapPoints, type P3, type SnapKind, type SnapModes, type SnapPoint } from "./snap.ts";
+import { gridLines, orthoLock, pickSnap, snapPoints, type GridHit, type P3, type SnapKind, type SnapModes, type SnapPoint } from "./snap.ts";
 
 export interface ViewerTheme {
   background: string;
@@ -82,11 +82,32 @@ export interface ViewerCallbacks {
   onHover?(info: HoverInfo | null): void;
   /** Toạ độ con trỏ trên mặt phẳng khung nhìn (m), null khi ra ngoài. */
   onCursor?(p: [number, number, number] | null): void;
+  /** Chuột phải (không kéo) trên khung nhìn: đối tượng hoặc trục lưới dưới con trỏ. */
+  onContextMenu?(info: { clientX: number; clientY: number; hit: HoverInfo | null; grid: GridHit | null }): void;
+  /** Bấm đúp vào trục lưới hoặc đường cao độ tầng (không có đối tượng ở đó). */
+  onGridDoubleClick?(grid: GridHit): void;
   /** Chế độ vẽ: người dùng bấm một điểm (đã bắt điểm). */
   onPoint?(snap: SnapPoint): void;
   /** Chế độ vẽ: kết thúc chuỗi (chuột phải hoặc bấm đúp). */
   onFinish?(): void;
 }
+
+/** Tuỳ chọn hiển thị trên khung nhìn. */
+export interface DisplayOptions {
+  joints: boolean;
+  jointLabels: boolean;
+  frameLabels: boolean;
+}
+
+/** Loại đối tượng được phép chọn. */
+export interface SelectFilter {
+  joint: boolean;
+  frame: boolean;
+  shell: boolean;
+}
+
+/** Quá số lượng này thì không hiện nhãn (tránh chậm và rối). */
+export const MAX_LABELS = 1500;
 
 export interface DrawingOptions {
   modes: SnapModes;
@@ -146,6 +167,8 @@ export class StructureViewer {
   // chế độ vẽ
   #drawing: DrawingOptions | null = null;
   #loadPattern: string | null = null;
+  #display: DisplayOptions = { joints: true, jointLabels: false, frameLabels: false };
+  #filter: SelectFilter = { joint: true, frame: true, shell: true };
   #viewDir = new THREE.Vector3(1, -1.25, 0.8).normalize();
   #pivotEl: HTMLDivElement;
   #snapCache: { points: SnapPoint[]; lines: ReturnType<typeof gridLines> } | null = null;
@@ -244,6 +267,16 @@ export class StructureViewer {
       this.invalidate();
     } else this.#updateRubber();
     if (was !== !!this.#drawing) this.#renderer.domElement.style.cursor = this.#drawing ? "crosshair" : "default";
+  }
+
+  setDisplay(d: DisplayOptions): void {
+    if (JSON.stringify(d) === JSON.stringify(this.#display)) return;
+    this.#display = d;
+    this.#rebuild();
+  }
+
+  setSelectFilter(f: SelectFilter): void {
+    this.#filter = f;
   }
 
   /** Hiện tải của một mẫu tải (mũi tên + giá trị), null để ẩn. */
@@ -565,7 +598,7 @@ export class StructureViewer {
       }
     }
     this.#jointPoints = null;
-    if (jp.length) {
+    if (jp.length && this.#display.joints) {
       const g = new THREE.BufferGeometry();
       g.setAttribute("position", new THREE.Float32BufferAttribute(jp, 3));
       this.#jointPoints = new THREE.Points(g, new THREE.PointsMaterial({ color: t.joint, size: 3.5, sizeAttenuation: false }));
@@ -601,6 +634,7 @@ export class StructureViewer {
     }
 
     if (this.#loadPattern) this.#buildLoads(m, vis, joints);
+    this.#buildTags(vis, joints);
 
     // Cột cắt qua mặt bằng: ô vuông.
     const mp: number[] = [];
@@ -708,6 +742,31 @@ export class StructureViewer {
       for (const p of pts) c.add(new THREE.Vector3(p.x, p.y, p.z));
       c.divideScalar(pts.length);
       this.#valueLabel(`${toDisplay(l.value, "stress", u).toFixed(2)}`, c);
+    }
+  }
+
+  /** Nhãn nút / nhãn thanh (chỉ khi số lượng không quá MAX_LABELS). */
+  #buildTags(vis: VisibleSet, joints: Map<string, Model["joints"][number]>): void {
+    const t = this.#theme;
+    const tag = (text: string, p: THREE.Vector3, color: string) => {
+      const el = document.createElement("div");
+      el.textContent = text;
+      el.className = "nx-label nx-label-tag";
+      el.style.cssText = `font:500 10px/1 Inter,system-ui,sans-serif;color:${color};text-shadow:0 0 2px ${t.background},0 0 2px ${t.background};white-space:nowrap;`;
+      const o = new CSS2DObject(el);
+      o.position.copy(p);
+      o.center.set(-0.25, 1.15);
+      this.#content.add(o);
+    };
+    if (this.#display.jointLabels && this.#display.joints && vis.joints.length <= MAX_LABELS) {
+      for (const j of vis.joints) tag(j.label, new THREE.Vector3(j.x, j.y, j.z), t.joint);
+    }
+    if (this.#display.frameLabels && vis.frames.length <= MAX_LABELS) {
+      for (const f of vis.frames) {
+        const a = joints.get(f.i);
+        const b = joints.get(f.j);
+        if (a && b) tag(f.label, new THREE.Vector3((a.x + b.x) / 2, (a.y + b.y) / 2, (a.z + b.z) / 2), f.kind === "column" ? t.column : f.kind === "beam" ? t.beam : t.brace);
+      }
     }
   }
 
@@ -1075,15 +1134,16 @@ export class StructureViewer {
       const hit = rc.intersectObject(obj)[0];
       return hit && hit.index != null ? { id: ids[hit.index]!, kind, ...at } : null;
     };
-    const mark = hitPoints(this.#markPoints, this.#markIds, "frame");
+    const f = this.#filter;
+    const mark = f.frame ? hitPoints(this.#markPoints, this.#markIds, "frame") : null;
     if (mark) return mark;
-    const joint = hitPoints(this.#jointPoints, this.#jointIds, "joint");
+    const joint = f.joint ? hitPoints(this.#jointPoints, this.#jointIds, "joint") : null;
     if (joint) return joint;
-    if (this.#frameLines) {
+    if (this.#frameLines && f.frame) {
       const hit = rc.intersectObject(this.#frameLines)[0];
       if (hit && hit.faceIndex != null) return { id: this.#frameIds[hit.faceIndex]!, kind: "frame", ...at };
     }
-    if (this.#shellMesh) {
+    if (this.#shellMesh && f.shell) {
       const hit = rc.intersectObject(this.#shellMesh)[0];
       if (hit && hit.faceIndex != null) return { id: this.#shellTriIds[hit.faceIndex]!, kind: "shell", ...at };
     }
@@ -1116,13 +1176,45 @@ export class StructureViewer {
       }
       return false;
     };
-    for (const f of vis.frames) if (test([toScreen(f.i), toScreen(f.j)], false)) out.push(f.id);
-    for (const f of vis.columnMarks) {
-      const p = toScreen(f.j);
-      if (p && inside(p)) out.push(f.id);
+    const flt = this.#filter;
+    if (flt.frame) {
+      for (const f of vis.frames) if (test([toScreen(f.i), toScreen(f.j)], false)) out.push(f.id);
+      for (const f of vis.columnMarks) {
+        const p = toScreen(f.j);
+        if (p && inside(p)) out.push(f.id);
+      }
     }
-    for (const s of vis.shells) if (test(s.joints.map(toScreen), true)) out.push(s.id);
+    if (flt.shell) for (const s of vis.shells) if (test(s.joints.map(toScreen), true)) out.push(s.id);
+    if (flt.joint && this.#display.joints) {
+      for (const j of vis.joints) {
+        const p = toScreen(j.id);
+        if (p && inside(p)) out.push(j.id);
+      }
+    }
     return out;
+  }
+
+  /** Trục lưới / đường cao độ tầng gần con trỏ nhất (trong 8 px), chỉ ở khung nhìn 2D. */
+  #gridAt(ev: { clientX: number; clientY: number }): GridHit | null {
+    const m = this.#model;
+    const vis = this.#visible;
+    if (!m || !vis?.plane) return null;
+    const r = this.#renderer.domElement.getBoundingClientRect();
+    const c: [number, number] = [ev.clientX - r.left, ev.clientY - r.top];
+    let best: GridHit | null = null;
+    let bestD = 8;
+    for (const l of gridLines(m, vis)) {
+      const a = this.worldToScreen(...l.o);
+      const b = this.worldToScreen(l.o[0] + l.d[0], l.o[1] + l.d[1], l.o[2] + l.d[2]);
+      const len = Math.hypot(b[0] - a[0], b[1] - a[1]);
+      if (len < 1e-6) continue;
+      const d = Math.abs((b[0] - a[0]) * (a[1] - c[1]) - (a[0] - c[0]) * (b[1] - a[1])) / len;
+      if (d < bestD) {
+        bestD = d;
+        best = { kind: l.kind, id: l.id, label: l.label };
+      }
+    }
+    return best;
   }
 
   #cursorPoint(ev: { clientX: number; clientY: number }): [number, number, number] | null {
@@ -1143,6 +1235,7 @@ export class StructureViewer {
     let lastMove: PointerEvent | null = null;
 
     // Xoay 3D: chuột phải kéo, hoặc Shift + chuột giữa kéo.
+    let suppressMenu = false;
     let orbit: { pivot: THREE.Vector3; x: number; y: number; id: number; moved: boolean } | null = null;
     el.addEventListener("pointerdown", (e) => {
       if (this.#view.kind !== "3d" || this.#drawing) return;
@@ -1164,6 +1257,7 @@ export class StructureViewer {
     });
     const endOrbit = (e: PointerEvent) => {
       if (!orbit || e.pointerId !== orbit.id) return;
+      suppressMenu = orbit.moved;
       orbit = null;
       this.#showPivot(null);
     };
@@ -1172,10 +1266,20 @@ export class StructureViewer {
 
     el.addEventListener("contextmenu", (e) => {
       e.preventDefault();
-      if (this.#drawing) this.#cb.onFinish?.();
+      if (this.#drawing) return this.#cb.onFinish?.();
+      // Sau khi kéo xoay 3D bằng chuột phải thì không hiện menu.
+      if (suppressMenu) {
+        suppressMenu = false;
+        return;
+      }
+      const hit = this.pickAt(e.clientX, e.clientY);
+      this.#cb.onContextMenu?.({ clientX: e.clientX, clientY: e.clientY, hit, grid: hit ? null : this.#gridAt(e) });
     });
-    el.addEventListener("dblclick", () => {
-      if (this.#drawing) this.#cb.onFinish?.();
+    el.addEventListener("dblclick", (e) => {
+      if (this.#drawing) return this.#cb.onFinish?.();
+      if (this.pickAt(e.clientX, e.clientY)) return;
+      const grid = this.#gridAt(e);
+      if (grid) this.#cb.onGridDoubleClick?.(grid);
     });
     el.addEventListener("pointerdown", (e) => {
       if (e.button !== 0) return;

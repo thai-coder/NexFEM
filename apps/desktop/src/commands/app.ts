@@ -49,6 +49,26 @@ function dialog(kind: DialogKind, tab?: string) {
 
 const unlocked = () => !model().locked;
 
+/** Chế độ tập trung: ẩn mọi bảng và ribbon; bấm lại để khôi phục đúng trạng thái trước đó. */
+function toggleFocus() {
+  const s = ui();
+  if (s.focusMode && s.focusSaved) {
+    s.set({ focusMode: false, panels: s.focusSaved.panels, ribbonCollapsed: s.focusSaved.ribbonCollapsed, focusSaved: null });
+  } else {
+    s.set({
+      focusMode: true,
+      focusSaved: { panels: s.panels, ribbonCollapsed: s.ribbonCollapsed },
+      panels: { explorer: false, properties: false, bottom: false },
+      ribbonCollapsed: true,
+    });
+  }
+}
+
+function toggleDisplay(k: "joints" | "jointLabels" | "frameLabels") {
+  const d = ui().display;
+  ui().set({ display: { ...d, [k]: !d[k] } });
+}
+
 function setActiveView(view: ViewSpec) {
   ui().setView(ui().activePane, view);
 }
@@ -193,7 +213,7 @@ export const COMMANDS: AppCommand[] = [
     keys: ["ctrl+a"],
     run: () => {
       const m = model().model;
-      model().select([...m.frames, ...m.shells].map((o) => o.id));
+      model().select([...m.joints, ...m.frames, ...m.shells].map((o) => o.id));
     },
   },
 
@@ -226,13 +246,42 @@ export const COMMANDS: AppCommand[] = [
     icon: "zoomExtents",
     shortcut: "Ctrl+Shift+E",
     keys: ["ctrl+shift+e"],
-    run: () => ui().set({ zoomSeq: ui().zoomSeq + 1 }),
+    run: () => ui().set({ zoomSeq: ui().zoomSeq + 1, zoomAll: false }),
   },
   { id: "view.toggleExplorer", shortcut: "F2", keys: ["f2"], run: () => ui().togglePanel("explorer"), checked: () => ui().panels.explorer },
   { id: "view.toggleProperties", shortcut: "F4", keys: ["f4"], run: () => ui().togglePanel("properties"), checked: () => ui().panels.properties },
   { id: "view.toggleBottom", shortcut: "F8", keys: ["f8"], run: () => ui().togglePanel("bottom"), checked: () => ui().panels.bottom },
   { id: "view.storyUp", icon: "up", shortcut: "PgUp", keys: ["pageup"], run: () => moveStory(1) },
   { id: "view.storyDown", icon: "down", shortcut: "PgDn", keys: ["pagedown"], run: () => moveStory(-1) },
+  {
+    id: "view.focus",
+    shortcut: "Ctrl+Shift+F",
+    keys: ["ctrl+shift+f"],
+    run: () => toggleFocus(),
+    checked: () => ui().focusMode,
+  },
+  {
+    id: "view.compactRibbon",
+    run: () => ui().set({ ribbonCompact: !ui().ribbonCompact }),
+    checked: () => ui().ribbonCompact,
+  },
+  { id: "view.showJoints", run: () => toggleDisplay("joints"), checked: () => ui().display.joints },
+  { id: "view.jointLabels", run: () => toggleDisplay("jointLabels"), checked: () => ui().display.jointLabels },
+  { id: "view.frameLabels", run: () => toggleDisplay("frameLabels"), checked: () => ui().display.frameLabels },
+  {
+    id: "ctx.info",
+    icon: "info",
+    run: () => ui().set({ panels: { ...ui().panels, properties: true } }),
+  },
+  {
+    id: "ctx.rename",
+    run: () => {
+      const id = model().selection[0];
+      if (id) ui().set({ dialog: { kind: "rename", id } });
+    },
+    enabled: () => model().selection.length === 1 && !model().locked,
+  },
+  { id: "ctx.editGrid", icon: "grid", run: () => dialog("gridStory"), enabled: unlocked },
   {
     id: "view.resetLayout",
     run: () => window.dispatchEvent(new CustomEvent("nexfem:reset-layout")),
@@ -362,9 +411,15 @@ export const MENUS: { id: keyof Strings["menu"]; items: MenuItem[] }[] = [
       "view.storyUp",
       "view.storyDown",
       "-",
+      "view.showJoints",
+      "view.jointLabels",
+      "view.frameLabels",
+      "-",
       "view.toggleExplorer",
       "view.toggleProperties",
       "view.toggleBottom",
+      "view.focus",
+      "view.compactRibbon",
       "view.resetLayout",
     ],
   },

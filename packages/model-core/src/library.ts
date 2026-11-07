@@ -61,3 +61,13 @@ export const MATERIAL_LIBRARY: Material[] = [
   steel("S355", 355),
   steel("S460", 460),
 ];
+
+/**
+ * Tiêu chuẩn chọn được cho dự án. Hiện chỉ lưu lựa chọn theo dự án; các phép kiểm tra thiết kế
+ * theo tiêu chuẩn được lập trình dần (xem docs/design-codes.md). Năm ban hành cần đối chiếu bản chính thức.
+ */
+export const DESIGN_CODE_OPTIONS = {
+  concrete: ["TCVN 5574:2018", "EN 1992-1-1", "ACI 318-19"],
+  steel: ["TCVN 5575:2024", "EN 1993-1-1", "AISC 360-22"],
+  loads: ["TCVN 2737:2023", "EN 1990 / EN 1991", "ASCE 7-22"],
+} as const;

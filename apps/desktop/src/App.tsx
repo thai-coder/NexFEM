@@ -15,9 +15,10 @@ import { BottomPanel } from "./panels/console/BottomPanel.tsx";
 import { ModelExplorer } from "./panels/model-explorer/ModelExplorer.tsx";
 import { Properties } from "./panels/properties/Properties.tsx";
 import { Viewport } from "./panels/viewport/Viewport.tsx";
-import { basename, confirmDiscard } from "./services/files.ts";
+import { basename, confirmDiscardAsync } from "./services/files.ts";
 import { notifyReady, onCloseRequested, setWindowTitle } from "./services/tauri.ts";
 import { CommandPalette } from "./shell/CommandPalette.tsx";
+import { ContextMenu } from "./shell/ContextMenu.tsx";
 import { Dialogs } from "./shell/Dialogs.tsx";
 import { ErrorBoundary } from "./shell/ErrorBoundary.tsx";
 import { MenuBar } from "./shell/MenuBar.tsx";
@@ -27,7 +28,7 @@ import { useModel } from "./stores/model.ts";
 import { load, remove, save } from "./stores/persist.ts";
 import { useUi, type PanelVisibility } from "./stores/ui.ts";
 
-const LAYOUT_KEY = "dock-layout-v1";
+const LAYOUT_KEY = "dock-layout-v2";
 
 const components: Record<string, React.FunctionComponent<IDockviewPanelProps>> = {
   explorer: () => (
@@ -74,7 +75,7 @@ function addSide(api: DockviewApi, id: SidePanel, T: Strings) {
     component: id,
     title: titleOf(id, T),
     position: { referencePanel: "viewport", direction },
-    ...(id === "bottom" ? { initialHeight: 200 } : { initialWidth: id === "explorer" ? 260 : 300 }),
+    ...(id === "bottom" ? { initialHeight: 150 } : { initialWidth: id === "explorer" ? 220 : 270 }),
   });
 }
 
@@ -118,7 +119,7 @@ export function App() {
     };
     window.addEventListener("beforeunload", before);
     let unlisten: (() => void) | undefined;
-    void onCloseRequested(() => !useModel.getState().dirty || confirmDiscard()).then((u) => (unlisten = u));
+    void onCloseRequested(() => confirmDiscardAsync()).then((u) => (unlisten = u));
     return () => {
       window.removeEventListener("beforeunload", before);
       unlisten?.();
@@ -219,6 +220,7 @@ export function App() {
       </main>
       <StatusBar />
       <CommandPalette />
+      <ContextMenu />
       <Dialogs />
     </div>
   );

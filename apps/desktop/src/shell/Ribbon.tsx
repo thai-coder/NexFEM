@@ -11,13 +11,14 @@ export function Ribbon() {
   const T = useT();
   const tab = useUi((s) => s.ribbonTab);
   const collapsed = useUi((s) => s.ribbonCollapsed);
+  const compact = useUi((s) => s.ribbonCompact);
   const set = useUi((s) => s.set);
   // Cập nhật trạng thái nút theo mô hình/giao diện.
   useModel();
   useUi();
 
   return (
-    <div className={`ribbon${collapsed ? " collapsed" : ""}`}>
+    <div className={`ribbon${collapsed ? " collapsed" : ""}${compact ? " compact" : ""}`}>
       <div className="ribbon-tabs" role="tablist">
         {TABS.map((id) => (
           <button
@@ -31,6 +32,9 @@ export function Ribbon() {
           </button>
         ))}
         <div className="menubar-spacer" />
+        <button className={`icon-btn${compact ? " on" : ""}`} title={T.cmd["view.compactRibbon"]} aria-pressed={compact} onClick={() => runCommand("view.compactRibbon")}>
+          <Icon name="layout1" size={14} />
+        </button>
         <button
           className="icon-btn"
           title={collapsed ? T.ribbon.expand : T.ribbon.collapse}
@@ -130,6 +134,7 @@ function Btn({ id, big }: { id: CommandId; big?: boolean }) {
   const label = T.cmd[id].replace(/…$/, "");
   const disabled = c.enabled ? !c.enabled() : false;
   const checked = c.checked?.() ?? false;
+  const compact = useUi((s) => s.ribbonCompact);
   const tip = [label, c.shortcut ? `(${c.shortcut})` : "", c.phase ? `· ${T.fmt(T.phase.badge, { n: c.phase })}` : ""].join(" ").trim();
   return (
     <button
@@ -140,7 +145,7 @@ function Btn({ id, big }: { id: CommandId; big?: boolean }) {
       data-command={id}
       onClick={() => runCommand(id)}
     >
-      <Icon name={c.icon ?? "info"} size={big ? 22 : 16} />
+      <Icon name={c.icon ?? "info"} size={big && !compact ? 22 : 16} />
       <span>{shortLabel(label)}</span>
     </button>
   );

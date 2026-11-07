@@ -146,6 +146,20 @@ Step "Chạy thử bằng tài khoản hiện tại (quản trị)"
 $admin = Invoke-SmokeAsCurrentUser $exe (Join-Path $env:RUNNER_TEMP "nexfem-smoke-admin.json")
 $Results["Chạy bằng tài khoản quản trị"] = $admin.user
 
+Step "Đóng ứng dụng bằng nút đóng cửa sổ (như người dùng bấm X)"
+$closeOut = Join-Path $env:RUNNER_TEMP "nexfem-close.json"
+Remove-Item $closeOut -ErrorAction SilentlyContinue
+$env:NEXFEM_SMOKE_CLOSE = $closeOut
+try {
+  $p = Start-Process -FilePath $exe -PassThru
+  if (-not $p.WaitForExit(90000)) { $p.Kill(); throw "App không thoát sau khi đóng cửa sổ (nút đóng không hoạt động)" }
+} finally {
+  Remove-Item Env:NEXFEM_SMOKE_CLOSE -ErrorAction SilentlyContinue
+}
+if (-not (Test-Path $closeOut)) { throw "App thoát nhưng không qua đường đóng cửa sổ bình thường (mã thoát $($p.ExitCode))" }
+Write-Host "OK: đóng cửa sổ thoát sạch, mã thoát $($p.ExitCode)"
+$Results["Nút đóng cửa sổ hoạt động"] = "có"
+
 Step "Chạy thử bằng tài khoản người dùng thường"
 $user = Invoke-SmokeAsStandardUser $exe
 if ($user.appLocalData -eq $admin.appLocalData) { throw "Hai tài khoản dùng chung thư mục dữ liệu: $($user.appLocalData)" }

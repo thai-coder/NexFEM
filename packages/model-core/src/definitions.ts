@@ -78,6 +78,20 @@ export function definitionUsages(d: Model, collection: DefinitionCollection, id:
 }
 
 export const definitionCommands = {
+  setDesignCodes: defineCommand({
+    name: "model.setDesignCodes",
+    title: "Đổi tiêu chuẩn thiết kế",
+    mutates: true,
+    args: z.object({ concrete: z.string().optional(), steel: z.string().optional(), loads: z.string().optional() }),
+    run(d, a) {
+      for (const k of ["concrete", "steel", "loads"] as const) {
+        if (!(k in a)) continue;
+        if (a[k]) d.designCodes[k] = a[k];
+        else delete d.designCodes[k];
+      }
+    },
+  }),
+
   upsert: defineCommand({
     name: "definition.upsert",
     title: "Lưu định nghĩa",

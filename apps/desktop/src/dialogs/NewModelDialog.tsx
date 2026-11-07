@@ -1,10 +1,10 @@
-import { MATERIAL_LIBRARY, UNIT_PRESETS, createRcFrameModel, emptyModel } from "@nexfem/model-core";
+import { DESIGN_CODE_OPTIONS, MATERIAL_LIBRARY, UNIT_PRESETS, createRcFrameModel, emptyModel } from "@nexfem/model-core";
 import { Icon } from "@nexfem/ui";
 import { useState } from "react";
 import { Field } from "../components/fields.tsx";
 import { Modal } from "../components/Modal.tsx";
 import { useT } from "../i18n/index.ts";
-import { basename, confirmDiscard, openPath, openProject, recentFiles } from "../services/files.ts";
+import { basename, confirmDiscardAsync, openPath, openProject, recentFiles } from "../services/files.ts";
 import { isTauri } from "../services/tauri.ts";
 import { useModel } from "../stores/model.ts";
 import { useUi } from "../stores/ui.ts";
@@ -25,6 +25,11 @@ export function NewModelDialog({ onClose }: { onClose(): void }) {
   const [slab, setSlab] = useState("120");
   const [concrete, setConcrete] = useState("B25");
   const [units, setUnits] = useState(UNIT_PRESETS[0]!.label);
+  const [codes, setCodes] = useState<{ concrete: string; steel: string; loads: string }>({
+    concrete: DESIGN_CODE_OPTIONS.concrete[0],
+    steel: DESIGN_CODE_OPTIONS.steel[0],
+    loads: DESIGN_CODE_OPTIONS.loads[0],
+  });
   const recent = isTauri() ? recentFiles() : [];
 
   const xv = parseSpans(xs);
@@ -40,12 +45,12 @@ export function NewModelDialog({ onClose }: { onClose(): void }) {
   const needGrid = tpl !== "blank";
   const valid = !!name.trim() && (!needGrid || (xv && yv && hv && cv && bv && sv));
 
-  const create = () => {
-    if (!valid || !confirmDiscard()) return;
+  const create = async () => {
+    if (!valid || !(await confirmDiscardAsync())) return;
     const u = UNIT_PRESETS.find((p) => p.label === units)!.units;
     const model =
       tpl === "blank"
-        ? emptyModel(name.trim(), u)
+        ? { ...emptyModel(name.trim(), u), designCodes: Object.fromEntries(Object.entries(codes).filter(([, v]) => v)) }
         : createRcFrameModel({
             name: name.trim(),
             xSpans: xv!,
@@ -57,10 +62,11 @@ export function NewModelDialog({ onClose }: { onClose(): void }) {
             concrete,
             objects: tpl === "frame" ? "frame" : "grid",
             units: u,
+            designCodes: Object.fromEntries(Object.entries(codes).filter(([, v]) => v)),
           });
     useModel.getState().reset(model, null);
     useUi.getState().log("success", T.log.newModel);
-    useUi.getState().set({ zoomSeq: useUi.getState().zoomSeq + 1 });
+    useUi.getState().set({ zoomSeq: useUi.getState().zoomSeq + 1, zoomAll: true });
     onClose();
   };
 
@@ -98,7 +104,7 @@ export function NewModelDialog({ onClose }: { onClose(): void }) {
               className="define-item"
               title={r.path}
               onClick={async () => {
-                if (!confirmDiscard()) return;
+                if (!(await confirmDiscardAsync())) return;
                 if (await openPath(r.path)) onClose();
               }}
             >
@@ -141,6 +147,18 @@ export function NewModelDialog({ onClose }: { onClose(): void }) {
               ))}
             </select>
           </Field>
+          <h4 className="form-subtitle">{T.codes.title}</h4>
+          {(["concrete", "steel", "loads"] as const).map((k) => (
+            <Field key={k} label={T.codes[k]}>
+              <select value={codes[k]} aria-label={T.codes[k]} data-testid={`code-${k}`} onChange={(e) => setCodes((c) => ({ ...c, [k]: e.target.value }))}>
+                <option value="">{T.codes.none}</option>
+                {DESIGN_CODE_OPTIONS[k].map((o) => (
+                  <option key={o}>{o}</option>
+                ))}
+              </select>
+            </Field>
+          ))}
+          <p className="form-hint">{T.codes.note}</p>
           {needGrid && (
             <>
               <Field label={N.xSpans} hint={N.spansHint}>

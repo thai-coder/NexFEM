@@ -3,7 +3,7 @@ import { t } from "../i18n/index.ts";
 import { useModel } from "../stores/model.ts";
 import { load, save } from "../stores/persist.ts";
 import { useUi } from "../stores/ui.ts";
-import { isTauri } from "./tauri.ts";
+import { askYesNo, isTauri } from "./tauri.ts";
 
 /** Mở và lưu file dự án `.nxf`. Bản desktop dùng hộp thoại hệ điều hành; bản trình duyệt dùng tải lên/tải xuống. */
 
@@ -30,9 +30,14 @@ function pushRecent(path: string) {
   save(RECENT_KEY, list.slice(0, 10));
 }
 
-/** Hỏi trước khi bỏ thay đổi chưa lưu. */
+/** Hỏi trước khi bỏ thay đổi chưa lưu (bản trình duyệt). */
 export function confirmDiscard(): boolean {
   return !useModel.getState().dirty || window.confirm(t().file.confirmDiscard);
+}
+
+/** Như `confirmDiscard` nhưng dùng hộp thoại hệ điều hành khi chạy trong Tauri. */
+export async function confirmDiscardAsync(): Promise<boolean> {
+  return !useModel.getState().dirty || askYesNo(t().file.confirmDiscard);
 }
 
 function loadBytes(bytes: Uint8Array, path: string) {
@@ -40,7 +45,7 @@ function loadBytes(bytes: Uint8Array, path: string) {
   useModel.getState().reset(model, path);
   pushRecent(path);
   useUi.getState().log("success", t().fmt(t().file.opened, { name: basename(path) }));
-  useUi.getState().set({ zoomSeq: useUi.getState().zoomSeq + 1 });
+  useUi.getState().set({ zoomSeq: useUi.getState().zoomSeq + 1, zoomAll: true });
 }
 
 function fail(kind: "openFailed" | "saveFailed", e: unknown) {
@@ -70,7 +75,7 @@ export async function openPath(path: string): Promise<boolean> {
 }
 
 export async function openProject(): Promise<boolean> {
-  if (!confirmDiscard()) return false;
+  if (!(await confirmDiscardAsync())) return false;
   if (isTauri()) {
     const { dialog } = await tauri();
     const path = await dialog.open({ multiple: false, directory: false, filters: filters() });

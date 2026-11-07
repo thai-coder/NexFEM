@@ -6,6 +6,7 @@ NexFEM là phần mềm desktop phân tích và thiết kế kết cấu cho **W
 
 Tài liệu liên quan:
 - Bản đồ kiến trúc trực quan (sơ đồ tư duy + luồng dữ liệu): [`docs/architecture-map.html`](architecture-map.html)
+- Đánh giá và kế hoạch vòng cải thiện giao diện (07/11/2026): [`docs/ux-round2.md`](ux-round2.md)
 - Thiết kế giao diện và cây thư mục: [`docs/ux/ui-architecture.md`](ux/ui-architecture.md)
 - Phạm vi tiêu chuẩn thiết kế: [`docs/design-codes.md`](design-codes.md)
 - API cục bộ và MCP: [`docs/api-mcp.md`](api-mcp.md)
@@ -79,6 +80,9 @@ Mỗi giai đoạn kết thúc bằng một bản chạy được trên Windows.
 - Bài toán mẫu có đáp án (công xôn, dầm đơn giản, dầm ngàm, nhả khớp, kéo nén, khung cổng, cân bằng tòa nhà mẫu) trong `crates/fem-solver/src/benchmarks.rs`.
 - Khung 3D: xoay quanh điểm dưới con trỏ (chuột phải / Shift + chuột giữa), hiện tâm xoay, nút hướng nhìn Trên/Trước/Phải/3D.
 - Chưa làm: offset/vùng cứng, sàn tuyệt đối cứng (diaphragm), biến dạng cắt, tổ hợp bao/SRSS, so sánh với kết quả SAP2000/ETABS thật, chạy bộ giải trong Web Worker cho mô hình lớn.
+
+### Vòng cải thiện giao diện sau Giai đoạn 5 (đang làm)
+13 yêu cầu từ lần chạy thử đầu tiên, đã phân loại theo độ phức tạp trong [`docs/ux-round2.md`](ux-round2.md). Đã xong các mục đơn giản (sửa nút đóng cửa sổ, ribbon gọn, chế độ tập trung, mở lại bảng, chọn tiêu chuẩn khi tạo dự án, chọn và sửa nút, đổi nhãn, menu chuột phải, sửa lưới từ khung nhìn). Còn: trang bắt đầu, tối ưu mô hình lớn (bộ giải thưa), đọc `.e2k`/`.s2k`, nhiều màn hình. Giai đoạn 6 chờ đến khi vòng này xong.
 
 ### Giai đoạn 6: Hiển thị kết quả
 - Biến dạng, biểu đồ M/V/N/T, phản lực, drift tầng, Results Table, xuất Excel/CSV.

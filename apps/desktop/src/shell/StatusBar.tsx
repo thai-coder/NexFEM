@@ -13,6 +13,9 @@ export function StatusBar() {
   const selection = useModel((s) => s.selection.length);
   const locked = useModel((s) => s.locked);
   const execute = useModel((s) => s.execute);
+  const filter = useUi((s) => s.selectFilter);
+  const panels = useUi((s) => s.panels);
+  const focus = useUi((s) => s.focusMode);
   const fmt = (v: number) => toDisplay(v, "length", units).toFixed(units.length === "mm" ? 0 : units.length === "cm" ? 1 : 3);
 
   return (
@@ -30,7 +33,37 @@ export function StatusBar() {
         <Icon name={locked ? "lock" : "unlock"} size={13} />
         {locked ? T.status.locked : T.status.unlocked}
       </button>
+      <span className="status-cell" role="group" aria-label={T.status.select}>
+        {T.status.select}:
+        {(["joint", "frame", "shell"] as const).map((k) => (
+          <label key={k} className="snap-toggle">
+            <input
+              type="checkbox"
+              checked={filter[k]}
+              data-testid={`filter-${k}`}
+              onChange={(e) => useUi.getState().set({ selectFilter: { ...filter, [k]: e.target.checked } })}
+            />
+            {k === "joint" ? T.explorer.joints : k === "frame" ? T.explorer.frames : T.explorer.shells}
+          </label>
+        ))}
+      </span>
       <span className="menubar-spacer" />
+      <span className="status-cell" role="group" aria-label={T.status.panels}>
+        {(
+          [
+            ["explorer", "folder", "view.toggleExplorer"],
+            ["properties", "section", "view.toggleProperties"],
+            ["bottom", "terminal", "view.toggleBottom"],
+          ] as const
+        ).map(([k, icon, cmd]) => (
+          <button key={k} className={`icon-btn${panels[k] ? " on" : ""}`} aria-pressed={panels[k]} title={T.cmd[cmd]} data-testid={`panel-${k}`} onClick={() => runCommand(cmd)}>
+            <Icon name={icon} size={14} />
+          </button>
+        ))}
+        <button className={`icon-btn${focus ? " on" : ""}`} aria-pressed={focus} title={`${T.cmd["view.focus"]} (Ctrl+Shift+F)`} data-testid="focus-mode" onClick={() => runCommand("view.focus")}>
+          <Icon name="zoomExtents" size={14} />
+        </button>
+      </span>
       <label className="status-cell">
         {T.status.units}
         <select

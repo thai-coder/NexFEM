@@ -76,8 +76,8 @@ test("kéo khung chọn trên mặt bằng", async ({ page }) => {
   await page.mouse.move(b.x, b.y, { steps: 5 });
   await page.mouse.up();
   const n = await state(page, (n) => n.model.getState().selection.length);
-  // Ô A-B / 1-2: 4 dầm, 1 sàn, 4 cột tại góc.
-  expect(n).toBe(9);
+  // Ô A-B / 1-2: 4 dầm, 1 sàn, 4 cột tại góc, 4 nút.
+  expect(n).toBe(13);
 });
 
 test("Console vẽ dầm và chọn theo nhãn", async ({ page }) => {

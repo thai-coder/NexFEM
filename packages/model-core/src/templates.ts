@@ -19,6 +19,7 @@ export interface RcFrameOptions {
   /** "frame": dựng cột, dầm, sàn; "grid": chỉ lưới trục, tầng và định nghĩa. */
   objects?: "frame" | "grid";
   units?: Model["units"];
+  designCodes?: Model["designCodes"];
 }
 
 const X_LABELS = "ABCDEFGHJKLMNPQRSTUVWXYZ";
@@ -37,7 +38,7 @@ const mm = (v: number) => Math.round(v * 1000);
  */
 export function createRcFrameModel(opts: RcFrameOptions): Model {
   const model = emptyModel(opts.name ?? "Khung BTCT", opts.units);
-  model.designCodes = { concrete: "TCVN 5574:2018", loads: "TCVN 2737:2023" };
+  model.designCodes = opts.designCodes ?? { concrete: "TCVN 5574:2018", loads: "TCVN 2737:2023" };
   const col = opts.column ?? { b: 0.4, h: 0.4 };
   const beam = opts.beam ?? { b: 0.3, h: 0.6 };
   const slabT = opts.slabThickness ?? 0.12;

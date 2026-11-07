@@ -58,19 +58,29 @@ export function snapPoints(model: Model, vis: VisibleSet, modes: SnapModes): Sna
   return out;
 }
 
-/** Các trục lưới (đường thẳng) trên mặt phẳng: điểm gốc + phương. */
-export function gridLines(model: Model, vis: VisibleSet): { o: P3; d: P3; label: string }[] {
+export interface GridHit {
+  kind: "x" | "y" | "story";
+  id: string;
+  label: string;
+}
+
+/** Các trục lưới (đường thẳng) trên mặt phẳng: điểm gốc + phương + nhận dạng để sửa. */
+export function gridLines(model: Model, vis: VisibleSet): ({ o: P3; d: P3; label: string } & GridHit)[] {
   const plane = vis.plane;
   if (!plane) return [];
-  const out: { o: P3; d: P3; label: string }[] = [];
+  const out: ({ o: P3; d: P3; label: string } & GridHit)[] = [];
   for (const g of model.grids) {
     if (plane.axis === "z") {
-      for (const x of g.x) out.push({ o: [x.coord, 0, plane.value], d: [0, 1, 0], label: x.label });
-      for (const y of g.y) out.push({ o: [0, y.coord, plane.value], d: [1, 0, 0], label: y.label });
+      for (const x of g.x) out.push({ o: [x.coord, 0, plane.value], d: [0, 1, 0], label: x.label, kind: "x", id: x.id });
+      for (const y of g.y) out.push({ o: [0, y.coord, plane.value], d: [1, 0, 0], label: y.label, kind: "y", id: y.id });
     } else {
       const lines = plane.axis === "x" ? g.y : g.x;
-      for (const l of lines) out.push({ o: plane.axis === "x" ? [plane.value, l.coord, 0] : [l.coord, plane.value, 0], d: [0, 0, 1], label: l.label });
-      for (const s of model.stories) out.push({ o: plane.axis === "x" ? [plane.value, 0, s.elevation] : [0, plane.value, s.elevation], d: plane.axis === "x" ? [0, 1, 0] : [1, 0, 0], label: s.name });
+      for (const l of lines) {
+        out.push({ o: plane.axis === "x" ? [plane.value, l.coord, 0] : [l.coord, plane.value, 0], d: [0, 0, 1], label: l.label, kind: plane.axis === "x" ? "y" : "x", id: l.id });
+      }
+      for (const s of model.stories) {
+        out.push({ o: plane.axis === "x" ? [plane.value, 0, s.elevation] : [0, plane.value, s.elevation], d: plane.axis === "x" ? [0, 1, 0] : [1, 0, 0], label: s.name, kind: "story", id: s.id });
+      }
     }
   }
   return out;

@@ -25,13 +25,21 @@ export type DialogKind =
   | "assignSection"
   | "assignReleases"
   | "assignFrameLoad"
-  | "assignShellLoad";
+  | "assignShellLoad"
+  | "rename";
 
 export interface DialogState {
   kind: DialogKind;
+  /** Đối tượng đang xử lý (hộp thoại đổi nhãn). */
+  id?: string;
   /** Tab mở sẵn (hộp thoại Tải trọng: patterns / cases / combos). */
   tab?: string;
 }
+
+/** Mục menu ngữ cảnh: lệnh có sẵn, đường phân cách, hoặc mục tuỳ biến. */
+export type MenuEntry =
+  | string
+  | { label: string; icon?: string; disabled?: boolean; header?: boolean; run?(): void };
 
 export interface LogEntry {
   id: number;
@@ -69,6 +77,17 @@ interface UiState {
   hover: (HoverInfo & { pane: number }) | null;
   /** Tăng mỗi lần yêu cầu "vừa khung" cho ô đang hoạt động. */
   zoomSeq: number;
+  ribbonCompact: boolean;
+  /** Chế độ tập trung: ẩn mọi bảng và ribbon; lưu trạng thái cũ để khôi phục. */
+  focusMode: boolean;
+  focusSaved: { panels: PanelVisibility; ribbonCollapsed: boolean } | null;
+  /** Hiển thị nút và nhãn trên khung nhìn. */
+  display: { joints: boolean; jointLabels: boolean; frameLabels: boolean };
+  /** Loại đối tượng được phép chọn. */
+  selectFilter: { joint: boolean; frame: boolean; shell: boolean };
+  /** true: lệnh "vừa khung" áp dụng cho mọi ô (mở file, tạo mô hình mới). */
+  zoomAll: boolean;
+  contextMenu: { x: number; y: number; entries: MenuEntry[] } | null;
   /** Mẫu tải đang hiển thị trên khung nhìn (null = ẩn). */
   loadDisplay: string | null;
   /** Chế độ bắt điểm khi vẽ. */
@@ -130,6 +149,13 @@ export const useUi = create<UiState>((set, get) => ({
   zoomSeq: 0,
   snapModes: load<SnapModes>("snapModes", ALL_SNAPS),
   loadDisplay: null,
+  ribbonCompact: load("ribbonCompact", true),
+  focusMode: false,
+  focusSaved: null,
+  display: load("display", { joints: true, jointLabels: false, frameLabels: false }),
+  selectFilter: load("selectFilter", { joint: true, frame: true, shell: true }),
+  zoomAll: false,
+  contextMenu: null,
   drawPoints: [],
   drawPane: 0,
   drawSections: {},
@@ -163,5 +189,8 @@ useUi.subscribe((s, prev) => {
 });
 
 useUi.subscribe((s, prev) => {
+  if (s.ribbonCompact !== prev.ribbonCompact) save("ribbonCompact", s.ribbonCompact);
+  if (s.display !== prev.display) save("display", s.display);
+  if (s.selectFilter !== prev.selectFilter) save("selectFilter", s.selectFilter);
   if (s.snapModes !== prev.snapModes) save("snapModes", s.snapModes);
 });

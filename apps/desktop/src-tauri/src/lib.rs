@@ -48,10 +48,19 @@ fn model_stats(json: String) -> Result<ModelStats, String> {
 /// (phiên bản, tài khoản Windows, thư mục dữ liệu riêng của tài khoản) vào file đó rồi thoát.
 /// CI dùng chế độ này để kiểm tra bản đã cài chạy được với từng tài khoản trên máy.
 #[tauri::command]
-fn frontend_ready(app: tauri::AppHandle) -> Result<(), String> {
+fn frontend_ready(app: tauri::AppHandle) -> Result<bool, String> {
     use tauri::Manager;
+    // Chế độ kiểm tra đóng cửa sổ: trả về true để giao diện tự bấm "đóng" như người dùng;
+    // sự kiện thoát ghi file báo cáo (xem `run`). Quá 30 giây chưa thoát thì coi là lỗi.
+    if std::env::var("NEXFEM_SMOKE_CLOSE").is_ok() {
+        std::thread::spawn(|| {
+            std::thread::sleep(std::time::Duration::from_secs(30));
+            std::process::exit(3);
+        });
+        return Ok(true);
+    }
     let Ok(out) = std::env::var("NEXFEM_SMOKE_TEST") else {
-        return Ok(());
+        return Ok(false);
     };
     let data_dir = app
         .path()
@@ -73,7 +82,7 @@ fn frontend_ready(app: tauri::AppHandle) -> Result<(), String> {
         std::process::exit(0);
     });
     app.exit(0);
-    Ok(())
+    Ok(false)
 }
 
 /// Ở chế độ tự kiểm tra, ghi lỗi panic (kèm backtrace) ra `<NEXFEM_SMOKE_TEST>.panic.txt`
@@ -164,8 +173,15 @@ pub fn run() {
             read_project_file,
             write_project_file
         ])
-        .run(tauri::generate_context!())
-        .expect("không khởi động được NexFEM");
+        .build(tauri::generate_context!())
+        .expect("không khởi động được NexFEM")
+        .run(|_app, event| {
+            if let tauri::RunEvent::Exit = event {
+                if let Ok(path) = std::env::var("NEXFEM_SMOKE_CLOSE") {
+                    let _ = std::fs::write(path, "closed");
+                }
+            }
+        });
 }
 
 #[cfg(test)]

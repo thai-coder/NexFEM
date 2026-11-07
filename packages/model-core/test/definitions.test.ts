@@ -141,3 +141,38 @@ describe(".nxf", () => {
     expect(() => parseProject(new TextEncoder().encode('{"name":1}'))).toThrow(/không hợp lệ/);
   });
 });
+
+describe("nhãn, di chuyển nút, tiêu chuẩn", () => {
+  it("đổi nhãn: loại bỏ khoảng trắng, chặn trùng và rỗng", () => {
+    const s = stack();
+    const f = s.model.frames[0]!;
+    s.execute("object.update", { collection: "frames", id: f.id, patch: { label: "  DAM-A  " } });
+    expect(s.model.frames[0]!.label).toBe("DAM-A");
+    expect(() => s.execute("object.update", { collection: "frames", id: f.id, patch: { label: s.model.frames[1]!.label.toLowerCase() } })).toThrow(/đã có/);
+    expect(() => s.execute("object.update", { collection: "joints", id: s.model.joints[0]!.id, patch: { label: " " } })).toThrow(/trống/);
+    // Có thể giữ nguyên nhãn của chính nó (không tính là trùng).
+    s.execute("object.update", { collection: "frames", id: f.id, patch: { label: "dam-a" } });
+    expect(s.model.frames[0]!.label).toBe("dam-a");
+  });
+
+  it("di chuyển nút kéo theo thanh; chặn trùng vị trí", () => {
+    const s = stack();
+    const col = s.model.frames.find((x) => x.kind === "column")!;
+    const top = s.model.joints.find((j) => j.id === col.j)!;
+    s.execute("joint.move", { joint: top.id, point: [top.x + 0.5, top.y, top.z] });
+    expect(s.model.joints.find((j) => j.id === top.id)!.x).toBeCloseTo(top.x + 0.5);
+    const other = s.model.joints.find((j) => j.id !== top.id && j.z === top.z)!;
+    expect(() => s.execute("joint.move", { joint: top.id, point: [other.x, other.y, other.z] })).toThrow(/Đã có nút/);
+    // Dời khỏi cao độ tầng thì bỏ liên kết tầng.
+    s.execute("joint.move", { joint: top.id, point: [top.x, top.y, top.z + 0.3] });
+    expect(s.model.joints.find((j) => j.id === top.id)!.story).toBeUndefined();
+  });
+
+  it("đổi tiêu chuẩn thiết kế", () => {
+    const s = stack();
+    s.execute("model.setDesignCodes", { concrete: "EN 1992-1-1", steel: "AISC 360-22" });
+    expect(s.model.designCodes).toMatchObject({ concrete: "EN 1992-1-1", steel: "AISC 360-22", loads: "TCVN 2737:2023" });
+    s.execute("model.setDesignCodes", { steel: "" });
+    expect(s.model.designCodes.steel).toBeUndefined();
+  });
+});

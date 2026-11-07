@@ -3,6 +3,7 @@ import { FrameSectionsDialog, LoadsDialog, MaterialsDialog, ShellSectionsDialog 
 import { GridStoryDialog } from "../dialogs/GridStoryDialog.tsx";
 import { NewModelDialog } from "../dialogs/NewModelDialog.tsx";
 import { PreferencesDialog } from "../dialogs/PreferencesDialog.tsx";
+import { RenameDialog } from "../dialogs/RenameDialog.tsx";
 import { ReplicateDialog } from "../dialogs/ReplicateDialog.tsx";
 import {
   AssignFrameLoadDialog,
@@ -39,6 +40,8 @@ export function Dialogs() {
       return <PreferencesDialog onClose={close} />;
     case "replicate":
       return <ReplicateDialog onClose={close} />;
+    case "rename":
+      return dialog.id ? <RenameDialog id={dialog.id} onClose={close} /> : null;
     case "assignRestraint":
       return <AssignRestraintDialog onClose={close} />;
     case "assignSection":

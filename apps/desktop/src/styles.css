@@ -1650,3 +1650,79 @@ input[aria-invalid="true"] {
   color: var(--color-text);
   border-color: var(--color-accent);
 }
+
+/* ---------------------------------------------------------------- compact UI, context menu */
+
+.menubar {
+  height: 28px;
+}
+
+.pane-header {
+  height: 22px;
+}
+
+.ribbon.compact .ribbon-tabs {
+  height: 24px;
+}
+
+.ribbon.compact .ribbon-body {
+  min-height: 0;
+  padding: 2px 8px;
+  align-items: center;
+}
+
+.ribbon.compact .ribbon-group-label {
+  display: none;
+}
+
+.ribbon.compact .ribbon-group {
+  padding: 0 4px;
+}
+
+.ribbon.compact .ribbon-btn {
+  height: 44px;
+  min-width: 42px;
+  gap: 1px;
+}
+
+.ribbon.compact .ribbon-btn.big {
+  min-width: 46px;
+}
+
+.ribbon.compact .ribbon-btn span {
+  font-size: 10px;
+  max-width: 56px;
+}
+
+.ribbon.compact .story-control {
+  flex-direction: row;
+  align-items: center;
+}
+
+.ribbon.compact .story-control select {
+  min-width: 120px;
+}
+
+.icon-btn.on {
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+}
+
+.menu-header {
+  padding: 4px 10px 2px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.context-menu {
+  min-width: 250px;
+  z-index: 3000;
+}
+
+.ribbon.compact .ribbon-stack .ribbon-btn {
+  height: 14px;
+  min-width: 0;
+}
