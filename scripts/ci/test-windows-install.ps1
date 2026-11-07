@@ -45,10 +45,12 @@ function Invoke-SmokeAsCurrentUser($exe, $out) {
 
 function Invoke-SmokeAsStandardUser($exe) {
   $name = "nxtest$((Get-Random -Maximum 9999))"
-  $pw = "Nx!" + [guid]::NewGuid().ToString("N").Substring(0, 14) + "a1"
+  # Tối đa 14 ký tự: dài hơn thì "net user" dừng lại hỏi xác nhận.
+  $pw = "Nx!" + [guid]::NewGuid().ToString("N").Substring(0, 9) + "a1"
   $out = "C:\Users\Public\nexfem-smoke-$name.json"
   Remove-Item $out -ErrorAction SilentlyContinue
   net user $name $pw /add | Out-Null
+  if ($LASTEXITCODE -ne 0) { throw "Không tạo được tài khoản thử $name" }
   try {
     # Không thêm vào nhóm Administrators: đây là tài khoản người dùng thường.
     $cred = New-Object System.Management.Automation.PSCredential($name, (ConvertTo-SecureString $pw -AsPlainText -Force))

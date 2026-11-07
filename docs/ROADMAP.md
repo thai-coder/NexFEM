@@ -22,6 +22,7 @@ Tài liệu liên quan:
 | API & MCP | API cục bộ REST/SSE (`127.0.0.1`, token) + MCP server `nexfem-mcp` + SDK Python/TypeScript, dùng chung command registry với giao diện | [0004](adr/0004-api-mcp.md) |
 | Tiêu chuẩn | TCVN, Eurocode, ACI/AISC (+ ASCE 7 cho tải), làm theo từng đợt | [0003](adr/0003-design-codes.md) |
 | File dự án | `.nxf` (zip: JSON mô hình + kết quả nhị phân) | — |
+| Triển khai | Cài cho toàn máy (MSI/NSIS), WebView2 gói sẵn, không cần .NET; dữ liệu riêng từng tài khoản | [0005](adr/0005-deployment.md) |
 
 ## Cách phát triển
 

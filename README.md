@@ -8,6 +8,7 @@ NexFEM Designer is an intuitive structural analysis FEA software you can master 
 - [Thiết kế giao diện & cây thư mục](docs/ux/ui-architecture.md)
 - [Phạm vi tiêu chuẩn thiết kế (TCVN, Eurocode, ACI/AISC)](docs/design-codes.md)
 - [API cục bộ và MCP](docs/api-mcp.md)
+- [Cài đặt trên máy khách nhiều người dùng](docs/deployment.md)
 - [Quyết định kiến trúc (ADR)](docs/adr/)
 
 ## Cấu trúc mã nguồn
@@ -42,7 +43,7 @@ cargo test --workspace          # Rust
 pnpm gen                        # sinh lại JSON Schema và mô hình mẫu khi đổi schema
 ```
 
-Mỗi lần đẩy code, GitHub Actions build bộ cài Windows; tải ở mục **Artifacts** của lần chạy CI.
+Mỗi lần đẩy code, GitHub Actions build bộ cài Windows, cài thử cho toàn máy và chạy thử bằng hai tài khoản; tải bộ cài ở mục **Artifacts** của lần chạy CI. Máy khách không cần cài .NET hay runtime nào khác — xem [docs/deployment.md](docs/deployment.md).
 
 ## Phím tắt chính
 
