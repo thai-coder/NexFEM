@@ -61,6 +61,7 @@ function Pane({ index }: { index: number }) {
   const snapModes = useUi((s) => s.snapModes);
   const drawPoints = useUi((s) => (s.drawPane === index ? s.drawPoints : null));
   const drawing = tool !== "select" && canDrawIn(view);
+  const loadDisplay = useUi((s) => s.loadDisplay);
 
   useEffect(() => {
     const el = host.current;
@@ -101,6 +102,9 @@ function Pane({ index }: { index: number }) {
   useEffect(() => {
     viewer.current?.setSelection(selection);
   }, [selection]);
+  useEffect(() => {
+    viewer.current?.setLoadDisplay(loadDisplay && model.loadPatterns.some((p) => p.id === loadDisplay) ? loadDisplay : null);
+  }, [loadDisplay, model]);
   useEffect(() => {
     if (zoomSeq && active) viewer.current?.zoomExtents();
   }, [zoomSeq]);

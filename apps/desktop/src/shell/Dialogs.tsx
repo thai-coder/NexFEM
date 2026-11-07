@@ -4,6 +4,13 @@ import { GridStoryDialog } from "../dialogs/GridStoryDialog.tsx";
 import { NewModelDialog } from "../dialogs/NewModelDialog.tsx";
 import { PreferencesDialog } from "../dialogs/PreferencesDialog.tsx";
 import { ReplicateDialog } from "../dialogs/ReplicateDialog.tsx";
+import {
+  AssignFrameLoadDialog,
+  AssignReleasesDialog,
+  AssignRestraintDialog,
+  AssignSectionDialog,
+  AssignShellLoadDialog,
+} from "../dialogs/AssignDialogs.tsx";
 import { useT } from "../i18n/index.ts";
 import { useUi } from "../stores/ui.ts";
 
@@ -32,6 +39,16 @@ export function Dialogs() {
       return <PreferencesDialog onClose={close} />;
     case "replicate":
       return <ReplicateDialog onClose={close} />;
+    case "assignRestraint":
+      return <AssignRestraintDialog onClose={close} />;
+    case "assignSection":
+      return <AssignSectionDialog onClose={close} />;
+    case "assignReleases":
+      return <AssignReleasesDialog onClose={close} />;
+    case "assignFrameLoad":
+      return <AssignFrameLoadDialog onClose={close} />;
+    case "assignShellLoad":
+      return <AssignShellLoadDialog onClose={close} />;
     default:
       break;
   }

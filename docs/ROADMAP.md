@@ -64,8 +64,12 @@ Mỗi giai đoạn kết thúc bằng một bản chạy được trên Windows.
 - Replicate (Ctrl+R): tịnh tiến nhiều bản, đối xứng qua trục, sao chép sang tầng khác (giữ đúng cao độ khi tầng cao khác nhau), có sao chép tải; tự bỏ qua bản trùng.
 - Chưa làm: vẽ trong khung 3D, nhân bản xoay (radial), chia thanh, gộp nút, di chuyển/kéo giãn đối tượng, bắt điểm vuông góc/giao điểm, vẽ nhanh bằng một lần bấm vào ô lưới.
 
-### Giai đoạn 4: Gán (Assign)
-- Gối, nhả liên kết, tải thanh/tải sàn, tiết diện; biểu tượng trên view; Check model.
+### Giai đoạn 4: Gán (Assign) — ✅ xong (07/11/2026)
+- Hộp thoại Assign áp lên đối tượng đang chọn: liên kết gối (6 bậc tự do + mẫu ngàm/khớp/lăn/tự do), tiết diện thanh, nhả liên kết (P, V2, V3, T, M2, M3 hai đầu; mẫu khớp hai đầu/đầu i/đầu j), tải thanh (phân bố đều hoặc tập trung, 7 phương), tải sàn/vách.
+- Gán tải theo mẫu tải: thay tải cũ, cộng thêm hoặc xoá; chặn nhả lực dọc/cắt/xoắn ở cả hai đầu (thanh mất ổn định).
+- Khung nhìn: ký hiệu gối theo loại (ngàm vuông, khớp tam giác, khác tròn), vòng tròn tại đầu thanh có nhả liên kết, mũi tên và giá trị tải của mẫu tải chọn ở tab Tải trọng (theo đơn vị đang dùng).
+- Check model đã có từ Giai đoạn 1.
+- Chưa làm: tải nút, tải hình thang/nhiều đoạn, nhóm đối tượng (group), lò xo gối, offset/vùng cứng đầu thanh, trục cục bộ xoay.
 
 ### Giai đoạn 5: Solver v1 — v0.1
 - Khung 3D tuyến tính tĩnh (phần tử dầm 12 bậc tự do, offset, release), diaphragm cứng.

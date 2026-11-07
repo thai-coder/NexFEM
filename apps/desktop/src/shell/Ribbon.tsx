@@ -80,9 +80,12 @@ export function Ribbon() {
               </Group>
               <Group label={T.ribbon.groupAssign}>
                 <Btn id="assign.restraint" />
+                <Btn id="assign.section" />
+                <Btn id="assign.releases" />
                 <Btn id="assign.frameLoad" />
                 <Btn id="assign.shellLoad" />
               </Group>
+              <LoadDisplayGroup />
             </>
           )}
           {tab === "analysis" && (
@@ -200,6 +203,31 @@ function StoryGroup() {
           <option value="one">{T.story.one}</option>
           <option value="similar">{T.story.similar}</option>
           <option value="all">{T.story.all}</option>
+        </select>
+      </div>
+    </Group>
+  );
+}
+
+function LoadDisplayGroup() {
+  const T = useT();
+  const patterns = useModel((s) => s.model.loadPatterns);
+  const value = useUi((s) => s.loadDisplay);
+  return (
+    <Group label={T.assign.show}>
+      <div className="story-control">
+        <select
+          value={value ?? ""}
+          aria-label={T.assign.show}
+          data-testid="load-display"
+          onChange={(e) => useUi.getState().set({ loadDisplay: e.target.value || null })}
+        >
+          <option value="">{T.assign.hide}</option>
+          {patterns.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.name}
+            </option>
+          ))}
         </select>
       </div>
     </Group>

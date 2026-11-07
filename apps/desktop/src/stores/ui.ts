@@ -20,7 +20,12 @@ export type DialogKind =
   | "shellSections"
   | "loads"
   | "preferences"
-  | "replicate";
+  | "replicate"
+  | "assignRestraint"
+  | "assignSection"
+  | "assignReleases"
+  | "assignFrameLoad"
+  | "assignShellLoad";
 
 export interface DialogState {
   kind: DialogKind;
@@ -64,6 +69,8 @@ interface UiState {
   hover: (HoverInfo & { pane: number }) | null;
   /** Tăng mỗi lần yêu cầu "vừa khung" cho ô đang hoạt động. */
   zoomSeq: number;
+  /** Mẫu tải đang hiển thị trên khung nhìn (null = ẩn). */
+  loadDisplay: string | null;
   /** Chế độ bắt điểm khi vẽ. */
   snapModes: SnapModes;
   /** Các điểm đã bấm của đối tượng đang vẽ và ô viewport đang vẽ. */
@@ -122,6 +129,7 @@ export const useUi = create<UiState>((set, get) => ({
   hover: null,
   zoomSeq: 0,
   snapModes: load<SnapModes>("snapModes", ALL_SNAPS),
+  loadDisplay: null,
   drawPoints: [],
   drawPane: 0,
   drawSections: {},

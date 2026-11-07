@@ -84,3 +84,68 @@ jobs:
             target/release/bundle/msi/*.msi
             target/release/bundle/nsis/*.exe
           retention-days: 14
+
+  # Mỗi lần CI trên nhánh phát triển đạt: đưa bộ cài lên nhánh `installer` (cắt phần < 100 MB)
+  # và bản pre-release `latest-build` để tải về chạy thử.
+  publish:
+    name: Phát hành bộ cài thử
+    needs: [web, rust, windows]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/claude/etab-sap2000-connection-vts58p'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      TAG: latest-build
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: nexfem-windows-*
+          merge-multiple: true
+          path: dl
+
+      - name: Nhánh installer (cắt phần 95 MB)
+        run: |
+          set -euo pipefail
+          exe=$(find "$PWD/dl" -name '*-setup.exe' | head -1)
+          msi=$(find "$PWD/dl" -name '*.msi' | head -1)
+          echo "EXE=$exe" >> "$GITHUB_ENV"
+          echo "MSI=$msi" >> "$GITHUB_ENV"
+          ls -la "$exe" "$msi"
+          mkdir out && cd out
+          name=$(basename "$exe")
+          split -b 95m -d -a 2 "$exe" "$name.part"
+          sum=$(sha256sum "$exe" | cut -d' ' -f1)
+          printf '@echo off\r\ncd /d "%%~dp0"\r\ncopy /b "%s.part*" "%s" >nul\r\necho Da ghep: %s\r\ncertutil -hashfile "%s" SHA256\r\necho SHA256 dung phai la: %s\r\npause\r\n' "$name" "$name" "$name" "$name" "$sum" > GHEP-BO-CAI.bat
+          cat > README.md <<MD
+          # Bộ cài NexFEM (bản thử)
+
+          Nguồn: CI run ${GITHUB_RUN_ID}, commit ${GITHUB_SHA}.
+
+          Cách nhanh nhất: tải nguyên file ở trang Releases, tag **${TAG}**.
+
+          Hoặc từ nhánh này:
+          1. Tải nhánh dạng ZIP (Code → Download ZIP) rồi giải nén.
+          2. Chạy \`GHEP-BO-CAI.bat\` để ghép các file \`.part\` thành \`${name}\`.
+          3. Chạy \`${name}\` bằng quyền quản trị (cài cho mọi tài khoản trên máy).
+
+          SHA256: \`${sum}\`
+
+          Windows sẽ cảnh báo SmartScreen vì bộ cài chưa có chữ ký số: More info → Run anyway.
+          MD
+          sed -i 's/^          //' README.md
+          git init -q -b installer
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "NexFEM installer from CI run ${GITHUB_RUN_ID}"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" installer
+          ls -la
+
+      - name: Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete "$TAG" -R "${{ github.repository }}" -y --cleanup-tag || true
+          gh release create "$TAG" "$EXE" "$MSI" -R "${{ github.repository }}" --target "${{ github.sha }}" --prerelease \
+            --title "NexFEM — bản build mới nhất (bản thử)" \
+            --notes "Bản build tự động từ CI run ${{ github.run_id }}, commit ${{ github.sha }}. Chạy file -setup.exe hoặc .msi bằng quyền quản trị. Chưa có chữ ký số: SmartScreen → More info → Run anyway."

@@ -232,10 +232,11 @@ export const COMMANDS: AppCommand[] = [
     },
   },
 
-  later("assign.restraint", 4),
-  later("assign.section", 4, "section"),
-  later("assign.frameLoad", 4, "load"),
-  later("assign.shellLoad", 4, "load"),
+  { id: "assign.restraint", icon: "joint", run: () => dialog("assignRestraint"), enabled: unlocked },
+  { id: "assign.section", icon: "section", run: () => dialog("assignSection"), enabled: unlocked },
+  { id: "assign.releases", icon: "beam", run: () => dialog("assignReleases"), enabled: unlocked },
+  { id: "assign.frameLoad", icon: "load", run: () => dialog("assignFrameLoad"), enabled: unlocked },
+  { id: "assign.shellLoad", icon: "slab", run: () => dialog("assignShellLoad"), enabled: unlocked },
 
   {
     id: "analyze.check",
@@ -349,7 +350,7 @@ export const MENUS: { id: keyof Strings["menu"]; items: MenuItem[] }[] = [
   },
   { id: "draw", items: ["draw.select", "-", "draw.joint", "draw.beam", "draw.column", "draw.brace", "draw.slab", "draw.wall", "-", "draw.finish", "draw.undoPoint"] },
   { id: "select", items: ["edit.selectAll", "select.byStory", "select.invert", "select.clear"] },
-  { id: "assign", items: ["assign.restraint", "assign.section", "-", "assign.frameLoad", "assign.shellLoad"] },
+  { id: "assign", items: ["assign.restraint", "-", "assign.section", "assign.releases", "-", "assign.frameLoad", "assign.shellLoad"] },
   { id: "analyze", items: ["analyze.check", "analyze.run", "analyze.unlock"] },
   { id: "display", items: ["display.deformed", "display.moment", "display.shear", "display.axial"] },
   { id: "design", items: ["design.concrete", "design.steel"] },

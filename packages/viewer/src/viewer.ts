@@ -1,4 +1,4 @@
-import type { Model } from "@nexfem/model-core";
+import { toDisplay, unitLabel, type Model } from "@nexfem/model-core";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { LineMaterial } from "three/addons/lines/LineMaterial.js";
@@ -22,6 +22,7 @@ export interface ViewerTheme {
   support: string;
   selection: string;
   hover: string;
+  load: string;
   axisX: string;
   axisY: string;
   axisZ: string;
@@ -41,6 +42,7 @@ export const DARK_THEME: ViewerTheme = {
   support: "#ff6b6b",
   selection: "#ffd400",
   hover: "#ffffff",
+  load: "#ff8a3d",
   axisX: "#ff6b6b",
   axisY: "#7fd18b",
   axisZ: "#6aa6ff",
@@ -60,6 +62,7 @@ export const LIGHT_THEME: ViewerTheme = {
   support: "#d33a2c",
   selection: "#e0a800",
   hover: "#111827",
+  load: "#d4570c",
   axisX: "#d33a2c",
   axisY: "#2f8a3a",
   axisZ: "#1f63d6",
@@ -142,6 +145,7 @@ export class StructureViewer {
 
   // chế độ vẽ
   #drawing: DrawingOptions | null = null;
+  #loadPattern: string | null = null;
   #snapCache: { points: SnapPoint[]; lines: ReturnType<typeof gridLines> } | null = null;
   #snap: SnapPoint | null = null;
   #snapEl: HTMLDivElement;
@@ -233,6 +237,13 @@ export class StructureViewer {
       this.invalidate();
     } else this.#updateRubber();
     if (was !== !!this.#drawing) this.#renderer.domElement.style.cursor = this.#drawing ? "crosshair" : "default";
+  }
+
+  /** Hiện tải của một mẫu tải (mũi tên + giá trị), null để ẩn. */
+  setLoadDisplay(pattern: string | null): void {
+    if (pattern === this.#loadPattern) return;
+    this.#loadPattern = pattern;
+    this.#rebuild();
   }
 
   /** Điểm bắt hiện tại (chế độ vẽ). */
@@ -514,12 +525,16 @@ export class StructureViewer {
 
     // Nút và gối.
     const jp: number[] = [];
-    const supports: number[] = [];
+    const supports: Record<"fixed" | "pinned" | "other", number[]> = { fixed: [], pinned: [], other: [] };
     this.#jointIds = [];
     for (const j of vis.joints) {
       jp.push(j.x, j.y, j.z);
       this.#jointIds.push(j.id);
-      if (j.restraint?.some(Boolean)) supports.push(j.x, j.y, j.z);
+      const r = j.restraint;
+      if (r?.some(Boolean)) {
+        const kind = r.every(Boolean) ? "fixed" : r[0] && r[1] && r[2] && !r[3] && !r[4] && !r[5] ? "pinned" : "other";
+        supports[kind].push(j.x, j.y, j.z);
+      }
     }
     this.#jointPoints = null;
     if (jp.length) {
@@ -529,13 +544,35 @@ export class StructureViewer {
       this.#jointPoints.renderOrder = 3;
       this.#content.add(this.#jointPoints);
     }
-    if (supports.length) {
+    for (const kind of ["fixed", "pinned", "other"] as const) {
+      if (!supports[kind].length) continue;
       const g = new THREE.BufferGeometry();
-      g.setAttribute("position", new THREE.Float32BufferAttribute(supports, 3));
-      const pts = new THREE.Points(g, new THREE.PointsMaterial({ color: t.support, size: 8, sizeAttenuation: false, map: triangleSprite(), alphaTest: 0.5 }));
+      g.setAttribute("position", new THREE.Float32BufferAttribute(supports[kind], 3));
+      const pts = new THREE.Points(g, new THREE.PointsMaterial({ color: t.support, size: 9, sizeAttenuation: false, map: symbolSprite(kind), alphaTest: 0.5 }));
       pts.renderOrder = 4;
       this.#content.add(pts);
     }
+
+    // Nhả liên kết: vòng tròn nhỏ gần đầu thanh được nhả mô men.
+    const rel: number[] = [];
+    for (const f of vis.frames) {
+      if (!f.releases) continue;
+      const a = joints.get(f.i);
+      const b = joints.get(f.j);
+      if (!a || !b) continue;
+      const at = (u: number) => [a.x + (b.x - a.x) * u, a.y + (b.y - a.y) * u, a.z + (b.z - a.z) * u];
+      if (f.releases.i.some(Boolean)) rel.push(...at(0.08));
+      if (f.releases.j.some(Boolean)) rel.push(...at(0.92));
+    }
+    if (rel.length) {
+      const g = new THREE.BufferGeometry();
+      g.setAttribute("position", new THREE.Float32BufferAttribute(rel, 3));
+      const pts = new THREE.Points(g, new THREE.PointsMaterial({ color: t.hover, size: 8, sizeAttenuation: false, map: symbolSprite("ring"), alphaTest: 0.5 }));
+      pts.renderOrder = 5;
+      this.#content.add(pts);
+    }
+
+    if (this.#loadPattern) this.#buildLoads(m, vis, joints);
 
     // Cột cắt qua mặt bằng: ô vuông.
     const mp: number[] = [];
@@ -558,6 +595,103 @@ export class StructureViewer {
     this.#buildOverlay();
     this.#snapCache = null;
     if (this.#drawing && !vis.plane) this.setDrawing(null);
+  }
+
+  /** Mũi tên tải thanh (phân bố/tập trung) và nhãn giá trị tải sàn của mẫu tải đang hiển thị. */
+  #buildLoads(m: Model, vis: VisibleSet, joints: Map<string, Model["joints"][number]>): void {
+    const pattern = this.#loadPattern;
+    const t = this.#theme;
+    const u = m.units;
+    const pos: number[] = [];
+    const frames = new Map(vis.frames.map((f) => [f.id, f]));
+    const loads = m.frameLoads.filter((l) => l.pattern === pattern && frames.has(l.frame));
+    const maxQ = Math.max(1e-9, ...loads.filter((l) => l.kind === "distributed").map((l) => Math.abs(l.value)));
+    const maxP = Math.max(1e-9, ...loads.filter((l) => l.kind === "point").map((l) => Math.abs(l.value)));
+    const dirOf = (dir: string, value: number, axis: THREE.Vector3): THREE.Vector3 => {
+      const s = Math.sign(value) || 1;
+      switch (dir) {
+        case "gravity":
+          return new THREE.Vector3(0, 0, -s);
+        case "globalX":
+          return new THREE.Vector3(s, 0, 0);
+        case "globalY":
+          return new THREE.Vector3(0, s, 0);
+        case "localX":
+          return axis.clone().multiplyScalar(s);
+        default: {
+          // Trục 2 cục bộ: thẳng đứng với thanh ngang, theo X với thanh đứng; trục 3 = 1 × 2.
+          const vertical = Math.abs(axis.z) > 0.99;
+          const l2 = vertical ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 0, 1).sub(axis.clone().multiplyScalar(axis.z)).normalize();
+          const v = dir === "local3" ? axis.clone().cross(l2) : dir === "globalZ" ? new THREE.Vector3(0, 0, 1) : l2;
+          return v.multiplyScalar(s);
+        }
+      }
+    };
+    // Mũi tên từ "tail" tới "tip" kèm hai nét đầu mũi tên.
+    const arrow = (tip: THREE.Vector3, d: THREE.Vector3, len: number) => {
+      const tail = tip.clone().addScaledVector(d, -len);
+      pos.push(tail.x, tail.y, tail.z, tip.x, tip.y, tip.z);
+      const side = Math.abs(d.z) > 0.9 ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 0, 1);
+      const h = Math.min(0.18, len * 0.35);
+      for (const sgn of [1, -1]) {
+        const p = tip.clone().addScaledVector(d, -h).addScaledVector(side, sgn * h * 0.6);
+        pos.push(tip.x, tip.y, tip.z, p.x, p.y, p.z);
+      }
+    };
+    for (const l of loads) {
+      const f = frames.get(l.frame)!;
+      const a = joints.get(f.i);
+      const b = joints.get(f.j);
+      if (!a || !b) continue;
+      const A = new THREE.Vector3(a.x, a.y, a.z);
+      const B = new THREE.Vector3(b.x, b.y, b.z);
+      const axis = B.clone().sub(A).normalize();
+      const d = dirOf(l.direction, l.value, axis);
+      if (l.kind === "distributed") {
+        const len = 0.35 + 0.65 * (Math.abs(l.value) / maxQ);
+        const offA = A.clone().addScaledVector(d, -len);
+        const offB = B.clone().addScaledVector(d, -len);
+        pos.push(offA.x, offA.y, offA.z, offB.x, offB.y, offB.z);
+        for (let k = 0; k <= 5; k++) arrow(A.clone().lerp(B, k / 5), d, len);
+        const mid = offA.clone().lerp(offB, 0.5);
+        this.#valueLabel(`${toDisplay(l.value, "forcePerLength", u).toFixed(2)}`, mid);
+      } else {
+        const len = 0.5 + 1.0 * (Math.abs(l.value) / maxP);
+        const tip = A.clone().lerp(B, l.at ?? 0.5);
+        arrow(tip, d, len);
+        this.#valueLabel(`${toDisplay(l.value, "force", u).toFixed(2)} ${unitLabel("force", u)}`, tip.clone().addScaledVector(d, -len - 0.35));
+      }
+    }
+    if (pos.length) {
+      const g = new LineSegmentsGeometry();
+      g.setPositions(pos);
+      const lines = new LineSegments2(g, this.#lineMaterial(1.5, { color: new THREE.Color(t.load).getHex() }));
+      lines.renderOrder = 6;
+      this.#content.add(lines);
+    }
+    const shells = new Map(vis.shells.map((x) => [x.id, x]));
+    for (const l of m.shellLoads) {
+      if (l.pattern !== pattern) continue;
+      const sh = shells.get(l.shell);
+      if (!sh) continue;
+      const pts = sh.joints.map((id) => joints.get(id)).filter((j) => j !== undefined);
+      if (!pts.length) continue;
+      const c = new THREE.Vector3();
+      for (const p of pts) c.add(new THREE.Vector3(p.x, p.y, p.z));
+      c.divideScalar(pts.length);
+      this.#valueLabel(`${toDisplay(l.value, "stress", u).toFixed(2)}`, c);
+    }
+  }
+
+  #valueLabel(text: string, at: THREE.Vector3): void {
+    const t = this.#theme;
+    const el = document.createElement("div");
+    el.textContent = text;
+    el.className = "nx-label nx-label-load";
+    el.style.cssText = `font:600 10px/1 Inter,system-ui,sans-serif;color:${t.load};background:${t.gridLabelBg}cc;padding:1px 3px;border-radius:3px;white-space:nowrap;`;
+    const obj = new CSS2DObject(el);
+    obj.position.copy(at);
+    this.#content.add(obj);
   }
 
   #label(text: string, at: THREE.Vector3, kind: "bubble" | "story"): void {
@@ -1020,22 +1154,30 @@ export class StructureViewer {
   }
 }
 
-let triTexture: THREE.Texture | null = null;
-/** Hình tam giác cho ký hiệu gối. */
-function triangleSprite(): THREE.Texture {
-  if (triTexture) return triTexture;
+const sprites = new Map<string, THREE.Texture>();
+/** Ký hiệu: gối ngàm (vuông), khớp (tam giác), gối khác (tròn), nhả liên kết (vòng tròn rỗng). */
+function symbolSprite(kind: "fixed" | "pinned" | "other" | "ring"): THREE.Texture {
+  const hit = sprites.get(kind);
+  if (hit) return hit;
   const c = document.createElement("canvas");
   c.width = c.height = 32;
   const ctx = c.getContext("2d")!;
   ctx.fillStyle = "#fff";
+  ctx.strokeStyle = "#fff";
+  ctx.lineWidth = 5;
   ctx.beginPath();
-  ctx.moveTo(16, 4);
-  ctx.lineTo(30, 28);
-  ctx.lineTo(2, 28);
-  ctx.closePath();
-  ctx.fill();
-  triTexture = new THREE.CanvasTexture(c);
-  return triTexture;
+  if (kind === "fixed") ctx.rect(5, 5, 22, 22);
+  else if (kind === "pinned") {
+    ctx.moveTo(16, 4);
+    ctx.lineTo(30, 28);
+    ctx.lineTo(2, 28);
+    ctx.closePath();
+  } else ctx.arc(16, 16, kind === "ring" ? 11 : 12, 0, Math.PI * 2);
+  if (kind === "ring") ctx.stroke();
+  else ctx.fill();
+  const tex = new THREE.CanvasTexture(c);
+  sprites.set(kind, tex);
+  return tex;
 }
 
 export { findGridLine };

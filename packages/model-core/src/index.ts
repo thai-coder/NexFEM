@@ -9,3 +9,4 @@ export * from "./validation.ts";
 export * from "./definitions.ts";
 export * from "./project.ts";
 export * from "./drawing.ts";
+export * from "./assign.ts";
