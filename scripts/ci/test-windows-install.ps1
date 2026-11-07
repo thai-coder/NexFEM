@@ -152,6 +152,16 @@ $Results["Chạy bằng tài khoản thường"] = "$($user.user) (dữ liệu r
 
 # ---------------------------------------------------------------- gỡ cài đặt
 Step "Gỡ cài đặt"
+# Trình gỡ NSIS tự huỷ (mã 2) nếu NexFEM.exe còn chạy ở bất kỳ phiên nào; đợi app tắt hẳn.
+for ($i = 0; $i -lt 60; $i++) {
+  $running = Get-Process -Name "NexFEM" -ErrorAction SilentlyContinue
+  if (-not $running) { break }
+  Start-Sleep 1
+}
+if ($running) {
+  $running | ForEach-Object { Write-Host "  vẫn chạy: pid $($_.Id) phiên $($_.SessionId)" }
+  throw "NexFEM.exe chưa tắt sau 60 giây"
+}
 if ($Kind -eq "msi") {
   $p = Start-Process msiexec.exe -ArgumentList "/x `"$Installer`" /qn" -Wait -PassThru
   if ($p.ExitCode -ne 0) { throw "Gỡ MSI trả về $($p.ExitCode)" }
