@@ -157,11 +157,21 @@ if ($Kind -eq "msi") {
   if ($p.ExitCode -ne 0) { throw "Gỡ MSI trả về $($p.ExitCode)" }
 } else {
   $un = Join-Path $InstallDir "uninstall.exe"
-  $p = Start-Process $un -ArgumentList "/S" -Wait -PassThru
-  # Trình gỡ NSIS tự sao chép ra thư mục tạm rồi chạy tiếp; đợi nó xoá xong.
-  for ($i = 0; $i -lt 30 -and (Test-Path (Join-Path $InstallDir "*.exe")); $i++) { Start-Sleep 2 }
+  # "_?=" giữ trình gỡ chạy tại chỗ và chờ xong (không tách ra tiến trình nền trong %TEMP%);
+  # khi đó chính uninstall.exe không tự xoá được, nên xoá nó sau cùng.
+  $p = Start-Process $un -ArgumentList "/S", "_?=$InstallDir" -Wait -PassThru
+  if ($p.ExitCode -ne 0) { throw "Gỡ NSIS trả về $($p.ExitCode)" }
+  Remove-Item $un -Force -ErrorAction SilentlyContinue
 }
-if (Get-ChildItem $InstallDir -Filter *.exe -ErrorAction SilentlyContinue) { throw "Gỡ cài đặt chưa xoá hết file trong $InstallDir" }
+$left = Get-ChildItem $InstallDir -Recurse -File -ErrorAction SilentlyContinue
+if ($left) {
+  Write-Host "File còn lại:"; $left | ForEach-Object { Write-Host "  $($_.FullName)" }
+  Get-Process | Where-Object { $_.Path -like "$InstallDir*" } | ForEach-Object { Write-Host "  đang chạy: $($_.Path)" }
+  throw "Gỡ cài đặt chưa xoá hết file trong $InstallDir"
+}
+$reg = Get-ChildItem "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall", "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall" -ErrorAction SilentlyContinue |
+  Where-Object { (Get-ItemProperty $_.PSPath -ErrorAction SilentlyContinue).DisplayName -eq "NexFEM" }
+if ($reg) { throw "Còn mục NexFEM trong Programs and Features sau khi gỡ" }
 $Results["Gỡ cài đặt sạch"] = "có"
 
 Step "Kết quả ($Kind)"
