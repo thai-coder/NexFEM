@@ -70,6 +70,21 @@ fn frontend_ready(app: tauri::AppHandle) -> Result<(), String> {
     Ok(())
 }
 
+/// Ở chế độ tự kiểm tra, ghi lỗi panic (kèm backtrace) ra `<NEXFEM_SMOKE_TEST>.panic.txt`
+/// vì bản release trên Windows không có cửa sổ console để in lỗi.
+fn install_smoke_panic_hook() {
+    let Ok(out) = std::env::var("NEXFEM_SMOKE_TEST") else {
+        return;
+    };
+    let crash = format!("{out}.panic.txt");
+    let default = std::panic::take_hook();
+    std::panic::set_hook(Box::new(move |info| {
+        let bt = std::backtrace::Backtrace::force_capture();
+        let _ = std::fs::write(&crash, format!("{info}\n\n{bt}"));
+        default(info);
+    }));
+}
+
 const ALLOWED_EXTENSIONS: [&str; 2] = ["nxf", "json"];
 /// Giới hạn kích thước file dự án khi đọc (512 MB).
 const MAX_PROJECT_BYTES: u64 = 512 * 1024 * 1024;
@@ -133,6 +148,7 @@ fn write_atomic(path: &std::path::Path, data: &[u8]) -> std::io::Result<()> {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    install_smoke_panic_hook();
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .invoke_handler(tauri::generate_handler![

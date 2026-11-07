@@ -36,34 +36,76 @@ function Invoke-SmokeAsCurrentUser($exe, $out) {
   } finally {
     Remove-Item Env:NEXFEM_SMOKE_TEST -ErrorAction SilentlyContinue
   }
-  if (-not (Test-Path $out)) { throw "App chạy nhưng không ghi báo cáo (giao diện không tải được?)" }
+  if (-not (Test-Path $out)) { Show-Panic $out; throw "App chạy nhưng không ghi báo cáo (giao diện không tải được?)" }
   $r = Get-Content $out -Raw | ConvertFrom-Json
   if (-not $r.ok) { throw "Báo cáo không hợp lệ: $(Get-Content $out -Raw)" }
   Write-Host "OK: user=$($r.user) data=$($r.appLocalData) version=$($r.version)"
   return $r
 }
 
+function Show-Panic($out) {
+  $panic = "$out.panic.txt"
+  if (Test-Path $panic) {
+    Write-Host "--- panic ---" -ForegroundColor Yellow
+    Get-Content $panic -TotalCount 40 | Write-Host
+  }
+}
+
+function Wait-Report($out, $seconds, [scriptblock] $running) {
+  for ($i = 0; $i -lt $seconds; $i++) {
+    if (Test-Path $out) { return $true }
+    if (-not (& $running)) { Start-Sleep 2; return (Test-Path $out) }
+    Start-Sleep 1
+  }
+  return (Test-Path $out)
+}
+
+<#
+  Chạy app bằng một tài khoản người dùng thường (không thuộc Administrators).
+  Cách A (chẩn đoán): Start-Process -Credential — tiến trình chạy trong màn hình của tài khoản quản trị
+           đang đăng nhập; tài khoản khác thường không có quyền tạo cửa sổ ở đó.
+  Cách B (bắt buộc): Task Scheduler đăng nhập bằng chính tài khoản đó, trong phiên riêng của nó,
+           giống người dùng thật đăng nhập máy.
+#>
 function Invoke-SmokeAsStandardUser($exe) {
   $name = "nxtest$((Get-Random -Maximum 9999))"
   # Tối đa 14 ký tự: dài hơn thì "net user" dừng lại hỏi xác nhận.
   $pw = "Nx!" + [guid]::NewGuid().ToString("N").Substring(0, 9) + "a1"
-  $out = "C:\Users\Public\nexfem-smoke-$name.json"
-  Remove-Item $out -ErrorAction SilentlyContinue
   net user $name $pw /add | Out-Null
   if ($LASTEXITCODE -ne 0) { throw "Không tạo được tài khoản thử $name" }
+  # Quyền "Log on as a batch job" để Task Scheduler đăng nhập được; nhóm này không có quyền quản trị.
+  net localgroup "Performance Log Users" $name /add | Out-Null
+  $groups = (net user $name) -join " "
+  if ($groups -match "\*Administrators") { throw "Tài khoản thử lại thuộc Administrators" }
+  $task = "nexfem-smoke-$name"
   try {
-    # Không thêm vào nhóm Administrators: đây là tài khoản người dùng thường.
+    Write-Host "-- Cách A: Start-Process -Credential (chẩn đoán)"
+    $outA = "C:\Users\Public\nexfem-smoke-$name-a.json"
     $cred = New-Object System.Management.Automation.PSCredential($name, (ConvertTo-SecureString $pw -AsPlainText -Force))
-    $cmd = "/c set NEXFEM_SMOKE_TEST=$out&& `"$exe`""
-    $p = Start-Process -FilePath "cmd.exe" -ArgumentList $cmd -Credential $cred -LoadUserProfile -WorkingDirectory "C:\Users\Public" -PassThru
-    if (-not $p.WaitForExit(180000)) { $p.Kill(); throw "App không tự thoát sau 180 giây (tài khoản $name)" }
-    if (-not (Test-Path $out)) { throw "App không ghi báo cáo khi chạy bằng tài khoản thường $name (mã thoát $($p.ExitCode))" }
+    $p = Start-Process -FilePath "cmd.exe" -ArgumentList "/c set NEXFEM_SMOKE_TEST=$outA&& `"$exe`"" -Credential $cred -LoadUserProfile -WorkingDirectory "C:\Users\Public" -PassThru
+    [void](Wait-Report $outA 120 { -not $p.HasExited })
+    if (Test-Path $outA) { Write-Host "Cách A: OK $(Get-Content $outA -Raw)" }
+    else { Write-Host "Cách A: không có báo cáo (mã thoát $($p.ExitCode))"; Show-Panic $outA }
+
+    Write-Host "-- Cách B: Task Scheduler, phiên đăng nhập riêng của $name"
+    $out = "C:\Users\Public\nexfem-smoke-$name.json"
+    $action = New-ScheduledTaskAction -Execute "cmd.exe" -Argument "/c set NEXFEM_SMOKE_TEST=$out&& `"$exe`"" -WorkingDirectory "C:\Users\Public"
+    $settings = New-ScheduledTaskSettingsSet -ExecutionTimeLimit (New-TimeSpan -Minutes 5)
+    Register-ScheduledTask -TaskName $task -Action $action -Settings $settings -User $name -Password $pw -RunLevel Limited | Out-Null
+    Start-ScheduledTask -TaskName $task
+    $ok = Wait-Report $out 180 { (Get-ScheduledTask -TaskName $task).State -eq "Running" }
+    $info = Get-ScheduledTaskInfo -TaskName $task
+    if (-not $ok) {
+      Show-Panic $out
+      throw "Tài khoản thường ${name}: app không ghi báo cáo (kết quả tác vụ $($info.LastTaskResult))"
+    }
     $r = Get-Content $out -Raw | ConvertFrom-Json
-    Write-Host "OK: user=$($r.user) data=$($r.appLocalData)"
+    Write-Host "Cách B: OK user=$($r.user) data=$($r.appLocalData)"
     return $r
   } finally {
+    Unregister-ScheduledTask -TaskName $task -Confirm:$false -ErrorAction SilentlyContinue
     net user $name /delete | Out-Null
-    Remove-Item $out -ErrorAction SilentlyContinue
+    Remove-Item "C:\Users\Public\nexfem-smoke-$name*" -ErrorAction SilentlyContinue
   }
 }
 
