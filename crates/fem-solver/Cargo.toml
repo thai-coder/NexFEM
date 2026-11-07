@@ -1,0 +1,12 @@
+[package]
+name = "fem-solver"
+description = "NexFEM: bộ giải phân tích tĩnh tuyến tính khung 3D"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+fem-core = { path = "../fem-core" }
+serde.workspace = true
+serde_json.workspace = true

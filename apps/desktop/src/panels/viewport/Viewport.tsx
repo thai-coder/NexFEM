@@ -152,6 +152,15 @@ function Pane({ index }: { index: number }) {
           )}
         </select>
         <span className="pane-sub">{viewTitle(model, view, labels)}</span>
+        {view.kind === "3d" && (
+          <span className="view-presets" title={T.view.orbitHint}>
+            {(["top", "front", "right", "iso"] as const).map((p) => (
+              <button key={p} className="preset-btn" data-testid={`preset-${p}`} onClick={() => viewer.current?.setViewPreset(p)}>
+                {T.view.presets[p]}
+              </button>
+            ))}
+          </span>
+        )}
         {tool !== "select" && (
           <span className={`pane-tool${drawing ? "" : " off"}`} title={drawing ? T.draw.hint[tool] : T.draw.not3d}>
             {T.cmd[`draw.${tool}`]}

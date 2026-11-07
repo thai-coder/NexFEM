@@ -7,3 +7,4 @@ test-results/
 playwright-report/
 apps/desktop/src-tauri/gen/
 .DS_Store
+apps/desktop/public/fem.wasm

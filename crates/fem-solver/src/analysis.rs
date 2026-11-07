@@ -1,0 +1,847 @@
+//! Phân tích tĩnh tuyến tính khung 3D.
+//!
+//! Giả thiết (Giai đoạn 5):
+//! - Thanh: phần tử dầm 3D Euler–Bernoulli, có nhả liên kết; chưa có offset/vùng cứng, chưa có biến dạng cắt.
+//! - Sàn: chưa có độ cứng; tải sàn (và trọng lượng bản thân sàn) truyền về các thanh biên theo
+//!   quy tắc 45° (ô chữ nhật) hoặc chia tam giác từ trọng tâm (ô khác), dưới dạng tải phân bố đều tương đương.
+//! - Vách: chưa có độ cứng; tải trên vách chia đều về các nút của vách.
+//! - Chỉ có trường hợp tải tĩnh tuyến tính và tổ hợp cộng tuyến tính.
+
+use crate::element::*;
+use crate::skyline::{reverse_cuthill_mckee, Skyline};
+use fem_core::{FrameShape, Model};
+use serde::Serialize;
+use std::collections::{BTreeMap, HashMap};
+
+const DOF_NAMES: [&str; 6] = ["Ux", "Uy", "Uz", "Rx", "Ry", "Rz"];
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Warning {
+    pub code: String,
+    pub message: String,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub objects: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AnalysisError {
+    pub code: String,
+    pub message: String,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub objects: Vec<String>,
+}
+
+impl AnalysisError {
+    fn new(code: &str, message: impl Into<String>, objects: Vec<String>) -> Self {
+        AnalysisError {
+            code: code.into(),
+            message: message.into(),
+            objects,
+        }
+    }
+}
+
+/// Nội lực tại các điểm dọc thanh (theo trục cục bộ). x tính từ đầu i (m).
+/// Quy ước: lực trên mặt cắt dương; P > 0 là kéo; M3 > 0 làm căng thớ dưới (dầm võng xuống).
+#[derive(Debug, Clone, Default, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FrameForces {
+    pub x: Vec<f64>,
+    pub p: Vec<f64>,
+    pub v2: Vec<f64>,
+    pub v3: Vec<f64>,
+    pub t: Vec<f64>,
+    pub m2: Vec<f64>,
+    pub m3: Vec<f64>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CaseResult {
+    pub id: String,
+    pub name: String,
+    /// "case" hoặc "combo".
+    pub kind: String,
+    /// Chuyển vị nút [Ux, Uy, Uz, Rx, Ry, Rz] (m, rad).
+    pub displacements: BTreeMap<String, [f64; 6]>,
+    /// Phản lực tại nút có gối [Fx, Fy, Fz, Mx, My, Mz] (kN, kN·m).
+    pub reactions: BTreeMap<String, [f64; 6]>,
+    pub frames: BTreeMap<String, FrameForces>,
+    /// Tổng lực tác dụng [Fx, Fy, Fz] và tổng phản lực, để kiểm tra cân bằng.
+    pub applied: [f64; 3],
+    pub sum_reactions: [f64; 3],
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Results {
+    pub dof: usize,
+    pub joints: usize,
+    pub frames: usize,
+    pub profile: usize,
+    pub cases: Vec<CaseResult>,
+    pub warnings: Vec<Warning>,
+}
+
+pub struct Options {
+    /// Số điểm tính nội lực trên mỗi thanh (≥ 2).
+    pub stations: usize,
+}
+
+impl Default for Options {
+    fn default() -> Self {
+        Options { stations: 9 }
+    }
+}
+
+/// Đặc trưng tiết diện (m), giống `packages/model-core/src/sections.ts`.
+pub fn section_props(g: &FrameShape) -> (f64, f64, f64, f64) {
+    use std::f64::consts::PI;
+    match *g {
+        FrameShape::Rect { b, h } => {
+            let (a, c) = (b.max(h), b.min(h));
+            let j = a
+                * c.powi(3)
+                * (1.0 / 3.0 - 0.21 * (c / a) * (1.0 - c.powi(4) / (12.0 * a.powi(4))));
+            (b * h, h * b.powi(3) / 12.0, b * h.powi(3) / 12.0, j)
+        }
+        FrameShape::Circle { d } => {
+            let r = d / 2.0;
+            let i = PI * r.powi(4) / 4.0;
+            (PI * r * r, i, i, 2.0 * i)
+        }
+        FrameShape::I { h, bf, tf, tw } => {
+            let hw = h - 2.0 * tf;
+            let a = 2.0 * bf * tf + hw * tw;
+            let i33 = (bf * h.powi(3) - (bf - tw) * hw.powi(3)) / 12.0;
+            let i22 = (2.0 * tf * bf.powi(3) + hw * tw.powi(3)) / 12.0;
+            let j = (2.0 * bf * tf.powi(3) + hw * tw.powi(3)) / 3.0;
+            (a, i22, i33, j)
+        }
+        FrameShape::Box { h, b, t } => {
+            let (hi, bi) = (h - 2.0 * t, b - 2.0 * t);
+            let a = b * h - bi * hi;
+            let i33 = (b * h.powi(3) - bi * hi.powi(3)) / 12.0;
+            let i22 = (h * b.powi(3) - hi * bi.powi(3)) / 12.0;
+            let j = 2.0 * t * (b - t).powi(2) * (h - t).powi(2) / (b + h - 2.0 * t);
+            (a, i22, i33, j)
+        }
+        FrameShape::Pipe { d, t } => {
+            let (ro, ri) = (d / 2.0, d / 2.0 - t);
+            let i = PI * (ro.powi(4) - ri.powi(4)) / 4.0;
+            (PI * (ro * ro - ri * ri), i, i, 2.0 * i)
+        }
+    }
+}
+
+enum MemberLoad {
+    /// Tải phân bố đều (cục bộ, kN/m) trên cả chiều dài.
+    Uniform(V3),
+    /// Lực tập trung (cục bộ, kN) tại khoảng cách a từ đầu i.
+    Point(V3, f64),
+}
+
+struct Elem {
+    id: String,
+    ax: [V3; 3],
+    l: f64,
+    k_local: M12,
+    released: [bool; 12],
+    k_cond: M12,
+    /// Bậc tự do tổng thể của 12 thành phần (None = bị gối giữ).
+    dofs: [Option<usize>; 12],
+    ji: usize,
+    jj: usize,
+}
+
+/// Tải của một mẫu tải: tải nút (theo chỉ số nút trong tập nút phân tích) và tải trên thanh.
+#[derive(Default)]
+struct PatternLoads {
+    joint: HashMap<usize, [f64; 6]>,
+    member: HashMap<usize, Vec<MemberLoad>>,
+}
+
+pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> {
+    let mut warnings: Vec<Warning> = Vec::new();
+    let warn = |w: &mut Vec<Warning>, code: &str, msg: String, objects: Vec<String>| {
+        w.push(Warning {
+            code: code.into(),
+            message: msg,
+            objects,
+        })
+    };
+    if model.frames.is_empty() {
+        return Err(AnalysisError::new(
+            "no_frames",
+            "Mô hình chưa có thanh nào để phân tích",
+            vec![],
+        ));
+    }
+
+    // ---- nút tham gia phân tích: nút của các thanh
+    let joint_by_id: HashMap<&str, usize> = model
+        .joints
+        .iter()
+        .enumerate()
+        .map(|(i, j)| (j.id.as_str(), i))
+        .collect();
+    let mut used = vec![false; model.joints.len()];
+    for f in &model.frames {
+        for id in [&f.i, &f.j] {
+            let k = *joint_by_id.get(id.as_str()).ok_or_else(|| {
+                AnalysisError::new(
+                    "missing_joint",
+                    format!("Thanh {} tham chiếu nút không tồn tại", f.label),
+                    vec![f.id.clone()],
+                )
+            })?;
+            used[k] = true;
+        }
+    }
+    let nodes: Vec<usize> = (0..model.joints.len()).filter(|&k| used[k]).collect();
+    let node_of: HashMap<usize, usize> = nodes.iter().enumerate().map(|(n, &k)| (k, n)).collect();
+    let pos = |n: usize| -> V3 {
+        let j = &model.joints[nodes[n]];
+        [j.x, j.y, j.z]
+    };
+
+    // ---- đánh số bậc tự do theo thứ tự Cuthill–McKee ngược
+    let mut adj = vec![Vec::new(); nodes.len()];
+    let pair = |f: &fem_core::Frame| {
+        (
+            node_of[&joint_by_id[f.i.as_str()]],
+            node_of[&joint_by_id[f.j.as_str()]],
+        )
+    };
+    for f in &model.frames {
+        let (a, b) = pair(f);
+        adj[a].push(b);
+        adj[b].push(a);
+    }
+    let order = reverse_cuthill_mckee(&adj);
+    let mut dof_of = vec![[None; 6]; nodes.len()];
+    let mut dof_owner: Vec<(usize, usize)> = Vec::new();
+    for &n in &order {
+        let r = model.joints[nodes[n]].restraint.unwrap_or([false; 6]);
+        for d in 0..6 {
+            if !r[d] {
+                dof_of[n][d] = Some(dof_owner.len());
+                dof_owner.push((n, d));
+            }
+        }
+    }
+    let ndof = dof_owner.len();
+
+    // ---- phần tử
+    let materials: HashMap<&str, &fem_core::Material> =
+        model.materials.iter().map(|m| (m.id.as_str(), m)).collect();
+    let sections: HashMap<&str, &fem_core::FrameSection> = model
+        .frame_sections
+        .iter()
+        .map(|s| (s.id.as_str(), s))
+        .collect();
+    let mut elems: Vec<Elem> = Vec::with_capacity(model.frames.len());
+    let mut self_weight: Vec<f64> = Vec::with_capacity(model.frames.len()); // kN/m
+    for f in &model.frames {
+        let sec = sections.get(f.section.as_str()).ok_or_else(|| {
+            AnalysisError::new(
+                "missing_section",
+                format!("Thanh {}: thiếu tiết diện", f.label),
+                vec![f.id.clone()],
+            )
+        })?;
+        let mat = materials.get(sec.material.as_str()).ok_or_else(|| {
+            AnalysisError::new(
+                "missing_material",
+                format!("Tiết diện {}: thiếu vật liệu", sec.name),
+                vec![sec.id.clone()],
+            )
+        })?;
+        let (ji, jj) = pair(f);
+        let (a, b) = (pos(ji), pos(jj));
+        let l = norm(sub(b, a));
+        if l < 1e-9 {
+            return Err(AnalysisError::new(
+                "zero_length",
+                format!("Thanh {} có chiều dài bằng 0", f.label),
+                vec![f.id.clone()],
+            ));
+        }
+        let (area, i22, i33, j) = section_props(&sec.geometry);
+        let props = SectionProps {
+            e: mat.e,
+            g: mat.e / (2.0 * (1.0 + mat.nu)),
+            a: area,
+            i22,
+            i33,
+            j,
+        };
+        let k_local = local_stiffness(&props, l);
+        let mut released = [false; 12];
+        if let Some(r) = &f.releases {
+            for c in 0..6 {
+                released[c] = r.i.get(c).copied().unwrap_or(false);
+                released[6 + c] = r.j.get(c).copied().unwrap_or(false);
+            }
+        }
+        let (k_cond, _) = condense(&k_local, &[0.0; 12], &released);
+        let mut dofs = [None; 12];
+        for d in 0..6 {
+            dofs[d] = dof_of[ji][d];
+            dofs[6 + d] = dof_of[jj][d];
+        }
+        self_weight.push(mat.gamma * area);
+        elems.push(Elem {
+            id: f.id.clone(),
+            ax: local_axes(a, b),
+            l,
+            k_local,
+            released,
+            k_cond,
+            dofs,
+            ji,
+            jj,
+        });
+    }
+
+    // ---- lắp ghép ma trận độ cứng (skyline)
+    let mut first: Vec<usize> = (0..ndof).collect();
+    for e in &elems {
+        if let Some(m) = e.dofs.iter().flatten().min() {
+            for &d in e.dofs.iter().flatten() {
+                first[d] = first[d].min(*m);
+            }
+        }
+    }
+    let mut k = Skyline::new(first);
+    for e in &elems {
+        let kg = stiffness_to_global(&e.ax, &e.k_cond);
+        for a in 0..12 {
+            let Some(da) = e.dofs[a] else { continue };
+            for b in a..12 {
+                let Some(db) = e.dofs[b] else { continue };
+                if kg[a][b] != 0.0 || a == b {
+                    k.add(da, db, kg[a][b]);
+                }
+            }
+        }
+    }
+    // Bậc tự do xoay không có độ cứng (mọi thanh nối vào đều nhả mô men) → thêm lò xo đơn vị và cảnh báo.
+    let mut stabilized = Vec::new();
+    for d in 0..ndof {
+        if k.get(d, d) == 0.0 && dof_owner[d].1 >= 3 {
+            k.add(d, d, 1.0);
+            stabilized.push(model.joints[nodes[dof_owner[d].0]].label.clone());
+        }
+    }
+    if !stabilized.is_empty() {
+        stabilized.sort();
+        stabilized.dedup();
+        warn(
+            &mut warnings,
+            "free_rotation",
+            format!("{} nút có bậc tự do xoay tự do (mọi thanh nối vào đều nhả mô men); đã giữ lại để giải", stabilized.len()),
+            stabilized,
+        );
+    }
+    let profile = k.profile();
+    k.factor(1e-11).map_err(|s| {
+        let (n, d) = dof_owner[s.dof];
+        let jt = &model.joints[nodes[n]];
+        AnalysisError::new(
+            "unstable",
+            format!(
+                "Kết cấu mất ổn định tại nút {} theo phương {} (thiếu gối hoặc liên kết)",
+                jt.label, DOF_NAMES[d]
+            ),
+            vec![jt.id.clone()],
+        )
+    })?;
+
+    // ---- tải theo mẫu tải
+    let frame_by_id: HashMap<&str, usize> = model
+        .frames
+        .iter()
+        .enumerate()
+        .map(|(i, f)| (f.id.as_str(), i))
+        .collect();
+    let mut edge_frame: HashMap<(usize, usize), usize> = HashMap::new();
+    for (i, f) in model.frames.iter().enumerate() {
+        let (a, b) = (joint_by_id[f.i.as_str()], joint_by_id[f.j.as_str()]);
+        edge_frame.insert((a.min(b), a.max(b)), i);
+    }
+    let mut lost_joints: Vec<String> = Vec::new();
+    let mut patterns: HashMap<&str, PatternLoads> = HashMap::new();
+    for lp in &model.load_patterns {
+        let mut pl = PatternLoads::default();
+        // Lực đặt tại nút (theo chỉ số trong model.joints).
+        let add_joint = |pl: &mut PatternLoads, jk: usize, force: V3, lost: &mut Vec<String>| {
+            if let Some(&n) = node_of.get(&jk) {
+                let e = pl.joint.entry(n).or_insert([0.0; 6]);
+                for c in 0..3 {
+                    e[c] += force[c];
+                }
+            } else {
+                lost.push(model.joints[jk].label.clone());
+            }
+        };
+        // Trọng lượng bản thân thanh.
+        if lp.self_weight != 0.0 {
+            for (ei, e) in elems.iter().enumerate() {
+                let w = to_local3(&e.ax, [0.0, 0.0, -self_weight[ei] * lp.self_weight]);
+                pl.member
+                    .entry(ei)
+                    .or_default()
+                    .push(MemberLoad::Uniform(w));
+            }
+        }
+        // Tải trên thanh.
+        for fl in model.frame_loads.iter().filter(|l| l.pattern == lp.id) {
+            let Some(&ei) = frame_by_id.get(fl.frame.as_str()) else {
+                continue;
+            };
+            let e = &elems[ei];
+            let v = fl.value;
+            let w = match fl.direction.as_str() {
+                "gravity" => to_local3(&e.ax, [0.0, 0.0, -v]),
+                "globalX" => to_local3(&e.ax, [v, 0.0, 0.0]),
+                "globalY" => to_local3(&e.ax, [0.0, v, 0.0]),
+                "globalZ" => to_local3(&e.ax, [0.0, 0.0, v]),
+                "localX" => [v, 0.0, 0.0],
+                "local2" => [0.0, v, 0.0],
+                _ => [0.0, 0.0, v],
+            };
+            let ml = if fl.kind == "point" {
+                MemberLoad::Point(w, fl.at.unwrap_or(0.5) * e.l)
+            } else {
+                MemberLoad::Uniform(w)
+            };
+            pl.member.entry(ei).or_default().push(ml);
+        }
+        // Tải sàn/vách và trọng lượng bản thân sàn.
+        let shell_sections: HashMap<&str, &fem_core::ShellSection> = model
+            .shell_sections
+            .iter()
+            .map(|s| (s.id.as_str(), s))
+            .collect();
+        for sh in &model.shells {
+            let mut q_dirs: Vec<V3> = Vec::new(); // vector tải theo diện tích (kN/m²)
+            let corners: Vec<usize> = sh
+                .joints
+                .iter()
+                .filter_map(|id| joint_by_id.get(id.as_str()).copied())
+                .collect();
+            if corners.len() < 3 {
+                continue;
+            }
+            let pts: Vec<V3> = corners
+                .iter()
+                .map(|&c| [model.joints[c].x, model.joints[c].y, model.joints[c].z])
+                .collect();
+            let normal = {
+                let n = cross(sub(pts[1], pts[0]), sub(pts[2], pts[0]));
+                let l = norm(n).max(1e-12);
+                scale(n, 1.0 / l)
+            };
+            for l in model
+                .shell_loads
+                .iter()
+                .filter(|l| l.shell == sh.id && l.pattern == lp.id)
+            {
+                q_dirs.push(match l.direction.as_str() {
+                    "gravity" => [0.0, 0.0, -l.value],
+                    "globalZ" => [0.0, 0.0, l.value],
+                    _ => scale(normal, l.value),
+                });
+            }
+            if lp.self_weight != 0.0 {
+                if let Some(ss) = shell_sections.get(sh.section.as_str()) {
+                    if let Some(m) = materials.get(ss.material.as_str()) {
+                        q_dirs.push([0.0, 0.0, -m.gamma * ss.thickness * lp.self_weight]);
+                    }
+                }
+            }
+            if q_dirs.is_empty() {
+                continue;
+            }
+            let q = q_dirs
+                .iter()
+                .fold([0.0; 3], |a, b| [a[0] + b[0], a[1] + b[1], a[2] + b[2]]);
+            let areas = edge_tributary(&pts);
+            if sh.kind == "wall" {
+                let total: f64 = areas.iter().sum();
+                let share = scale(q, total / corners.len() as f64);
+                for &c in &corners {
+                    add_joint(&mut pl, c, share, &mut lost_joints);
+                }
+                continue;
+            }
+            for (k, &area) in areas.iter().enumerate() {
+                let (a, b) = (corners[k], corners[(k + 1) % corners.len()]);
+                let force = scale(q, area);
+                if let Some(&fi) = edge_frame.get(&(a.min(b), a.max(b))) {
+                    let e = &elems[fi];
+                    let w = to_local3(&e.ax, scale(force, 1.0 / e.l));
+                    pl.member
+                        .entry(fi)
+                        .or_default()
+                        .push(MemberLoad::Uniform(w));
+                } else {
+                    add_joint(&mut pl, a, scale(force, 0.5), &mut lost_joints);
+                    add_joint(&mut pl, b, scale(force, 0.5), &mut lost_joints);
+                }
+            }
+        }
+        patterns.insert(lp.id.as_str(), pl);
+    }
+    if model.shells.iter().any(|s| s.kind == "wall") {
+        warn(&mut warnings, "walls_no_stiffness", "Vách chưa tham gia chịu lực (phần tử shell có ở Giai đoạn 9); tải trên vách chia đều về các nút".into(), vec![]);
+    }
+    if !lost_joints.is_empty() {
+        lost_joints.sort();
+        lost_joints.dedup();
+        warn(
+            &mut warnings,
+            "lost_loads",
+            format!(
+                "Tải đặt lên {} nút không nối với thanh nào đã bị bỏ qua",
+                lost_joints.len()
+            ),
+            lost_joints,
+        );
+    }
+
+    // ---- giải từng trường hợp tải tĩnh tuyến tính
+    let mut cases: Vec<CaseResult> = Vec::new();
+    for lc in &model.load_cases {
+        if lc.kind != "linearStatic" {
+            warn(
+                &mut warnings,
+                "case_skipped",
+                format!(
+                    "Trường hợp {} ({}) chưa được hỗ trợ, bỏ qua",
+                    lc.name, lc.kind
+                ),
+                vec![lc.id.clone()],
+            );
+            continue;
+        }
+        // Tổng hợp tải của trường hợp.
+        let mut joint_loads: HashMap<usize, [f64; 6]> = HashMap::new();
+        let mut member_loads: HashMap<usize, Vec<(f64, &MemberLoad)>> = HashMap::new();
+        for cl in &lc.loads {
+            let Some(pl) = patterns.get(cl.pattern.as_str()) else {
+                continue;
+            };
+            for (&n, v) in &pl.joint {
+                let e = joint_loads.entry(n).or_insert([0.0; 6]);
+                for c in 0..6 {
+                    e[c] += cl.factor * v[c];
+                }
+            }
+            for (&ei, list) in &pl.member {
+                member_loads
+                    .entry(ei)
+                    .or_default()
+                    .extend(list.iter().map(|ml| (cl.factor, ml)));
+            }
+        }
+        let mut rhs = vec![0.0; ndof];
+        let mut applied = [0.0; 3];
+        for (&n, v) in &joint_loads {
+            for d in 0..6 {
+                if let Some(g) = dof_of[n][d] {
+                    rhs[g] += v[d];
+                }
+            }
+            for c in 0..3 {
+                applied[c] += v[c];
+            }
+        }
+        let mut feq_cond: HashMap<usize, [f64; 12]> = HashMap::new();
+        for (&ei, list) in &member_loads {
+            let e = &elems[ei];
+            let mut feq = [0.0; 12];
+            for &(fac, ml) in list {
+                let (f, total) = match ml {
+                    MemberLoad::Uniform(w) => (uniform_feq(*w, e.l), scale(*w, e.l)),
+                    MemberLoad::Point(p, a) => (point_feq(*p, *a, e.l), *p),
+                };
+                for c in 0..12 {
+                    feq[c] += fac * f[c];
+                }
+                let tg = from_local3(&e.ax, total);
+                for c in 0..3 {
+                    applied[c] += fac * tg[c];
+                }
+            }
+            let (_, fc) = condense(&e.k_local, &feq, &e.released);
+            let fg = to_global(&e.ax, &fc);
+            for c in 0..12 {
+                if let Some(g) = e.dofs[c] {
+                    rhs[g] += fg[c];
+                }
+            }
+            feq_cond.insert(ei, fc);
+        }
+        k.solve(&mut rhs);
+        let u = rhs;
+
+        let disp_of = |n: usize| -> [f64; 6] {
+            let mut d = [0.0; 6];
+            for c in 0..6 {
+                if let Some(g) = dof_of[n][c] {
+                    d[c] = u[g];
+                }
+            }
+            d
+        };
+        let mut displacements = BTreeMap::new();
+        for n in 0..nodes.len() {
+            displacements.insert(model.joints[nodes[n]].id.clone(), disp_of(n));
+        }
+        // Lực đầu thanh và phản lực.
+        let mut joint_sum: Vec<[f64; 6]> = vec![[0.0; 6]; nodes.len()];
+        let mut frames = BTreeMap::new();
+        for (ei, e) in elems.iter().enumerate() {
+            let (di, dj) = (disp_of(e.ji), disp_of(e.jj));
+            let mut ug = [0.0; 12];
+            ug[..6].copy_from_slice(&di);
+            ug[6..].copy_from_slice(&dj);
+            let ul = to_local(&e.ax, &ug);
+            let mut fl = [0.0; 12];
+            for a in 0..12 {
+                fl[a] = (0..12).map(|b| e.k_cond[a][b] * ul[b]).sum::<f64>()
+                    - feq_cond.get(&ei).map_or(0.0, |f| f[a]);
+            }
+            let fg = to_global(&e.ax, &fl);
+            for c in 0..6 {
+                joint_sum[e.ji][c] += fg[c];
+                joint_sum[e.jj][c] += fg[6 + c];
+            }
+            let loads: Vec<(f64, &MemberLoad)> = member_loads.get(&ei).cloned().unwrap_or_default();
+            frames.insert(
+                e.id.clone(),
+                stations(&fl, &loads, e.l, opts.stations.max(2)),
+            );
+        }
+        let mut reactions = BTreeMap::new();
+        let mut sum_reactions = [0.0; 3];
+        for n in 0..nodes.len() {
+            let jt = &model.joints[nodes[n]];
+            let Some(r) = jt.restraint else { continue };
+            if !r.iter().any(|x| *x) {
+                continue;
+            }
+            let applied_here = joint_loads.get(&n).copied().unwrap_or([0.0; 6]);
+            let mut rv = [0.0; 6];
+            for c in 0..6 {
+                if r[c] {
+                    rv[c] = joint_sum[n][c] - applied_here[c];
+                }
+            }
+            for c in 0..3 {
+                sum_reactions[c] += rv[c];
+            }
+            reactions.insert(jt.id.clone(), rv);
+        }
+        cases.push(CaseResult {
+            id: lc.id.clone(),
+            name: lc.name.clone(),
+            kind: "case".into(),
+            displacements,
+            reactions,
+            frames,
+            applied,
+            sum_reactions,
+        });
+    }
+
+    // ---- tổ hợp cộng tuyến tính (có thể lồng tổ hợp khác đã tính trước)
+    for co in &model.combos {
+        if co.kind != "linearAdd" {
+            warn(
+                &mut warnings,
+                "combo_skipped",
+                format!("Tổ hợp {} ({}) chưa được hỗ trợ, bỏ qua", co.name, co.kind),
+                vec![co.id.clone()],
+            );
+            continue;
+        }
+        let parts: Vec<(f64, &CaseResult)> = co
+            .items
+            .iter()
+            .filter_map(|it| {
+                cases
+                    .iter()
+                    .find(|c| c.id == it.case)
+                    .map(|c| (it.factor, c))
+            })
+            .collect();
+        if parts.len() != co.items.len() {
+            warn(
+                &mut warnings,
+                "combo_incomplete",
+                format!("Tổ hợp {} có thành phần chưa được tính, bỏ qua", co.name),
+                vec![co.id.clone()],
+            );
+            continue;
+        }
+        cases.push(combine(co.id.clone(), co.name.clone(), &parts));
+    }
+
+    Ok(Results {
+        dof: ndof,
+        joints: nodes.len(),
+        frames: elems.len(),
+        profile,
+        cases,
+        warnings,
+    })
+}
+
+fn to_local3(ax: &[V3; 3], g: V3) -> V3 {
+    [dot(ax[0], g), dot(ax[1], g), dot(ax[2], g)]
+}
+fn from_local3(ax: &[V3; 3], l: V3) -> V3 {
+    [0, 1, 2].map(|c| ax[0][c] * l[0] + ax[1][c] * l[1] + ax[2][c] * l[2])
+}
+
+/// Diện tích truyền tải về từng cạnh của đa giác (cạnh k nối đỉnh k và k+1).
+pub fn edge_tributary(pts: &[V3]) -> Vec<f64> {
+    let n = pts.len();
+    if n == 4 {
+        let e: Vec<V3> = (0..4).map(|k| sub(pts[(k + 1) % 4], pts[k])).collect();
+        let right = (0..4)
+            .all(|k| dot(e[k], e[(k + 1) % 4]).abs() < 1e-6 * norm(e[k]) * norm(e[(k + 1) % 4]));
+        if right {
+            // Quy tắc 45°: cạnh ngắn nhận tam giác, cạnh dài nhận hình thang.
+            let (l0, l1) = (norm(e[0]), norm(e[1]));
+            let (a, b) = (l0.min(l1), l0.max(l1));
+            let tri = a * a / 4.0;
+            let trap = a * b / 2.0 - tri;
+            return (0..4)
+                .map(|k| {
+                    if (norm(e[k]) - a).abs() < 1e-9 * b {
+                        tri
+                    } else {
+                        trap
+                    }
+                })
+                .collect();
+        }
+    }
+    let c = pts
+        .iter()
+        .fold([0.0; 3], |s, p| [s[0] + p[0], s[1] + p[1], s[2] + p[2]]);
+    let c = scale(c, 1.0 / n as f64);
+    (0..n)
+        .map(|k| norm(cross(sub(pts[k], c), sub(pts[(k + 1) % n], c))) / 2.0)
+        .collect()
+}
+
+/// Nội lực tại các điểm chia đều dọc thanh từ lực đầu i (cục bộ) và tải trên thanh.
+fn stations(f: &[f64; 12], loads: &[(f64, &MemberLoad)], l: f64, n: usize) -> FrameForces {
+    let mut out = FrameForces::default();
+    for s in 0..n {
+        let x = l * s as f64 / (n - 1) as f64;
+        // Lực và mô men trên mặt cắt (đoạn [0, x]): F = -(f_i + ∫w), M = -(m_i + r_i×f_i + Σ r×w).
+        let mut fsum = [f[0], f[1], f[2]];
+        let mut msum = [f[3], f[4] + x * f[2], f[5] - x * f[1]];
+        for &(fac, ml) in loads {
+            match ml {
+                MemberLoad::Uniform(w) => {
+                    for c in 0..3 {
+                        fsum[c] += fac * w[c] * x;
+                    }
+                    msum[1] += fac * w[2] * x * x / 2.0;
+                    msum[2] -= fac * w[1] * x * x / 2.0;
+                }
+                MemberLoad::Point(p, a) => {
+                    if *a <= x + 1e-12 {
+                        for c in 0..3 {
+                            fsum[c] += fac * p[c];
+                        }
+                        let r = a - x;
+                        msum[1] -= fac * r * p[2];
+                        msum[2] += fac * r * p[1];
+                    }
+                }
+            }
+        }
+        out.x.push(x);
+        out.p.push(-fsum[0]);
+        out.v2.push(-fsum[1]);
+        out.v3.push(-fsum[2]);
+        out.t.push(-msum[0]);
+        out.m2.push(-msum[1]);
+        out.m3.push(-msum[2]);
+    }
+    out
+}
+
+fn combine(id: String, name: String, parts: &[(f64, &CaseResult)]) -> CaseResult {
+    let (_, base) = parts[0];
+    let mut r = CaseResult {
+        id,
+        name,
+        kind: "combo".into(),
+        displacements: base
+            .displacements
+            .keys()
+            .map(|k| (k.clone(), [0.0; 6]))
+            .collect(),
+        reactions: base
+            .reactions
+            .keys()
+            .map(|k| (k.clone(), [0.0; 6]))
+            .collect(),
+        frames: BTreeMap::new(),
+        applied: [0.0; 3],
+        sum_reactions: [0.0; 3],
+    };
+    for &(fac, c) in parts {
+        for (k, v) in &c.displacements {
+            let e = r.displacements.entry(k.clone()).or_insert([0.0; 6]);
+            for i in 0..6 {
+                e[i] += fac * v[i];
+            }
+        }
+        for (k, v) in &c.reactions {
+            let e = r.reactions.entry(k.clone()).or_insert([0.0; 6]);
+            for i in 0..6 {
+                e[i] += fac * v[i];
+            }
+        }
+        for (k, v) in &c.frames {
+            let e = r.frames.entry(k.clone()).or_insert_with(|| FrameForces {
+                x: v.x.clone(),
+                p: vec![0.0; v.x.len()],
+                v2: vec![0.0; v.x.len()],
+                v3: vec![0.0; v.x.len()],
+                t: vec![0.0; v.x.len()],
+                m2: vec![0.0; v.x.len()],
+                m3: vec![0.0; v.x.len()],
+            });
+            for (dst, src) in [
+                (&mut e.p, &v.p),
+                (&mut e.v2, &v.v2),
+                (&mut e.v3, &v.v3),
+                (&mut e.t, &v.t),
+                (&mut e.m2, &v.m2),
+                (&mut e.m3, &v.m3),
+            ] {
+                for (a, b) in dst.iter_mut().zip(src) {
+                    *a += fac * b;
+                }
+            }
+        }
+        for i in 0..3 {
+            r.applied[i] += fac * c.applied[i];
+            r.sum_reactions[i] += fac * c.sum_reactions[i];
+        }
+    }
+    r
+}

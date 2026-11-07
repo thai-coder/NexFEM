@@ -18,14 +18,16 @@ apps/desktop/          Ứng dụng Tauri 2: frontend React (src/) + backend Rus
 packages/model-core/   Mô hình kết cấu thuần TypeScript: schema, đơn vị, lệnh có Undo/Redo, kiểm tra mô hình
 packages/viewer/       Vẽ 2D/3D bằng Three.js (Plan, Elevation, 3D), chọn đối tượng
 packages/ui/           Design token (theme sáng/tối) và bộ biểu tượng
-crates/fem-core/       Lõi Rust: đọc cùng định dạng mô hình (solver từ Giai đoạn 5)
+crates/fem-core/       Lõi Rust: kiểu dữ liệu mô hình dùng chung với TypeScript
+crates/fem-solver/     Bộ giải tĩnh tuyến tính khung 3D + bài toán mẫu có đáp án
+crates/fem-wasm/       Bộ giải biên dịch sang WebAssembly cho giao diện
 resources/templates/   Mô hình mẫu dùng chung cho test TS và Rust
 tests/e2e/             Kiểm thử giao diện bằng Playwright
 ```
 
 ## Chạy thử
 
-Cần Node 22+, pnpm 10, Rust stable. Trên Windows cần thêm [WebView2](https://developer.microsoft.com/microsoft-edge/webview2/) (có sẵn trên Windows 11) và Visual Studio Build Tools (C++).
+Cần Node 22+, pnpm 10, Rust stable và target WebAssembly (`rustup target add wasm32-unknown-unknown`). Trên Windows cần thêm [WebView2](https://developer.microsoft.com/microsoft-edge/webview2/) (có sẵn trên Windows 11) và Visual Studio Build Tools (C++).
 
 ```bash
 pnpm install
@@ -50,12 +52,13 @@ Mỗi lần đẩy code, GitHub Actions build bộ cài Windows, cài thử cho 
 | Phím | Lệnh |
 | --- | --- |
 | Ctrl+Z / Ctrl+Y | Hoàn tác / Làm lại |
-| F5 | Chạy phân tích (hiện tại: kiểm tra mô hình, solver ở Giai đoạn 5) |
+| F5 / F6 | Chạy phân tích (khoá mô hình) / mở khoá |
 | Ctrl+1 / 2 / 4 | Bố cục 1 / 2 / 4 khung nhìn |
 | PgUp / PgDn | Lên / xuống tầng |
 | F2 / F4 / F8 | Ẩn hiện Model Explorer / Properties / Console |
 | Ctrl+Shift+P | Bảng lệnh |
-| Chuột giữa kéo | Pan · Shift + chuột giữa hoặc chuột phải (3D): xoay · Lăn: zoom |
+| Chuột giữa kéo | Pan · Lăn: zoom |
+| Chuột phải kéo (3D) | Xoay quanh điểm dưới con trỏ (hoặc Shift + chuột giữa) |
 | Kéo trái → phải / phải → trái | Chọn nằm trọn / chọn cắt qua |
 | J / B / C / R / S / W | Vẽ nút / dầm / cột / giằng / sàn / vách |
 | Enter · Backspace · Esc | Kết thúc (đóng sàn) · bỏ điểm vừa bấm · huỷ / về công cụ Chọn |

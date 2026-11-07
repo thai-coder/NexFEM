@@ -1,6 +1,7 @@
 import { CommandError, CommandStack, sampleModel, type Model } from "@nexfem/model-core";
 import { create } from "zustand";
 import { t } from "../i18n/index.ts";
+import { useResults } from "./results.ts";
 import { defaultViewsFor, useUi } from "./ui.ts";
 
 export type SelectMode = "replace" | "toggle" | "add";
@@ -138,6 +139,7 @@ export const useModel = create<ModelState>((set, get) => ({
   reset(model, fileName = null) {
     stack.reset(model);
     set({ ...snapshot(), fileName, dirty: false, locked: false, selection: [] });
+    useResults.getState().clear();
     useUi.getState().set({ messages: null, views: defaultViewsFor(model), hover: null });
   },
 }));

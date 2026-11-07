@@ -5,6 +5,8 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { currentStory, runCommand } from "../../commands/app.ts";
 import { useT } from "../../i18n/index.ts";
 import { useModel } from "../../stores/model.ts";
+import { useResults } from "../../stores/results.ts";
+import type { CaseResult } from "../../services/solver.ts";
 import { useUi, type BottomTab, type LogEntry } from "../../stores/ui.ts";
 import { parseConsole } from "./parse.ts";
 
@@ -174,12 +176,67 @@ function Messages() {
   );
 }
 
-type TableKind = "frames" | "joints" | "shells" | "stories";
+type TableKind = "frames" | "joints" | "shells" | "stories" | "displacements" | "reactions" | "frameForces";
+const RESULT_KINDS: TableKind[] = ["displacements", "reactions", "frameForces"];
 
 interface Column {
   head: string;
   cell(row: unknown): ReactNode;
   num?: boolean;
+}
+
+function resultTable(kind: TableKind, m: Model, c: CaseResult | undefined, T: ReturnType<typeof useT>): { rows: { id: string }[]; cols: Column[] } {
+  if (!c) return { rows: [], cols: [] };
+  const u = m.units;
+  const label = new Map([...m.joints, ...m.frames].map((o) => [o.id, o.label]));
+  const L = unitLabel("length", u);
+  const F = unitLabel("force", u);
+  const FM = unitLabel("moment", u);
+  const num = (v: number | undefined, q: Parameters<typeof toDisplay>[1], d = 3) => (v === undefined ? "" : toDisplay(v, q, u).toFixed(d));
+  type Row = { id: string; label: string; v: number[]; x?: number };
+  const col = (head: string, i: number, q: Parameters<typeof toDisplay>[1] | "rad", d = 3): Column => ({
+    head,
+    num: true,
+    cell: (r) => (q === "rad" ? ((r as Row).v[i] ?? 0).toExponential(3) : num((r as Row).v[i], q, d)),
+  });
+  if (kind === "displacements") {
+    const rows: Row[] = Object.entries(c.displacements).map(([id, v]) => ({ id, label: label.get(id) ?? id, v }));
+    const mm = { ...u, length: "mm" as const };
+    const dmm = (i: number): Column => ({ head: ["Ux", "Uy", "Uz"][i] + " (mm)", num: true, cell: (r) => toDisplay((r as Row).v[i] ?? 0, "length", mm).toFixed(3) });
+    return { rows, cols: [{ head: T.props.joint, cell: (r) => (r as Row).label }, dmm(0), dmm(1), dmm(2), col("Rx (rad)", 3, "rad"), col("Ry (rad)", 4, "rad"), col("Rz (rad)", 5, "rad")] };
+  }
+  if (kind === "reactions") {
+    const rows: Row[] = Object.entries(c.reactions).map(([id, v]) => ({ id, label: label.get(id) ?? id, v }));
+    return {
+      rows,
+      cols: [
+        { head: T.props.joint, cell: (r) => (r as Row).label },
+        col(`Fx (${F})`, 0, "force"),
+        col(`Fy (${F})`, 1, "force"),
+        col(`Fz (${F})`, 2, "force"),
+        col(`Mx (${FM})`, 3, "moment"),
+        col(`My (${FM})`, 4, "moment"),
+        col(`Mz (${FM})`, 5, "moment"),
+      ],
+    };
+  }
+  const rows: Row[] = [];
+  for (const [id, ff] of Object.entries(c.frames)) {
+    ff.x.forEach((x, k) => rows.push({ id: `${id}#${k}`, label: label.get(id) ?? id, x, v: [ff.p[k]!, ff.v2[k]!, ff.v3[k]!, ff.t[k]!, ff.m2[k]!, ff.m3[k]!] }));
+  }
+  return {
+    rows,
+    cols: [
+      { head: T.props.label, cell: (r) => (r as Row).label },
+      { head: `${T.analysis.station} (${L})`, num: true, cell: (r) => num((r as Row).x, "length") },
+      col(`P (${F})`, 0, "force", 2),
+      col(`V2 (${F})`, 1, "force", 2),
+      col(`V3 (${F})`, 2, "force", 2),
+      col(`T (${FM})`, 3, "moment", 2),
+      col(`M2 (${FM})`, 4, "moment", 2),
+      col(`M3 (${FM})`, 5, "moment", 2),
+    ],
+  };
 }
 
 function tableDef(kind: TableKind, m: Model, T: ReturnType<typeof useT>): { rows: { id: string }[]; cols: Column[] } {
@@ -229,6 +286,10 @@ function tableDef(kind: TableKind, m: Model, T: ReturnType<typeof useT>): { rows
           { head: T.props.section, cell: (r) => m.shellSections.find((s) => s.id === (r as Model["shells"][number]).section)?.name },
         ],
       };
+    case "displacements":
+    case "reactions":
+    case "frameForces":
+      return { rows: [], cols: [] };
     case "stories":
       return {
         rows: [...m.stories].reverse(),
@@ -253,8 +314,13 @@ function Tables() {
     window.addEventListener("nexfem:table", h);
     return () => window.removeEventListener("nexfem:table", h);
   }, []);
-  const { rows, cols } = tableDef(kind, model, T);
-  const shown = rows.slice(0, 2000);
+  const results = useResults((s) => s.results);
+  const activeCase = useResults((s) => s.activeCase);
+  const isResult = RESULT_KINDS.includes(kind);
+  const current = results?.cases.find((c) => c.id === activeCase) ?? results?.cases[0];
+  const { rows, cols } = isResult ? resultTable(kind, model, current, T) : tableDef(kind, model, T);
+  const shown = rows.slice(0, 3000);
+  const rowSel = (id: string) => id.split("#")[0]!;
   return (
     <div className="table-wrap">
       <div className="table-toolbar">
@@ -266,8 +332,26 @@ function Tables() {
                 {T.tables[k]}
               </option>
             ))}
+            {(["displacements", "reactions", "frameForces"] as const).map((k) => (
+              <option key={k} value={k}>
+                {T.analysis[k]}
+              </option>
+            ))}
           </select>
         </label>
+        {isResult && results && (
+          <label>
+            {T.analysis.case}{" "}
+            <select value={current?.id ?? ""} onChange={(e) => useResults.getState().set({ activeCase: e.target.value })} data-testid="result-case">
+              {results.cases.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+        {isResult && !results && <span className="muted">{T.analysis.noResults}</span>}
         <span className="muted">{T.fmt(T.tables.rows, { n: rows.length })}</span>
       </div>
       <div className="table-scroll">
@@ -283,7 +367,7 @@ function Tables() {
           </thead>
           <tbody>
             {shown.map((r) => (
-              <tr key={r.id} className={sel.has(r.id) ? "selected" : undefined} onClick={(e) => kind !== "stories" && select([r.id], e.ctrlKey || e.metaKey ? "toggle" : "replace")}>
+              <tr key={r.id} className={sel.has(rowSel(r.id)) ? "selected" : undefined} onClick={(e) => kind !== "stories" && select([rowSel(r.id)], e.ctrlKey || e.metaKey ? "toggle" : "replace")}>
                 {cols.map((c) => (
                   <td key={c.head} className={c.num ? "num" : undefined}>
                     {c.cell(r)}

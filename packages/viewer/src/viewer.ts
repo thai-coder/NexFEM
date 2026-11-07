@@ -146,6 +146,8 @@ export class StructureViewer {
   // chế độ vẽ
   #drawing: DrawingOptions | null = null;
   #loadPattern: string | null = null;
+  #viewDir = new THREE.Vector3(1, -1.25, 0.8).normalize();
+  #pivotEl: HTMLDivElement;
   #snapCache: { points: SnapPoint[]; lines: ReturnType<typeof gridLines> } | null = null;
   #snap: SnapPoint | null = null;
   #snapEl: HTMLDivElement;
@@ -176,6 +178,11 @@ export class StructureViewer {
     this.#selRect = document.createElement("div");
     this.#selRect.style.cssText = SEL_RECT_STYLE;
     container.appendChild(this.#selRect);
+
+    this.#pivotEl = document.createElement("div");
+    this.#pivotEl.style.cssText =
+      "position:absolute;pointer-events:none;display:none;z-index:3;width:14px;height:14px;margin:-9px 0 0 -9px;border:2px solid #ffd400;border-radius:50%;box-shadow:0 0 0 2px rgba(0,0,0,.35);";
+    container.appendChild(this.#pivotEl);
 
     this.#snapEl = document.createElement("div");
     this.#snapEl.className = "nx-snap";
@@ -246,6 +253,11 @@ export class StructureViewer {
     this.#rebuild();
   }
 
+  /** Vị trí camera và tâm nhìn (cho kiểm thử). */
+  get cameraState(): { position: number[]; target: number[] } {
+    return { position: this.#camera.position.toArray(), target: this.#controls.target.toArray() };
+  }
+
   /** Điểm bắt hiện tại (chế độ vẽ). */
   get snap(): SnapPoint | null {
     return this.#snap;
@@ -262,6 +274,22 @@ export class StructureViewer {
   }
 
   zoomExtents(): void {
+    this.#zoomTo(this.#viewDir);
+  }
+
+  /** Hướng nhìn nhanh cho khung 3D. */
+  setViewPreset(preset: "iso" | "top" | "front" | "right"): void {
+    const dirs = {
+      iso: new THREE.Vector3(1, -1.25, 0.8),
+      top: new THREE.Vector3(0, -0.0001, 1),
+      front: new THREE.Vector3(0, -1, 0.0001),
+      right: new THREE.Vector3(1, 0, 0.0001),
+    };
+    this.#viewDir = dirs[preset].normalize();
+    this.#zoomTo(this.#viewDir);
+  }
+
+  #zoomTo(viewDir: THREE.Vector3): void {
     const box = this.#contentBox();
     if (box.isEmpty()) return;
     const center = box.getCenter(new THREE.Vector3());
@@ -272,8 +300,7 @@ export class StructureViewer {
     if (this.#view.kind === "3d") {
       const radius = Math.max(size.length() / 2, 1);
       const dist = radius / Math.sin(THREE.MathUtils.degToRad(this.#persp.fov / 2)) / Math.min(1, aspect) * 0.9;
-      const dir = new THREE.Vector3(1, -1.25, 0.8).normalize();
-      this.#persp.position.copy(center).addScaledVector(dir, dist);
+      this.#persp.position.copy(center).addScaledVector(viewDir, dist);
       this.#controls.target.copy(center);
       this.#persp.near = dist / 100;
       this.#persp.far = dist * 100;
@@ -345,12 +372,13 @@ export class StructureViewer {
     this.#controls.object = this.#camera;
     this.#controls.enableRotate = true;
     // Chuột giữa: pan (Shift + chuột giữa: xoay ở 3D). Chuột phải: xoay ở 3D. Chuột trái dành cho chọn.
+    // Xoay 3D do viewer tự xử lý (xoay quanh điểm dưới con trỏ), OrbitControls chỉ lo pan và zoom.
     this.#controls.mouseButtons = {
       LEFT: null as unknown as THREE.MOUSE,
       MIDDLE: THREE.MOUSE.PAN,
-      RIGHT: is3d ? THREE.MOUSE.ROTATE : (null as unknown as THREE.MOUSE),
+      RIGHT: null as unknown as THREE.MOUSE,
     };
-    this.#controls.enableRotate = is3d;
+    this.#controls.enableRotate = false;
     this.#controls.screenSpacePanning = true;
     this.#controls.touches = { ONE: is3d ? THREE.TOUCH.ROTATE : THREE.TOUCH.PAN, TWO: THREE.TOUCH.DOLLY_PAN };
   }
@@ -951,6 +979,66 @@ export class StructureViewer {
     this.invalidate();
   }
 
+  // ---------------------------------------------------------------- orbit 3D
+
+  /** Tâm xoay: điểm phần tử dưới con trỏ → tâm các đối tượng đang chọn → tâm hiện tại. */
+  #pivotAt(ev: { clientX: number; clientY: number }): THREE.Vector3 {
+    const rc = this.#raycaster;
+    rc.setFromCamera(this.#ndc(ev), this.#camera);
+    rc.params.Points = { threshold: this.#worldPerPixel() * 6 };
+    (rc.params as { Line2?: { threshold: number } }).Line2 = { threshold: 6 };
+    const targets = [this.#jointPoints, this.#frameLines, this.#shellMesh].filter((o): o is NonNullable<typeof o> => !!o);
+    const hits = rc.intersectObjects(targets, false).sort((a, b) => a.distance - b.distance);
+    if (hits[0]) return hits[0].point.clone();
+    const m = this.#model;
+    if (m && this.#selection.size) {
+      const box = new THREE.Box3();
+      const joints = new Map(m.joints.map((j) => [j.id, j]));
+      const add = (id: string) => {
+        const j = joints.get(id);
+        if (j) box.expandByPoint(new THREE.Vector3(j.x, j.y, j.z));
+      };
+      for (const f of m.frames) if (this.#selection.has(f.id)) (add(f.i), add(f.j));
+      for (const s of m.shells) if (this.#selection.has(s.id)) s.joints.forEach(add);
+      for (const id of this.#selection) add(id);
+      if (!box.isEmpty()) return box.getCenter(new THREE.Vector3());
+    }
+    return this.#controls.target.clone();
+  }
+
+  #orbit(pivot: THREE.Vector3, dx: number, dy: number): void {
+    const cam = this.#persp;
+    const speed = 0.006;
+    const Z = new THREE.Vector3(0, 0, 1);
+    const forward = this.#controls.target.clone().sub(cam.position).normalize();
+    const right = forward.clone().cross(Z).normalize();
+    const qYaw = new THREE.Quaternion().setFromAxisAngle(Z, -dx * speed);
+    const qPitch = new THREE.Quaternion().setFromAxisAngle(right, -dy * speed);
+    const apply = (q: THREE.Quaternion) => {
+      const pos = cam.position.clone().sub(pivot).applyQuaternion(q).add(pivot);
+      const tgt = this.#controls.target.clone().sub(pivot).applyQuaternion(q).add(pivot);
+      return { pos, tgt };
+    };
+    let r = apply(qYaw.clone().multiply(qPitch));
+    // Không cho lật qua đỉnh/đáy: khi gần thẳng đứng thì chỉ xoay ngang.
+    if (Math.abs(r.tgt.clone().sub(r.pos).normalize().z) > 0.995) r = apply(qYaw);
+    cam.position.copy(r.pos);
+    this.#controls.target.copy(r.tgt);
+    cam.lookAt(r.tgt);
+    this.#controls.update();
+    this.#showPivot(pivot);
+    this.invalidate();
+  }
+
+  #showPivot(p: THREE.Vector3 | null): void {
+    if (!p) {
+      this.#pivotEl.style.display = "none";
+      return;
+    }
+    const [x, y] = this.worldToScreen(p.x, p.y, p.z);
+    Object.assign(this.#pivotEl.style, { display: "block", left: `${x}px`, top: `${y}px` });
+  }
+
   // ---------------------------------------------------------------- picking
 
   #ndc(ev: { clientX: number; clientY: number }): THREE.Vector2 {
@@ -1053,6 +1141,34 @@ export class StructureViewer {
     let dragging = false;
     let hoverFrame = 0;
     let lastMove: PointerEvent | null = null;
+
+    // Xoay 3D: chuột phải kéo, hoặc Shift + chuột giữa kéo.
+    let orbit: { pivot: THREE.Vector3; x: number; y: number; id: number; moved: boolean } | null = null;
+    el.addEventListener("pointerdown", (e) => {
+      if (this.#view.kind !== "3d" || this.#drawing) return;
+      if (!(e.button === 2 || (e.button === 1 && e.shiftKey))) return;
+      orbit = { pivot: this.#pivotAt(e), x: e.clientX, y: e.clientY, id: e.pointerId, moved: false };
+      el.setPointerCapture(e.pointerId);
+      this.#showPivot(orbit.pivot);
+      e.preventDefault();
+    });
+    el.addEventListener("pointermove", (e) => {
+      if (!orbit || e.pointerId !== orbit.id) return;
+      const dx = e.clientX - orbit.x;
+      const dy = e.clientY - orbit.y;
+      if (!dx && !dy) return;
+      orbit.x = e.clientX;
+      orbit.y = e.clientY;
+      orbit.moved = true;
+      this.#orbit(orbit.pivot, dx, dy);
+    });
+    const endOrbit = (e: PointerEvent) => {
+      if (!orbit || e.pointerId !== orbit.id) return;
+      orbit = null;
+      this.#showPivot(null);
+    };
+    el.addEventListener("pointerup", endOrbit);
+    el.addEventListener("pointercancel", endOrbit);
 
     el.addEventListener("contextmenu", (e) => {
       e.preventDefault();

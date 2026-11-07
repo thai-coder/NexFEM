@@ -169,6 +169,15 @@ pub struct Frame {
     pub section: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub story: Option<String>,
+    /// Nhả liên kết đầu i / j: [P, V2, V3, T, M2, M3].
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub releases: Option<Releases>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Releases {
+    pub i: Vec<bool>,
+    pub j: Vec<bool>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

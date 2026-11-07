@@ -1629,3 +1629,24 @@ input[aria-invalid="true"] {
   background: var(--color-text-muted);
   border-radius: 50%;
 }
+
+.view-presets {
+  display: inline-flex;
+  gap: 2px;
+  margin-left: 4px;
+}
+
+.preset-btn {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: var(--radius-sm);
+  padding: 0 6px;
+  font-size: 11px;
+  line-height: 18px;
+  color: var(--color-text-muted);
+}
+
+.preset-btn:hover {
+  color: var(--color-text);
+  border-color: var(--color-accent);
+}

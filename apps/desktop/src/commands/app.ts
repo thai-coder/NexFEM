@@ -4,6 +4,9 @@ import { t } from "../i18n/index.ts";
 import type { Strings } from "../i18n/vi.ts";
 import { useModel } from "../stores/model.ts";
 import { openProject, saveProject } from "../services/files.ts";
+import { useResults } from "../stores/results.ts";
+import { solve } from "../services/solver.ts";
+import { toDisplay, unitLabel } from "@nexfem/model-core";
 import { cancel as cancelDraw, finish as finishDraw, undoPoint } from "../tools/draw.ts";
 import { useUi, type DialogKind, type Tool } from "../stores/ui.ts";
 
@@ -83,6 +86,46 @@ export function runCheck(): number {
     "analysis",
   );
   return count("error");
+}
+
+/** Chạy phân tích: kiểm tra mô hình → bộ giải WebAssembly → khoá mô hình và lưu kết quả. */
+export async function runAnalysis(): Promise<boolean> {
+  const s = ui();
+  s.set({ panels: { ...s.panels, bottom: true }, tool: "select", drawPoints: [] });
+  const errors = runCheck();
+  if (errors) {
+    s.log("error", t().fmt(t().log.runBlocked, { n: errors }), "analysis");
+    s.set({ bottomTab: "messages" });
+    return false;
+  }
+  s.log("info", t().analysis.running, "analysis");
+  s.set({ bottomTab: "log" });
+  const m = model().model;
+  const t0 = performance.now();
+  let out;
+  try {
+    out = await solve(m);
+  } catch (e) {
+    s.log("error", t().fmt(t().analysis.loadFailed, { message: e instanceof Error ? e.message : String(e) }), "analysis");
+    return false;
+  }
+  const ms = Math.round(performance.now() - t0);
+  if (!out.ok) {
+    s.log("error", t().fmt(t().analysis.failed, { message: out.error.message }), "analysis");
+    if (out.error.objects?.length) model().select(out.error.objects);
+    return false;
+  }
+  const r = out.results;
+  for (const w of r.warnings) s.log("warning", w.message, "analysis");
+  const u = m.units;
+  for (const c of r.cases.filter((x) => x.kind === "case")) {
+    const f = (v: number) => toDisplay(v, "force", u).toFixed(3);
+    s.log("info", t().fmt(t().analysis.balance, { name: c.name, applied: f(c.applied[2]!), reaction: f(c.sumReactions[2]!), unit: unitLabel("force", u) }), "analysis");
+  }
+  s.log("success", t().fmt(t().analysis.done, { joints: r.joints, frames: r.frames, dof: r.dof, cases: r.cases.length, ms }), "analysis");
+  useResults.getState().set({ results: r, elapsed: ms, activeCase: r.cases[0]?.id ?? null });
+  useModel.setState({ locked: true });
+  return true;
 }
 
 const draw = (tool: Tool, icon: string, key?: string): AppCommand => ({
@@ -251,27 +294,19 @@ export const COMMANDS: AppCommand[] = [
     icon: "run",
     shortcut: "F5",
     keys: ["f5"],
-    run: () => {
-      const errors = runCheck();
-      const s = ui();
-      s.set({ panels: { ...s.panels, bottom: true } });
-      if (errors) {
-        s.log("error", t().fmt(t().log.runBlocked, { n: errors }), "analysis");
-        s.set({ bottomTab: "messages" });
-        return;
-      }
-      const m = model().model;
-      const dof = m.joints.reduce((n, j) => n + (j.restraint ? j.restraint.filter((x) => !x).length : 6), 0);
-      s.log("info", t().fmt(t().log.runNoSolver, { dof }), "analysis");
-      s.set({ bottomTab: "log" });
-    },
+    run: () => void runAnalysis(),
+    enabled: () => !model().locked,
   },
   {
     id: "analyze.unlock",
     icon: "unlock",
     shortcut: "F6",
     keys: ["f6"],
-    run: () => useModel.setState({ locked: false }),
+    run: () => {
+      useModel.setState({ locked: false });
+      useResults.getState().clear();
+      ui().log("info", t().analysis.unlocked, "analysis");
+    },
     enabled: () => model().locked,
   },
 

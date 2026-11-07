@@ -4,12 +4,13 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "node scripts/build-wasm.mjs && vite",
+    "build": "node scripts/build-wasm.mjs && vite build",
     "preview": "vite preview --port 4173 --strictPort",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "build:wasm": "node scripts/build-wasm.mjs"
   },
   "dependencies": {
     "@nexfem/model-core": "workspace:*",

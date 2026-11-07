@@ -749,6 +749,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "fem-solver"
+version = "0.1.0"
+dependencies = [
+ "fem-core",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "fem-wasm"
+version = "0.1.0"
+dependencies = [
+ "fem-solver",
+]
+
+[[package]]
 name = "field-offset"
 version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"

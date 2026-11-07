@@ -71,9 +71,14 @@ Mỗi giai đoạn kết thúc bằng một bản chạy được trên Windows.
 - Check model đã có từ Giai đoạn 1.
 - Chưa làm: tải nút, tải hình thang/nhiều đoạn, nhóm đối tượng (group), lò xo gối, offset/vùng cứng đầu thanh, trục cục bộ xoay.
 
-### Giai đoạn 5: Solver v1 — v0.1
-- Khung 3D tuyến tính tĩnh (phần tử dầm 12 bậc tự do, offset, release), diaphragm cứng.
-- Bộ bài toán mẫu trong `tests/benchmarks` có đáp án (sách, kết quả SAP2000/ETABS).
+### Giai đoạn 5: Solver v1 — ✅ xong (07/11/2026)
+- `crates/fem-solver` (Rust): phần tử dầm 3D Euler–Bernoulli 12 bậc tự do, nhả liên kết (ngưng tụ tĩnh), tải phân bố đều/tập trung theo 7 phương, trọng lượng bản thân; ma trận skyline + Cholesky, đánh số lại Cuthill–McKee ngược; báo nút/phương mất ổn định.
+- Tải sàn và trọng lượng sàn truyền về thanh biên (quy tắc 45° với ô chữ nhật, chia tam giác từ trọng tâm với ô khác) dưới dạng tải phân bố đều tương đương; vách chia tải đều về nút.
+- Trường hợp tải tĩnh tuyến tính + tổ hợp cộng tuyến tính (cả tổ hợp lồng nhau). Kết quả: chuyển vị, phản lực, nội lực P/V2/V3/T/M2/M3 tại 9 điểm mỗi thanh; kiểm tra tổng phản lực = tổng tải.
+- Biên dịch sang WebAssembly (`crates/fem-wasm`, ~400 KB), chạy trong cả app desktop và bản trình duyệt. F5 chạy và khoá mô hình, F6 mở khoá; bảng chuyển vị/phản lực/nội lực theo trường hợp tải.
+- Bài toán mẫu có đáp án (công xôn, dầm đơn giản, dầm ngàm, nhả khớp, kéo nén, khung cổng, cân bằng tòa nhà mẫu) trong `crates/fem-solver/src/benchmarks.rs`.
+- Khung 3D: xoay quanh điểm dưới con trỏ (chuột phải / Shift + chuột giữa), hiện tâm xoay, nút hướng nhìn Trên/Trước/Phải/3D.
+- Chưa làm: offset/vùng cứng, sàn tuyệt đối cứng (diaphragm), biến dạng cắt, tổ hợp bao/SRSS, so sánh với kết quả SAP2000/ETABS thật, chạy bộ giải trong Web Worker cho mô hình lớn.
 
 ### Giai đoạn 6: Hiển thị kết quả
 - Biến dạng, biểu đồ M/V/N/T, phản lực, drift tầng, Results Table, xuất Excel/CSV.
@@ -88,7 +93,7 @@ Mỗi giai đoạn kết thúc bằng một bản chạy được trên Windows.
 - Cầu nối OAPI C# .NET 10: lấy mô hình đang mở, đẩy mô hình sang, lấy kết quả về để so sánh; mở ra qua API và MCP.
 
 ### Giai đoạn 9: Phân tích mở rộng — v0.3
-- Shell (MITC4) và chia lưới sàn/vách, dao động riêng, phổ phản ứng, P-Delta.
+- Shell (MITC4) và chia lưới sàn/vách, dao động riêng, phổ phản ứng, P-Delta, sàn tuyệt đối cứng, tổ hợp bao.
 
 ### Giai đoạn 10+: Thiết kế theo tiêu chuẩn và trợ lý AI — v0.4 trở đi
 - Theo từng đợt trong [`docs/design-codes.md`](design-codes.md): tổ hợp tải tự động → kiểm tra cấu kiện BTCT → thép → động đất → móng.

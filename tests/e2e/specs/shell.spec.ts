@@ -93,7 +93,7 @@ test("Console vẽ dầm và chọn theo nhãn", async ({ page }) => {
 
 test("chạy kiểm tra mô hình và phân tích (F5)", async ({ page }) => {
   await page.keyboard.press("F5");
-  await expect(page.getByTestId("bottom")).toContainText("Mô hình hợp lệ (360 bậc tự do)");
+  await expect(page.getByTestId("bottom")).toContainText("Phân tích xong: 72 nút, 145 thanh, 360 bậc tự do");
 });
 
 test("đổi theme, ngôn ngữ, bố cục và ẩn panel", async ({ page }) => {
@@ -114,4 +114,23 @@ test("command palette", async ({ page }) => {
   await page.getByPlaceholder("Tìm lệnh theo tên…").fill("bo cuc 1");
   await page.keyboard.press("Enter");
   await expect.poll(() => state(page, (n) => n.ui.getState().layout)).toBe(1);
+});
+
+test("xoay 3D bằng chuột phải và nút hướng nhìn nhanh", async ({ page }) => {
+  const cam = () =>
+    page.evaluate(() => (window as unknown as { __nexfemViewers: { cameraState: { position: number[]; target: number[] } }[] }).__nexfemViewers[1]!.cameraState);
+  const before = await cam();
+  const box = (await page.getByTestId("pane-1").locator(".pane-canvas").boundingBox())!;
+  const [x, y] = [box.x + box.width / 2, box.y + box.height / 2];
+  await page.mouse.move(x, y);
+  await page.mouse.down({ button: "right" });
+  await page.mouse.move(x + 120, y + 30, { steps: 6 });
+  await page.mouse.up({ button: "right" });
+  const after = await cam();
+  expect(after.position).not.toEqual(before.position);
+  await page.getByTestId("preset-top").click();
+  const top = await cam();
+  // Nhìn từ trên: camera cao hơn hẳn tâm, gần như thẳng đứng.
+  expect(top.position[2]! - top.target[2]!).toBeGreaterThan(10);
+  expect(Math.abs(top.position[0]! - top.target[0]!)).toBeLessThan(0.01);
 });
