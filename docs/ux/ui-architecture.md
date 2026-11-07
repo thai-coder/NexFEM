@@ -1,5 +1,7 @@
 # Thiết kế UX/UI & kiến trúc thư mục — App phân tích kết cấu kiểu ETABS
 
+> **Cập nhật 07/11/2026:** ribbon đã được thay bằng menu + một hàng thanh công cụ + thanh công cụ dọc bên trái (kiểu ETABS/SAP2000) theo quyết định của người dùng. Các mục nhắc "Ribbon" bên dưới là thiết kế ban đầu; xem `docs/ux-round2.md` và `docs/ux-round3.md`.
+
 Nov 6, 2026 · @Thái Lê
 
 ## Tóm tắt và công nghệ đề xuất

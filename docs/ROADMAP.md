@@ -42,7 +42,7 @@ Mỗi giai đoạn kết thúc bằng một bản chạy được trên Windows.
 - CI: kiểm tra kiểu TS, vitest, Playwright e2e, `cargo fmt`/`clippy`/`test`, build bộ cài Windows. (`dotnet test` thêm khi có cầu nối .NET ở Giai đoạn 8.)
 
 ### Giai đoạn 1: Khung giao diện (UI shell) — ✅ xong, v0.1-alpha
-- Cửa sổ chính: menu, ribbon, Model Explorer, viewport (1/2/4 ô), Properties, Console/Messages/Bảng/Analysis Log, status bar.
+- Cửa sổ chính: menu, thanh công cụ (thay ribbon từ 07/11/2026), Model Explorer, viewport (1/2/4 ô), Properties, Console/Messages/Bảng/Analysis Log, status bar.
 - Theme tối/sáng, phím tắt, command palette, tiếng Việt/Anh. Dữ liệu mẫu: khung BTCT 3×2 nhịp, 5 tầng.
 - Làm thêm sớm: viewer 2D/3D có chọn bằng click và kéo khung (window/crossing), sửa thuộc tính có Undo, Console gõ lệnh (`beam`, `column`, `select`, `cmd`), Check model.
 - Chưa làm (để đúng giai đoạn): hộp thoại Define, vẽ bằng chuột, Assign, lưu/mở file — các mục này hiện nhãn "GĐ n" trong menu.

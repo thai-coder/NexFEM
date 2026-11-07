@@ -53,18 +53,18 @@ const unlocked = () => !model().locked;
 function toggleFocus() {
   const s = ui();
   if (s.focusMode && s.focusSaved) {
-    s.set({ focusMode: false, panels: s.focusSaved.panels, ribbonCollapsed: s.focusSaved.ribbonCollapsed, focusSaved: null });
+    s.set({ focusMode: false, panels: s.focusSaved.panels, toolbarHidden: s.focusSaved.toolbarHidden, focusSaved: null });
   } else {
     s.set({
       focusMode: true,
-      focusSaved: { panels: s.panels, ribbonCollapsed: s.ribbonCollapsed },
+      focusSaved: { panels: s.panels, toolbarHidden: s.toolbarHidden },
       panels: { explorer: false, properties: false, bottom: false },
-      ribbonCollapsed: true,
+      toolbarHidden: true,
     });
   }
 }
 
-function toggleDisplay(k: "joints" | "jointLabels" | "frameLabels") {
+function toggleDisplay(k: "joints" | "jointLabels" | "frameLabels" | "restraints") {
   const d = ui().display;
   ui().set({ display: { ...d, [k]: !d[k] } });
 }
@@ -260,11 +260,7 @@ export const COMMANDS: AppCommand[] = [
     run: () => toggleFocus(),
     checked: () => ui().focusMode,
   },
-  {
-    id: "view.compactRibbon",
-    run: () => ui().set({ ribbonCompact: !ui().ribbonCompact }),
-    checked: () => ui().ribbonCompact,
-  },
+  { id: "view.showRestraints", run: () => toggleDisplay("restraints"), checked: () => ui().display.restraints },
   { id: "view.showJoints", run: () => toggleDisplay("joints"), checked: () => ui().display.joints },
   { id: "view.jointLabels", run: () => toggleDisplay("jointLabels"), checked: () => ui().display.jointLabels },
   { id: "view.frameLabels", run: () => toggleDisplay("frameLabels"), checked: () => ui().display.frameLabels },
@@ -414,12 +410,12 @@ export const MENUS: { id: keyof Strings["menu"]; items: MenuItem[] }[] = [
       "view.showJoints",
       "view.jointLabels",
       "view.frameLabels",
+      "view.showRestraints",
       "-",
       "view.toggleExplorer",
       "view.toggleProperties",
       "view.toggleBottom",
       "view.focus",
-      "view.compactRibbon",
       "view.resetLayout",
     ],
   },

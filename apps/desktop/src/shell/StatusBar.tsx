@@ -4,7 +4,7 @@ import { runCommand } from "../commands/app.ts";
 import { SnapToggles } from "../panels/properties/DrawProps.tsx";
 import { useT } from "../i18n/index.ts";
 import { useModel } from "../stores/model.ts";
-import { useUi } from "../stores/ui.ts";
+import { useUi, type StoryScope } from "../stores/ui.ts";
 
 export function StatusBar() {
   const T = useT();
@@ -16,6 +16,7 @@ export function StatusBar() {
   const filter = useUi((s) => s.selectFilter);
   const panels = useUi((s) => s.panels);
   const focus = useUi((s) => s.focusMode);
+  const scope = useUi((s) => s.storyScope);
   const fmt = (v: number) => toDisplay(v, "length", units).toFixed(units.length === "mm" ? 0 : units.length === "cm" ? 1 : 3);
 
   return (
@@ -33,6 +34,13 @@ export function StatusBar() {
         <Icon name={locked ? "lock" : "unlock"} size={13} />
         {locked ? T.status.locked : T.status.unlocked}
       </button>
+      <label className="status-cell">
+        <select className="status-select" value={scope} aria-label={T.draw.scope} data-testid="story-scope" onChange={(e) => useUi.getState().set({ storyScope: e.target.value as StoryScope })}>
+          <option value="one">{T.story.one}</option>
+          <option value="similar">{T.story.similar}</option>
+          <option value="all">{T.story.all}</option>
+        </select>
+      </label>
       <span className="status-cell" role="group" aria-label={T.status.select}>
         {T.status.select}:
         {(["joint", "frame", "shell"] as const).map((k) => (

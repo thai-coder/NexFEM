@@ -1,7 +1,7 @@
 import { RELEASE_LABELS, RELEASE_PRESETS, type FrameLoad, type Restraint } from "@nexfem/model-core";
 import { useState, type ReactNode } from "react";
 import { Field, NumberField } from "../components/fields.tsx";
-import { Modal } from "../components/Modal.tsx";
+import { ToolWindow } from "../components/ToolWindow.tsx";
 import { useT } from "../i18n/index.ts";
 import { useModel } from "../stores/model.ts";
 import { useUi } from "../stores/ui.ts";
@@ -48,10 +48,10 @@ function AssignShell({
   };
   const disabled = !ids.length || !op || locked;
   return (
-    <Modal
+    <ToolWindow
       title={title}
       onClose={onClose}
-      width={520}
+      width={380}
       testId={testId}
       footer={
         <>
@@ -73,7 +73,7 @@ function AssignShell({
       <fieldset className="plain-fieldset" disabled={locked}>
         {children}
       </fieldset>
-    </Modal>
+    </ToolWindow>
   );
 }
 

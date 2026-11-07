@@ -8,7 +8,6 @@ export type Layout = 1 | 2 | 4;
 export type Tool = "select" | "joint" | "beam" | "column" | "brace" | "slab" | "wall";
 export type StoryScope = "one" | "similar" | "all";
 export type BottomTab = "console" | "messages" | "tables" | "log";
-export type RibbonTab = "modeling" | "loads" | "analysis" | "results" | "design";
 
 export type DialogKind =
   | "about"
@@ -41,6 +40,8 @@ export type MenuEntry =
   | string
   | { label: string; icon?: string; disabled?: boolean; header?: boolean; run?(): void };
 
+type UiStateDisplay = { joints: boolean; jointLabels: boolean; frameLabels: boolean; restraints: boolean };
+
 export interface LogEntry {
   id: number;
   time: Date;
@@ -65,8 +66,8 @@ interface UiState {
   activePane: number;
   panels: PanelVisibility;
   bottomTab: BottomTab;
-  ribbonTab: RibbonTab;
-  ribbonCollapsed: boolean;
+  /** Ẩn thanh công cụ trên và thanh công cụ dọc (Ctrl+F1, chế độ tập trung). */
+  toolbarHidden: boolean;
   tool: Tool;
   storyScope: StoryScope;
   paletteOpen: boolean;
@@ -77,12 +78,11 @@ interface UiState {
   hover: (HoverInfo & { pane: number }) | null;
   /** Tăng mỗi lần yêu cầu "vừa khung" cho ô đang hoạt động. */
   zoomSeq: number;
-  ribbonCompact: boolean;
   /** Chế độ tập trung: ẩn mọi bảng và ribbon; lưu trạng thái cũ để khôi phục. */
   focusMode: boolean;
-  focusSaved: { panels: PanelVisibility; ribbonCollapsed: boolean } | null;
+  focusSaved: { panels: PanelVisibility; toolbarHidden: boolean } | null;
   /** Hiển thị nút và nhãn trên khung nhìn. */
-  display: { joints: boolean; jointLabels: boolean; frameLabels: boolean };
+  display: { joints: boolean; jointLabels: boolean; frameLabels: boolean; restraints: boolean };
   /** Loại đối tượng được phép chọn. */
   selectFilter: { joint: boolean; frame: boolean; shell: boolean };
   /** true: lệnh "vừa khung" áp dụng cho mọi ô (mở file, tạo mô hình mới). */
@@ -136,8 +136,7 @@ export const useUi = create<UiState>((set, get) => ({
   activePane: 0,
   panels: load<PanelVisibility>("panels", { explorer: true, properties: true, bottom: true }),
   bottomTab: "console",
-  ribbonTab: "modeling",
-  ribbonCollapsed: load("ribbonCollapsed", false),
+  toolbarHidden: false,
   tool: "select",
   storyScope: "one",
   paletteOpen: false,
@@ -149,10 +148,9 @@ export const useUi = create<UiState>((set, get) => ({
   zoomSeq: 0,
   snapModes: load<SnapModes>("snapModes", ALL_SNAPS),
   loadDisplay: null,
-  ribbonCompact: load("ribbonCompact", true),
   focusMode: false,
   focusSaved: null,
-  display: load("display", { joints: true, jointLabels: false, frameLabels: false }),
+  display: { joints: true, jointLabels: false, frameLabels: false, restraints: true, ...load<Partial<UiStateDisplay>>("display", {}) },
   selectFilter: load("selectFilter", { joint: true, frame: true, shell: true }),
   zoomAll: false,
   contextMenu: null,
@@ -185,11 +183,6 @@ export const useUi = create<UiState>((set, get) => ({
 }));
 
 useUi.subscribe((s, prev) => {
-  if (s.ribbonCollapsed !== prev.ribbonCollapsed) save("ribbonCollapsed", s.ribbonCollapsed);
-});
-
-useUi.subscribe((s, prev) => {
-  if (s.ribbonCompact !== prev.ribbonCompact) save("ribbonCompact", s.ribbonCompact);
   if (s.display !== prev.display) save("display", s.display);
   if (s.selectFilter !== prev.selectFilter) save("selectFilter", s.selectFilter);
   if (s.snapModes !== prev.snapModes) save("snapModes", s.snapModes);

@@ -33,12 +33,13 @@ test.beforeEach(async ({ page }) => {
   await page.waitForFunction(() => ((window as unknown as { __nexfemViewers?: unknown[] }).__nexfemViewers?.length ?? 0) >= 2);
 });
 
-test("mở app: đủ menu, ribbon, panel và không có lỗi", async ({ page }) => {
+test("mở app: đủ menu, thanh công cụ, panel và không có lỗi", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.reload();
   await expect(page.getByRole("menuitem", { name: "Analyze" })).toBeVisible();
-  await expect(page.getByRole("tab", { name: "Mô hình" })).toBeVisible();
+  await expect(page.getByTestId("toolbar")).toBeVisible();
+  await expect(page.getByTestId("toolstrip")).toBeVisible();
   await expect(page.getByTestId("explorer")).toBeVisible();
   await expect(page.getByTestId("properties")).toContainText("Tóm tắt mô hình");
   await expect(page.getByTestId("bottom")).toContainText("NexFEM sẵn sàng");
@@ -99,8 +100,8 @@ test("chạy kiểm tra mô hình và phân tích (F5)", async ({ page }) => {
 test("đổi theme, ngôn ngữ, bố cục và ẩn panel", async ({ page }) => {
   await page.getByTestId("theme-toggle").click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
-  await page.getByRole("button", { name: "VI" }).click();
-  await expect(page.getByRole("tab", { name: "Modeling" })).toBeVisible();
+  await page.getByRole("button", { name: "VI", exact: true }).click();
+  await expect(page.getByTitle(/New model/)).toBeVisible();
   await page.keyboard.press("Control+4");
   await expect(page.getByTestId("pane-3")).toBeVisible();
   await page.keyboard.press("F2");

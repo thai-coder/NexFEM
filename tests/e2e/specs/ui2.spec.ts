@@ -33,15 +33,6 @@ test("chế độ tập trung và nút bật/tắt bảng ở thanh trạng thá
   for (const id of ["explorer", "properties", "bottom"]) await expect(page.getByTestId(id)).toBeVisible();
 });
 
-test("ribbon gọn thấp hơn ribbon đầy đủ", async ({ page }) => {
-  const h = async () => (await page.locator(".ribbon").boundingBox())!.height;
-  const compact = await h();
-  await page.getByTitle("Ribbon gọn").click();
-  const full = await h();
-  expect(compact).toBeLessThan(full - 25);
-  expect(compact).toBeLessThan(80);
-});
-
 test("chuột phải vào dầm: menu, đổi nhãn, báo trùng nhãn", async ({ page }) => {
   const p = await at(page, 0, [3, 0, 11.1]);
   await page.mouse.click(p.x, p.y, { button: "right" });

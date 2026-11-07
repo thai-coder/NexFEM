@@ -22,13 +22,31 @@ import { ContextMenu } from "./shell/ContextMenu.tsx";
 import { Dialogs } from "./shell/Dialogs.tsx";
 import { ErrorBoundary } from "./shell/ErrorBoundary.tsx";
 import { MenuBar } from "./shell/MenuBar.tsx";
-import { Ribbon } from "./shell/Ribbon.tsx";
+import { ToolStrip } from "./shell/ToolStrip.tsx";
+import { Toolbar } from "./shell/Toolbar.tsx";
 import { StatusBar } from "./shell/StatusBar.tsx";
 import { useModel } from "./stores/model.ts";
 import { load, remove, save } from "./stores/persist.ts";
 import { useUi, type PanelVisibility } from "./stores/ui.ts";
 
-const LAYOUT_KEY = "dock-layout-v2";
+const LAYOUT_KEY = "dock-layout-v3";
+
+/** Cửa sổ công cụ không chặn: phím tắt và thao tác trên khung nhìn vẫn hoạt động khi chúng mở. */
+const MODELESS = new Set(["assignRestraint", "assignSection", "assignReleases", "assignFrameLoad", "assignShellLoad"]);
+
+/** Giới hạn kích thước từng bảng để bảng không bao giờ che hết khung nhìn. */
+const LIMITS = {
+  explorer: { constraints: { minimumWidth: 160, maximumWidth: 360 }, size: { width: 220 } },
+  properties: { constraints: { minimumWidth: 200, maximumWidth: 400 }, size: { width: 270 } },
+  bottom: { constraints: { minimumHeight: 90, maximumHeight: 320 }, size: { height: 150 } },
+} as const;
+
+function limit(api: DockviewApi, id: SidePanel, resize: boolean) {
+  const p = api.getPanel(id);
+  if (!p) return;
+  p.api.setConstraints(LIMITS[id].constraints);
+  if (resize) p.api.setSize(LIMITS[id].size);
+}
 
 const components: Record<string, React.FunctionComponent<IDockviewPanelProps>> = {
   explorer: () => (
@@ -77,6 +95,8 @@ function addSide(api: DockviewApi, id: SidePanel, T: Strings) {
     position: { referencePanel: "viewport", direction },
     ...(id === "bottom" ? { initialHeight: 150 } : { initialWidth: id === "explorer" ? 220 : 270 }),
   });
+  // Dockview chia đôi khi thêm lại bảng; ép đúng kích thước và giới hạn.
+  limit(api, id, true);
 }
 
 function buildDefault(api: DockviewApi, T: Strings, panels: PanelVisibility) {
@@ -128,10 +148,11 @@ export function App() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (useUi.getState().paletteOpen || useUi.getState().dialog) return;
+      const d = useUi.getState().dialog;
+      if (useUi.getState().paletteOpen || (d && !MODELESS.has(d.kind))) return;
       if (e.key === "F1" && e.ctrlKey) {
         e.preventDefault();
-        useUi.getState().set({ ribbonCollapsed: !useUi.getState().ribbonCollapsed });
+        useUi.getState().set({ toolbarHidden: !useUi.getState().toolbarHidden });
         return;
       }
       handleShortcut(e);
@@ -188,6 +209,7 @@ export function App() {
     }
     if (!ok) buildDefault(api, T, useUi.getState().panels);
     else {
+      for (const id of ["explorer", "properties", "bottom"] as const) limit(api, id, false);
       // Đồng bộ trạng thái panel với layout đã lưu.
       useUi.setState({
         panels: { explorer: !!api.getPanel("explorer"), properties: !!api.getPanel("properties"), bottom: !!api.getPanel("bottom") },
@@ -208,16 +230,19 @@ export function App() {
   return (
     <div className="app">
       <MenuBar />
-      <Ribbon />
-      <main className="dock-host">
-        <DockviewReact
-          components={components}
-          tabComponents={tabComponents}
-          onReady={onReady}
-          theme={theme === "dark" ? themeDark : themeLight}
-          disableFloatingGroups={false}
-        />
-      </main>
+      <Toolbar />
+      <div className="workspace">
+        <ToolStrip />
+        <main className="dock-host">
+          <DockviewReact
+            components={components}
+            tabComponents={tabComponents}
+            onReady={onReady}
+            theme={theme === "dark" ? themeDark : themeLight}
+            disableFloatingGroups={false}
+          />
+        </main>
+      </div>
       <StatusBar />
       <CommandPalette />
       <ContextMenu />

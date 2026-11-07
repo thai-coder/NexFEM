@@ -97,6 +97,8 @@ export interface DisplayOptions {
   joints: boolean;
   jointLabels: boolean;
   frameLabels: boolean;
+  /** Ký hiệu gối và nhả liên kết. */
+  restraints: boolean;
 }
 
 /** Loại đối tượng được phép chọn. */
@@ -167,7 +169,9 @@ export class StructureViewer {
   // chế độ vẽ
   #drawing: DrawingOptions | null = null;
   #loadPattern: string | null = null;
-  #display: DisplayOptions = { joints: true, jointLabels: false, frameLabels: false };
+  #display: DisplayOptions = { joints: true, jointLabels: false, frameLabels: false, restraints: true };
+  /** Ký hiệu có kích thước theo mét: to ra khi phóng gần, nhưng luôn đủ lớn để thấy. */
+  #symbolMats: { mat: THREE.PointsMaterial; world: number; min: number; max: number }[] = [];
   #filter: SelectFilter = { joint: true, frame: true, shell: true };
   #viewDir = new THREE.Vector3(1, -1.25, 0.8).normalize();
   #pivotEl: HTMLDivElement;
@@ -220,7 +224,10 @@ export class StructureViewer {
     this.#controls = new OrbitControls(this.#camera, this.#renderer.domElement);
     this.#controls.zoomToCursor = true;
     this.#controls.enableDamping = false;
-    this.#controls.addEventListener("change", () => this.invalidate());
+    this.#controls.addEventListener("change", () => {
+      this.#updateSymbolSizes();
+      this.invalidate();
+    });
     this.#setupCamera();
 
     this.#scene.add(this.#content, this.#overlay, this.#rubber);
@@ -284,6 +291,18 @@ export class StructureViewer {
     if (pattern === this.#loadPattern) return;
     this.#loadPattern = pattern;
     this.#rebuild();
+  }
+
+  #updateSymbolSizes(): void {
+    if (!this.#symbolMats.length) return;
+    const wpp = this.#worldPerPixel();
+    if (!(wpp > 0)) return;
+    for (const s of this.#symbolMats) s.mat.size = Math.min(s.max, Math.max(s.min, s.world / wpp));
+  }
+
+  /** Kích thước (px) hiện tại của các ký hiệu gối và nhả liên kết (cho kiểm thử). */
+  get symbolSizes(): number[] {
+    return this.#symbolMats.map((s) => s.mat.size);
   }
 
   /** Vị trí camera và tâm nhìn (cho kiểm thử). */
@@ -601,16 +620,19 @@ export class StructureViewer {
     if (jp.length && this.#display.joints) {
       const g = new THREE.BufferGeometry();
       g.setAttribute("position", new THREE.Float32BufferAttribute(jp, 3));
-      this.#jointPoints = new THREE.Points(g, new THREE.PointsMaterial({ color: t.joint, size: 3.5, sizeAttenuation: false }));
+      this.#jointPoints = new THREE.Points(g, new THREE.PointsMaterial({ color: t.joint, size: 5, sizeAttenuation: false }));
       this.#jointPoints.renderOrder = 3;
       this.#content.add(this.#jointPoints);
     }
+    this.#symbolMats = [];
     for (const kind of ["fixed", "pinned", "other"] as const) {
-      if (!supports[kind].length) continue;
+      if (!supports[kind].length || !this.#display.restraints) continue;
       const g = new THREE.BufferGeometry();
       g.setAttribute("position", new THREE.Float32BufferAttribute(supports[kind], 3));
-      const pts = new THREE.Points(g, new THREE.PointsMaterial({ color: t.support, size: 9, sizeAttenuation: false, map: symbolSprite(kind), alphaTest: 0.5 }));
-      pts.renderOrder = 4;
+      const mat = new THREE.PointsMaterial({ color: t.support, size: 18, sizeAttenuation: false, map: symbolSprite(kind), alphaTest: 0.5, depthTest: false });
+      this.#symbolMats.push({ mat, world: 0.8, min: 16, max: 44 });
+      const pts = new THREE.Points(g, mat);
+      pts.renderOrder = 8;
       this.#content.add(pts);
     }
 
@@ -625,13 +647,16 @@ export class StructureViewer {
       if (f.releases.i.some(Boolean)) rel.push(...at(0.08));
       if (f.releases.j.some(Boolean)) rel.push(...at(0.92));
     }
-    if (rel.length) {
+    if (rel.length && this.#display.restraints) {
       const g = new THREE.BufferGeometry();
       g.setAttribute("position", new THREE.Float32BufferAttribute(rel, 3));
-      const pts = new THREE.Points(g, new THREE.PointsMaterial({ color: t.hover, size: 8, sizeAttenuation: false, map: symbolSprite("ring"), alphaTest: 0.5 }));
-      pts.renderOrder = 5;
+      const mat = new THREE.PointsMaterial({ color: t.hover, size: 12, sizeAttenuation: false, map: symbolSprite("ring"), alphaTest: 0.5, depthTest: false });
+      this.#symbolMats.push({ mat, world: 0.4, min: 11, max: 24 });
+      const pts = new THREE.Points(g, mat);
+      pts.renderOrder = 7;
       this.#content.add(pts);
     }
+    this.#updateSymbolSizes();
 
     if (this.#loadPattern) this.#buildLoads(m, vis, joints);
     this.#buildTags(vis, joints);
