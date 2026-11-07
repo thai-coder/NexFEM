@@ -22,8 +22,8 @@ Nguồn: ảnh chụp ETABS do người dùng cung cấp (splash, Start Page, Mo
 | 6 | Nút gom nhóm cùng họ (Dầm/Cột/Giằng, Sàn/Vách, Define, Assign, Bố cục) | Trung bình | ✅ |
 | 7 | Hộp thoại Assign không chặn khung nhìn (chọn đối tượng trước hoặc sau) | Trung bình | ✅ |
 | 8 | Hình bộ cài (NSIS, WiX) và biểu tượng dùng logo chữ N | Đơn giản | ✅ |
-| 9 | Splash khi mở app (logo NexFEM) | Đơn giản | ⏳ Kế tiếp |
-| 10 | Start Page là một tab: Mô hình mới / Mở / Gần đây / "Hiện khi khởi động" | Trung bình | ⏳ Kế tiếp |
+| 9 | Splash khi mở app (logo NexFEM) | Đơn giản | ✅ Xong (cửa sổ splash riêng, tối thiểu 1,6 s, tự đóng khi giao diện sẵn sàng; watchdog 25 s) |
+| 10 | Start Page là một tab: Mô hình mới / Mở / Gần đây / "Hiện khi khởi động" | Trung bình | ✅ Xong (tab "Trang chủ" cạnh khung nhìn, lệnh File ▸ Trang chủ; chạy tự động mặc định tắt) |
 | 11 | New Model hai bước: Initialization (đơn vị, vật liệu theo vùng, CSDL thép hình, tiêu chuẩn; dùng thiết lập đã lưu hoặc lấy từ file mô hình) rồi Quick Templates (lưới đều/tuỳ chỉnh, tầng đơn giản/tuỳ chỉnh) | Trung bình | ⏳ |
 | 12 | Mẫu: sàn phẳng, sàn phẳng có dầm biên | Đơn giản | ⏳ |
 | 13 | Mẫu thép + sàn deck (cần CSDL thép hình) | Trung bình | ⏳ cần nguồn bảng thép hình |

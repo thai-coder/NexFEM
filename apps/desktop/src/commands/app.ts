@@ -169,6 +169,7 @@ const later = (id: CommandId, phase: number, icon?: string, shortcut?: string, k
 export const COMMANDS: AppCommand[] = [
   { id: "file.new", icon: "new", shortcut: "Ctrl+N", keys: ["ctrl+n"], run: () => dialog("newModel") },
   { id: "file.open", icon: "open", shortcut: "Ctrl+O", keys: ["ctrl+o"], run: () => void openProject() },
+  { id: "file.startPage", run: () => window.dispatchEvent(new CustomEvent("nexfem:start-page")) },
   { id: "file.save", icon: "save", shortcut: "Ctrl+S", keys: ["ctrl+s"], run: () => void saveProject(false) },
   { id: "file.saveAs", shortcut: "Ctrl+Shift+S", keys: ["ctrl+shift+s"], run: () => void saveProject(true) },
   later("file.import", 8),
@@ -390,7 +391,7 @@ export function runCommand(id: CommandId): void {
 export type MenuItem = CommandId | "-";
 
 export const MENUS: { id: keyof Strings["menu"]; items: MenuItem[] }[] = [
-  { id: "file", items: ["file.new", "file.open", "file.save", "file.saveAs", "-", "file.import", "file.export"] },
+  { id: "file", items: ["file.new", "file.open", "file.startPage", "file.save", "file.saveAs", "-", "file.import", "file.export"] },
   { id: "edit", items: ["edit.undo", "edit.redo", "-", "edit.delete", "edit.replicate", "-", "edit.selectAll"] },
   {
     id: "view",

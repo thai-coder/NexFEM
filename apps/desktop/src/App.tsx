@@ -14,6 +14,7 @@ import { useT, type T as Strings } from "./i18n/index.ts";
 import { BottomPanel } from "./panels/console/BottomPanel.tsx";
 import { ModelExplorer } from "./panels/model-explorer/ModelExplorer.tsx";
 import { Properties } from "./panels/properties/Properties.tsx";
+import { showStartAtStartup, StartPage } from "./panels/start/StartPage.tsx";
 import { Viewport } from "./panels/viewport/Viewport.tsx";
 import { basename, confirmDiscardAsync } from "./services/files.ts";
 import { notifyReady, onCloseRequested, setWindowTitle } from "./services/tauri.ts";
@@ -59,6 +60,11 @@ const components: Record<string, React.FunctionComponent<IDockviewPanelProps>> =
       <Viewport />
     </ErrorBoundary>
   ),
+  start: () => (
+    <ErrorBoundary name="Start Page">
+      <StartPage />
+    </ErrorBoundary>
+  ),
   properties: () => (
     <ErrorBoundary name="Properties">
       <Properties />
@@ -82,6 +88,7 @@ function titleOf(id: string, T: Strings): string {
   if (id === "explorer") return T.panel.explorer;
   if (id === "properties") return T.panel.properties;
   if (id === "bottom") return T.panel.console;
+  if (id === "start") return T.panel.start;
   return T.panel.viewport;
 }
 
@@ -101,10 +108,28 @@ function addSide(api: DockviewApi, id: SidePanel, T: Strings) {
 
 function buildDefault(api: DockviewApi, T: Strings, panels: PanelVisibility) {
   api.clear();
-  api.addPanel({ id: "viewport", component: "viewport", title: T.panel.viewport, tabComponent: "pinned" });
+  // renderer "always": đổi sang tab Trang chủ không huỷ khung nhìn 3D.
+  api.addPanel({ id: "viewport", component: "viewport", title: T.panel.viewport, tabComponent: "pinned", renderer: "always" });
   if (panels.explorer) addSide(api, "explorer", T);
   if (panels.properties) addSide(api, "properties", T);
   if (panels.bottom) addSide(api, "bottom", T);
+}
+
+/** Mở (hoặc kích hoạt) tab Trang chủ cạnh khung nhìn. */
+function openStart(api: DockviewApi, T: Strings, activate: boolean) {
+  const existing = api.getPanel("start");
+  if (existing) {
+    if (activate) existing.api.setActive();
+    return;
+  }
+  api.addPanel({
+    id: "start",
+    component: "start",
+    title: T.panel.start,
+    position: { referencePanel: "viewport", direction: "within" },
+    inactive: !activate,
+  });
+  if (!activate) api.getPanel("viewport")?.api.setActive();
 }
 
 export function App() {
@@ -127,10 +152,31 @@ export function App() {
   }, [name, dirty, fileName]);
 
   useEffect(() => {
-    // Đợi một khung hình để khung nhìn và panel đã vẽ xong.
-    const id = requestAnimationFrame(() => void notifyReady());
-    return () => cancelAnimationFrame(id);
+    // Cửa sổ chính đang ẩn nên requestAnimationFrame không chạy; dùng bộ đếm giờ để đợi bố cục xong.
+    const id = window.setTimeout(() => void notifyReady(), 60);
+    // Khi cửa sổ vừa hiện, áp lại kích thước các bảng (lúc ẩn dockview đo được 0).
+    const onVisible = () => {
+      const api = apiRef.current;
+      if (document.visibilityState !== "visible" || !api) return;
+      for (const sid of ["explorer", "properties", "bottom"] as const) limit(api, sid, true);
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      window.clearTimeout(id);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, []);
+
+  useEffect(() => {
+    const openStartTab = () => apiRef.current && openStart(apiRef.current, T, true);
+    const focusView = () => apiRef.current?.getPanel("viewport")?.api.setActive();
+    window.addEventListener("nexfem:start-page", openStartTab);
+    window.addEventListener("nexfem:focus-viewport", focusView);
+    return () => {
+      window.removeEventListener("nexfem:start-page", openStartTab);
+      window.removeEventListener("nexfem:focus-viewport", focusView);
+    };
+  }, [T]);
 
   // Hỏi trước khi đóng cửa sổ khi còn thay đổi chưa lưu.
   useEffect(() => {
@@ -215,6 +261,10 @@ export function App() {
         panels: { explorer: !!api.getPanel("explorer"), properties: !!api.getPanel("properties"), bottom: !!api.getPanel("bottom") },
       });
     }
+    // Trang chủ theo tuỳ chọn "hiện khi khởi động", không theo layout đã lưu.
+    const start = api.getPanel("start");
+    if (showStartAtStartup()) openStart(api, T, true);
+    else if (start) api.removePanel(start);
     api.onDidLayoutChange(() => save(LAYOUT_KEY, api.toJSON()));
     api.onDidRemovePanel((p) => {
       const key = (Object.keys(PANEL_OF) as (keyof PanelVisibility)[]).find((k) => PANEL_OF[k] === p.id);

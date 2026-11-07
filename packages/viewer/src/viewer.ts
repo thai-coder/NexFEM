@@ -341,12 +341,20 @@ export class StructureViewer {
     this.#zoomTo(this.#viewDir);
   }
 
+  /** Đã yêu cầu zoom nhưng khung chứa chưa có kích thước (cửa sổ đang ẩn); làm lại khi có kích thước. */
+  #pendingFit: THREE.Vector3 | null = null;
+
   #zoomTo(viewDir: THREE.Vector3): void {
     const box = this.#contentBox();
     if (box.isEmpty()) return;
     const center = box.getCenter(new THREE.Vector3());
     const size = box.getSize(new THREE.Vector3());
     const { width, height } = this.#size();
+    if (width === 0 || height === 0) {
+      this.#pendingFit = viewDir.clone();
+      return;
+    }
+    this.#pendingFit = null;
     const aspect = width / Math.max(height, 1);
 
     if (this.#view.kind === "3d") {
@@ -385,6 +393,7 @@ export class StructureViewer {
     for (const m of this.#lineMaterials) m.resolution.set(width, height);
     this.#applyFrustum();
     this.invalidate();
+    if (this.#pendingFit) this.#zoomTo(this.#pendingFit);
   }
 
   /** Lên lịch vẽ lại ở khung hình kế tiếp. */

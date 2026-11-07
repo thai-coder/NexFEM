@@ -5,6 +5,7 @@
 //! API cục bộ (Giai đoạn 7) và lời gọi solver (Giai đoạn 5) sẽ thêm vào đây.
 
 use serde::Serialize;
+use std::time::{Duration, Instant};
 
 #[derive(Serialize)]
 struct AppInfo {
@@ -42,6 +43,26 @@ fn model_stats(json: String) -> Result<ModelStats, String> {
     })
 }
 
+/// Thời điểm khởi động, để splash hiện tối thiểu `MIN_SPLASH_MS`.
+struct Boot(Instant);
+
+/// Splash hiện ít nhất chừng này mili giây (không kéo dài nếu app khởi động chậm hơn).
+const MIN_SPLASH_MS: u64 = 1600;
+/// Nếu giao diện không báo sẵn sàng sau chừng này giây thì vẫn hiện cửa sổ chính để người dùng thấy lỗi.
+const SPLASH_WATCHDOG_SECS: u64 = 25;
+
+/// Đóng splash và hiện cửa sổ chính (gọi lại nhiều lần cũng không sao).
+fn reveal_main(app: &tauri::AppHandle) {
+    use tauri::Manager;
+    if let Some(splash) = app.get_webview_window("splash") {
+        let _ = splash.close();
+    }
+    if let Some(main) = app.get_webview_window("main") {
+        let _ = main.show();
+        let _ = main.set_focus();
+    }
+}
+
 /// Frontend gọi lệnh này khi giao diện đã dựng xong.
 ///
 /// Khi biến môi trường `NEXFEM_SMOKE_TEST` trỏ tới một file, app ghi thông tin khởi động
@@ -50,6 +71,19 @@ fn model_stats(json: String) -> Result<ModelStats, String> {
 #[tauri::command]
 fn frontend_ready(app: tauri::AppHandle) -> Result<bool, String> {
     use tauri::Manager;
+    // Trong các chế độ tự kiểm tra thì hiện cửa sổ chính ngay; bình thường thì để splash hiện đủ lâu để đọc được.
+    let smoke =
+        std::env::var("NEXFEM_SMOKE_TEST").is_ok() || std::env::var("NEXFEM_SMOKE_CLOSE").is_ok();
+    let wait = if smoke {
+        Duration::ZERO
+    } else {
+        Duration::from_millis(MIN_SPLASH_MS).saturating_sub(app.state::<Boot>().0.elapsed())
+    };
+    let handle = app.clone();
+    std::thread::spawn(move || {
+        std::thread::sleep(wait);
+        reveal_main(&handle);
+    });
     // Chế độ kiểm tra đóng cửa sổ: trả về true để giao diện tự bấm "đóng" như người dùng;
     // sự kiện thoát ghi file báo cáo (xem `run`). Quá 30 giây chưa thoát thì coi là lỗi.
     if std::env::var("NEXFEM_SMOKE_CLOSE").is_ok() {
@@ -166,6 +200,17 @@ pub fn run() {
     install_smoke_panic_hook();
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_opener::init())
+        .setup(|app| {
+            use tauri::Manager;
+            app.manage(Boot(Instant::now()));
+            let handle = app.handle().clone();
+            std::thread::spawn(move || {
+                std::thread::sleep(Duration::from_secs(SPLASH_WATCHDOG_SECS));
+                reveal_main(&handle);
+            });
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             app_info,
             model_stats,
