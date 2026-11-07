@@ -3,6 +3,7 @@ import { FrameSectionsDialog, LoadsDialog, MaterialsDialog, ShellSectionsDialog 
 import { GridStoryDialog } from "../dialogs/GridStoryDialog.tsx";
 import { NewModelDialog } from "../dialogs/NewModelDialog.tsx";
 import { PreferencesDialog } from "../dialogs/PreferencesDialog.tsx";
+import { ReplicateDialog } from "../dialogs/ReplicateDialog.tsx";
 import { useT } from "../i18n/index.ts";
 import { useUi } from "../stores/ui.ts";
 
@@ -29,6 +30,8 @@ export function Dialogs() {
       return <LoadsDialog onClose={close} {...(dialog.tab ? { tab: dialog.tab } : {})} />;
     case "preferences":
       return <PreferencesDialog onClose={close} />;
+    case "replicate":
+      return <ReplicateDialog onClose={close} />;
     default:
       break;
   }

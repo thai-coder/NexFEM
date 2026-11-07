@@ -1,6 +1,7 @@
 import { UNIT_PRESETS, toDisplay, unitsLabel } from "@nexfem/model-core";
 import { Icon } from "@nexfem/ui";
 import { runCommand } from "../commands/app.ts";
+import { SnapToggles } from "../panels/properties/DrawProps.tsx";
 import { useT } from "../i18n/index.ts";
 import { useModel } from "../stores/model.ts";
 import { useUi } from "../stores/ui.ts";
@@ -20,7 +21,7 @@ export function StatusBar() {
         X {cursor ? fmt(cursor[0]) : "—"}&nbsp;&nbsp;Y {cursor ? fmt(cursor[1]) : "—"}&nbsp;&nbsp;Z {cursor ? fmt(cursor[2]) : "—"}
       </span>
       <span className="status-cell">
-        {T.status.snap}: {T.status.snapModes}
+        {T.status.snap}: <SnapToggles />
       </span>
       <span className="status-cell" data-testid="selection-count">
         {T.fmt(T.status.selected, { n: selection })}

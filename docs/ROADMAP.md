@@ -55,8 +55,14 @@ Mỗi giai đoạn kết thúc bằng một bản chạy được trên Windows.
 - Hộp thoại Tuỳ chọn: ngôn ngữ, giao diện, đơn vị, khôi phục bố cục.
 - Chưa có (để đúng giai đoạn): thư viện tiết diện thép cán (A992/IPE/HEA…), sinh tổ hợp tự động theo tiêu chuẩn (Giai đoạn 10), modifiers/cốt thép của tiết diện.
 
-### Giai đoạn 3: View 2D/3D và công cụ vẽ
-- Plan/Elevation/3D, chọn (window/crossing), bắt điểm, vẽ Beam/Column/Brace/Slab/Wall, Replicate.
+### Giai đoạn 3: View 2D/3D và công cụ vẽ — ✅ xong (07/11/2026)
+- Plan/Elevation/3D và chọn window/crossing đã có từ Giai đoạn 1.
+- Vẽ bằng chuột ở mặt bằng và mặt đứng: nút (J), dầm (B), cột (C), giằng (R), sàn (S), vách (W). Dầm/giằng/vách vẽ nối tiếp; sàn theo đa giác (bấm lại điểm đầu, Enter hoặc chuột phải để đóng); Backspace bỏ điểm, Esc huỷ.
+- Bắt điểm: nút, giao lưới (và giao trục với cao độ tầng ở mặt đứng), trung điểm thanh, điểm trên trục; dấu bắt điểm có nhãn; Shift khoá phương ngang/dọc; bật/tắt từng loại ở thanh trạng thái.
+- Phạm vi tầng khi vẽ ở mặt bằng: một tầng / tầng tương tự / tất cả tầng; mỗi lần vẽ nhiều tầng là một bước Undo.
+- Panel Properties khi vẽ: chọn tiết diện sẽ gán, phạm vi tầng, gợi ý thao tác.
+- Replicate (Ctrl+R): tịnh tiến nhiều bản, đối xứng qua trục, sao chép sang tầng khác (giữ đúng cao độ khi tầng cao khác nhau), có sao chép tải; tự bỏ qua bản trùng.
+- Chưa làm: vẽ trong khung 3D, nhân bản xoay (radial), chia thanh, gộp nút, di chuyển/kéo giãn đối tượng, bắt điểm vuông góc/giao điểm, vẽ nhanh bằng một lần bấm vào ô lưới.
 
 ### Giai đoạn 4: Gán (Assign)
 - Gối, nhả liên kết, tải thanh/tải sàn, tiết diện; biểu tượng trên view; Check model.

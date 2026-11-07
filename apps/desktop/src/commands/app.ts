@@ -4,6 +4,7 @@ import { t } from "../i18n/index.ts";
 import type { Strings } from "../i18n/vi.ts";
 import { useModel } from "../stores/model.ts";
 import { openProject, saveProject } from "../services/files.ts";
+import { cancel as cancelDraw, finish as finishDraw, undoPoint } from "../tools/draw.ts";
 import { useUi, type DialogKind, type Tool } from "../stores/ui.ts";
 
 export type CommandId = keyof Strings["cmd"];
@@ -62,8 +63,14 @@ function moveStory(delta: number) {
 }
 
 function setTool(tool: Tool) {
-  ui().set({ tool });
-  if (tool !== "select") ui().log("info", t().fmt(t().log.drawHint, { tool: t().cmd[`draw.${tool}`] }));
+  ui().set({ tool, drawPoints: [] });
+  // Khung đang hoạt động là 3D thì chuyển sang mặt bằng để vẽ được ngay.
+  const s = ui();
+  if (tool !== "select" && s.views[s.activePane]?.kind === "3d") {
+    const plan = s.views.findIndex((v) => v.kind !== "3d");
+    if (plan >= 0 && plan < s.layout) s.set({ activePane: plan });
+    else s.setView(s.activePane, { kind: "plan", story: currentStory() ?? "" });
+  }
 }
 
 export function runCheck(): number {
@@ -130,7 +137,13 @@ export const COMMANDS: AppCommand[] = [
     },
     enabled: () => model().selection.length > 0 && !model().locked,
   },
-  later("edit.replicate", 3),
+  {
+    id: "edit.replicate",
+    shortcut: "Ctrl+R",
+    keys: ["ctrl+r"],
+    run: () => dialog("replicate"),
+    enabled: () => model().selection.length > 0 && !model().locked,
+  },
   {
     id: "edit.selectAll",
     shortcut: "Ctrl+A",
@@ -191,8 +204,10 @@ export const COMMANDS: AppCommand[] = [
   { id: "define.loadCases", icon: "load", run: () => dialog("loads", "loadCases"), enabled: unlocked },
   { id: "define.combos", icon: "combo", run: () => dialog("loads", "combos"), enabled: unlocked },
 
-  { ...draw("select", "select"), shortcut: "Esc", keys: ["escape"] },
-  draw("joint", "joint"),
+  { ...draw("select", "select"), shortcut: "Esc", keys: ["escape"], run: () => cancelDraw() },
+  { id: "draw.finish", shortcut: "Enter", keys: ["enter"], run: () => finishDraw(), enabled: () => ui().drawPoints.length > 0 },
+  { id: "draw.undoPoint", shortcut: "Backspace", keys: ["backspace"], run: () => undoPoint(), enabled: () => ui().drawPoints.length > 0 },
+  draw("joint", "joint", "j"),
   draw("beam", "beam", "b"),
   draw("column", "column", "c"),
   draw("brace", "brace", "r"),
@@ -332,7 +347,7 @@ export const MENUS: { id: keyof Strings["menu"]; items: MenuItem[] }[] = [
       "define.combos",
     ],
   },
-  { id: "draw", items: ["draw.select", "-", "draw.joint", "draw.beam", "draw.column", "draw.brace", "draw.slab", "draw.wall"] },
+  { id: "draw", items: ["draw.select", "-", "draw.joint", "draw.beam", "draw.column", "draw.brace", "draw.slab", "draw.wall", "-", "draw.finish", "draw.undoPoint"] },
   { id: "select", items: ["edit.selectAll", "select.byStory", "select.invert", "select.clear"] },
   { id: "assign", items: ["assign.restraint", "assign.section", "-", "assign.frameLoad", "assign.shellLoad"] },
   { id: "analyze", items: ["analyze.check", "analyze.run", "analyze.unlock"] },
@@ -367,9 +382,11 @@ export function handleShortcut(e: KeyboardEvent): boolean {
   const c = keyMap.get(key);
   if (!c) return false;
   // Phím một chữ cái và Delete không chạy khi đang gõ.
-  const plain = !key.includes("+") && (key.length === 1 || key === "delete");
+  const plain = !key.includes("+") && (key.length === 1 || key === "delete" || key === "enter" || key === "backspace");
   if (typing && (plain || key === "ctrl+a" || key === "ctrl+z" || key === "ctrl+y")) return false;
   if (typing && key === "escape") return false;
+  // Enter/Backspace chỉ có tác dụng khi đang vẽ; nếu không thì để trình duyệt xử lý bình thường.
+  if ((key === "enter" || key === "backspace") && c.enabled && !c.enabled()) return false;
   e.preventDefault();
   if (c.enabled && !c.enabled()) return true;
   c.run();

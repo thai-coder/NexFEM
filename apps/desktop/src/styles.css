@@ -1560,3 +1560,72 @@ input[aria-invalid="true"] {
 .template-card svg {
   color: var(--color-accent);
 }
+
+/* ---------------------------------------------------------------- drawing (phase 3) */
+
+.pane-tool.off {
+  background: var(--color-surface-3);
+  color: var(--color-text-muted);
+}
+
+.draw-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+  max-width: calc(100% - 140px);
+  padding: 4px 10px;
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 11px;
+  pointer-events: none;
+  text-align: center;
+  z-index: 4;
+}
+
+.snap-toggles {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.snap-toggles.vertical {
+  display: grid;
+  grid-template-columns: 96px repeat(2, auto);
+  gap: 4px 10px;
+  padding: 0 12px 10px;
+  justify-content: start;
+}
+
+.snap-toggles.vertical .prop-label {
+  grid-row: span 2;
+}
+
+.snap-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  white-space: nowrap;
+}
+
+.snap-toggle input {
+  margin: 0;
+}
+
+.warn-text {
+  color: var(--color-warning);
+  font-size: var(--font-size-sm);
+}
+
+.story-checks {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 12px;
+}
+
+.kind-dot.joint {
+  background: var(--color-text-muted);
+  border-radius: 50%;
+}

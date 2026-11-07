@@ -57,3 +57,7 @@ Mỗi lần đẩy code, GitHub Actions build bộ cài Windows, cài thử cho 
 | Ctrl+Shift+P | Bảng lệnh |
 | Chuột giữa kéo | Pan · Shift + chuột giữa hoặc chuột phải (3D): xoay · Lăn: zoom |
 | Kéo trái → phải / phải → trái | Chọn nằm trọn / chọn cắt qua |
+| J / B / C / R / S / W | Vẽ nút / dầm / cột / giằng / sàn / vách |
+| Enter · Backspace · Esc | Kết thúc (đóng sàn) · bỏ điểm vừa bấm · huỷ / về công cụ Chọn |
+| Shift (khi vẽ) | Khoá phương ngang/dọc |
+| Ctrl+R | Nhân bản đối tượng đang chọn |

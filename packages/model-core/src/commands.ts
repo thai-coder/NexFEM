@@ -168,10 +168,10 @@ export class CommandStack {
 // Lệnh dựng sẵn
 // ---------------------------------------------------------------------------
 
-const Point = z.tuple([z.number(), z.number(), z.number()]);
+export const Point = z.tuple([z.number(), z.number(), z.number()]);
 const TOL = 1e-6;
 
-function findOrAddJoint(draft: Model, p: [number, number, number], story?: string): string {
+export function findOrAddJoint(draft: Model, p: [number, number, number], story?: string): string {
   const hit = draft.joints.find((j) => Math.abs(j.x - p[0]) < TOL && Math.abs(j.y - p[1]) < TOL && Math.abs(j.z - p[2]) < TOL);
   if (hit) return hit.id;
   const label = nextLabel(
@@ -184,7 +184,7 @@ function findOrAddJoint(draft: Model, p: [number, number, number], story?: strin
   return id;
 }
 
-function requireIn(draft: Model, collection: CollectionName, id: string): void {
+export function requireIn(draft: Model, collection: CollectionName, id: string): void {
   if (!(draft[collection] as { id: string }[]).some((o) => o.id === id)) {
     throw new CommandError(`Không tìm thấy ${id} trong ${collection}`, "not_found");
   }

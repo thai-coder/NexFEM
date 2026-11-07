@@ -21,6 +21,8 @@ interface ModelState {
   execute(name: string, args: unknown, source?: string): unknown;
   /** Chạy nhiều lệnh thành một bước Undo. Trả về thông báo lỗi nếu có (mô hình giữ nguyên). */
   executeBatch(title: string, ops: { name: string; args: unknown }[], source?: string): string | null;
+  /** Chạy một lệnh, trả về kết quả hoặc thông báo lỗi (để hiện ngay trong hộp thoại). */
+  run(name: string, args: unknown, title?: string): { ok: true; result: unknown } | { ok: false; error: string };
   /** Đánh dấu đã lưu. */
   markSaved(fileName: string): void;
   undo(): void;
@@ -85,6 +87,24 @@ export const useModel = create<ModelState>((set, get) => ({
       const message = e instanceof Error ? e.message : String(e);
       log("error", t().fmt(t().log.failed, { message }), source);
       return message;
+    }
+  },
+
+  run(name, args, title) {
+    const log = useUi.getState().log;
+    if (get().locked) return { ok: false, error: t().props.locked };
+    try {
+      const r = stack.executeBatch(title ?? name, [{ name, args }]);
+      if (r.changed) {
+        const ids = new Set(objectIds(stack.model));
+        set({ ...snapshot(), dirty: true, selection: get().selection.filter((id) => ids.has(id)) });
+        log("command", title ?? name);
+      }
+      return { ok: true, result: r.results[0] };
+    } catch (e) {
+      const error = e instanceof Error ? e.message : String(e);
+      log("error", t().fmt(t().log.failed, { message: error }));
+      return { ok: false, error };
     }
   },
 

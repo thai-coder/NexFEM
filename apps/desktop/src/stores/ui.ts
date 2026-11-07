@@ -1,5 +1,5 @@
 import type { Model, ModelMessage } from "@nexfem/model-core";
-import type { HoverInfo, ViewSpec } from "@nexfem/viewer";
+import { ALL_SNAPS, type HoverInfo, type P3, type SnapModes, type ViewSpec } from "@nexfem/viewer";
 import { create } from "zustand";
 import { load, save } from "./persist.ts";
 
@@ -19,7 +19,8 @@ export type DialogKind =
   | "frameSections"
   | "shellSections"
   | "loads"
-  | "preferences";
+  | "preferences"
+  | "replicate";
 
 export interface DialogState {
   kind: DialogKind;
@@ -63,6 +64,13 @@ interface UiState {
   hover: (HoverInfo & { pane: number }) | null;
   /** Tăng mỗi lần yêu cầu "vừa khung" cho ô đang hoạt động. */
   zoomSeq: number;
+  /** Chế độ bắt điểm khi vẽ. */
+  snapModes: SnapModes;
+  /** Các điểm đã bấm của đối tượng đang vẽ và ô viewport đang vẽ. */
+  drawPoints: P3[];
+  drawPane: number;
+  /** Tiết diện dùng khi vẽ, theo công cụ (rỗng = tự chọn). */
+  drawSections: Partial<Record<Exclude<Tool, "select" | "joint">, string>>;
 
   set(patch: Partial<UiState>): void;
   setTheme(theme: Theme): void;
@@ -113,6 +121,10 @@ export const useUi = create<UiState>((set, get) => ({
   cursor: null,
   hover: null,
   zoomSeq: 0,
+  snapModes: load<SnapModes>("snapModes", ALL_SNAPS),
+  drawPoints: [],
+  drawPane: 0,
+  drawSections: {},
 
   set: (patch) => set(patch),
   setTheme: (theme) => {
@@ -140,4 +152,8 @@ export const useUi = create<UiState>((set, get) => ({
 
 useUi.subscribe((s, prev) => {
   if (s.ribbonCollapsed !== prev.ribbonCollapsed) save("ribbonCollapsed", s.ribbonCollapsed);
+});
+
+useUi.subscribe((s, prev) => {
+  if (s.snapModes !== prev.snapModes) save("snapModes", s.snapModes);
 });

@@ -20,15 +20,19 @@ import { useEffect, useState, type ReactNode } from "react";
 import { runCommand } from "../../commands/app.ts";
 import { useT } from "../../i18n/index.ts";
 import { useModel } from "../../stores/model.ts";
+import { useUi } from "../../stores/ui.ts";
+import { DrawProps } from "./DrawProps.tsx";
 
 export function Properties() {
   const T = useT();
   const model = useModel((s) => s.model);
   const selection = useModel((s) => s.selection);
   const locked = useModel((s) => s.locked);
+  const tool = useUi((s) => s.tool);
 
   let body: ReactNode;
-  if (selection.length === 0) body = <Summary model={model} />;
+  if (tool !== "select") body = <DrawProps tool={tool} />;
+  else if (selection.length === 0) body = <Summary model={model} />;
   else if (selection.length === 1) {
     const hit = findObject(model, selection[0]!);
     const obj = hit?.object;

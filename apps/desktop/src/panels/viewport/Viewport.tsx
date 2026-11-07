@@ -3,6 +3,7 @@ import { readToken } from "@nexfem/ui";
 import { DARK_THEME, LIGHT_THEME, StructureViewer, viewTitle, type ViewSpec, type ViewerTheme } from "@nexfem/viewer";
 import { useEffect, useRef } from "react";
 import { useT } from "../../i18n/index.ts";
+import { canDrawIn, finish, handlePoint, isPolygonTool } from "../../tools/draw.ts";
 import { useModel } from "../../stores/model.ts";
 import { useUi } from "../../stores/ui.ts";
 
@@ -57,6 +58,9 @@ function Pane({ index }: { index: number }) {
   const zoomSeq = useUi((s) => s.zoomSeq);
   const hover = useUi((s) => (s.hover?.pane === index ? s.hover : null));
   const tool = useUi((s) => s.tool);
+  const snapModes = useUi((s) => s.snapModes);
+  const drawPoints = useUi((s) => (s.drawPane === index ? s.drawPoints : null));
+  const drawing = tool !== "select" && canDrawIn(view);
 
   useEffect(() => {
     const el = host.current;
@@ -69,6 +73,11 @@ function Pane({ index }: { index: number }) {
       },
       onHover: (info) => useUi.getState().set({ hover: info ? { ...info, pane: index } : null }),
       onCursor: (p) => useUi.getState().set({ cursor: p }),
+      onPoint: (snap) => {
+        useUi.getState().set({ activePane: index });
+        handlePoint(index, snap);
+      },
+      onFinish: () => finish(index),
     });
     viewer.current = v;
     // Cho kiểm thử e2e truy cập viewer.
@@ -95,6 +104,14 @@ function Pane({ index }: { index: number }) {
   useEffect(() => {
     if (zoomSeq && active) viewer.current?.zoomExtents();
   }, [zoomSeq]);
+  useEffect(() => {
+    const T0 = T.draw.snapKinds;
+    viewer.current?.setDrawing(
+      drawing
+        ? { modes: snapModes, preview: drawPoints ?? [], closed: isPolygonTool(tool, view), labels: { joint: T0.joint, grid: T0.grid, mid: T0.mid, gridline: T0.gridline } }
+        : null,
+    );
+  }, [drawing, snapModes, drawPoints, tool, JSON.stringify(view), model, T]);
 
   const labels = { plan: T.view.plan, elevation: T.view.elevation, view3d: T.view.view3d, axis: T.view.axis };
   const grid = model.grids[0];
@@ -131,10 +148,16 @@ function Pane({ index }: { index: number }) {
           )}
         </select>
         <span className="pane-sub">{viewTitle(model, view, labels)}</span>
-        {tool !== "select" && <span className="pane-tool">{T.cmd[`draw.${tool}`]}</span>}
+        {tool !== "select" && (
+          <span className={`pane-tool${drawing ? "" : " off"}`} title={drawing ? T.draw.hint[tool] : T.draw.not3d}>
+            {T.cmd[`draw.${tool}`]}
+            {drawPoints?.length ? ` · ${T.fmt(T.draw.points, { n: drawPoints.length })}` : ""}
+          </span>
+        )}
       </header>
       <div className="pane-canvas" ref={host} />
-      {hover && <HoverTip id={hover.id} x={hover.x} y={hover.y} />}
+      {hover && !drawing && <HoverTip id={hover.id} x={hover.x} y={hover.y} />}
+      {tool !== "select" && active && <div className="draw-hint">{drawing ? T.draw.hint[tool] : T.draw.not3d}</div>}
     </section>
   );
 }

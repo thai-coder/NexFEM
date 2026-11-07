@@ -6,6 +6,7 @@ import { LineSegments2 } from "three/addons/lines/LineSegments2.js";
 import { LineSegmentsGeometry } from "three/addons/lines/LineSegmentsGeometry.js";
 import { CSS2DObject, CSS2DRenderer } from "three/addons/renderers/CSS2DRenderer.js";
 import { TOL, findGridLine, segmentIntersectsRect, visibleObjects, type ViewSpec, type VisibleSet } from "./filter.ts";
+import { gridLines, orthoLock, pickSnap, snapPoints, type P3, type SnapKind, type SnapModes, type SnapPoint } from "./snap.ts";
 
 export interface ViewerTheme {
   background: string;
@@ -78,6 +79,20 @@ export interface ViewerCallbacks {
   onHover?(info: HoverInfo | null): void;
   /** Toạ độ con trỏ trên mặt phẳng khung nhìn (m), null khi ra ngoài. */
   onCursor?(p: [number, number, number] | null): void;
+  /** Chế độ vẽ: người dùng bấm một điểm (đã bắt điểm). */
+  onPoint?(snap: SnapPoint): void;
+  /** Chế độ vẽ: kết thúc chuỗi (chuột phải hoặc bấm đúp). */
+  onFinish?(): void;
+}
+
+export interface DrawingOptions {
+  modes: SnapModes;
+  /** Các điểm đã bấm của đối tượng đang vẽ, để vẽ đường kéo xem trước. */
+  preview: P3[];
+  /** Đa giác (sàn): nối điểm hiện tại về điểm đầu. */
+  closed?: boolean;
+  /** Nhãn hiển thị cạnh dấu bắt điểm, theo loại. */
+  labels?: Partial<Record<SnapKind, string>>;
 }
 
 const SEL_RECT_STYLE =
@@ -125,6 +140,13 @@ export class StructureViewer {
   #lineMaterials: LineMaterial[] = [];
   #orthoHalfHeight = 10;
 
+  // chế độ vẽ
+  #drawing: DrawingOptions | null = null;
+  #snapCache: { points: SnapPoint[]; lines: ReturnType<typeof gridLines> } | null = null;
+  #snap: SnapPoint | null = null;
+  #snapEl: HTMLDivElement;
+  #rubber = new THREE.Group();
+
   constructor(container: HTMLElement, callbacks: ViewerCallbacks = {}) {
     this.container = container;
     this.#cb = callbacks;
@@ -151,6 +173,11 @@ export class StructureViewer {
     this.#selRect.style.cssText = SEL_RECT_STYLE;
     container.appendChild(this.#selRect);
 
+    this.#snapEl = document.createElement("div");
+    this.#snapEl.className = "nx-snap";
+    this.#snapEl.style.cssText = "position:absolute;pointer-events:none;display:none;z-index:3;";
+    container.appendChild(this.#snapEl);
+
     this.#persp = new THREE.PerspectiveCamera(45, 1, 0.05, 5000);
     this.#persp.up.set(0, 0, 1);
     this.#ortho = new THREE.OrthographicCamera(-10, 10, 10, -10, -5000, 5000);
@@ -162,7 +189,7 @@ export class StructureViewer {
     this.#controls.addEventListener("change", () => this.invalidate());
     this.#setupCamera();
 
-    this.#scene.add(this.#content, this.#overlay);
+    this.#scene.add(this.#content, this.#overlay, this.#rubber);
     this.#scene.add(new THREE.AmbientLight(0xffffff, 1));
 
     this.#bindPointer();
@@ -189,6 +216,28 @@ export class StructureViewer {
       this.#rebuild();
       this.zoomExtents();
     }
+  }
+
+  /**
+   * Bật/tắt chế độ vẽ. Khi bật, chuột trái bấm điểm (có bắt điểm) thay vì chọn đối tượng.
+   * Chỉ dùng được ở khung nhìn 2D (Plan, Elevation).
+   */
+  setDrawing(opts: DrawingOptions | null): void {
+    const was = !!this.#drawing;
+    this.#drawing = opts && this.#visible?.plane ? opts : null;
+    this.#snapCache = null;
+    if (!this.#drawing) {
+      this.#snap = null;
+      this.#snapEl.style.display = "none";
+      this.#clear(this.#rubber);
+      this.invalidate();
+    } else this.#updateRubber();
+    if (was !== !!this.#drawing) this.#renderer.domElement.style.cursor = this.#drawing ? "crosshair" : "default";
+  }
+
+  /** Điểm bắt hiện tại (chế độ vẽ). */
+  get snap(): SnapPoint | null {
+    return this.#snap;
   }
 
   setSelection(ids: Iterable<string>): void {
@@ -507,6 +556,8 @@ export class StructureViewer {
     }
 
     this.#buildOverlay();
+    this.#snapCache = null;
+    if (this.#drawing && !vis.plane) this.setDrawing(null);
   }
 
   #label(text: string, at: THREE.Vector3, kind: "bubble" | "story"): void {
@@ -694,6 +745,78 @@ export class StructureViewer {
     }
   }
 
+  // ---------------------------------------------------------------- drawing
+
+  #snapAt(ev: { clientX: number; clientY: number; shiftKey: boolean }): SnapPoint | null {
+    const d = this.#drawing;
+    const m = this.#model;
+    const vis = this.#visible;
+    if (!d || !m || !vis?.plane) return null;
+    const cursor = this.#cursorPoint(ev);
+    if (!cursor) return null;
+    this.#snapCache ??= { points: snapPoints(m, vis, d.modes), lines: gridLines(m, vis) };
+    const r = this.#renderer.domElement.getBoundingClientRect();
+    const px: [number, number] = [ev.clientX - r.left, ev.clientY - r.top];
+    let snap = pickSnap(cursor, px, this.#snapCache.points, this.#snapCache.lines, d.modes, (p) => this.worldToScreen(...p), 12, this.#worldPerPixel());
+    const anchor = d.preview.at(-1);
+    if (ev.shiftKey && anchor && (snap.kind === "free" || snap.kind === "gridline")) {
+      snap = { kind: snap.kind, p: orthoLock(anchor, snap.p, vis.plane.axis) };
+    }
+    return snap;
+  }
+
+  #showSnap(snap: SnapPoint | null): void {
+    const el = this.#snapEl;
+    const d = this.#drawing;
+    if (!snap || !d) {
+      el.style.display = "none";
+      return;
+    }
+    const [x, y] = this.worldToScreen(...snap.p);
+    const t = this.#theme;
+    const shape: Record<SnapKind, string> = {
+      joint: "width:11px;height:11px;border:2px solid;",
+      grid: "width:12px;height:12px;border:2px solid;border-radius:50%;",
+      mid: "width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:12px solid;",
+      gridline: "width:10px;height:10px;border:2px dotted;border-radius:50%;",
+      free: "width:6px;height:6px;border:1px solid;",
+    };
+    const prefix = d.labels?.[snap.kind] ?? "";
+    const text = snap.kind === "free" ? "" : `${prefix}${snap.label ? ` ${snap.label}` : ""}`.trim();
+    el.innerHTML = `<div style="position:absolute;left:0;top:0;transform:translate(-50%,-50%);box-sizing:border-box;color:${t.selection};border-color:${t.selection};${shape[snap.kind]}"></div>${
+      text
+        ? `<div style="position:absolute;left:10px;top:8px;white-space:nowrap;font:500 11px Inter,system-ui,sans-serif;color:${t.gridLabel};background:${t.gridLabelBg};border:1px solid ${t.grid};border-radius:3px;padding:1px 5px;">${text.replace(/[<&>]/g, "")}</div>`
+        : ""
+    }`;
+    Object.assign(el.style, { display: "block", left: `${x}px`, top: `${y}px` });
+  }
+
+  #updateRubber(): void {
+    this.#clear(this.#rubber);
+    const d = this.#drawing;
+    if (!d) return this.invalidate();
+    const pts = [...d.preview];
+    if (this.#snap) pts.push(this.#snap.p);
+    if (d.closed && pts.length >= 3) pts.push(pts[0]!);
+    if (pts.length >= 2) {
+      const pos: number[] = [];
+      for (let k = 0; k + 1 < pts.length; k++) pos.push(...pts[k]!, ...pts[k + 1]!);
+      const g = new LineSegmentsGeometry();
+      g.setPositions(pos);
+      const l = new LineSegments2(g, this.#lineMaterial(2.5, { color: new THREE.Color(this.#theme.selection).getHex(), depthTest: false }));
+      l.renderOrder = 20;
+      this.#rubber.add(l);
+    }
+    if (d.preview.length) {
+      const g = new THREE.BufferGeometry();
+      g.setAttribute("position", new THREE.Float32BufferAttribute(d.preview.flat(), 3));
+      const p = new THREE.Points(g, new THREE.PointsMaterial({ color: this.#theme.selection, size: 7, sizeAttenuation: false, depthTest: false }));
+      p.renderOrder = 21;
+      this.#rubber.add(p);
+    }
+    this.invalidate();
+  }
+
   // ---------------------------------------------------------------- picking
 
   #ndc(ev: { clientX: number; clientY: number }): THREE.Vector2 {
@@ -780,7 +903,7 @@ export class StructureViewer {
     return out;
   }
 
-  #cursorPoint(ev: PointerEvent): [number, number, number] | null {
+  #cursorPoint(ev: { clientX: number; clientY: number }): [number, number, number] | null {
     const plane = this.#visible?.plane;
     const rc = this.#raycaster;
     rc.setFromCamera(this.#ndc(ev), this.#camera);
@@ -797,7 +920,13 @@ export class StructureViewer {
     let hoverFrame = 0;
     let lastMove: PointerEvent | null = null;
 
-    el.addEventListener("contextmenu", (e) => e.preventDefault());
+    el.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+      if (this.#drawing) this.#cb.onFinish?.();
+    });
+    el.addEventListener("dblclick", () => {
+      if (this.#drawing) this.#cb.onFinish?.();
+    });
     el.addEventListener("pointerdown", (e) => {
       if (e.button !== 0) return;
       const r = el.getBoundingClientRect();
@@ -811,7 +940,7 @@ export class StructureViewer {
         const x = e.clientX - r.left;
         const y = e.clientY - r.top;
         if (!dragging && Math.hypot(x - down.x, y - down.y) > 4) dragging = true;
-        if (dragging) {
+        if (dragging && !this.#drawing) {
           const crossing = x < down.x;
           Object.assign(this.#selRect.style, {
             display: "block",
@@ -829,6 +958,13 @@ export class StructureViewer {
       hoverFrame = requestAnimationFrame(() => {
         hoverFrame = 0;
         if (!lastMove || this.#disposed) return;
+        if (this.#drawing) {
+          this.#snap = this.#snapAt(lastMove);
+          this.#showSnap(this.#snap);
+          this.#updateRubber();
+          this.#cb.onCursor?.(this.#snap?.p ?? null);
+          return;
+        }
         const info = this.pickAt(lastMove.clientX, lastMove.clientY);
         const id = info?.id ?? null;
         if (id !== this.#hover) {
@@ -847,6 +983,11 @@ export class StructureViewer {
       }
       this.#cb.onHover?.(null);
       this.#cb.onCursor?.(null);
+      if (this.#drawing) {
+        this.#snap = null;
+        this.#showSnap(null);
+        this.#updateRubber();
+      }
     });
     el.addEventListener("pointerup", (e) => {
       if (!down || e.pointerId !== down.id) return;
@@ -854,6 +995,16 @@ export class StructureViewer {
       const x = e.clientX - r.left;
       const y = e.clientY - r.top;
       const additive = e.ctrlKey || e.metaKey;
+      if (this.#drawing) {
+        if (!dragging) {
+          const snap = this.#snapAt(e);
+          if (snap) this.#cb.onPoint?.(snap);
+        }
+        this.#selRect.style.display = "none";
+        down = null;
+        dragging = false;
+        return;
+      }
       if (dragging) {
         this.#selRect.style.display = "none";
         const ids = this.pickRect(down.x, down.y, x, y, x < down.x);
