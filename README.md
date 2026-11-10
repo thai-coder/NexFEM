@@ -7,5 +7,6 @@ NexFEM Designer is an intuitive structural analysis FEA software you can master 
 
 - [CLAUDE.md](CLAUDE.md) — instructions for Claude working on NexFEM.
 - [CSI Import & Validation implementation plan](docs/CSI_IMPORT_VALIDATION_PLAN.md) — agreed priority, scope, acceptance criteria and implementation checklist.
+- [ETABS sample intake, 2026-11-10](docs/ETABS_SAMPLE_INTAKE_2026-11-10.md) — metadata from the first real ETABS text export; the original model files are not published.
 
 The `main` branch currently holds project entry-point documentation. Active application code and its existing roadmap are on `claude/etab-sap2000-connection-vts58p`; do not mistake the small `main` tree for the entire implementation.
