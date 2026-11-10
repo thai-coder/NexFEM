@@ -20,6 +20,9 @@ If working from an older development branch, **read the instructions from `main`
 git fetch origin main
 git show origin/main:CLAUDE.md
 git show origin/main:docs/CSI_IMPORT_VALIDATION_PLAN.md
+git show origin/main:docs/ETABS_SAMPLE_INTAKE_2026-11-10.md
+# Read the original fixture directly from main (quote the path containing spaces):
+git show "origin/main:tests/fixtures/csi/etabs/23217_SMFs 3D model_updated v4.e2k" > /tmp/nexfem-etabs-reference.e2k
 ```
 
 ## Engineering guardrails
@@ -33,4 +36,4 @@ git show origin/main:docs/CSI_IMPORT_VALIDATION_PLAN.md
 
 ## ETABS sample received — 2026-11-10
 
-A real ETABS 23.2.0 `.e2k` text model and related files have been inspected. Read [the metadata-only intake note](docs/ETABS_SAMPLE_INTAKE_2026-11-10.md) for counts, grammar/units risks, blocked benchmarks and privacy constraints. **The original attachments are not present in GitHub; do not invent fixture files or assume access to them.** SAP2000 `.s2k` and ETABS analysis result exports remain pending.
+A real ETABS 23.2.0 `.e2k` text model and related files have been inspected. Read [the fixture intake note](docs/ETABS_SAMPLE_INTAKE_2026-11-10.md) for counts, grammar/units risks, blocked benchmarks and privacy constraints. **The owner explicitly authorized publishing the original .e2k, and it is now present on GitHub `main`: [ETABS 23.2.0 fixture](https://github.com/thai-coder/NexFEM/blob/main/tests/fixtures/csi/etabs/23217_SMFs%203D%20model_updated%20v4.e2k).** Only this `.e2k` (not the other four attachments) was published. SAP2000 `.s2k` and exported ETABS analysis results remain pending.

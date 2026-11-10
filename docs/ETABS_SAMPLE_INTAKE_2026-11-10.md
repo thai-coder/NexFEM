@@ -1,6 +1,6 @@
-# ETABS sample intake — 2026-11-10 (metadata only)
+# ETABS sample intake — 2026-11-10 (original .e2k published)
 
-**Status:** ETABS sample supplied in a ChatGPT conversation and inspected; **not checked into GitHub**. SAP2000 `.s2k` sample is still pending from the owner. This note updates the approved [CSI Import & Validation plan](CSI_IMPORT_VALIDATION_PLAN.md).
+**Status:** ETABS sample supplied in a ChatGPT conversation, inspected, and **original `.e2k` committed to public `main` with the owner's explicit permission**. SAP2000 `.s2k` sample is still pending from the owner. This note updates the approved [CSI Import & Validation plan](CSI_IMPORT_VALIDATION_PLAN.md).
 
 ## Files received (five attachments from one model family)
 
@@ -12,7 +12,7 @@
 | `.ebk` | ETABS native binary backup | Header contains ETABS **20.3.0**; do not assume it is identical to the current `.EDB`. |
 | `.ico` | Actually PNG-encoded image (120x120) | Not an engineering model/import fixture. |
 
-**No raw file, raw log, internal Windows path, project title, private file identifier, or structure geometry has been published in this repository.** The uploads are **conversation attachments, not GitHub files**. Claude running solely against GitHub will see only this metadata, not the ETABS contents. Request explicit owner authorization and an agreed private/sanitized fixture distribution method before using these original engineering files in a repository.
+**Public ETABS fixture:** [`tests/fixtures/csi/etabs/23217_SMFs 3D model_updated v4.e2k`](https://github.com/thai-coder/NexFEM/blob/main/tests/fixtures/csi/etabs/23217_SMFs%203D%20model_updated%20v4.e2k). The original `.e2k` is published **unchanged**, including any internal Windows path, model title and geometry it contains, as expressly authorized by the owner. The other four uploaded attachments are **not** in GitHub. Use this one real fixture to develop parser tests; do not presume additional data or publish other original files without separate permission.
 
 ## Verified `.e2k` structure (counts from the uploaded file)
 
@@ -45,9 +45,17 @@ Relevant blocks include: `PROGRAM INFORMATION`, `CONTROLS`, `STORIES`, `GRIDS`, 
 
 ## Updated milestone status
 
-- **M0 — ETABS side: partially unblocked.** One real, version-identified `.e2k` sample is available **in the conversation**; transfer into a secure fixture workspace still requires authorization. SAP2000 `.s2k` remains pending. Reference CSI analysis-result tables remain pending.
-- **M1 — Import:** proceed with parser scaffolding, field/token grammar and supported-construct matrix; once a secure fixture is accessible to implementers, run full parsing and map to `model-core`.
+- **M0 — ETABS side: fixture available on GitHub.** One real, version-identified `.e2k` is committed on `main` at `tests/fixtures/csi/etabs/23217_SMFs 3D model_updated v4.e2k`. SAP2000 `.s2k` and reference CSI analysis-result tables remain pending.
+- **M1 — Import:** proceed immediately using the committed `.e2k` for parser grammar, full parsing tests, diagnostics and mapping to `model-core`. If working on a development branch, fetch `origin/main` to access this fixture.
 - **M2 — Comparison:** write benchmark harness and analytic cases now, but **do not claim actual ETABS numeric validation** without exported CSI reference results.
 - **M4 — OAPI:** remains deferred until M1/M2 acceptance as decided.
 
-**Do not mistake this file inventory for source artifacts.** It is an intake note only, intentionally free of private raw uploads.
+**Integrity and interpretation:** the `.e2k` was uploaded as original source data (not a processed mock). The intake note itself contains observations, not proof of successful import or CSI numerical validation.
+
+## Original file integrity (GitHub fixture)
+
+- Relative path: `tests/fixtures/csi/etabs/23217_SMFs 3D model_updated v4.e2k`
+- Byte size: **350310**; line count: **4263**; original line endings: CRLF.
+- SHA-256: `01d6753b2894b657e78d2a4fc3b4842f95e8c85d384a30f90fc4c458d965f431`
+- Git blob SHA-1: `c49d07245a3d87705570ad467eba897b917a52f4` (verified against original attachment before commit).
+- Permission: owner expressly authorized publishing **this `.e2k` only** in the public repository.
