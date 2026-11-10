@@ -30,3 +30,7 @@ git show origin/main:docs/CSI_IMPORT_VALIDATION_PLAN.md
 - Compare solver outputs with independently exported CSI results (without requiring OAPI), alongside analytic benchmarks. Record tolerances and known solver limitations.
 - The current Rust solver is a linear-static frame solver; do not present shell, diaphragm, P-Delta, dynamics, or design-code behavior as equivalent to ETABS/SAP2000 without implementing and validating it.
 - CI success is not proof of engineering equivalence. Document validation coverage, gaps, and manual verification separately.
+
+## ETABS sample received — 2026-11-10
+
+A real ETABS 23.2.0 `.e2k` text model and related files have been inspected. Read [the metadata-only intake note](docs/ETABS_SAMPLE_INTAKE_2026-11-10.md) for counts, grammar/units risks, blocked benchmarks and privacy constraints. **The original attachments are not present in GitHub; do not invent fixture files or assume access to them.** SAP2000 `.s2k` and ETABS analysis result exports remain pending.
