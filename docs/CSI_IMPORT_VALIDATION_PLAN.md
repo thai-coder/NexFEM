@@ -76,3 +76,7 @@ The immediate integration goal is to **reliably read ETABS `.e2k` and SAP2000 `.
 For each PR, record: verified input program/version; sample file provenance; supported and unsupported tables; mapping assumptions; checks run; benchmark outputs with tolerances; known limitations; follow-up issues. Avoid describing any part as ETABS/SAP2000-compatible until the applicable real-file tests and comparisons have passed.
 
 **Source context:** `docs/ROADMAP.md`, `docs/adr/0002-csi-interop.md`, `docs/ux-round2.md` on the development branch. This decision document is maintained on `main`.
+
+## Fixture availability update — 2026-11-10
+
+One **real ETABS 23.2.0 `.e2k`** and a related `.$et` variant have now been received as ChatGPT conversation attachments, along with ETABS native binary files and an image. **They have not been uploaded to this public repository.** See [ETABS sample intake](ETABS_SAMPLE_INTAKE_2026-11-10.md) for verified format and record counts, temperature-unit normalization tests, and parser risk notes. SAP2000 `.s2k` and independent CSI analysis-result exports remain pending. Accordingly M0 is **ETABS partially unblocked, overall incomplete**; M2 CSI numerical comparison is still blocked. Do not push the raw engineering models to public GitHub without the owner's explicit authorization.
