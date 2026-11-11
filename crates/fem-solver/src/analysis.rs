@@ -348,8 +348,8 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
         let (area, i22, i33, j) = section_props(&sec.geometry);
         if !geometry_ok
             || [area, i22, i33, j, mat.e]
-            .iter()
-            .any(|v| !v.is_finite() || *v <= 0.0)
+                .iter()
+                .any(|v| !v.is_finite() || *v <= 0.0)
         {
             return Err(AnalysisError::new(
                 "invalid_section",
@@ -699,7 +699,10 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
                 let joint = &model.joints[nodes[n]];
                 return Err(AnalysisError::new(
                     "unrestrained_moment",
-                    format!("Nút {}: mô men đặt vào bậc tự do xoay {} không có độ cứng", joint.label, DOF_NAMES[direction]),
+                    format!(
+                        "Nút {}: mô men đặt vào bậc tự do xoay {} không có độ cứng",
+                        joint.label, DOF_NAMES[direction]
+                    ),
                     vec![joint.id.clone()],
                 ));
             }

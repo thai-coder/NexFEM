@@ -307,7 +307,8 @@ fn rejects_impossible_section_dimensions_in_solver_without_ui() {
         json!([{"id":"f","label":"B1","kind":"beam","i":"a","j":"b","section":"s"}]),
         json!([]),
     );
-    m.frame_sections[0].geometry = serde_json::from_value(json!({"shape":"box","h":0.3,"b":0.2,"t":0.11})).unwrap();
+    m.frame_sections[0].geometry =
+        serde_json::from_value(json!({"shape":"box","h":0.3,"b":0.2,"t":0.11})).unwrap();
     assert_eq!(
         analyze(&m, &Options::default()).err().unwrap().code,
         "invalid_section"
