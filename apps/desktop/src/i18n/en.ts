@@ -186,6 +186,12 @@ export const en: Strings = {
     duplicate_frame: "Frame {label} duplicates another frame",
     no_supports: "The model has no supports",
     unused_section: "Section {name} is not used",
+    invalid_section: "Section {name} has invalid geometry",
+    invalid_releases: "Frame {name} has invalid releases at both ends",
+    missing_load_target: "Load {name}: target missing or load position invalid",
+    missing_load_pattern: "{name}: missing load pattern",
+    missing_load_case: "Combination {name}: missing case/combination",
+    invalid_combo_cycle: "Combination {name} has a circular dependency",
   },
   tables: { type: "Table", rows: "{n} rows", frames: "Frames", joints: "Joints", shells: "Shells", stories: "Stories" },
   log: {

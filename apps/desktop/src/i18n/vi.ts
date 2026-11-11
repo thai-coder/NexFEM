@@ -185,6 +185,12 @@ export const vi = {
     duplicate_frame: "Thanh {label} trùng với thanh khác",
     no_supports: "Mô hình chưa có gối nào",
     unused_section: "Tiết diện {name} chưa được dùng",
+    invalid_section: "Tiết diện {name} có kích thước không hợp lệ",
+    invalid_releases: "Thanh {name}: nhả liên kết cả hai đầu không hợp lệ",
+    missing_load_target: "Tải {name}: đối tượng gán tải không tồn tại hoặc vị trí tải sai",
+    missing_load_pattern: "{name}: mẫu tải không tồn tại",
+    missing_load_case: "Tổ hợp {name}: trường hợp/tổ hợp tham chiếu không tồn tại",
+    invalid_combo_cycle: "Tổ hợp {name} tham gia vòng phụ thuộc",
   },
   tables: { type: "Bảng", rows: "{n} dòng", frames: "Thanh", joints: "Nút", shells: "Sàn/vách", stories: "Tầng" },
   log: {
