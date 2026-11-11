@@ -55,3 +55,17 @@ test("không mất trạng thái mô hình chưa lưu sau khi tạo mới", asyn
   const dirty = await page.evaluate(() => (window as unknown as { __nexfem: { model: { getState(): { dirty: boolean } } } }).__nexfem.model.getState().dirty);
   expect(dirty).toBe(true);
 });
+
+test("F5 hai lần liên tiếp chỉ được ghi nhận một lần phân tích", async ({ page }) => {
+  await page.keyboard.press("F5");
+  await page.keyboard.press("F5");
+  await expect(page.getByTestId("bottom")).toContainText("Phân tích xong");
+  const doneCount = await page.evaluate(() =>
+    (window as unknown as { __nexfem: { ui: { getState(): { logs: { text: string }[] } } } })
+      .__nexfem.ui.getState().logs.filter((entry) => entry.text.includes("Phân tích xong")).length
+  );
+  expect(doneCount).toBe(1);
+  expect(await state(page)).toBe(true);
+  await page.keyboard.press("F6");
+  expect(await state(page)).toBe(false);
+});
