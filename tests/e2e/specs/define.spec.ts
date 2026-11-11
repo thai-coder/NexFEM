@@ -137,6 +137,8 @@ test("lưu .nxf rồi mở lại", async ({ page }) => {
   await page.getByTestId("create-model").click();
   expect((await model(page)).frames.length).toBe(0);
 
+  // Mô hình mới chưa lưu: xác nhận bỏ thay đổi trước khi mở file đã lưu.
+  page.on("dialog", (dialog) => void dialog.accept());
   const [chooser] = await Promise.all([page.waitForEvent("filechooser"), page.keyboard.press("Control+o")]);
   await chooser.setFiles(path);
   await expect.poll(async () => (await model(page)).name).toBe("Du_an_B");
