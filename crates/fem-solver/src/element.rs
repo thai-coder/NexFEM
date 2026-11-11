@@ -137,7 +137,11 @@ pub fn point_feq(p: V3, a: f64, l: f64) -> [f64; 12] {
 
 /// Ngưng tụ tĩnh các bậc tự do được nhả (`released[k]` = true): trả về k và f đã ngưng tụ,
 /// hàng/cột bị nhả bằng 0.
-pub fn condense(k: &M12, f: &[f64; 12], released: &[bool; 12]) -> Result<(M12, [f64; 12]), &'static str> {
+pub fn condense(
+    k: &M12,
+    f: &[f64; 12],
+    released: &[bool; 12],
+) -> Result<(M12, [f64; 12]), &'static str> {
     let r: Vec<usize> = (0..12).filter(|&i| released[i]).collect();
     if r.is_empty() {
         return Ok((*k, *f));

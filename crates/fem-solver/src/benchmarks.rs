@@ -250,13 +250,22 @@ fn rejects_missing_frame_and_pattern_loads() {
         json!([{"id":"f","label":"B1","kind":"beam","i":"a","j":"b","section":"s"}]),
         json!([{"id":"l","frame":"missing","pattern":"p","kind":"point","direction":"gravity","value":10.0,"at":1.0}]),
     );
-    assert_eq!(analyze(&m, &Options::default()).err().unwrap().code, "invalid_frame_load");
+    assert_eq!(
+        analyze(&m, &Options::default()).err().unwrap().code,
+        "invalid_frame_load"
+    );
     m.frame_loads[0].frame = "f".into();
     m.frame_loads[0].pattern = "missing".into();
-    assert_eq!(analyze(&m, &Options::default()).err().unwrap().code, "invalid_frame_load");
+    assert_eq!(
+        analyze(&m, &Options::default()).err().unwrap().code,
+        "invalid_frame_load"
+    );
     m.frame_loads[0].pattern = "p".into();
     m.load_cases[0].loads[0].pattern = "missing".into();
-    assert_eq!(analyze(&m, &Options::default()).err().unwrap().code, "invalid_load_case");
+    assert_eq!(
+        analyze(&m, &Options::default()).err().unwrap().code,
+        "invalid_load_case"
+    );
 }
 
 #[test]
@@ -269,13 +278,17 @@ fn nested_combos_work_out_of_order_and_cycles_fail() {
     m.combos = serde_json::from_value(json!([
         {"id":"outer","name":"Outer","type":"linearAdd","items":[{"case":"inner","factor":2.0}]},
         {"id":"inner","name":"Inner","type":"linearAdd","items":[{"case":"c","factor":1.5}]}
-    ])).unwrap();
+    ]))
+    .unwrap();
     let r = run(&m);
     let uz = r.cases.iter().find(|c| c.id == "c").unwrap().displacements["b"][2];
     let outer = r.cases.iter().find(|c| c.id == "outer").unwrap();
     assert!(close(outer.displacements["b"][2], 3.0 * uz, 1e-10));
     m.combos[1].items[0].case = "outer".into();
-    assert_eq!(analyze(&m, &Options::default()).err().unwrap().code, "combo_dependency");
+    assert_eq!(
+        analyze(&m, &Options::default()).err().unwrap().code,
+        "combo_dependency"
+    );
 }
 
 #[test]
