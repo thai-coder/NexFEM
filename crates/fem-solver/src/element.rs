@@ -137,13 +137,17 @@ pub fn point_feq(p: V3, a: f64, l: f64) -> [f64; 12] {
 
 /// Ngưng tụ tĩnh các bậc tự do được nhả (`released[k]` = true): trả về k và f đã ngưng tụ,
 /// hàng/cột bị nhả bằng 0.
-pub fn condense(k: &M12, f: &[f64; 12], released: &[bool; 12]) -> (M12, [f64; 12]) {
+pub fn condense(k: &M12, f: &[f64; 12], released: &[bool; 12]) -> Result<(M12, [f64; 12]), &'static str> {
     let r: Vec<usize> = (0..12).filter(|&i| released[i]).collect();
     if r.is_empty() {
-        return (*k, *f);
+        return Ok((*k, *f));
     }
     let c: Vec<usize> = (0..12).filter(|&i| !released[i]).collect();
     let nr = r.len();
+    let scale = r.iter().map(|&i| k[i][i].abs()).fold(0.0_f64, f64::max);
+    if !scale.is_finite() || scale == 0.0 {
+        return Err("Ma trận releases không khả nghịch");
+    }
     // Krr⁻¹ bằng khử Gauss trên ma trận nhỏ.
     let mut aug: Vec<Vec<f64>> = (0..nr)
         .map(|a| {
@@ -158,9 +162,9 @@ pub fn condense(k: &M12, f: &[f64; 12], released: &[bool; 12]) -> (M12, [f64; 12
             .unwrap();
         aug.swap(col, piv);
         let d = aug[col][col];
-        if d.abs() < 1e-300 {
-            // Nhả bậc tự do không có độ cứng (ví dụ I = 0): bỏ qua, coi như không ngưng tụ được.
-            return (*k, *f);
+        if !d.is_finite() || d.abs() <= scale * 1e-14 {
+            // Không được âm thầm dùng độ cứng thanh chưa nhả liên kết.
+            return Err("Ma trận releases không khả nghịch");
         }
         for v in aug[col].iter_mut() {
             *v /= d;
@@ -198,7 +202,7 @@ pub fn condense(k: &M12, f: &[f64; 12], released: &[bool; 12]) -> (M12, [f64; 12
             kc[i][j] = v;
         }
     }
-    (kc, fc)
+    Ok((kc, fc))
 }
 
 /// Đổi vector 12 từ cục bộ sang tổng thể: g = Tᵀ l.

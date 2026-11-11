@@ -241,3 +241,48 @@ fn tributary_45_degree_rule() {
     assert_eq!(a, vec![8.0, 4.0, 8.0, 4.0]);
     assert!((a.iter().sum::<f64>() - 24.0).abs() < 1e-12);
 }
+
+// Giai đoạn 5 — regression tests: không được mất tải, bỏ qua releases hay phụ thuộc thứ tự combo.
+#[test]
+fn rejects_missing_frame_and_pattern_loads() {
+    let mut m = model(
+        json!([{"id":"a","label":"1","x":0,"y":0,"z":0,"restraint":FIX},{"id":"b","label":"2","x":3,"y":0,"z":0}]),
+        json!([{"id":"f","label":"B1","kind":"beam","i":"a","j":"b","section":"s"}]),
+        json!([{"id":"l","frame":"missing","pattern":"p","kind":"point","direction":"gravity","value":10.0,"at":1.0}]),
+    );
+    assert_eq!(analyze(&m, &Options::default()).err().unwrap().code, "invalid_frame_load");
+    m.frame_loads[0].frame = "f".into();
+    m.frame_loads[0].pattern = "missing".into();
+    assert_eq!(analyze(&m, &Options::default()).err().unwrap().code, "invalid_frame_load");
+    m.frame_loads[0].pattern = "p".into();
+    m.load_cases[0].loads[0].pattern = "missing".into();
+    assert_eq!(analyze(&m, &Options::default()).err().unwrap().code, "invalid_load_case");
+}
+
+#[test]
+fn nested_combos_work_out_of_order_and_cycles_fail() {
+    let mut m = model(
+        json!([{"id":"a","label":"1","x":0,"y":0,"z":0,"restraint":FIX},{"id":"b","label":"2","x":3,"y":0,"z":0}]),
+        json!([{"id":"f","label":"B1","kind":"beam","i":"a","j":"b","section":"s"}]),
+        json!([{"id":"l","frame":"f","pattern":"p","kind":"point","direction":"gravity","value":10.0,"at":1.0}]),
+    );
+    m.combos = serde_json::from_value(json!([
+        {"id":"outer","name":"Outer","type":"linearAdd","items":[{"case":"inner","factor":2.0}]},
+        {"id":"inner","name":"Inner","type":"linearAdd","items":[{"case":"c","factor":1.5}]}
+    ])).unwrap();
+    let r = run(&m);
+    let uz = r.cases.iter().find(|c| c.id == "c").unwrap().displacements["b"][2];
+    let outer = r.cases.iter().find(|c| c.id == "outer").unwrap();
+    assert!(close(outer.displacements["b"][2], 3.0 * uz, 1e-10));
+    m.combos[1].items[0].case = "outer".into();
+    assert_eq!(analyze(&m, &Options::default()).err().unwrap().code, "combo_dependency");
+}
+
+#[test]
+fn rejects_singular_release_condensation_instead_of_ignoring_it() {
+    let mut k = [[0.0; 12]; 12];
+    k[0][0] = 100.0;
+    let mut releases = [false; 12];
+    releases[3] = true;
+    assert!(crate::element::condense(&k, &[0.0; 12], &releases).is_err());
+}

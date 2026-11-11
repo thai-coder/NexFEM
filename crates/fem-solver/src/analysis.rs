@@ -11,7 +11,7 @@ use crate::element::*;
 use crate::skyline::{reverse_cuthill_mckee, Skyline};
 use fem_core::{FrameShape, Model};
 use serde::Serialize;
-use std::collections::{BTreeMap, HashMap};
+use std::collections::{BTreeMap, HashMap, HashSet};
 
 const DOF_NAMES: [&str; 6] = ["Ux", "Uy", "Uz", "Rx", "Ry", "Rz"];
 
@@ -180,6 +180,45 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
         ));
     }
 
+    // Dữ liệu có thể được gọi thẳng từ API/WASM; không được tin rằng UI đã Check model.
+    // Tránh trường hợp tải biến mất im lặng nhưng vẫn trả "ok: true".
+    let pattern_ids: HashSet<&str> = model.load_patterns.iter().map(|x| x.id.as_str()).collect();
+    let frame_ids: HashSet<&str> = model.frames.iter().map(|x| x.id.as_str()).collect();
+    let shell_ids: HashSet<&str> = model.shells.iter().map(|x| x.id.as_str()).collect();
+    let case_ids: HashSet<&str> = model.load_cases.iter().map(|x| x.id.as_str()).collect();
+    let combo_ids: HashSet<&str> = model.combos.iter().map(|x| x.id.as_str()).collect();
+    for load in &model.frame_loads {
+        if !frame_ids.contains(load.frame.as_str()) || !pattern_ids.contains(load.pattern.as_str()) {
+            return Err(AnalysisError::new(
+                "invalid_frame_load",
+                format!("Tải thanh {} tham chiếu tới thanh hoặc mẫu tải không tồn tại", load.id),
+                vec![load.id.clone()],
+            ));
+        }
+        if load.kind == "point" && !load.at.is_some_and(|a| (0.0..=1.0).contains(&a)) {
+            return Err(AnalysisError::new("invalid_frame_load", format!("Tải tập trung {} có vị trí không hợp lệ", load.id), vec![load.id.clone()]));
+        }
+    }
+    for load in &model.shell_loads {
+        if !shell_ids.contains(load.shell.as_str()) || !pattern_ids.contains(load.pattern.as_str()) {
+            return Err(AnalysisError::new(
+                "invalid_shell_load",
+                format!("Tải sàn/vách {} tham chiếu tới đối tượng hoặc mẫu tải không tồn tại", load.id),
+                vec![load.id.clone()],
+            ));
+        }
+    }
+    for case in &model.load_cases {
+        if case.loads.iter().any(|x| !pattern_ids.contains(x.pattern.as_str())) {
+            return Err(AnalysisError::new("invalid_load_case", format!("Trường hợp {} chứa mẫu tải không tồn tại", case.name), vec![case.id.clone()]));
+        }
+    }
+    for co in &model.combos {
+        if co.items.iter().any(|x| !case_ids.contains(x.case.as_str()) && !combo_ids.contains(x.case.as_str())) {
+            return Err(AnalysisError::new("invalid_combo", format!("Tổ hợp {} tham chiếu trường hợp/tổ hợp không tồn tại", co.name), vec![co.id.clone()]));
+        }
+    }
+
     // ---- nút tham gia phân tích: nút của các thanh
     let joint_by_id: HashMap<&str, usize> = model
         .joints
@@ -270,6 +309,9 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
             ));
         }
         let (area, i22, i33, j) = section_props(&sec.geometry);
+        if [area, i22, i33, j, mat.e].iter().any(|v| !v.is_finite() || *v <= 0.0) {
+            return Err(AnalysisError::new("invalid_section", format!("Tiết diện {} không có đặc trưng hình học hợp lệ", sec.name), vec![sec.id.clone()]));
+        }
         let props = SectionProps {
             e: mat.e,
             g: mat.e / (2.0 * (1.0 + mat.nu)),
@@ -286,7 +328,9 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
                 released[6 + c] = r.j.get(c).copied().unwrap_or(false);
             }
         }
-        let (k_cond, _) = condense(&k_local, &[0.0; 12], &released);
+        let (k_cond, _) = condense(&k_local, &[0.0; 12], &released).map_err(|e| {
+            AnalysisError::new("invalid_releases", format!("Thanh {}: {}", f.label, e), vec![f.id.clone()])
+        })?;
         let mut dofs = [None; 12];
         for d in 0..6 {
             dofs[d] = dof_of[ji][d];
@@ -400,7 +444,7 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
         // Tải trên thanh.
         for fl in model.frame_loads.iter().filter(|l| l.pattern == lp.id) {
             let Some(&ei) = frame_by_id.get(fl.frame.as_str()) else {
-                continue;
+                return Err(AnalysisError::new("invalid_frame_load", format!("Không có thanh cho tải {}", fl.id), vec![fl.id.clone()]));
             };
             let e = &elems[ei];
             let v = fl.value;
@@ -502,15 +546,11 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
     if !lost_joints.is_empty() {
         lost_joints.sort();
         lost_joints.dedup();
-        warn(
-            &mut warnings,
+        return Err(AnalysisError::new(
             "lost_loads",
-            format!(
-                "Tải đặt lên {} nút không nối với thanh nào đã bị bỏ qua",
-                lost_joints.len()
-            ),
+            format!("{} nút có tải nhưng không nối với phần tử thanh: dừng phân tích để tránh mất tải", lost_joints.len()),
             lost_joints,
-        );
+        ));
     }
 
     // ---- giải từng trường hợp tải tĩnh tuyến tính
@@ -577,7 +617,9 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
                     applied[c] += fac * tg[c];
                 }
             }
-            let (_, fc) = condense(&e.k_local, &feq, &e.released);
+            let (_, fc) = condense(&e.k_local, &feq, &e.released).map_err(|msg| {
+                AnalysisError::new("invalid_releases", format!("Thanh {}: {}", e.id, msg), vec![e.id.clone()])
+            })?;
             let fg = to_global(&e.ax, &fc);
             for c in 0..12 {
                 if let Some(g) = e.dofs[c] {
@@ -659,37 +701,36 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
         });
     }
 
-    // ---- tổ hợp cộng tuyến tính (có thể lồng tổ hợp khác đã tính trước)
+    // ---- tổ hợp cộng tuyến tính: giải theo quan hệ phụ thuộc, không phụ thuộc thứ tự khai báo.
+    let mut pending: Vec<&fem_core::LoadCombo> = Vec::new();
     for co in &model.combos {
-        if co.kind != "linearAdd" {
-            warn(
-                &mut warnings,
-                "combo_skipped",
+        if co.kind == "linearAdd" {
+            pending.push(co);
+        } else {
+            warn(&mut warnings, "combo_skipped",
                 format!("Tổ hợp {} ({}) chưa được hỗ trợ, bỏ qua", co.name, co.kind),
-                vec![co.id.clone()],
-            );
-            continue;
+                vec![co.id.clone()]);
         }
-        let parts: Vec<(f64, &CaseResult)> = co
-            .items
-            .iter()
-            .filter_map(|it| {
-                cases
-                    .iter()
-                    .find(|c| c.id == it.case)
-                    .map(|c| (it.factor, c))
-            })
-            .collect();
-        if parts.len() != co.items.len() {
-            warn(
-                &mut warnings,
-                "combo_incomplete",
-                format!("Tổ hợp {} có thành phần chưa được tính, bỏ qua", co.name),
-                vec![co.id.clone()],
-            );
-            continue;
+    }
+    while !pending.is_empty() {
+        let before = pending.len();
+        pending.retain(|co| {
+            let parts: Vec<(f64, &CaseResult)> = co.items.iter()
+                .filter_map(|it| cases.iter().find(|c| c.id == it.case).map(|c| (it.factor, c)))
+                .collect();
+            if parts.len() != co.items.len() {
+                return true;
+            }
+            let result = combine(co.id.clone(), co.name.clone(), &parts);
+            cases.push(result);
+            false
+        });
+        if pending.len() == before {
+            let stuck = pending.iter().map(|x| x.name.as_str()).collect::<Vec<_>>().join(", ");
+            return Err(AnalysisError::new("combo_dependency",
+                format!("Tổ hợp tải có phụ thuộc vòng hoặc thành phần chưa tính được: {}", stuck),
+                pending.iter().map(|x| x.id.clone()).collect()));
         }
-        cases.push(combine(co.id.clone(), co.name.clone(), &parts));
     }
 
     Ok(Results {
