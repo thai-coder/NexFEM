@@ -339,8 +339,15 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
                 vec![f.id.clone()],
             ));
         }
+        let geometry_ok = match &sec.geometry {
+            FrameShape::I { h, bf, tf, tw } => 2.0 * *tf < *h && *tw < *bf,
+            FrameShape::Box { h, b, t } => 2.0 * *t < *h && 2.0 * *t < *b,
+            FrameShape::Pipe { d, t } => 2.0 * *t < *d,
+            _ => true,
+        };
         let (area, i22, i33, j) = section_props(&sec.geometry);
-        if [area, i22, i33, j, mat.e]
+        if !geometry_ok
+            || [area, i22, i33, j, mat.e]
             .iter()
             .any(|v| !v.is_finite() || *v <= 0.0)
         {
@@ -416,9 +423,13 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
     }
     // Bậc tự do xoay không có độ cứng (mọi thanh nối vào đều nhả mô men) → thêm lò xo đơn vị và cảnh báo.
     let mut stabilized = Vec::new();
+    let mut zero_rotation_dofs = Vec::new();
     for d in 0..ndof {
         if k.get(d, d) == 0.0 && dof_owner[d].1 >= 3 {
+            // Chỉ để loại bỏ bậc tự do xoay không có độ cứng và KHÔNG chịu tải.
+            // Nếu có mô men đặt vào đây, báo lỗi thay vì biến nó thành lò xo giả.
             k.add(d, d, 1.0);
+            zero_rotation_dofs.push(d);
             stabilized.push(model.joints[nodes[dof_owner[d].0]].label.clone());
         }
     }
@@ -680,6 +691,18 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
                 }
             }
             feq_cond.insert(ei, fc);
+        }
+        let rhs_scale = rhs.iter().map(|x| x.abs()).fold(0.0_f64, f64::max);
+        for &d in &zero_rotation_dofs {
+            if rhs[d].abs() > 1e-10 * (1.0 + rhs_scale) {
+                let (n, direction) = dof_owner[d];
+                let joint = &model.joints[nodes[n]];
+                return Err(AnalysisError::new(
+                    "unrestrained_moment",
+                    format!("Nút {}: mô men đặt vào bậc tự do xoay {} không có độ cứng", joint.label, DOF_NAMES[direction]),
+                    vec![joint.id.clone()],
+                ));
+            }
         }
         k.solve(&mut rhs);
         let u = rhs;

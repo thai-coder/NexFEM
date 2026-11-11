@@ -299,3 +299,17 @@ fn rejects_singular_release_condensation_instead_of_ignoring_it() {
     releases[3] = true;
     assert!(crate::element::condense(&k, &[0.0; 12], &releases).is_err());
 }
+
+#[test]
+fn rejects_impossible_section_dimensions_in_solver_without_ui() {
+    let mut m = model(
+        json!([{"id":"a","label":"1","x":0,"y":0,"z":0,"restraint":FIX},{"id":"b","label":"2","x":3,"y":0,"z":0}]),
+        json!([{"id":"f","label":"B1","kind":"beam","i":"a","j":"b","section":"s"}]),
+        json!([]),
+    );
+    m.frame_sections[0].geometry = serde_json::from_value(json!({"shape":"box","h":0.3,"b":0.2,"t":0.11})).unwrap();
+    assert_eq!(
+        analyze(&m, &Options::default()).err().unwrap().code,
+        "invalid_section"
+    );
+}
