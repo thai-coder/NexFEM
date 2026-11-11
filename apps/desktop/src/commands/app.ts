@@ -108,8 +108,14 @@ export function runCheck(): number {
   return count("error");
 }
 
-/** Chạy phân tích: kiểm tra mô hình → bộ giải WebAssembly → khoá mô hình và lưu kết quả. */
+/** Khoá mô hình trước khi gửi sang Web Worker; không nhận F5/F6 chồng nhau. */
+let analysisInProgress = false;
+export function isAnalysisRunning(): boolean {
+  return analysisInProgress;
+}
+
 export async function runAnalysis(): Promise<boolean> {
+  if (analysisInProgress || model().locked) return false;
   const s = ui();
   s.set({ panels: { ...s.panels, bottom: true }, tool: "select", drawPoints: [] });
   const errors = runCheck();
@@ -118,34 +124,43 @@ export async function runAnalysis(): Promise<boolean> {
     s.set({ bottomTab: "messages" });
     return false;
   }
+  const m = model().model;
+  analysisInProgress = true;
+  useModel.setState({ locked: true });
   s.log("info", t().analysis.running, "analysis");
   s.set({ bottomTab: "log" });
-  const m = model().model;
   const t0 = performance.now();
-  let out;
+  let succeeded = false;
   try {
-    out = await solve(m);
+    const out = await solve(m);
+    // New/Open/reset during an asynchronous solve must never attach obsolete results.
+    if (model().model !== m) return false;
+    const ms = Math.round(performance.now() - t0);
+    if (!out.ok) {
+      s.log("error", t().fmt(t().analysis.failed, { message: out.error.message }), "analysis");
+      if (out.error.objects?.length) model().select(out.error.objects);
+      return false;
+    }
+    const r = out.results;
+    for (const w of r.warnings) s.log("warning", w.message, "analysis");
+    const u = m.units;
+    for (const c of r.cases.filter((x) => x.kind === "case")) {
+      const f = (v: number) => toDisplay(v, "force", u).toFixed(3);
+      s.log("info", t().fmt(t().analysis.balance, { name: c.name, applied: f(c.applied[2]!), reaction: f(c.sumReactions[2]!), unit: unitLabel("force", u) }), "analysis");
+    }
+    s.log("success", t().fmt(t().analysis.done, { joints: r.joints, frames: r.frames, dof: r.dof, cases: r.cases.length, ms }), "analysis");
+    useResults.getState().set({ results: r, elapsed: ms, activeCase: r.cases[0]?.id ?? null });
+    succeeded = true;
+    return true;
   } catch (e) {
-    s.log("error", t().fmt(t().analysis.loadFailed, { message: e instanceof Error ? e.message : String(e) }), "analysis");
+    if (model().model === m) {
+      s.log("error", t().fmt(t().analysis.loadFailed, { message: e instanceof Error ? e.message : String(e) }), "analysis");
+    }
     return false;
+  } finally {
+    analysisInProgress = false;
+    if (!succeeded && model().model === m) useModel.setState({ locked: false });
   }
-  const ms = Math.round(performance.now() - t0);
-  if (!out.ok) {
-    s.log("error", t().fmt(t().analysis.failed, { message: out.error.message }), "analysis");
-    if (out.error.objects?.length) model().select(out.error.objects);
-    return false;
-  }
-  const r = out.results;
-  for (const w of r.warnings) s.log("warning", w.message, "analysis");
-  const u = m.units;
-  for (const c of r.cases.filter((x) => x.kind === "case")) {
-    const f = (v: number) => toDisplay(v, "force", u).toFixed(3);
-    s.log("info", t().fmt(t().analysis.balance, { name: c.name, applied: f(c.applied[2]!), reaction: f(c.sumReactions[2]!), unit: unitLabel("force", u) }), "analysis");
-  }
-  s.log("success", t().fmt(t().analysis.done, { joints: r.joints, frames: r.frames, dof: r.dof, cases: r.cases.length, ms }), "analysis");
-  useResults.getState().set({ results: r, elapsed: ms, activeCase: r.cases[0]?.id ?? null });
-  useModel.setState({ locked: true });
-  return true;
 }
 
 const draw = (tool: Tool, icon: string, key?: string): AppCommand => ({
@@ -353,7 +368,7 @@ export const COMMANDS: AppCommand[] = [
       useResults.getState().clear();
       ui().log("info", t().analysis.unlocked, "analysis");
     },
-    enabled: () => model().locked,
+    enabled: () => model().locked && !isAnalysisRunning(),
   },
 
   later("display.deformed", 6, "deformed"),

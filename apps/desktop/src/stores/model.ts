@@ -138,7 +138,8 @@ export const useModel = create<ModelState>((set, get) => ({
 
   reset(model, fileName = null) {
     stack.reset(model);
-    set({ ...snapshot(), fileName, dirty: false, locked: false, selection: [] });
+    // Chỉ mở mô hình từ file đã lưu mới được xem là "clean"; mô hình mới phải được Save lần đầu.
+    set({ ...snapshot(), fileName, dirty: fileName === null, locked: false, selection: [] });
     useResults.getState().clear();
     useUi.getState().set({ messages: null, views: defaultViewsFor(model), hover: null });
   },

@@ -48,3 +48,10 @@ test("mô hình thiếu gối: báo mất ổn định và chọn nút có vấn
   await expect(page.getByTestId("bottom")).toContainText("Mô hình chưa có gối nào");
   expect(await state(page)).toBe(false);
 });
+
+test("không mất trạng thái mô hình chưa lưu sau khi tạo mới", async ({ page }) => {
+  await page.keyboard.press("Control+n");
+  await page.getByTestId("create-model").click();
+  const dirty = await page.evaluate(() => (window as unknown as { __nexfem: { model: { getState(): { dirty: boolean } } } }).__nexfem.model.getState().dirty);
+  expect(dirty).toBe(true);
+});
