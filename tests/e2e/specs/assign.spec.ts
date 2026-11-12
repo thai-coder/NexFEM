@@ -107,4 +107,7 @@ test("Assign diaphragm từ hai nút cùng cao độ", async ({ page }) => {
   await page.getByTestId("diaphragm-master").selectOption(ids[0]!);
   await page.getByTestId("dialog-ok").click();
   expect((await model(page)).diaphragms?.[0]).toMatchObject({ name: "D_TEST", master: ids[0], slaves: [ids[1]] });
+  await menu(page, "Diaphragm tuyệt đối cứng…");
+  await page.getByTestId("diaphragm-remove").click();
+  expect((await model(page)).diaphragms).toEqual([]);
 });

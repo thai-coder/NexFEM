@@ -368,6 +368,19 @@ export function AssignDiaphragmDialog({ onClose }: { onClose(): void }) {
         </select>
       </Field>
       <p className="form-hint">{T.assign.diaphragmHelp}</p>
+      {(model.diaphragms?.length ?? 0) > 0 && (
+        <Field label={T.assign.existingDiaphragms}>
+          {model.diaphragms!.map((g) => (
+            <div key={g.id} className="preset-row">
+              <span>{g.name} ({g.slaves.length + 1} {T.assign.joints})</span>
+              <button className="btn small" data-testid="diaphragm-remove" type="button"
+                onClick={() => useModel.getState().run("diaphragm.remove", { id: g.id }, T.assign.removeDiaphragm)}>
+                {T.assign.removeDiaphragm}
+              </button>
+            </div>
+          ))}
+        </Field>
+      )
     </AssignShell>
   );
 }

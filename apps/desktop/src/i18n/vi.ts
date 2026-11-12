@@ -388,6 +388,8 @@ export const vi = {
     offsetHelp: "Offset dọc trục thanh tính từ tim nút (m); tổng i+j phải nhỏ hơn chiều dài thanh.",
     diaphragmTitle: "Gán diaphragm tuyệt đối cứng",
     diaphragmName: "Tên diaphragm",
+    existingDiaphragms: "Nhóm diaphragm hiện có",
+    removeDiaphragm: "Xoá diaphragm",
     diaphragmMaster: "Nút master",
     diaphragmHelp: "Chọn ít nhất 2 nút cùng cao độ. UX/UY/RZ của slave phụ thuộc master; không đặt gối UX/UY/RZ trên slave.",
     frameLoadTitle: "Gán tải lên thanh",

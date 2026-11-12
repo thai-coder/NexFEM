@@ -389,6 +389,8 @@ export const en: Strings = {
     offsetHelp: "Axial offsets measured from joint centers (m). i+j must be shorter than member length.",
     diaphragmTitle: "Assign rigid diaphragm",
     diaphragmName: "Diaphragm name",
+    existingDiaphragms: "Existing diaphragms",
+    removeDiaphragm: "Remove diaphragm",
     diaphragmMaster: "Master joint",
     diaphragmHelp: "Select at least 2 joints on one elevation. Slave UX/UY/RZ depend on master; no UX/UY/RZ restraints at slave joints.",
     frameLoadTitle: "Assign frame loads",
