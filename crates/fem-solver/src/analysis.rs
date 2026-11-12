@@ -155,7 +155,7 @@ struct Elem {
     offset_j: V3,
     offset_i_length: f64,
     /// Bậc tự do tổng thể của 12 thành phần (None = bị gối giữ).
-    dofs: [Option<usize>; 12],
+    dofs: [Vec<(usize, f64)>; 12],
     ji: usize,
     jj: usize,
 }
@@ -276,6 +276,51 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
     }
     let nodes: Vec<usize> = (0..model.joints.len()).filter(|&k| used[k]).collect();
     let node_of: HashMap<usize, usize> = nodes.iter().enumerate().map(|(n, &k)| (k, n)).collect();
+    // Master/slave thuộc cùng diaphragm; dùng MPC chính xác theo mặt phẳng XY:
+    // Ux_s = Ux_m - (y_s-y_m)*Rz_m; Uy_s = Uy_m + (x_s-x_m)*Rz_m; Rz_s=Rz_m.
+    let mut bindings: Vec<(usize, usize, f64, f64)> = Vec::new();
+    let mut occupied: HashSet<usize> = HashSet::new();
+    let mut slave_nodes: HashSet<usize> = HashSet::new();
+    for group in &model.diaphragms {
+        let mut members: Vec<usize> = Vec::new();
+        for id in std::iter::once(&group.master).chain(&group.slaves) {
+            let index = joint_by_id.get(id.as_str())
+                .and_then(|&i| node_of.get(&i))
+                .copied()
+                .ok_or_else(|| AnalysisError::new("invalid_diaphragm",
+                    format!("Diaphragm {} chứa nút không thuộc phần tử thanh", group.name),
+                    vec![group.id.clone()]))?;
+            if !occupied.insert(index) {
+                return Err(AnalysisError::new("invalid_diaphragm",
+                    format!("Diaphragm {} có nút lặp hoặc trùng nhóm khác", group.name),
+                    vec![group.id.clone()]));
+            }
+            members.push(index);
+        }
+        if members.len() < 2 {
+            return Err(AnalysisError::new("invalid_diaphragm",
+                format!("Diaphragm {} cần master và ít nhất một slave", group.name),
+                vec![group.id.clone()]));
+        }
+        let master = members[0];
+        let jm = &model.joints[nodes[master]];
+        for &slave in &members[1..] {
+            let js = &model.joints[nodes[slave]];
+            if (jm.z - js.z).abs() > 1e-6 {
+                return Err(AnalysisError::new("invalid_diaphragm",
+                    format!("Diaphragm {} có nút khác cao độ", group.name),
+                    vec![group.id.clone()]));
+            }
+            let r = js.restraint.unwrap_or([false; 6]);
+            if r[0] || r[1] || r[5] {
+                return Err(AnalysisError::new("invalid_diaphragm",
+                    format!("Diaphragm {}: gối UX/UY/RZ trên slave không được hỗ trợ", group.name),
+                    vec![group.id.clone()]));
+            }
+            slave_nodes.insert(slave);
+            bindings.push((slave, master, js.x - jm.x, js.y - jm.y));
+        }
+    }
     let pos = |n: usize| -> V3 {
         let j = &model.joints[nodes[n]];
         [j.x, j.y, j.z]
@@ -294,19 +339,41 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
         adj[a].push(b);
         adj[b].push(a);
     }
+    for &(slave, master, _, _) in &bindings {
+        adj[slave].push(master);
+        adj[master].push(slave);
+    }
     let order = reverse_cuthill_mckee(&adj);
     let mut dof_of = vec![[None; 6]; nodes.len()];
     let mut dof_owner: Vec<(usize, usize)> = Vec::new();
     for &n in &order {
         let r = model.joints[nodes[n]].restraint.unwrap_or([false; 6]);
         for d in 0..6 {
-            if !r[d] {
+            if !r[d] && !(slave_nodes.contains(&n) && matches!(d, 0 | 1 | 5)) {
                 dof_of[n][d] = Some(dof_owner.len());
                 dof_owner.push((n, d));
             }
         }
     }
     let ndof = dof_owner.len();
+    let mut dof_weights: Vec<[Vec<(usize, f64)>; 6]> =
+        (0..nodes.len()).map(|_| std::array::from_fn(|_| Vec::new())).collect();
+    for n in 0..nodes.len() {
+        for d in 0..6 {
+            if let Some(g) = dof_of[n][d] {
+                dof_weights[n][d].push((g, 1.0));
+            }
+        }
+    }
+    for &(slave, master, dx, dy) in &bindings {
+        dof_weights[slave][0] = dof_weights[master][0].clone();
+        dof_weights[slave][1] = dof_weights[master][1].clone();
+        if let Some(g) = dof_of[master][5] {
+            if dy != 0.0 { dof_weights[slave][0].push((g, -dy)); }
+            if dx != 0.0 { dof_weights[slave][1].push((g, dx)); }
+        }
+        dof_weights[slave][5] = dof_weights[master][5].clone();
+    }
 
     // ---- phần tử
     let materials: HashMap<&str, &fem_core::Material> =
@@ -413,10 +480,10 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
                 vec![f.id.clone()],
             )
         })?;
-        let mut dofs = [None; 12];
+        let mut dofs: [Vec<(usize, f64)>; 12] = std::array::from_fn(|_| Vec::new());
         for d in 0..6 {
-            dofs[d] = dof_of[ji][d];
-            dofs[6 + d] = dof_of[jj][d];
+            dofs[d] = dof_weights[ji][d].clone();
+            dofs[6 + d] = dof_weights[jj][d].clone();
         }
         self_weight.push(mat.gamma * area);
         elems.push(Elem {
@@ -435,13 +502,12 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
         });
     }
 
-    // ---- lắp ghép ma trận độ cứng (skyline)
+    // ---- lắp ghép MPC-reduced stiffness matrix (profile skyline).
     let mut first: Vec<usize> = (0..ndof).collect();
     for e in &elems {
-        if let Some(m) = e.dofs.iter().flatten().min() {
-            for &d in e.dofs.iter().flatten() {
-                first[d] = first[d].min(*m);
-            }
+        let involved: Vec<usize> = e.dofs.iter().flatten().map(|(g, _)| *g).collect();
+        if let Some(&min) = involved.iter().min() {
+            for &g in &involved { first[g] = first[g].min(min); }
         }
     }
     let mut k = Skyline::new(first);
@@ -451,12 +517,15 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
             e.offset_i,
             e.offset_j,
         );
+        // Full a,b loops preserve both K_ab contributions when two DOFs collapse
+        // into the same generalized coordinate (rigid diaphragm).
         for a in 0..12 {
-            let Some(da) = e.dofs[a] else { continue };
-            for b in a..12 {
-                let Some(db) = e.dofs[b] else { continue };
-                if kg[a][b] != 0.0 || a == b {
-                    k.add(da, db, kg[a][b]);
+            for b in 0..12 {
+                if kg[a][b] == 0.0 { continue; }
+                for &(da, wa) in &e.dofs[a] {
+                    for &(db, wb) in &e.dofs[b] {
+                        if da <= db { k.add(da, db, kg[a][b] * wa * wb); }
+                    }
                 }
             }
         }
@@ -692,8 +761,8 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
         let mut applied = [0.0; 3];
         for (&n, v) in &joint_loads {
             for d in 0..6 {
-                if let Some(g) = dof_of[n][d] {
-                    rhs[g] += v[d];
+                for &(g, weight) in &dof_weights[n][d] {
+                    rhs[g] += weight * v[d];
                 }
             }
             for c in 0..3 {
@@ -726,8 +795,8 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
             })?;
             let fg = rigid_end_force(&to_global(&e.ax, &fc), e.offset_i, e.offset_j);
             for c in 0..12 {
-                if let Some(g) = e.dofs[c] {
-                    rhs[g] += fg[c];
+                for &(g, weight) in &e.dofs[c] {
+                    rhs[g] += weight * fg[c];
                 }
             }
             feq_cond.insert(ei, fc);
@@ -753,9 +822,7 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
         let disp_of = |n: usize| -> [f64; 6] {
             let mut d = [0.0; 6];
             for c in 0..6 {
-                if let Some(g) = dof_of[n][c] {
-                    d[c] = u[g];
-                }
+                d[c] = dof_weights[n][c].iter().map(|&(g, weight)| weight * u[g]).sum();
             }
             d
         };
@@ -790,24 +857,29 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
             }
             frames.insert(e.id.clone(), frame_forces);
         }
+        // Nội lực - ngoại lực tại mỗi nút. Chuyển phản lực ràng buộc slave
+        // về master (kèm mô men do cánh tay đòn), tránh mất cân bằng lực.
+        let mut residual = joint_sum;
+        for (&n, loads) in &joint_loads {
+            for c in 0..6 { residual[n][c] -= loads[c]; }
+        }
+        for &(slave, master, dx, dy) in &bindings {
+            let r = residual[slave];
+            residual[master][0] += r[0];
+            residual[master][1] += r[1];
+            residual[master][5] += r[5] + dx * r[1] - dy * r[0];
+        }
         let mut reactions = BTreeMap::new();
         let mut sum_reactions = [0.0; 3];
         for n in 0..nodes.len() {
             let jt = &model.joints[nodes[n]];
             let Some(r) = jt.restraint else { continue };
-            if !r.iter().any(|x| *x) {
-                continue;
-            }
-            let applied_here = joint_loads.get(&n).copied().unwrap_or([0.0; 6]);
+            if !r.iter().any(|x| *x) { continue; }
             let mut rv = [0.0; 6];
             for c in 0..6 {
-                if r[c] {
-                    rv[c] = joint_sum[n][c] - applied_here[c];
-                }
+                if r[c] { rv[c] = residual[n][c]; }
             }
-            for c in 0..3 {
-                sum_reactions[c] += rv[c];
-            }
+            for c in 0..3 { sum_reactions[c] += rv[c]; }
             reactions.insert(jt.id.clone(), rv);
         }
         cases.push(CaseResult {
