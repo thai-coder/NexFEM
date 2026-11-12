@@ -302,6 +302,8 @@ export const vi = {
       shapes: { rect: "Chữ nhật", circle: "Tròn đặc", I: "Chữ I", box: "Hộp", pipe: "Ống" },
       dims: { b: "Rộng b", h: "Cao h", d: "Đường kính d", bf: "Rộng cánh bf", tf: "Dày cánh tf", tw: "Dày bụng tw", t: "Dày t" },
       props: "Đặc trưng hình học",
+      shear: "Biến dạng cắt",
+      timoshenko: "Timoshenko (bật tính cắt, mặc định Euler–Bernoulli)",
     },
     shellSections: {
       title: "Tiết diện sàn / vách",
