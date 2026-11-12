@@ -187,6 +187,7 @@ export const vi = {
     unused_section: "Tiết diện {name} chưa được dùng",
     invalid_section: "Tiết diện {name} có kích thước không hợp lệ",
     invalid_offsets: "Thanh {name}: tổng vùng cứng vượt chiều dài thanh",
+    invalid_diaphragm: "Diaphragm {name}: nút/cao độ/gối hoặc liên kết nhóm không hợp lệ",
     invalid_releases: "Thanh {name}: nhả liên kết cả hai đầu không hợp lệ",
     missing_load_target: "Tải {name}: đối tượng gán tải không tồn tại hoặc vị trí tải sai",
     missing_load_pattern: "{name}: mẫu tải không tồn tại",
