@@ -505,12 +505,12 @@
             "minLength": 1
           },
           "slaves": {
+            "minItems": 1,
             "type": "array",
             "items": {
               "type": "string",
               "minLength": 1
-            },
-            "minItems": 1
+            }
           }
         },
         "required": [
