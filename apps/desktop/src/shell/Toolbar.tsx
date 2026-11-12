@@ -45,7 +45,7 @@ export function Toolbar() {
           label={T.menu.assign}
           icon="joint"
           title={T.menu.assign}
-          items={["assign.restraint", "assign.section", "assign.releases", "assign.frameLoad", "assign.shellLoad"]}
+          items={["assign.restraint", "assign.section", "assign.releases", "assign.offsets", "assign.diaphragm", "assign.frameLoad", "assign.shellLoad"]}
         />
       </Group>
       <Group>
