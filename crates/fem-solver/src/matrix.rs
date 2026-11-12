@@ -261,7 +261,9 @@ mod tests {
         let n = 3000;
         let mut matrix = Matrix::new(vec![0; n]);
         assert_eq!(matrix.backend(), "sparse_pcg_jacobi");
-        for i in 0..n { matrix.add(i, i, 2.0); }
+        for i in 0..n {
+            matrix.add(i, i, 2.0);
+        }
         matrix.factor(1e-11).unwrap();
         let mut rhs = vec![4.0; n];
         matrix.solve(&mut rhs).unwrap();
