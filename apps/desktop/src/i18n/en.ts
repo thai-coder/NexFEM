@@ -187,6 +187,7 @@ export const en: Strings = {
     no_supports: "The model has no supports",
     unused_section: "Section {name} is not used",
     invalid_section: "Section {name} has invalid geometry",
+    invalid_offsets: "Frame {name}: rigid offsets exceed available member length",
     invalid_releases: "Frame {name} has invalid releases at both ends",
     missing_load_target: "Load {name}: target missing or load position invalid",
     missing_load_pattern: "{name}: missing load pattern",
