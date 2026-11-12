@@ -20,7 +20,8 @@ export interface ModelMessage {
     | "missing_load_target"
     | "missing_load_pattern"
     | "missing_load_case"
-    | "invalid_combo_cycle";
+    | "invalid_combo_cycle"
+    | "invalid_offsets";
   /** Đối tượng liên quan, để nhảy tới khi bấm vào thông điệp. */
   objects: string[];
   params?: Record<string, string | number>;
@@ -65,7 +66,10 @@ export function checkModel(model: Model): ModelMessage[] {
     if (!frameSections.has(f.section)) out.push({ level: "error", code: "missing_section", objects: [f.id], params: { label: f.label } });
     if (f.releases && [0, 1, 2, 3].some((i) => f.releases!.i[i] && f.releases!.j[i]))
       out.push({ level: "error", code: "invalid_releases", objects: [f.id], params: { name: f.label } });
-    if (frameLength(f, joints) < 1e-6) out.push({ level: "error", code: "zero_length", objects: [f.id], params: { label: f.label } });
+    const fullLength = frameLength(f, joints);
+    if (fullLength < 1e-6) out.push({ level: "error", code: "zero_length", objects: [f.id], params: { label: f.label } });
+    if (f.offsets && f.offsets.i + f.offsets.j >= fullLength - 1e-6)
+      out.push({ level: "error", code: "invalid_offsets", objects: [f.id], params: { name: f.label } });
     const key = [f.i, f.j].sort().join("|");
     const prev = pairs.get(key);
     if (prev) out.push({ level: "warning", code: "duplicate_frame", objects: [prev, f.id], params: { label: f.label } });
