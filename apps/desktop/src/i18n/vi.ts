@@ -425,10 +425,12 @@ export const vi = {
     deformation: {
       frames: "Biến dạng thanh",
       chordHint: "Nối thẳng các nút đã dịch chuyển của phần tử thanh.",
+      projectionHint: "Chiếu chuyển vị của các thanh thuộc mặt phẳng gốc lên mặt phẳng đang xem.",
       scale: "Hệ số biến dạng",
       auto: "Tự động",
       unsupported: "Biến dạng chỉ dùng với tải tĩnh và tổ hợp tuyến tính.",
       unavailable: "Không vẽ được biến dạng với dữ liệu và hệ số hiện tại.",
+      noVisibleFrames: "Khung nhìn này không có thanh có kết quả biến dạng.",
     },
     displacements: "Chuyển vị nút",
     reactions: "Phản lực",

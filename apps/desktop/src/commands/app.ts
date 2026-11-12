@@ -381,12 +381,7 @@ export const COMMANDS: AppCommand[] = [
       return s.showDeformed || !!selectDeformationCase(s);
     },
     checked: () => useResults.getState().showDeformed,
-    run: () => {
-      const s = useResults.getState();
-      const { views, layout } = ui();
-      if (!s.showDeformed && !views.slice(0, layout).some((v) => v.kind === "3d")) setActiveView({ kind: "3d" });
-      s.toggleDeformed();
-    },
+    run: () => useResults.getState().toggleDeformed(),
   },
   later("display.moment", 6, "moment"),
   later("display.shear", 6, "shear"),

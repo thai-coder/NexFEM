@@ -426,10 +426,12 @@ export const en: Strings = {
     deformation: {
       frames: "Frame deformation",
       chordHint: "Straight segments connect the displaced joints of frame elements.",
+      projectionHint: "Joint displacements of frames in the original plane are projected onto the current view plane.",
       scale: "Deformation scale",
       auto: "Auto",
       unsupported: "Deformation is available for static cases and linear combinations.",
       unavailable: "Deformation cannot be drawn with the current data and scale.",
+      noVisibleFrames: "This view has no frames with deformation results.",
     },
     displacements: "Joint displacements",
     reactions: "Reactions",
