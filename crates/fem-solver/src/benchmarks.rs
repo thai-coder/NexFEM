@@ -396,10 +396,17 @@ fn rigid_end_offset_reduces_flexible_span_and_transfers_support_moment() {
     let expected_uz = -p * (l - rigid).powi(3) / (3.0 * E * I33);
     assert!(close(c.displacements["b"][2], expected_uz, 1e-9));
     assert!(close(c.reactions["a"][2], p, 1e-9));
-    assert!(close(c.reactions["a"][4], -p * l, 1e-9), "base reaction = {:?}", c.reactions["a"]);
+    assert!(
+        close(c.reactions["a"][4], -p * l, 1e-9),
+        "base reaction = {:?}",
+        c.reactions["a"]
+    );
     assert!(close(c.frames["f"].x[0], rigid, 1e-9));
     m.frames[0].offsets = Some(fem_core::FrameOffsets { i: l, j: 0.0 });
-    assert_eq!(analyze(&m, &Options::default()).err().unwrap().code, "invalid_offsets");
+    assert_eq!(
+        analyze(&m, &Options::default()).err().unwrap().code,
+        "invalid_offsets"
+    );
 }
 
 #[test]
@@ -424,17 +431,30 @@ fn rigid_diaphragm_shares_horizontal_shear_between_two_columns() {
     let free = run(&m).cases[0].displacements["a1"][0];
     m.diaphragms = serde_json::from_value(json!([{
         "id":"D1","name":"Roof","master":"a1","slaves":["b1"]
-    }])).unwrap();
+    }]))
+    .unwrap();
     let r = run(&m);
     let c = &r.cases[0];
     let u1 = c.displacements["a1"][0];
     let u2 = c.displacements["b1"][0];
-    assert!(close(u1, u2, 1e-9), "Diaphragm does not constrain Ux: {u1}, {u2}");
-    assert!(close(u1, free / 2.0, 1e-8), "Shared drift: {u1}, free: {free}");
+    assert!(
+        close(u1, u2, 1e-9),
+        "Diaphragm does not constrain Ux: {u1}, {u2}"
+    );
+    assert!(
+        close(u1, free / 2.0, 1e-8),
+        "Shared drift: {u1}, free: {free}"
+    );
     assert!(close(c.sum_reactions[0], -p, 1e-8));
     assert!(close(c.reactions["a0"][0], -p / 2.0, 1e-8));
     assert!(close(c.reactions["b0"][0], -p / 2.0, 1e-8));
-    m.joints.iter_mut().find(|j| j.id == "b1").unwrap().restraint =
-        Some([true, false, false, false, false, false]);
-    assert_eq!(analyze(&m, &Options::default()).err().unwrap().code, "invalid_diaphragm");
+    m.joints
+        .iter_mut()
+        .find(|j| j.id == "b1")
+        .unwrap()
+        .restraint = Some([true, false, false, false, false, false]);
+    assert_eq!(
+        analyze(&m, &Options::default()).err().unwrap().code,
+        "invalid_diaphragm"
+    );
 }
