@@ -13,6 +13,7 @@ export function CommandPalette() {
   const T = useT();
   const open = useUi((s) => s.paletteOpen);
   useResults((s) => s.showDeformed || !!selectDeformationCase(s));
+  useResults((s) => s.activeCase !== null);
   const set = useUi((s) => s.set);
   const [q, setQ] = useState("");
   const [idx, setIdx] = useState(0);

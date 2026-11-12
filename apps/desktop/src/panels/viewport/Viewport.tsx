@@ -1,13 +1,14 @@
-import { frameLength, jointMap, sectionProperties, toDisplay, unitLabel } from "@nexfem/model-core";
+import { frameLength, jointMap, sectionProperties, toDisplay, unitLabel, type UnitSystem } from "@nexfem/model-core";
 import { readToken } from "@nexfem/ui";
-import { buildDeformedFrames, DARK_THEME, LIGHT_THEME, StructureViewer, viewTitle, type DeformedFrames, type ViewSpec, type ViewerTheme } from "@nexfem/viewer";
+import { buildDeformedFrames, buildMomentDiagram, DARK_THEME, LIGHT_THEME, StructureViewer, viewTitle, type DeformedFrames, type MomentDiagram, type ViewSpec, type ViewerTheme } from "@nexfem/viewer";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { NumberField } from "../../components/fields.tsx";
 import { useT } from "../../i18n/index.ts";
 import { openContextMenu } from "../../commands/context.ts";
 import { canDrawIn, finish, handlePoint, isPolygonTool } from "../../tools/draw.ts";
 import { useModel } from "../../stores/model.ts";
-import { selectDeformationCase, useResults } from "../../stores/results.ts";
+import { selectActiveCase, selectDeformationCase, useResults } from "../../stores/results.ts";
+import type { CaseResult } from "../../services/solver.ts";
 import { useUi } from "../../stores/ui.ts";
 
 export function Viewport() {
@@ -16,15 +17,23 @@ export function Viewport() {
   const showDeformed = useResults((s) => s.showDeformed);
   const deformationCase = useResults(selectDeformationCase);
   const scale = useResults((s) => s.deformationScale);
+  const showMoment = useResults((s) => s.showMoment);
+  const momentScale = useResults((s) => s.momentScale);
+  const current = useResults(selectActiveCase);
   const deformed = useMemo(
     () => showDeformed && deformationCase ? buildDeformedFrames(model, deformationCase.displacements, scale) : null,
     [showDeformed, deformationCase, model, scale],
+  );
+  const moment = useMemo(
+    () => showMoment && current ? buildMomentDiagram(model, current.frames, momentScale) : null,
+    [showMoment, current, model, momentScale],
   );
   const panes = Array.from({ length: layout }, (_, i) => i);
   return (
     <div className={`viewport-grid layout-${layout}`} data-testid="viewport">
       {panes.map((i) => (
-        <Pane key={i} index={i} deformed={deformed} deformationCaseName={deformationCase?.name} showDeformed={showDeformed} />
+        <Pane key={i} index={i} deformed={deformed} deformationCaseName={deformationCase?.name} showDeformed={showDeformed}
+          moment={moment} momentCase={showMoment ? current : undefined} />
       ))}
     </div>
   );
@@ -57,16 +66,19 @@ function decode(s: string): ViewSpec {
   return { kind: "3d" };
 }
 
-function Pane({ index, deformed, deformationCaseName, showDeformed }: {
+function Pane({ index, deformed, deformationCaseName, showDeformed, moment, momentCase }: {
   index: number;
   deformed: DeformedFrames | null;
   deformationCaseName: string | undefined;
   showDeformed: boolean;
+  moment: MomentDiagram | null;
+  momentCase: CaseResult | undefined;
 }) {
   const T = useT();
   const host = useRef<HTMLDivElement>(null);
   const viewer = useRef<StructureViewer | null>(null);
-  const [hasDeformedShape, setHasDeformedShape] = useState(false);
+  const [hasResultShape, setHasResultShape] = useState(false);
+  const animationStart = useResults((s) => s.deformationAnimationStart);
   const model = useModel((s) => s.model);
   const selection = useModel((s) => s.selection);
   const view = useUi((s) => s.views[index]) ?? { kind: "3d" };
@@ -133,9 +145,10 @@ function Pane({ index, deformed, deformationCaseName, showDeformed }: {
   useEffect(() => {
     const v = viewer.current;
     if (!v) return;
-    v.setDeformedShape(deformed);
-    setHasDeformedShape(v.hasDeformedShape);
-  }, [model, deformed, viewKey]);
+    v.setDeformedShape(deformed, deformed ? animationStart : null);
+    v.setMomentDiagram(moment);
+    setHasResultShape(v.hasDeformedShape || v.momentBounds !== null);
+  }, [model, deformed, animationStart, moment, viewKey]);
   useEffect(() => {
     viewer.current?.setSelection(selection);
   }, [selection]);
@@ -215,11 +228,13 @@ function Pane({ index, deformed, deformationCaseName, showDeformed }: {
         <DeformationControls
           caseName={deformationCaseName}
           appliedScale={deformed?.scale}
-          hasDeformedShape={hasDeformedShape}
+          hasDeformedShape={hasResultShape}
           projected={view.kind !== "3d"}
           color={(theme === "dark" ? DARK_THEME : LIGHT_THEME).deformed}
         />
       )}
+      {momentCase && <MomentControls result={momentCase} units={model.units} appliedScale={moment?.scale}
+        visible={hasResultShape} color={(theme === "dark" ? DARK_THEME : LIGHT_THEME).moment} />}
       <div className="pane-body">
         <div className="pane-canvas" ref={host} />
         {hover && !drawing && <HoverTip id={hover.id} x={hover.x} y={hover.y} />}
@@ -239,6 +254,8 @@ function DeformationControls({ caseName, appliedScale, hasDeformedShape, project
   const { deformation: labels } = useT().analysis;
   const scale = useResults((s) => s.deformationScale);
   const setScale = useResults((s) => s.setDeformationScale);
+  const playing = useResults((s) => s.deformationAnimationStart !== null);
+  const toggleAnimation = useResults((s) => s.toggleDeformationAnimation);
   return (
     <div className="pane-deformation" style={{ borderInlineStartColor: color }} data-testid="deformation-controls">
       {caseName === undefined ? <span role="status">{labels.unsupported}</span> : (
@@ -250,10 +267,39 @@ function DeformationControls({ caseName, appliedScale, hasDeformedShape, project
             <span aria-hidden="true">×</span>
           </label>
           <button type="button" className="preset-btn" aria-pressed={scale === null} onClick={() => setScale(null)}>{labels.auto}</button>
+          <button type="button" className="preset-btn" aria-pressed={playing} disabled={!hasDeformedShape && !playing}
+            title={labels.animationHint} onClick={toggleAnimation}>{playing ? labels.stop : labels.play}</button>
           {appliedScale === undefined && <span role="status">{labels.unavailable}</span>}
           {appliedScale !== undefined && !hasDeformedShape && <span role="status">{labels.noVisibleFrames}</span>}
         </>
       )}
+    </div>
+  );
+}
+
+function MomentControls({ result, units, appliedScale, visible, color }: {
+  result: CaseResult;
+  units: UnitSystem;
+  appliedScale: number | undefined;
+  visible: boolean;
+  color: string;
+}) {
+  const { moment: labels, caseKinds, deformation } = useT().analysis;
+  const scale = useResults((s) => s.momentScale);
+  const setScale = useResults((s) => s.setMomentScale);
+  const scaleConversion = toDisplay(1, "length", units) / toDisplay(1, "moment", units);
+  const scaleUnit = `${unitLabel("length", units)}/(${unitLabel("moment", units)})`;
+  return (
+    <div className="pane-deformation" style={{ borderInlineStartColor: color }} data-testid="moment-controls">
+      <span title={labels.directionHint}>{labels.title} · {result.name} · {caseKinds[result.kind]}</span>
+      <label title={labels.scaleHint}>
+        {labels.scale}
+        <NumberField value={(scale ?? appliedScale ?? 1) * scaleConversion} onChange={(value) => setScale(value / scaleConversion)}
+          min={Number.MIN_VALUE} label={labels.scale} width={76} testId="moment-scale" />
+        {scaleUnit}
+      </label>
+      <button type="button" className="preset-btn" aria-pressed={scale === null} onClick={() => setScale(null)}>{deformation.auto}</button>
+      {!visible && <span role="status">{labels.unavailable}</span>}
     </div>
   );
 }

@@ -2,6 +2,8 @@ import { expect, test, type Page } from "@playwright/test";
 
 type Viewer = {
   deformedBounds: { min: { x: number; y: number; z: number }; max: { x: number; y: number; z: number } } | null;
+  momentBounds: { min: { z: number }; max: { z: number } } | null;
+  deformationAnimationProgress: number | null;
   cameraState: { position: number[]; target: number[] };
   worldToScreen(x: number, y: number, z: number): [number, number];
 };
@@ -30,9 +32,17 @@ const bounds = (page: Page, pane: number) => page.evaluate((index) => {
   return v?.deformedBounds ?? null;
 }, pane);
 
-async function displayMenu(page: Page) {
+async function displayMenu(page: Page, label = "Biến dạng") {
   await page.getByRole("menuitem", { name: "Display", exact: true }).click();
-  return page.getByRole("menuitem", { name: "Biến dạng", exact: true });
+  return page.getByRole("menuitem", { name: label, exact: true });
+}
+
+async function openCantilever(page: Page) {
+  await page.getByTestId("toolbar").locator('[data-command="file.open"]').click();
+  await page.getByTestId("open-input").setInputFiles({
+    name: "cantilever.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(cantilever)),
+  });
+  await expect(page).toHaveTitle(/cantilever\.json/);
 }
 
 test.beforeEach(async ({ page }) => {
@@ -43,13 +53,7 @@ test.beforeEach(async ({ page }) => {
 
 test("biến dạng công xôn theo chuyển vị tổng thể, hệ số và trường hợp tải", async ({ page }) => {
   await expect(await displayMenu(page)).toBeDisabled();
-  await page.getByTestId("toolbar").locator('[data-command="file.open"]').click();
-  await page.getByTestId("open-input").setInputFiles({
-    name: "cantilever.json",
-    mimeType: "application/json",
-    buffer: Buffer.from(JSON.stringify(cantilever)),
-  });
-  await expect(page).toHaveTitle(/cantilever\.json/);
+  await openCantilever(page);
   await page.keyboard.press("F5");
   const cases = page.getByTestId("toolbar-result-case");
   await expect(cases).toHaveValue("c");
@@ -105,6 +109,75 @@ test("biến dạng công xôn theo chuyển vị tổng thể, hệ số và tr
   await expect.poll(() => bounds(page, 1)).toBeNull();
   await expect.poll(() => bounds(page, 0)).toBeNull();
   await expect(await displayMenu(page)).toBeDisabled();
+});
+
+test("biểu đồ M3 khớp toàn bộ station và scale thủ công giữ theo case", async ({ page }) => {
+  await expect(await displayMenu(page, "Biểu đồ M3")).toBeDisabled();
+  await openCantilever(page);
+  await page.keyboard.press("F5");
+  const cases = page.getByTestId("toolbar-result-case");
+  await expect(cases).toHaveValue("c");
+  await (await displayMenu(page, "Biểu đồ M3")).click();
+  const pane = page.getByTestId("pane-1");
+  const moment = (index: number) => page.evaluate((i) =>
+    (window as unknown as { __nexfemViewers: Viewer[] }).__nexfemViewers[i]!.momentBounds, index);
+  await expect.poll(async () => (await moment(1))?.max.z).toBeCloseTo(0.18, 6);
+  expect(await moment(0)).toBeNull();
+  await page.getByTestId("pane-0").locator(".pane-title").selectOption("elev:g:y0");
+  await expect.poll(async () => (await moment(0))?.max.z).toBeCloseTo(0.18, 6);
+  await pane.getByTestId("moment-scale").fill("0.01");
+  await expect.poll(async () => (await moment(1))?.max.z).toBeCloseTo(0.30, 6);
+
+  await pane.getByTestId("preset-front").click();
+  const box = (await pane.locator(".pane-canvas").boundingBox())!;
+  const point = await page.evaluate(() => (window as unknown as { __nexfemViewers: Viewer[] }).__nexfemViewers[1]!.worldToScreen(1.5, 0, 0));
+  await page.mouse.click(box.x + point[0], box.y + point[1]);
+  const stationRows = page.getByTestId("moment-stations").locator("tbody tr");
+  await expect(stationRows).toHaveCount(9);
+  const bottom = page.getByTestId("bottom");
+  await bottom.getByRole("tab", { name: /Bảng dữ liệu/ }).click();
+  await bottom.getByLabel("Bảng").selectOption("frameForces");
+  const forceRows = bottom.locator("tbody tr");
+  await expect(forceRows).toHaveCount(9);
+  const stationValues = await stationRows.evaluateAll((rows) => rows.map((row) => Array.from(row.querySelectorAll("td"), (cell) => cell.textContent)));
+  const forceValues = await forceRows.evaluateAll((rows) => rows.map((row) => {
+    const cells = row.querySelectorAll("td");
+    return [cells[1]?.textContent, cells[7]?.textContent];
+  }));
+  expect(stationValues).toEqual(forceValues);
+  expect(stationValues[0]).toEqual(["0.000", "-30000.00"]);
+  await cases.selectOption("k");
+  await expect.poll(async () => (await moment(1))?.max.z).toBeCloseTo(0.45, 6);
+  await cases.selectOption("srss");
+  await expect(pane.getByTestId("moment-controls")).toContainText("SRSS tải tĩnh");
+  await expect.poll(async () => (await moment(1))?.min.z).toBeCloseTo(-0.30, 6);
+  await page.keyboard.press("F6");
+  await expect(pane.getByTestId("moment-controls")).toHaveCount(0);
+  await expect.poll(() => moment(1)).toBeNull();
+});
+
+test("chạy và dừng hình biến dạng tĩnh, đổi case đưa hình về trạng thái tĩnh", async ({ page }) => {
+  await openCantilever(page);
+  await page.keyboard.press("F5");
+  const cases = page.getByTestId("toolbar-result-case");
+  await expect(cases).toHaveValue("c");
+  await (await displayMenu(page)).click();
+  const pane = page.getByTestId("pane-1");
+  const progress = () => page.evaluate(() => (window as unknown as { __nexfemViewers: Viewer[] }).__nexfemViewers[1]!.deformationAnimationProgress);
+  await pane.getByRole("button", { name: "Chạy biến dạng" }).click();
+  await expect(pane.getByRole("button", { name: "Dừng biến dạng" })).toHaveAttribute("aria-pressed", "true");
+  await expect.poll(async () => (await progress()) ?? 1).toBeLessThan(0.8);
+  await pane.getByRole("button", { name: "Dừng biến dạng" }).click();
+  await expect.poll(progress).toBeNull();
+  await expect.poll(async () => (await bounds(page, 1))?.min.z).toBeCloseTo(-0.24, 3);
+  await pane.getByRole("button", { name: "Chạy biến dạng" }).click();
+  await cases.selectOption("k");
+  await expect(pane.getByRole("button", { name: "Chạy biến dạng" })).toBeVisible();
+  await expect.poll(progress).toBeNull();
+  await pane.getByRole("button", { name: "Chạy biến dạng" }).click();
+  await (await displayMenu(page, "Biểu đồ M3")).click();
+  await expect(pane.getByTestId("moment-controls")).toBeVisible();
+  await expect.poll(progress).toBeNull();
 });
 
 test("lớp biến dạng dùng được với 1/2/4 ô và giữ thao tác trên mô hình gốc", async ({ page }) => {
