@@ -164,6 +164,14 @@ export const ShellLoadSchema = z.object({
   value: Num,
 });
 
+/** Rigid diaphragm mặt phẳng ngang: master và danh sách slave; không tạo độ cứng shell. */
+export const DiaphragmSchema = z.object({
+  id: Id,
+  name: z.string(),
+  master: Id,
+  slaves: z.array(Id).min(1),
+});
+
 export const ModelSchema = z.object({
   schemaVersion: z.literal(MODEL_SCHEMA_VERSION),
   name: z.string(),
@@ -177,6 +185,7 @@ export const ModelSchema = z.object({
   frameSections: z.array(FrameSectionSchema),
   shellSections: z.array(ShellSectionSchema),
   joints: z.array(JointSchema),
+  diaphragms: z.array(DiaphragmSchema).optional(),
   frames: z.array(FrameSchema),
   shells: z.array(ShellSchema),
   loadPatterns: z.array(LoadPatternSchema),
@@ -196,6 +205,7 @@ export type FrameSection = z.infer<typeof FrameSectionSchema>;
 export type ShellSection = z.infer<typeof ShellSectionSchema>;
 export type Restraint = z.infer<typeof RestraintSchema>;
 export type Joint = z.infer<typeof JointSchema>;
+export type Diaphragm = z.infer<typeof DiaphragmSchema>;
 export type Frame = z.infer<typeof FrameSchema>;
 export type Shell = z.infer<typeof ShellSchema>;
 export type LoadPattern = z.infer<typeof LoadPatternSchema>;
