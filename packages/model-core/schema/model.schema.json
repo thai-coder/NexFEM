@@ -548,6 +548,23 @@
               "i",
               "j"
             ]
+          },
+          "offsets": {
+            "type": "object",
+            "properties": {
+              "i": {
+                "type": "number",
+                "minimum": 0
+              },
+              "j": {
+                "type": "number",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "i",
+              "j"
+            ]
           }
         },
         "required": [
