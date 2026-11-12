@@ -4,7 +4,7 @@ import { t } from "../i18n/index.ts";
 import type { Strings } from "../i18n/vi.ts";
 import { useModel } from "../stores/model.ts";
 import { openProject, saveProject } from "../services/files.ts";
-import { useResults } from "../stores/results.ts";
+import { selectDeformationCase, useResults } from "../stores/results.ts";
 import { solve } from "../services/solver.ts";
 import { toDisplay, unitLabel } from "@nexfem/model-core";
 import { cancel as cancelDraw, finish as finishDraw, undoPoint } from "../tools/draw.ts";
@@ -373,7 +373,21 @@ export const COMMANDS: AppCommand[] = [
     enabled: () => model().locked && !isAnalysisRunning(),
   },
 
-  later("display.deformed", 6, "deformed"),
+  {
+    id: "display.deformed",
+    icon: "deformed",
+    enabled: () => {
+      const s = useResults.getState();
+      return s.showDeformed || !!selectDeformationCase(s);
+    },
+    checked: () => useResults.getState().showDeformed,
+    run: () => {
+      const s = useResults.getState();
+      const { views, layout } = ui();
+      if (!s.showDeformed && !views.slice(0, layout).some((v) => v.kind === "3d")) setActiveView({ kind: "3d" });
+      s.toggleDeformed();
+    },
+  },
   later("display.moment", 6, "moment"),
   later("display.shear", 6, "shear"),
   later("display.axial", 6, "axial"),

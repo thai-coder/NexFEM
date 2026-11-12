@@ -4,6 +4,7 @@ import { MENUS, command, runCommand, type CommandId } from "../commands/app.ts";
 import { useT } from "../i18n/index.ts";
 import { basename } from "../services/files.ts";
 import { useModel } from "../stores/model.ts";
+import { useResults } from "../stores/results.ts";
 import { useUi } from "../stores/ui.ts";
 
 export function MenuBar() {
@@ -12,6 +13,8 @@ export function MenuBar() {
   const ref = useRef<HTMLDivElement>(null);
   // Đăng ký để menu cập nhật trạng thái bật/tắt khi mô hình hoặc giao diện đổi.
   useModel();
+  useResults((s) => s.activeCase);
+  useResults((s) => s.showDeformed);
   const theme = useUi((s) => s.theme);
   const lang = useUi((s) => s.lang);
   const name = useModel((s) => s.model.name);

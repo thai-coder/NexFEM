@@ -568,6 +568,36 @@ select:disabled {
   min-height: 0;
 }
 
+.pane-deformation {
+  position: absolute;
+  z-index: 4;
+  top: 28px;
+  right: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  max-width: calc(100% - 12px);
+  padding: 3px 6px;
+  border: 1px solid var(--color-border);
+  border-inline-start-width: 3px;
+  border-radius: 4px;
+  background: var(--color-surface);
+  font-size: var(--font-size-sm);
+  overflow-wrap: anywhere;
+}
+
+.pane-deformation label {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.pane-deformation button[aria-pressed="true"] {
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
 .hover-tip {
   position: absolute;
   z-index: 5;
