@@ -330,8 +330,14 @@ fn timoshenko_cantilever_deflection_adds_shear_compliance() {
     let deflection = run(&m).cases[0].displacements["b"][2];
     let g = E / (2.0 * (1.0 + NU));
     let expected = -p * l.powi(3) / (3.0 * E * I33) - p * l / (g * a2);
-    assert!(close(deflection, expected, 1e-9), "Timoshenko: {deflection} != {expected}");
-    assert!(deflection < baseline, "Ứng xử chịu cắt phải mềm hơn Euler–Bernoulli");
+    assert!(
+        close(deflection, expected, 1e-9),
+        "Timoshenko: {deflection} != {expected}"
+    );
+    assert!(
+        deflection < baseline,
+        "Ứng xử chịu cắt phải mềm hơn Euler–Bernoulli"
+    );
 }
 
 #[test]
@@ -356,11 +362,21 @@ fn envelope_min_max_and_srss_are_componentwise_not_equilibrium_cases() {
     assert_eq!(max.kind, "envelopeMax");
     assert!(close(max.displacements["b"][2], -2.0 * baseline, 1e-10));
     assert!(close(min.displacements["b"][2], baseline, 1e-10));
-    assert!(close(rss.displacements["b"][2], baseline.abs() * 5.0_f64.sqrt(), 1e-10));
+    assert!(close(
+        rss.displacements["b"][2],
+        baseline.abs() * 5.0_f64.sqrt(),
+        1e-10
+    ));
     assert_eq!(rss.applied, [0.0; 3]);
     // Lồng envelope dưới linearAdd là sai ngữ nghĩa kỹ thuật.
-    m.combos.push(serde_json::from_value(json!({
-        "id":"bad","name":"bad","type":"linearAdd","items":[{"case":"env","factor":1.0}]
-    })).unwrap());
-    assert_eq!(analyze(&m, &Options::default()).err().unwrap().code, "nonlinear_combo_dependency");
+    m.combos.push(
+        serde_json::from_value(json!({
+            "id":"bad","name":"bad","type":"linearAdd","items":[{"case":"env","factor":1.0}]
+        }))
+        .unwrap(),
+    );
+    assert_eq!(
+        analyze(&m, &Options::default()).err().unwrap().code,
+        "nonlinear_combo_dependency"
+    );
 }
