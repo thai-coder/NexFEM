@@ -8,8 +8,8 @@
 //! - Chỉ có trường hợp tải tĩnh tuyến tính và tổ hợp cộng tuyến tính.
 
 use crate::element::*;
-use crate::skyline::reverse_cuthill_mckee;
 use crate::matrix::{Matrix, SolveError};
+use crate::skyline::reverse_cuthill_mckee;
 use fem_core::{FrameShape, Model};
 use serde::Serialize;
 use std::collections::{BTreeMap, HashMap, HashSet};
@@ -860,8 +860,14 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
         }
         k.solve(&mut rhs).map_err(|err| {
             let (code, msg) = match err {
-                SolveError::NonConverged => ("sparse_no_convergence", "PCG thưa không hội tụ trong giới hạn; không xuất kết quả".to_string()),
-                SolveError::Indefinite => ("sparse_indefinite", "Ma trận không xác định dương hoặc có cơ cấu mất ổn định".to_string()),
+                SolveError::NonConverged => (
+                    "sparse_no_convergence",
+                    "PCG thưa không hội tụ trong giới hạn; không xuất kết quả".to_string(),
+                ),
+                SolveError::Indefinite => (
+                    "sparse_indefinite",
+                    "Ma trận không xác định dương hoặc có cơ cấu mất ổn định".to_string(),
+                ),
             };
             AnalysisError::new(code, msg, vec![])
         })?;
