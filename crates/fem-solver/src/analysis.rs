@@ -366,7 +366,10 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
             j,
         };
         let shear = if let Some(s) = &sec.shear_areas {
-            if [s.a2, s.a3].iter().any(|x| !x.is_finite() || *x <= 0.0 || *x > area) {
+            if [s.a2, s.a3]
+                .iter()
+                .any(|x| !x.is_finite() || *x <= 0.0 || *x > area)
+            {
                 return Err(AnalysisError::new(
                     "invalid_section",
                     format!("Tiết diện {}: diện tích chịu cắt không hợp lệ", sec.name),
@@ -814,7 +817,10 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
                 if parent.kind != "linearAdd" {
                     return Err(AnalysisError::new(
                         "nonlinear_combo_dependency",
-                        format!("Tổ hợp {} không được lồng kết quả {} ({})", co.name, parent.name, parent.kind),
+                        format!(
+                            "Tổ hợp {} không được lồng kết quả {} ({})",
+                            co.name, parent.name, parent.kind
+                        ),
                         vec![co.id.clone(), parent.id.clone()],
                     ));
                 }
@@ -837,16 +843,19 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
             if parts.len() != co.items.len() {
                 return true;
             }
-            match co.kind.as_str() {
-                "linearAdd" => cases.push(combine(co.id.clone(), co.name.clone(), &parts)),
-                "srss" => cases.push(nonlinear_combine(co.id.clone(), co.name.clone(), &parts, "srss")),
-                "envelope" => {
-                    // Hai bộ cực trị thành phần; KHÔNG phải hai trạng thái lực đồng thời.
-                    cases.push(nonlinear_combine(format!("{}:max", co.id), format!("{} [MAX]", co.name), &parts, "envelopeMax"));
-                    cases.push(nonlinear_combine(format!("{}:min", co.id), format!("{} [MIN]", co.name), &parts, "envelopeMin"));
-                }
-                _ => unreachable!(),
+            if parts.is_empty() {
+                return true; // Chặn tổ hợp trống phía dưới.
             }
+            let computed = match co.kind.as_str() {
+                "linearAdd" => vec![combine(co.id.clone(), co.name.clone(), &parts)],
+                "srss" => vec![nonlinear_combine(co.id.clone(), co.name.clone(), &parts, "srss")],
+                "envelope" => vec![
+                    nonlinear_combine(format!("{}:max", co.id), format!("{} [MAX]", co.name), &parts, "envelopeMax"),
+                    nonlinear_combine(format!("{}:min", co.id), format!("{} [MIN]", co.name), &parts, "envelopeMin"),
+                ],
+                _ => unreachable!(),
+            };
+            cases.extend(computed);
             false
         });
         if pending.len() == before {
@@ -1033,35 +1042,87 @@ fn nonlinear_value<I: Iterator<Item = f64>>(values: I, kind: &str) -> f64 {
     }
 }
 
-fn nonlinear_combine(id: String, name: String, parts: &[(f64, &CaseResult)], kind: &str) -> CaseResult {
+fn nonlinear_combine(
+    id: String,
+    name: String,
+    parts: &[(f64, &CaseResult)],
+    kind: &str,
+) -> CaseResult {
     let base = parts[0].1;
     let aggregate = |values: Vec<f64>| nonlinear_value(values.into_iter(), kind);
-    let displacements = base.displacements.iter().map(|(id, _)| {
-        (id.clone(), std::array::from_fn(|i|
-            aggregate(parts.iter().map(|(fac, c)| fac * c.displacements[id][i]).collect())))
-    }).collect();
-    let reactions = base.reactions.iter().map(|(id, _)| {
-        (id.clone(), std::array::from_fn(|i|
-            aggregate(parts.iter().map(|(fac, c)| fac * c.reactions[id][i]).collect())))
-    }).collect();
-    let frames = base.frames.iter().map(|(id, v)| {
-        let series = |get: fn(&FrameForces) -> &Vec<f64>| -> Vec<f64> {
-            (0..v.x.len()).map(|i| aggregate(parts.iter().map(|(fac, c)|
-                fac * get(&c.frames[id])[i]).collect())).collect()
-        };
-        (id.clone(), FrameForces {
-            x: v.x.clone(),
-            p: series(|f| &f.p),
-            v2: series(|f| &f.v2),
-            v3: series(|f| &f.v3),
-            t: series(|f| &f.t),
-            m2: series(|f| &f.m2),
-            m3: series(|f| &f.m3),
+    let displacements = base
+        .displacements
+        .iter()
+        .map(|(id, _)| {
+            (
+                id.clone(),
+                std::array::from_fn(|i| {
+                    aggregate(
+                        parts
+                            .iter()
+                            .map(|(fac, c)| fac * c.displacements[id][i])
+                            .collect(),
+                    )
+                }),
+            )
         })
-    }).collect();
+        .collect();
+    let reactions = base
+        .reactions
+        .iter()
+        .map(|(id, _)| {
+            (
+                id.clone(),
+                std::array::from_fn(|i| {
+                    aggregate(
+                        parts
+                            .iter()
+                            .map(|(fac, c)| fac * c.reactions[id][i])
+                            .collect(),
+                    )
+                }),
+            )
+        })
+        .collect();
+    let frames = base
+        .frames
+        .iter()
+        .map(|(id, v)| {
+            let series = |get: fn(&FrameForces) -> &Vec<f64>| -> Vec<f64> {
+                (0..v.x.len())
+                    .map(|i| {
+                        aggregate(
+                            parts
+                                .iter()
+                                .map(|(fac, c)| fac * get(&c.frames[id])[i])
+                                .collect(),
+                        )
+                    })
+                    .collect()
+            };
+            (
+                id.clone(),
+                FrameForces {
+                    x: v.x.clone(),
+                    p: series(|f| &f.p),
+                    v2: series(|f| &f.v2),
+                    v3: series(|f| &f.v3),
+                    t: series(|f| &f.t),
+                    m2: series(|f| &f.m2),
+                    m3: series(|f| &f.m3),
+                },
+            )
+        })
+        .collect();
     CaseResult {
-        id, name, kind: kind.into(), displacements, reactions, frames,
+        id,
+        name,
+        kind: kind.into(),
+        displacements,
+        reactions,
+        frames,
         // Không có ý nghĩa cân bằng vì các thành phần không đồng thời.
-        applied: [0.0; 3], sum_reactions: [0.0; 3],
+        applied: [0.0; 3],
+        sum_reactions: [0.0; 3],
     }
 }
