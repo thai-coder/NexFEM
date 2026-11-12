@@ -8,7 +8,8 @@
 //! - Chỉ có trường hợp tải tĩnh tuyến tính và tổ hợp cộng tuyến tính.
 
 use crate::element::*;
-use crate::skyline::{reverse_cuthill_mckee, Skyline};
+use crate::skyline::reverse_cuthill_mckee;
+use crate::matrix::{Matrix, SolveError};
 use fem_core::{FrameShape, Model};
 use serde::Serialize;
 use std::collections::{BTreeMap, HashMap, HashSet};
@@ -542,7 +543,8 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
             }
         }
     }
-    let mut k = Skyline::new(first);
+    let mut k = Matrix::new(first);
+    let backend = k.backend();
     for e in &elems {
         let kg = rigid_end_stiffness(
             &stiffness_to_global(&e.ax, &e.k_cond),
@@ -589,6 +591,10 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
         );
     }
     let profile = k.profile();
+    if backend == "sparse_pcg_jacobi" {
+        warn(&mut warnings, "sparse_pcg",
+            "Đã chuyển sang giải thưa PCG; chưa thể coi đây là Cholesky trực tiếp và yêu cầu kiểm tra hội tụ".into(), vec![]);
+    }
     k.factor(1e-11).map_err(|s| {
         let (n, d) = dof_owner[s.dof];
         let jt = &model.joints[nodes[n]];
@@ -852,7 +858,13 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
                 ));
             }
         }
-        k.solve(&mut rhs);
+        k.solve(&mut rhs).map_err(|err| {
+            let (code, msg) = match err {
+                SolveError::NonConverged => ("sparse_no_convergence", "PCG thưa không hội tụ trong giới hạn; không xuất kết quả".to_string()),
+                SolveError::Indefinite => ("sparse_indefinite", "Ma trận không xác định dương hoặc có cơ cấu mất ổn định".to_string()),
+            };
+            AnalysisError::new(code, msg, vec![])
+        })?;
         let u = rhs;
 
         let disp_of = |n: usize| -> [f64; 6] {
