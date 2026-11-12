@@ -380,7 +380,7 @@ export function AssignDiaphragmDialog({ onClose }: { onClose(): void }) {
             </div>
           ))}
         </Field>
-      )
+      )}
     </AssignShell>
   );
 }
