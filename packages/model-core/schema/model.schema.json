@@ -488,6 +488,39 @@
         ]
       }
     },
+    "diaphragms": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string"
+          },
+          "master": {
+            "type": "string",
+            "minLength": 1
+          },
+          "slaves": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "master",
+          "slaves"
+        ]
+      }
+    },
     "frames": {
       "type": "array",
       "items": {
@@ -847,39 +880,6 @@
           "pattern",
           "direction",
           "value"
-        ]
-      }
-    },
-    "diaphragms": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "minLength": 1
-          },
-          "name": {
-            "type": "string"
-          },
-          "master": {
-            "type": "string",
-            "minLength": 1
-          },
-          "slaves": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "minLength": 1
-            },
-            "minItems": 1
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "master",
-          "slaves"
         ]
       }
     }
