@@ -109,6 +109,8 @@ export const FrameSchema = z.object({
   releases: z
     .object({ i: z.array(z.boolean()).length(6), j: z.array(z.boolean()).length(6) })
     .optional(),
+  /** Vùng cứng đầu thanh dọc trục i/j, đo từ tim nút (m). */
+  offsets: z.object({ i: Num.min(0), j: Num.min(0) }).optional(),
 });
 
 export const ShellSchema = z.object({
