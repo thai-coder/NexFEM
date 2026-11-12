@@ -284,38 +284,57 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
     for group in &model.diaphragms {
         let mut members: Vec<usize> = Vec::new();
         for id in std::iter::once(&group.master).chain(&group.slaves) {
-            let index = joint_by_id.get(id.as_str())
+            let index = joint_by_id
+                .get(id.as_str())
                 .and_then(|&i| node_of.get(&i))
                 .copied()
-                .ok_or_else(|| AnalysisError::new("invalid_diaphragm",
-                    format!("Diaphragm {} chứa nút không thuộc phần tử thanh", group.name),
-                    vec![group.id.clone()]))?;
+                .ok_or_else(|| {
+                    AnalysisError::new(
+                        "invalid_diaphragm",
+                        format!(
+                            "Diaphragm {} chứa nút không thuộc phần tử thanh",
+                            group.name
+                        ),
+                        vec![group.id.clone()],
+                    )
+                })?;
             if !occupied.insert(index) {
-                return Err(AnalysisError::new("invalid_diaphragm",
+                return Err(AnalysisError::new(
+                    "invalid_diaphragm",
                     format!("Diaphragm {} có nút lặp hoặc trùng nhóm khác", group.name),
-                    vec![group.id.clone()]));
+                    vec![group.id.clone()],
+                ));
             }
             members.push(index);
         }
         if members.len() < 2 {
-            return Err(AnalysisError::new("invalid_diaphragm",
+            return Err(AnalysisError::new(
+                "invalid_diaphragm",
                 format!("Diaphragm {} cần master và ít nhất một slave", group.name),
-                vec![group.id.clone()]));
+                vec![group.id.clone()],
+            ));
         }
         let master = members[0];
         let jm = &model.joints[nodes[master]];
         for &slave in &members[1..] {
             let js = &model.joints[nodes[slave]];
             if (jm.z - js.z).abs() > 1e-6 {
-                return Err(AnalysisError::new("invalid_diaphragm",
+                return Err(AnalysisError::new(
+                    "invalid_diaphragm",
                     format!("Diaphragm {} có nút khác cao độ", group.name),
-                    vec![group.id.clone()]));
+                    vec![group.id.clone()],
+                ));
             }
             let r = js.restraint.unwrap_or([false; 6]);
             if r[0] || r[1] || r[5] {
-                return Err(AnalysisError::new("invalid_diaphragm",
-                    format!("Diaphragm {}: gối UX/UY/RZ trên slave không được hỗ trợ", group.name),
-                    vec![group.id.clone()]));
+                return Err(AnalysisError::new(
+                    "invalid_diaphragm",
+                    format!(
+                        "Diaphragm {}: gối UX/UY/RZ trên slave không được hỗ trợ",
+                        group.name
+                    ),
+                    vec![group.id.clone()],
+                ));
             }
             slave_nodes.insert(slave);
             bindings.push((slave, master, js.x - jm.x, js.y - jm.y));
@@ -356,8 +375,9 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
         }
     }
     let ndof = dof_owner.len();
-    let mut dof_weights: Vec<[Vec<(usize, f64)>; 6]> =
-        (0..nodes.len()).map(|_| std::array::from_fn(|_| Vec::new())).collect();
+    let mut dof_weights: Vec<[Vec<(usize, f64)>; 6]> = (0..nodes.len())
+        .map(|_| std::array::from_fn(|_| Vec::new()))
+        .collect();
     for n in 0..nodes.len() {
         for d in 0..6 {
             if let Some(g) = dof_of[n][d] {
@@ -369,8 +389,12 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
         dof_weights[slave][0] = dof_weights[master][0].clone();
         dof_weights[slave][1] = dof_weights[master][1].clone();
         if let Some(g) = dof_of[master][5] {
-            if dy != 0.0 { dof_weights[slave][0].push((g, -dy)); }
-            if dx != 0.0 { dof_weights[slave][1].push((g, dx)); }
+            if dy != 0.0 {
+                dof_weights[slave][0].push((g, -dy));
+            }
+            if dx != 0.0 {
+                dof_weights[slave][1].push((g, dx));
+            }
         }
         dof_weights[slave][5] = dof_weights[master][5].clone();
     }
@@ -412,12 +436,18 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
         }
         let start = f.offsets.as_ref().map_or(0.0, |o| o.i);
         let end = f.offsets.as_ref().map_or(0.0, |o| o.j);
-        if !start.is_finite() || !end.is_finite() || start < 0.0 || end < 0.0
+        if !start.is_finite()
+            || !end.is_finite()
+            || start < 0.0
+            || end < 0.0
             || start + end >= full_length - 1e-9
         {
             return Err(AnalysisError::new(
                 "invalid_offsets",
-                format!("Thanh {}: vùng cứng không hợp lệ so với chiều dài thanh", f.label),
+                format!(
+                    "Thanh {}: vùng cứng không hợp lệ so với chiều dài thanh",
+                    f.label
+                ),
                 vec![f.id.clone()],
             ));
         }
@@ -507,7 +537,9 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
     for e in &elems {
         let involved: Vec<usize> = e.dofs.iter().flatten().map(|(g, _)| *g).collect();
         if let Some(&min) = involved.iter().min() {
-            for &g in &involved { first[g] = first[g].min(min); }
+            for &g in &involved {
+                first[g] = first[g].min(min);
+            }
         }
     }
     let mut k = Skyline::new(first);
@@ -521,10 +553,14 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
         // into the same generalized coordinate (rigid diaphragm).
         for a in 0..12 {
             for b in 0..12 {
-                if kg[a][b] == 0.0 { continue; }
+                if kg[a][b] == 0.0 {
+                    continue;
+                }
                 for &(da, wa) in &e.dofs[a] {
                     for &(db, wb) in &e.dofs[b] {
-                        if da <= db { k.add(da, db, kg[a][b] * wa * wb); }
+                        if da <= db {
+                            k.add(da, db, kg[a][b] * wa * wb);
+                        }
                     }
                 }
             }
@@ -822,7 +858,10 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
         let disp_of = |n: usize| -> [f64; 6] {
             let mut d = [0.0; 6];
             for c in 0..6 {
-                d[c] = dof_weights[n][c].iter().map(|&(g, weight)| weight * u[g]).sum();
+                d[c] = dof_weights[n][c]
+                    .iter()
+                    .map(|&(g, weight)| weight * u[g])
+                    .sum();
             }
             d
         };
@@ -861,7 +900,9 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
         // về master (kèm mô men do cánh tay đòn), tránh mất cân bằng lực.
         let mut residual = joint_sum;
         for (&n, loads) in &joint_loads {
-            for c in 0..6 { residual[n][c] -= loads[c]; }
+            for c in 0..6 {
+                residual[n][c] -= loads[c];
+            }
         }
         for &(slave, master, dx, dy) in &bindings {
             let r = residual[slave];
@@ -874,12 +915,18 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
         for n in 0..nodes.len() {
             let jt = &model.joints[nodes[n]];
             let Some(r) = jt.restraint else { continue };
-            if !r.iter().any(|x| *x) { continue; }
+            if !r.iter().any(|x| *x) {
+                continue;
+            }
             let mut rv = [0.0; 6];
             for c in 0..6 {
-                if r[c] { rv[c] = residual[n][c]; }
+                if r[c] {
+                    rv[c] = residual[n][c];
+                }
             }
-            for c in 0..3 { sum_reactions[c] += rv[c]; }
+            for c in 0..3 {
+                sum_reactions[c] += rv[c];
+            }
             reactions.insert(jt.id.clone(), rv);
         }
         cases.push(CaseResult {
@@ -947,10 +994,25 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
             }
             let computed = match co.kind.as_str() {
                 "linearAdd" => vec![combine(co.id.clone(), co.name.clone(), &parts)],
-                "srss" => vec![nonlinear_combine(co.id.clone(), co.name.clone(), &parts, "srss")],
+                "srss" => vec![nonlinear_combine(
+                    co.id.clone(),
+                    co.name.clone(),
+                    &parts,
+                    "srss",
+                )],
                 "envelope" => vec![
-                    nonlinear_combine(format!("{}:max", co.id), format!("{} [MAX]", co.name), &parts, "envelopeMax"),
-                    nonlinear_combine(format!("{}:min", co.id), format!("{} [MIN]", co.name), &parts, "envelopeMin"),
+                    nonlinear_combine(
+                        format!("{}:max", co.id),
+                        format!("{} [MAX]", co.name),
+                        &parts,
+                        "envelopeMax",
+                    ),
+                    nonlinear_combine(
+                        format!("{}:min", co.id),
+                        format!("{} [MIN]", co.name),
+                        &parts,
+                        "envelopeMin",
+                    ),
                 ],
                 _ => unreachable!(),
             };
