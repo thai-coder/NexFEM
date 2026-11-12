@@ -2,6 +2,7 @@ import { Icon } from "@nexfem/ui";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { COMMANDS, runCommand } from "../commands/app.ts";
 import { useT } from "../i18n/index.ts";
+import { selectDeformationCase, useResults } from "../stores/results.ts";
 import { useUi } from "../stores/ui.ts";
 
 function normalize(s: string) {
@@ -11,6 +12,7 @@ function normalize(s: string) {
 export function CommandPalette() {
   const T = useT();
   const open = useUi((s) => s.paletteOpen);
+  useResults((s) => s.showDeformed || !!selectDeformationCase(s));
   const set = useUi((s) => s.set);
   const [q, setQ] = useState("");
   const [idx, setIdx] = useState(0);

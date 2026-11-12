@@ -23,6 +23,7 @@ export interface ViewerTheme {
   selection: string;
   hover: string;
   load: string;
+  deformed: string;
   axisX: string;
   axisY: string;
   axisZ: string;
@@ -43,6 +44,7 @@ export const DARK_THEME: ViewerTheme = {
   selection: "#ffd400",
   hover: "#ffffff",
   load: "#ff8a3d",
+  deformed: "#ff8fd1",
   axisX: "#ff6b6b",
   axisY: "#7fd18b",
   axisZ: "#6aa6ff",
@@ -63,6 +65,7 @@ export const LIGHT_THEME: ViewerTheme = {
   selection: "#e0a800",
   hover: "#111827",
   load: "#d4570c",
+  deformed: "#9e1469",
   axisX: "#d33a2c",
   axisY: "#2f8a3a",
   axisZ: "#1f63d6",
@@ -135,6 +138,7 @@ export class StructureViewer {
   #scene = new THREE.Scene();
   #content = new THREE.Group();
   #overlay = new THREE.Group();
+  #deformedLine: LineSegments2 | null = null;
   #persp: THREE.PerspectiveCamera;
   #ortho: THREE.OrthographicCamera;
   #camera: THREE.Camera;
@@ -243,6 +247,7 @@ export class StructureViewer {
 
   setModel(model: Model): void {
     const first = this.#model === null;
+    if (model !== this.#model) this.setDeformedShape(null);
     this.#model = model;
     this.#rebuild();
     if (first) this.zoomExtents();
@@ -252,6 +257,7 @@ export class StructureViewer {
     const changed = JSON.stringify(view) !== JSON.stringify(this.#view);
     const kindChanged = view.kind !== this.#view.kind;
     this.#view = view;
+    if (view.kind !== "3d") this.setDeformedShape(null);
     if (kindChanged || this.#camera === this.#persp !== (view.kind === "3d")) this.#setupCamera();
     if (changed) {
       this.#rebuild();
@@ -322,7 +328,35 @@ export class StructureViewer {
 
   setTheme(theme: ViewerTheme): void {
     this.#theme = theme;
+    this.#deformedLine?.material.color.set(theme.deformed);
     this.#rebuild();
+  }
+
+  /** Lớp kết quả riêng, nằm ngoài các đối tượng chọn và bắt điểm. */
+  setDeformedShape(positions: Float32Array | null): void {
+    const previous = this.#deformedLine;
+    if (previous) {
+      this.#scene.remove(previous);
+      previous.geometry.dispose();
+      previous.material.dispose();
+      this.#deformedLine = null;
+    }
+    if (positions?.length && this.#view.kind === "3d") {
+      const geometry = new LineSegmentsGeometry().setPositions(positions);
+      const material = new LineMaterial({ color: new THREE.Color(this.#theme.deformed).getHex(), linewidth: 2, depthTest: false, depthWrite: false });
+      const { width, height } = this.#size();
+      material.resolution.set(width || 1, height || 1);
+      const line = new LineSegments2(geometry, material);
+      line.renderOrder = 4;
+      this.#scene.add(line);
+      this.#deformedLine = line;
+    }
+    if (previous || this.#deformedLine) this.invalidate();
+  }
+
+  /** Phạm vi hình đã biến dạng, theo toạ độ mô hình. */
+  get deformedBounds(): THREE.Box3 | null {
+    return this.#deformedLine?.geometry.boundingBox?.clone() ?? null;
   }
 
   zoomExtents(): void {
@@ -391,6 +425,7 @@ export class StructureViewer {
     this.#persp.aspect = width / height;
     this.#persp.updateProjectionMatrix();
     for (const m of this.#lineMaterials) m.resolution.set(width, height);
+    this.#deformedLine?.material.resolution.set(width, height);
     this.#applyFrustum();
     this.invalidate();
     if (this.#pendingFit) this.#zoomTo(this.#pendingFit);
@@ -417,6 +452,7 @@ export class StructureViewer {
     this.#controls.dispose();
     this.#clear(this.#content);
     this.#clear(this.#overlay);
+    this.setDeformedShape(null);
     this.#renderer.dispose();
     this.container.replaceChildren();
   }
@@ -483,6 +519,8 @@ export class StructureViewer {
     if (!m || !vis) return box;
     const v = new THREE.Vector3();
     for (const j of vis.joints) box.expandByPoint(v.set(j.x, j.y, j.z));
+    const deformed = this.deformedBounds;
+    if (deformed) box.union(deformed);
     // Lưới trục cũng nằm trong khung.
     const z = vis.plane?.axis === "z" ? vis.plane.value : 0;
     for (const g of m.grids) {
