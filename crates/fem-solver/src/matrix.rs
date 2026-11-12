@@ -20,8 +20,7 @@ pub enum SolveError {
 
 impl Matrix {
     pub fn new(first: Vec<usize>) -> Self {
-        let estimated: usize = first.iter().enumerate()
-            .map(|(j, f)| j - f + 1).sum();
+        let estimated: usize = first.iter().enumerate().map(|(j, f)| j - f + 1).sum();
         if estimated > MAX_SKYLINE_PROFILE {
             Self::Sparse(SparseCg::new(first.len()))
         } else {
@@ -98,17 +97,20 @@ impl SparseCg {
     }
 
     pub fn profile(&self) -> usize {
-        if self.row_ptr.is_empty() { self.rows.iter().map(BTreeMap::len).sum() }
-        else { self.nonzeros }
+        if self.row_ptr.is_empty() {
+            self.rows.iter().map(BTreeMap::len).sum()
+        } else {
+            self.nonzeros
+        }
     }
 
     pub fn add(&mut self, i: usize, j: usize, v: f64) {
-        let (a,b) = if i <= j { (i,j) } else { (j,i) };
+        let (a, b) = if i <= j { (i, j) } else { (j, i) };
         *self.rows[a].entry(b).or_insert(0.0) += v;
     }
 
     pub fn get(&self, i: usize, j: usize) -> f64 {
-        let (a,b) = if i <= j { (i,j) } else { (j,i) };
+        let (a, b) = if i <= j { (i, j) } else { (j, i) };
         self.rows[a].get(&b).copied().unwrap_or(0.0)
     }
 
@@ -123,10 +125,16 @@ impl SparseCg {
         let mut full = vec![Vec::<(usize, f64)>::new(); n];
         for (i, row) in self.rows.iter().enumerate() {
             for (&j, &v) in row {
-                if v == 0.0 { continue; }
-                if !v.is_finite() { return Err(Singular { dof: i }); }
+                if v == 0.0 {
+                    continue;
+                }
+                if !v.is_finite() {
+                    return Err(Singular { dof: i });
+                }
                 full[i].push((j, v));
-                if i != j { full[j].push((i, v)); }
+                if i != j {
+                    full[j].push((i, v));
+                }
             }
         }
         self.row_ptr = Vec::with_capacity(n + 1);
@@ -157,36 +165,51 @@ impl SparseCg {
     /// iteration cap. Non-convergence is surfaced as an error, never as output.
     pub fn solve(&self, rhs: &mut [f64]) -> Result<(), SolveError> {
         let n = rhs.len();
-        if n == 0 { return Ok(()); }
+        if n == 0 {
+            return Ok(());
+        }
         let mut x = vec![0.0; n];
         let mut r = rhs.to_vec();
         let mut z: Vec<f64> = r.iter().zip(&self.diag).map(|(&ri, &d)| ri / d).collect();
         let mut p = z.clone();
-        let mut rz: f64 = r.iter().zip(&z).map(|(a,b)| a*b).sum();
-        if !rz.is_finite() || rz < 0.0 { return Err(SolveError::Indefinite); }
-        if rz == 0.0 { rhs.fill(0.0); return Ok(()); }
+        let mut rz: f64 = r.iter().zip(&z).map(|(a, b)| a * b).sum();
+        if !rz.is_finite() || rz < 0.0 {
+            return Err(SolveError::Indefinite);
+        }
+        if rz == 0.0 {
+            rhs.fill(0.0);
+            return Ok(());
+        }
         let initial = rz.sqrt();
         let max_iter = (n.saturating_mul(3)).clamp(500, 5000);
         let mut ap = vec![0.0; n];
         for _ in 0..max_iter {
             self.mul(&p, &mut ap);
-            let pap: f64 = p.iter().zip(&ap).map(|(a,b)| a*b).sum();
-            if !pap.is_finite() || pap <= 0.0 { return Err(SolveError::Indefinite); }
+            let pap: f64 = p.iter().zip(&ap).map(|(a, b)| a * b).sum();
+            if !pap.is_finite() || pap <= 0.0 {
+                return Err(SolveError::Indefinite);
+            }
             let alpha = rz / pap;
             for i in 0..n {
                 x[i] += alpha * p[i];
                 r[i] -= alpha * ap[i];
                 z[i] = r[i] / self.diag[i];
             }
-            let next_rz: f64 = r.iter().zip(&z).map(|(a,b)| a*b).sum();
-            if !next_rz.is_finite() || next_rz < 0.0 { return Err(SolveError::Indefinite); }
+            let next_rz: f64 = r.iter().zip(&z).map(|(a, b)| a * b).sum();
+            if !next_rz.is_finite() || next_rz < 0.0 {
+                return Err(SolveError::Indefinite);
+            }
             if next_rz.sqrt() <= 1e-9 * initial {
                 rhs.copy_from_slice(&x);
                 return Ok(());
             }
-            if rz == 0.0 { return Err(SolveError::Indefinite); }
+            if rz == 0.0 {
+                return Err(SolveError::Indefinite);
+            }
             let beta = next_rz / rz;
-            for i in 0..n { p[i] = z[i] + beta * p[i]; }
+            for i in 0..n {
+                p[i] = z[i] + beta * p[i];
+            }
             rz = next_rz;
         }
         Err(SolveError::NonConverged)
@@ -200,17 +223,26 @@ mod tests {
     #[test]
     fn sparse_and_skyline_agree_on_small_spd_system() {
         let mut sparse = SparseCg::new(3);
-        let mut skyline = Skyline::new(vec![0,0,1]);
-        for (i,j,v) in [(0,0,4.0), (0,1,1.0), (1,1,3.0), (1,2,1.0), (2,2,2.0)] {
-            sparse.add(i,j,v); skyline.add(i,j,v);
+        let mut skyline = Skyline::new(vec![0, 0, 1]);
+        for (i, j, v) in [
+            (0, 0, 4.0),
+            (0, 1, 1.0),
+            (1, 1, 3.0),
+            (1, 2, 1.0),
+            (2, 2, 2.0),
+        ] {
+            sparse.add(i, j, v);
+            skyline.add(i, j, v);
         }
         sparse.factor().unwrap();
         skyline.factor(1e-12).unwrap();
-        let mut b1 = vec![1.0,2.0,3.0];
+        let mut b1 = vec![1.0, 2.0, 3.0];
         let mut b2 = b1.clone();
         sparse.solve(&mut b1).unwrap();
         skyline.solve(&mut b2);
-        for (a,b) in b1.iter().zip(b2) { assert!((a-b).abs() < 1e-10); }
+        for (a, b) in b1.iter().zip(b2) {
+            assert!((a - b).abs() < 1e-10);
+        }
     }
 
     #[test]
@@ -223,7 +255,7 @@ mod tests {
     #[test]
     fn refuses_missing_diagonal_stiffness() {
         let mut m = SparseCg::new(2);
-        m.add(0,0,2.0);
+        m.add(0, 0, 2.0);
         assert_eq!(m.factor(), Err(Singular { dof: 1 }));
     }
 }
