@@ -317,3 +317,57 @@ export function AssignShellLoadDialog({ onClose }: { onClose(): void }) {
     </AssignShell>
   );
 }
+
+/** Gán vùng cứng đầu thanh: i/j tính từ tim nút dọc theo thanh. */
+export function AssignOffsetsDialog({ onClose }: { onClose(): void }) {
+  const T = useT();
+  const ids = useSelected("frames");
+  const model = useModel((s) => s.model);
+  const first = model.frames.find((f) => ids.includes(f.id));
+  const [i, setI] = useState(first?.offsets?.i ?? 0);
+  const [j, setJ] = useState(first?.offsets?.j ?? 0);
+  return (
+    <AssignShell title={T.assign.offsetsTitle} what="frames" ids={ids} onClose={onClose}
+      testId="dlg-assignOffsets" build={() => ["frame.assignOffsets", { frames: ids, offsets: { i, j } }]}>
+      <Field label={T.assign.offsetI}>
+        <NumberField value={i} onChange={setI} quantity="length" units={model.units} min={0} label="offset-i" testId="offset-i" />
+      </Field>
+      <Field label={T.assign.offsetJ}>
+        <NumberField value={j} onChange={setJ} quantity="length" units={model.units} min={0} label="offset-j" testId="offset-j" />
+      </Field>
+      <p className="form-hint">{T.assign.offsetHelp}</p>
+    </AssignShell>
+  );
+}
+
+/** Một master và các slave được chọn cùng cao độ, không ép độ cứng shell. */
+export function AssignDiaphragmDialog({ onClose }: { onClose(): void }) {
+  const T = useT();
+  const ids = useSelected("joints");
+  const model = useModel((s) => s.model);
+  const [master, setMaster] = useState("");
+  const [name, setName] = useState("D1");
+  const [id] = useState(() => `diaphragm-${Date.now().toString(36)}`);
+  const active = ids.includes(master) ? master : (ids[0] ?? "");
+  const slaves = ids.filter((x) => x !== active);
+  return (
+    <AssignShell title={T.assign.diaphragmTitle} what="joints" ids={ids} onClose={onClose}
+      testId="dlg-assignDiaphragm"
+      build={() => active && slaves.length && name.trim()
+        ? ["diaphragm.set", { id, name: name.trim(), master: active, slaves }] : null}>
+      <Field label={T.assign.diaphragmName}>
+        <input value={name} onChange={(e) => setName(e.target.value)} data-testid="diaphragm-name" />
+      </Field>
+      <Field label={T.assign.diaphragmMaster}>
+        <select value={active} onChange={(e) => setMaster(e.target.value)} data-testid="diaphragm-master">
+          {ids.map((jointId) => (
+            <option key={jointId} value={jointId}>
+              {model.joints.find((j) => j.id === jointId)?.label ?? jointId}
+            </option>
+          ))}
+        </select>
+      </Field>
+      <p className="form-hint">{T.assign.diaphragmHelp}</p>
+    </AssignShell>
+  );
+}
