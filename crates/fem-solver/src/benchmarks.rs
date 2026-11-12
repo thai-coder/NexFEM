@@ -401,3 +401,40 @@ fn rigid_end_offset_reduces_flexible_span_and_transfers_support_moment() {
     m.frames[0].offsets = Some(fem_core::FrameOffsets { i: l, j: 0.0 });
     assert_eq!(analyze(&m, &Options::default()).err().unwrap().code, "invalid_offsets");
 }
+
+#[test]
+fn rigid_diaphragm_shares_horizontal_shear_between_two_columns() {
+    let l = 3.0_f64;
+    let p = 10.0_f64;
+    let mut m = model(
+        json!([
+            {"id":"a0","label":"a0","x":0,"y":0,"z":0,"restraint":FIX},
+            {"id":"a1","label":"a1","x":0,"y":0,"z":l},
+            {"id":"b0","label":"b0","x":4,"y":0,"z":0,"restraint":FIX},
+            {"id":"b1","label":"b1","x":4,"y":0,"z":l}
+        ]),
+        json!([
+            {"id":"col-a","label":"C1","kind":"column","i":"a0","j":"a1","section":"s"},
+            {"id":"col-b","label":"C2","kind":"column","i":"b0","j":"b1","section":"s"}
+        ]),
+        json!([
+            {"id":"horizontal","frame":"col-a","pattern":"p","kind":"point","direction":"globalX","value":p,"at":1.0}
+        ]),
+    );
+    let free = run(&m).cases[0].displacements["a1"][0];
+    m.diaphragms = serde_json::from_value(json!([{
+        "id":"D1","name":"Roof","master":"a1","slaves":["b1"]
+    }])).unwrap();
+    let r = run(&m);
+    let c = &r.cases[0];
+    let u1 = c.displacements["a1"][0];
+    let u2 = c.displacements["b1"][0];
+    assert!(close(u1, u2, 1e-9), "Diaphragm does not constrain Ux: {u1}, {u2}");
+    assert!(close(u1, free / 2.0, 1e-8), "Shared drift: {u1}, free: {free}");
+    assert!(close(c.sum_reactions[0], -p, 1e-8));
+    assert!(close(c.reactions["a0"][0], -p / 2.0, 1e-8));
+    assert!(close(c.reactions["b0"][0], -p / 2.0, 1e-8));
+    m.joints.iter_mut().find(|j| j.id == "b1").unwrap().restraint =
+        Some([true, false, false, false, false, false]);
+    assert_eq!(analyze(&m, &Options::default()).err().unwrap().code, "invalid_diaphragm");
+}
