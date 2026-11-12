@@ -20,7 +20,11 @@ pub enum SolveError {
 
 impl Matrix {
     pub fn new(first: Vec<usize>) -> Self {
-        let estimated: usize = first.iter().enumerate().map(|(j, f)| j - f + 1).sum();
+        // WASM32 uses 32-bit usize: a 100k-DOF skyline can exceed u32::MAX.
+        // Saturation preserves safe fallback selection instead of overflow.
+        let estimated = first.iter().enumerate().fold(0usize, |acc, (j, f)| {
+            acc.saturating_add(j.saturating_sub(*f).saturating_add(1))
+        });
         if estimated > MAX_SKYLINE_PROFILE {
             Self::Sparse(SparseCg::new(first.len()))
         } else {
@@ -250,6 +254,23 @@ mod tests {
         let first = vec![0; 3000];
         let matrix = Matrix::new(first);
         assert_eq!(matrix.backend(), "sparse_pcg_jacobi");
+    }
+
+    #[test]
+    fn sparse_solver_large_diagonal_case_stays_exact() {
+        let n = 3000;
+        let mut matrix = Matrix::new(vec![0; n]);
+        assert_eq!(matrix.backend(), "sparse_pcg_jacobi");
+        for i in 0..n { matrix.add(i, i, 2.0); }
+        matrix.factor(1e-11).unwrap();
+        let mut rhs = vec![4.0; n];
+        matrix.solve(&mut rhs).unwrap();
+        assert!(rhs.iter().all(|v| (*v - 2.0).abs() < 1e-11));
+    }
+
+    #[test]
+    fn huge_skyline_estimate_does_not_overflow_wasm32() {
+        assert_eq!(Matrix::new(vec![0; 100_000]).backend(), "sparse_pcg_jacobi");
     }
 
     #[test]
