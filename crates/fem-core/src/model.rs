@@ -19,6 +19,8 @@ pub struct Model {
     pub frame_sections: Vec<FrameSection>,
     pub shell_sections: Vec<ShellSection>,
     pub joints: Vec<Joint>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub diaphragms: Vec<Diaphragm>,
     pub frames: Vec<Frame>,
     pub shells: Vec<Shell>,
     pub load_patterns: Vec<LoadPattern>,
@@ -158,6 +160,14 @@ pub struct Joint {
     /// Bậc tự do bị giữ: [Ux, Uy, Uz, Rx, Ry, Rz].
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub restraint: Option<[bool; 6]>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Diaphragm {
+    pub id: String,
+    pub name: String,
+    pub master: String,
+    pub slaves: Vec<String>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
