@@ -14,7 +14,8 @@ export interface FrameForces {
 export interface CaseResult {
   id: string;
   name: string;
-  kind: "case" | "combo";
+  /** Envelope MAX/MIN và SRSS không phải một trạng thái tải đồng thời. */
+  kind: "case" | "combo" | "envelopeMax" | "envelopeMin" | "srss";
   displacements: Record<string, number[]>;
   reactions: Record<string, number[]>;
   frames: Record<string, FrameForces>;

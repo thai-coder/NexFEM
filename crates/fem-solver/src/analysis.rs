@@ -795,7 +795,7 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
     // ---- tổ hợp cộng tuyến tính: giải theo quan hệ phụ thuộc, không phụ thuộc thứ tự khai báo.
     let mut pending: Vec<&fem_core::LoadCombo> = Vec::new();
     for co in &model.combos {
-        if co.kind == "linearAdd" {
+        if matches!(co.kind.as_str(), "linearAdd" | "envelope" | "srss") {
             pending.push(co);
         } else {
             warn(
@@ -804,6 +804,21 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
                 format!("Tổ hợp {} ({}) chưa được hỗ trợ, bỏ qua", co.name, co.kind),
                 vec![co.id.clone()],
             );
+        }
+    }
+    // Không được cộng đại số một kết quả bao/SRSS: đây là cực trị hoặc đại lượng
+    // thống kê theo thành phần, không phải trường hợp tải có nội lực đồng thời.
+    for co in &pending {
+        for part in &co.items {
+            if let Some(parent) = model.combos.iter().find(|p| p.id == part.case) {
+                if parent.kind != "linearAdd" {
+                    return Err(AnalysisError::new(
+                        "nonlinear_combo_dependency",
+                        format!("Tổ hợp {} không được lồng kết quả {} ({})", co.name, parent.name, parent.kind),
+                        vec![co.id.clone(), parent.id.clone()],
+                    ));
+                }
+            }
         }
     }
     while !pending.is_empty() {
@@ -822,8 +837,16 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
             if parts.len() != co.items.len() {
                 return true;
             }
-            let result = combine(co.id.clone(), co.name.clone(), &parts);
-            cases.push(result);
+            match co.kind.as_str() {
+                "linearAdd" => cases.push(combine(co.id.clone(), co.name.clone(), &parts)),
+                "srss" => cases.push(nonlinear_combine(co.id.clone(), co.name.clone(), &parts, "srss")),
+                "envelope" => {
+                    // Hai bộ cực trị thành phần; KHÔNG phải hai trạng thái lực đồng thời.
+                    cases.push(nonlinear_combine(format!("{}:max", co.id), format!("{} [MAX]", co.name), &parts, "envelopeMax"));
+                    cases.push(nonlinear_combine(format!("{}:min", co.id), format!("{} [MIN]", co.name), &parts, "envelopeMin"));
+                }
+                _ => unreachable!(),
+            }
             false
         });
         if pending.len() == before {
@@ -995,4 +1018,50 @@ fn combine(id: String, name: String, parts: &[(f64, &CaseResult)]) -> CaseResult
         }
     }
     r
+}
+
+/// Tính từng thành phần của envelope (MAX/MIN) hoặc SRSS. Các cực trị không
+/// đồng thời, tổng tải/tổng phản lực **không** được dùng để kiểm tra cân bằng.
+/// SRSS ở đây là phép cộng căn tổng bình phương của các CASE tĩnh độc lập,
+/// không thay thế phân tích phổ phản ứng/modal.
+fn nonlinear_value<I: Iterator<Item = f64>>(values: I, kind: &str) -> f64 {
+    match kind {
+        "envelopeMax" => values.fold(f64::NEG_INFINITY, f64::max),
+        "envelopeMin" => values.fold(f64::INFINITY, f64::min),
+        "srss" => values.map(|v| v * v).sum::<f64>().sqrt(),
+        _ => unreachable!(),
+    }
+}
+
+fn nonlinear_combine(id: String, name: String, parts: &[(f64, &CaseResult)], kind: &str) -> CaseResult {
+    let base = parts[0].1;
+    let aggregate = |values: Vec<f64>| nonlinear_value(values.into_iter(), kind);
+    let displacements = base.displacements.iter().map(|(id, _)| {
+        (id.clone(), std::array::from_fn(|i|
+            aggregate(parts.iter().map(|(fac, c)| fac * c.displacements[id][i]).collect())))
+    }).collect();
+    let reactions = base.reactions.iter().map(|(id, _)| {
+        (id.clone(), std::array::from_fn(|i|
+            aggregate(parts.iter().map(|(fac, c)| fac * c.reactions[id][i]).collect())))
+    }).collect();
+    let frames = base.frames.iter().map(|(id, v)| {
+        let series = |get: fn(&FrameForces) -> &Vec<f64>| -> Vec<f64> {
+            (0..v.x.len()).map(|i| aggregate(parts.iter().map(|(fac, c)|
+                fac * get(&c.frames[id])[i]).collect())).collect()
+        };
+        (id.clone(), FrameForces {
+            x: v.x.clone(),
+            p: series(|f| &f.p),
+            v2: series(|f| &f.v2),
+            v3: series(|f| &f.v3),
+            t: series(|f| &f.t),
+            m2: series(|f| &f.m2),
+            m3: series(|f| &f.m3),
+        })
+    }).collect();
+    CaseResult {
+        id, name, kind: kind.into(), displacements, reactions, frames,
+        // Không có ý nghĩa cân bằng vì các thành phần không đồng thời.
+        applied: [0.0; 3], sum_reactions: [0.0; 3],
+    }
 }

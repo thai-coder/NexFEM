@@ -333,3 +333,34 @@ fn timoshenko_cantilever_deflection_adds_shear_compliance() {
     assert!(close(deflection, expected, 1e-9), "Timoshenko: {deflection} != {expected}");
     assert!(deflection < baseline, "Ứng xử chịu cắt phải mềm hơn Euler–Bernoulli");
 }
+
+#[test]
+fn envelope_min_max_and_srss_are_componentwise_not_equilibrium_cases() {
+    let mut m = model(
+        json!([{"id":"a","label":"1","x":0,"y":0,"z":0,"restraint":FIX},{"id":"b","label":"2","x":3,"y":0,"z":0}]),
+        json!([{"id":"f","label":"B1","kind":"beam","i":"a","j":"b","section":"s"}]),
+        json!([{"id":"l","frame":"f","pattern":"p","kind":"point","direction":"gravity","value":10.0,"at":1.0}]),
+    );
+    m.load_cases.push(serde_json::from_value(json!({
+        "id":"reverse","name":"Reverse","type":"linearStatic","loads":[{"pattern":"p","factor":-2.0}]
+    })).unwrap());
+    m.combos = serde_json::from_value(json!([
+        {"id":"env","name":"ENV","type":"envelope","items":[{"case":"c","factor":1.0},{"case":"reverse","factor":1.0}]},
+        {"id":"rss","name":"RSS","type":"srss","items":[{"case":"c","factor":1.0},{"case":"reverse","factor":1.0}]}
+    ])).unwrap();
+    let r = run(&m);
+    let baseline = r.cases.iter().find(|c| c.id == "c").unwrap().displacements["b"][2];
+    let max = r.cases.iter().find(|c| c.id == "env:max").unwrap();
+    let min = r.cases.iter().find(|c| c.id == "env:min").unwrap();
+    let rss = r.cases.iter().find(|c| c.id == "rss").unwrap();
+    assert_eq!(max.kind, "envelopeMax");
+    assert!(close(max.displacements["b"][2], -2.0 * baseline, 1e-10));
+    assert!(close(min.displacements["b"][2], baseline, 1e-10));
+    assert!(close(rss.displacements["b"][2], baseline.abs() * 5.0_f64.sqrt(), 1e-10));
+    assert_eq!(rss.applied, [0.0; 3]);
+    // Lồng envelope dưới linearAdd là sai ngữ nghĩa kỹ thuật.
+    m.combos.push(serde_json::from_value(json!({
+        "id":"bad","name":"bad","type":"linearAdd","items":[{"case":"env","factor":1.0}]
+    })).unwrap());
+    assert_eq!(analyze(&m, &Options::default()).err().unwrap().code, "nonlinear_combo_dependency");
+}
