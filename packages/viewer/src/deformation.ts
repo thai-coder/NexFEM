@@ -4,6 +4,7 @@ import type { VisibleSet } from "./filter.ts";
 
 export interface DeformedFrames {
   positions: Float32Array;
+  origins: Float32Array;
   frameOffsets: ReadonlyMap<string, number>;
   scale: number;
 }
@@ -51,6 +52,7 @@ export function buildDeformedFrames(
   if (!Number.isFinite(scale) || scale <= 0) return null;
 
   const positions = new Float32Array(segments.length * 6);
+  const origins = new Float32Array(positions.length);
   let offset = 0;
   for (const segment of segments) {
     for (const { joint, ux, uy, uz } of segment) {
@@ -58,16 +60,19 @@ export function buildDeformedFrames(
       const y = Math.fround(joint.y + scale * uy);
       const z = Math.fround(joint.z + scale * uz);
       if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(z)) return null;
+      origins[offset] = joint.x;
+      origins[offset + 1] = joint.y;
+      origins[offset + 2] = joint.z;
       positions[offset++] = x;
       positions[offset++] = y;
       positions[offset++] = z;
     }
   }
-  return { positions, frameOffsets, scale };
+  return { positions, origins, frameOffsets, scale };
 }
 
 /** Lọc theo thanh thuộc mặt phẳng gốc, rồi chiếu hai đầu đã dịch chuyển lên mặt phẳng đó. */
-export function projectDeformedFrames(shape: DeformedFrames, visible: VisibleSet): Float32Array | null {
+export function projectDeformedFrames(shape: DeformedFrames, visible: VisibleSet, source = shape.positions): Float32Array | null {
   const { plane } = visible;
   if (!plane || !visible.frames.length) return null;
   const normal = { x: 0, y: 1, z: 2 }[plane.axis];
@@ -76,7 +81,7 @@ export function projectDeformedFrames(shape: DeformedFrames, visible: VisibleSet
   for (const { id } of visible.frames) {
     const start = shape.frameOffsets.get(id);
     if (start === undefined) continue;
-    positions.set(shape.positions.subarray(start, start + 6), offset);
+    positions.set(source.subarray(start, start + 6), offset);
     positions[offset + normal] = plane.value;
     positions[offset + 3 + normal] = plane.value;
     offset += 6;

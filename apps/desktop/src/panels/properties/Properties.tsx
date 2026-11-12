@@ -21,6 +21,7 @@ import { NumberField } from "../../components/fields.tsx";
 import { runCommand } from "../../commands/app.ts";
 import { useT } from "../../i18n/index.ts";
 import { useModel } from "../../stores/model.ts";
+import { selectActiveCase, useResults } from "../../stores/results.ts";
 import { useUi } from "../../stores/ui.ts";
 import { DrawProps } from "./DrawProps.tsx";
 
@@ -211,7 +212,7 @@ function FrameProps({ frame, model, locked }: { frame: Frame; model: Model; lock
         <Row label={T.props.loads}>{loads ? T.fmt(T.props.loadCount, { n: loads }) : T.props.none}</Row>
       </Section>
       <Section title={T.props.results}>
-        <div className="muted span2">{T.props.resultsLater}</div>
+        <FrameMomentStations id={frame.id} model={model} />
       </Section>
       <ApplyBar
         dirty={dirty}
@@ -226,6 +227,30 @@ function FrameProps({ frame, model, locked }: { frame: Frame; model: Model; lock
         }}
       />
     </>
+  );
+}
+
+function FrameMomentStations({ id, model }: { id: string; model: Model }) {
+  const T = useT();
+  const result = useResults((s) => s.showMoment ? selectActiveCase(s) : undefined);
+  const forces = result && Object.hasOwn(result.frames, id) ? result.frames[id] : undefined;
+  if (!forces || !result) return <div className="muted span2">{T.props.resultsLater}</div>;
+  const units = model.units;
+  return (
+    <div className="span2">
+      <div className="muted">{result.name} · {T.analysis.caseKinds[result.kind]}</div>
+      <table className="data-table" aria-label={T.analysis.moment.stations} data-testid="moment-stations">
+        <thead><tr><th>{T.analysis.station} ({unitLabel("length", units)})</th><th>M3 ({unitLabel("moment", units)})</th></tr></thead>
+        <tbody>
+          {forces.x.map((x, k) => (
+            <tr key={k}>
+              <td className="num">{toDisplay(x, "length", units).toFixed(3)}</td>
+              <td className="num">{toDisplay(forces.m3[k]!, "moment", units).toFixed(2)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 

@@ -4,7 +4,7 @@ import { t } from "../i18n/index.ts";
 import type { Strings } from "../i18n/vi.ts";
 import { useModel } from "../stores/model.ts";
 import { openProject, saveProject } from "../services/files.ts";
-import { selectDeformationCase, useResults } from "../stores/results.ts";
+import { selectActiveCase, selectDeformationCase, useResults } from "../stores/results.ts";
 import { solve } from "../services/solver.ts";
 import { toDisplay, unitLabel } from "@nexfem/model-core";
 import { cancel as cancelDraw, finish as finishDraw, undoPoint } from "../tools/draw.ts";
@@ -383,7 +383,13 @@ export const COMMANDS: AppCommand[] = [
     checked: () => useResults.getState().showDeformed,
     run: () => useResults.getState().toggleDeformed(),
   },
-  later("display.moment", 6, "moment"),
+  {
+    id: "display.moment",
+    icon: "moment",
+    enabled: () => !!selectActiveCase(useResults.getState()),
+    checked: () => useResults.getState().showMoment,
+    run: () => useResults.getState().toggleMoment(),
+  },
   later("display.shear", 6, "shear"),
   later("display.axial", 6, "axial"),
   later("design.concrete", 10),

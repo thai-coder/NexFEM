@@ -6,6 +6,7 @@ import { LineSegments2 } from "three/addons/lines/LineSegments2.js";
 import { LineSegmentsGeometry } from "three/addons/lines/LineSegmentsGeometry.js";
 import { CSS2DObject, CSS2DRenderer } from "three/addons/renderers/CSS2DRenderer.js";
 import { projectDeformedFrames, type DeformedFrames } from "./deformation.ts";
+import { momentDiagramPositions, type MomentDiagram } from "./moment.ts";
 import { TOL, findGridLine, segmentIntersectsRect, visibleObjects, type ViewSpec, type VisibleSet } from "./filter.ts";
 import { gridLines, orthoLock, pickSnap, snapPoints, type GridHit, type P3, type SnapKind, type SnapModes, type SnapPoint } from "./snap.ts";
 
@@ -25,6 +26,7 @@ export interface ViewerTheme {
   hover: string;
   load: string;
   deformed: string;
+  moment: string;
   axisX: string;
   axisY: string;
   axisZ: string;
@@ -46,6 +48,7 @@ export const DARK_THEME: ViewerTheme = {
   hover: "#ffffff",
   load: "#ff8a3d",
   deformed: "#ff8fd1",
+  moment: "#55def0",
   axisX: "#ff6b6b",
   axisY: "#7fd18b",
   axisZ: "#6aa6ff",
@@ -67,6 +70,7 @@ export const LIGHT_THEME: ViewerTheme = {
   hover: "#111827",
   load: "#d4570c",
   deformed: "#9e1469",
+  moment: "#007886",
   axisX: "#d33a2c",
   axisY: "#2f8a3a",
   axisZ: "#1f63d6",
@@ -141,6 +145,10 @@ export class StructureViewer {
   #overlay = new THREE.Group();
   #deformedShape: DeformedFrames | null = null;
   #deformedLine: LineSegments2 | null = null;
+  #deformationStart: number | null = null;
+  #deformationMotion: { origin: Float32Array; target: Float32Array; buffer: THREE.InterleavedBuffer; progress: number } | null = null;
+  #momentDiagram: MomentDiagram | null = null;
+  #momentLine: LineSegments2 | null = null;
   #persp: THREE.PerspectiveCamera;
   #ortho: THREE.OrthographicCamera;
   #camera: THREE.Camera;
@@ -249,7 +257,10 @@ export class StructureViewer {
 
   setModel(model: Model): void {
     const first = this.#model === null;
-    if (model !== this.#model) this.setDeformedShape(null);
+    if (model !== this.#model) {
+      this.setDeformedShape(null);
+      this.setMomentDiagram(null);
+    }
     this.#model = model;
     this.#rebuild();
     if (first) this.zoomExtents();
@@ -263,6 +274,7 @@ export class StructureViewer {
     if (changed) {
       this.#rebuild();
       this.#updateDeformedLine();
+      this.#updateMomentLine();
       this.zoomExtents();
     }
   }
@@ -331,39 +343,71 @@ export class StructureViewer {
   setTheme(theme: ViewerTheme): void {
     this.#theme = theme;
     this.#deformedLine?.material.color.set(theme.deformed);
+    this.#momentLine?.material.color.set(theme.moment);
     this.#rebuild();
   }
 
   /** Lớp kết quả riêng, nằm ngoài các đối tượng chọn và bắt điểm. */
-  setDeformedShape(shape: DeformedFrames | null): void {
-    if (shape === this.#deformedShape) return;
+  setDeformedShape(shape: DeformedFrames | null, animationStart: number | null = null): void {
+    if (shape === this.#deformedShape && animationStart === this.#deformationStart) return;
     this.#deformedShape = shape;
+    this.#deformationStart = animationStart;
     this.#updateDeformedLine();
   }
 
   #updateDeformedLine(): void {
     const previous = this.#deformedLine;
-    if (previous) {
-      this.#scene.remove(previous);
-      previous.geometry.dispose();
-      previous.material.dispose();
-      this.#deformedLine = null;
-    }
+    this.#removeResultLine(previous);
+    this.#deformationMotion = null;
     const shape = this.#deformedShape;
-    const positions = shape && this.#visible && (this.#view.kind === "3d"
-      ? shape.positions
-      : projectDeformedFrames(shape, this.#visible));
-    if (positions?.length) {
-      const geometry = new LineSegmentsGeometry().setPositions(positions);
-      const material = new LineMaterial({ color: new THREE.Color(this.#theme.deformed).getHex(), linewidth: 2, depthTest: false, depthWrite: false });
-      const { width, height } = this.#size();
-      material.resolution.set(width || 1, height || 1);
-      const line = new LineSegments2(geometry, material);
-      line.renderOrder = 4;
-      this.#scene.add(line);
-      this.#deformedLine = line;
+    const visible = this.#visible;
+    const in3d = this.#view.kind === "3d";
+    const positions = shape && visible && (in3d ? shape.positions : projectDeformedFrames(shape, visible));
+    const origin = positions && shape && visible && this.#deformationStart !== null
+      ? (in3d ? shape.origins : projectDeformedFrames(shape, visible, shape.origins))
+      : null;
+    const line = this.#addResultLine(origin ? positions?.slice() ?? null : positions, this.#theme.deformed);
+    this.#deformedLine = line;
+    if (line && positions && origin) {
+      const { data: buffer } = line.geometry.getAttribute("instanceStart") as THREE.InterleavedBufferAttribute;
+      buffer.setUsage(THREE.DynamicDrawUsage);
+      line.frustumCulled = false;
+      this.#deformationMotion = { origin, target: positions, buffer, progress: 1 };
     }
-    if (previous || this.#deformedLine) this.invalidate();
+    if (previous || line) this.invalidate();
+  }
+
+  setMomentDiagram(diagram: MomentDiagram | null): void {
+    if (diagram === this.#momentDiagram) return;
+    this.#momentDiagram = diagram;
+    this.#updateMomentLine();
+  }
+
+  #updateMomentLine(): void {
+    const previous = this.#momentLine;
+    this.#removeResultLine(previous);
+    const positions = this.#momentDiagram && this.#visible && momentDiagramPositions(this.#momentDiagram, this.#visible);
+    this.#momentLine = this.#addResultLine(positions, this.#theme.moment);
+    if (previous || this.#momentLine) this.invalidate();
+  }
+
+  #addResultLine(positions: Float32Array | null, color: string): LineSegments2 | null {
+    if (!positions?.length) return null;
+    const geometry = new LineSegmentsGeometry().setPositions(positions);
+    const material = new LineMaterial({ color: new THREE.Color(color).getHex(), linewidth: 2, depthTest: false, depthWrite: false });
+    const { width, height } = this.#size();
+    material.resolution.set(width || 1, height || 1);
+    const line = new LineSegments2(geometry, material);
+    line.renderOrder = 4;
+    this.#scene.add(line);
+    return line;
+  }
+
+  #removeResultLine(line: LineSegments2 | null): void {
+    if (!line) return;
+    this.#scene.remove(line);
+    line.geometry.dispose();
+    line.material.dispose();
   }
 
   get hasDeformedShape(): boolean {
@@ -373,6 +417,14 @@ export class StructureViewer {
   /** Phạm vi hình đã biến dạng, theo toạ độ mô hình. */
   get deformedBounds(): THREE.Box3 | null {
     return this.#deformedLine?.geometry.boundingBox?.clone() ?? null;
+  }
+
+  get momentBounds(): THREE.Box3 | null {
+    return this.#momentLine?.geometry.boundingBox?.clone() ?? null;
+  }
+
+  get deformationAnimationProgress(): number | null {
+    return this.#deformationMotion?.progress ?? null;
   }
 
   zoomExtents(): void {
@@ -442,6 +494,7 @@ export class StructureViewer {
     this.#persp.updateProjectionMatrix();
     for (const m of this.#lineMaterials) m.resolution.set(width, height);
     this.#deformedLine?.material.resolution.set(width, height);
+    this.#momentLine?.material.resolution.set(width, height);
     this.#applyFrustum();
     this.invalidate();
     if (this.#pendingFit) this.#zoomTo(this.#pendingFit);
@@ -469,6 +522,7 @@ export class StructureViewer {
     this.#clear(this.#content);
     this.#clear(this.#overlay);
     this.setDeformedShape(null);
+    this.setMomentDiagram(null);
     this.#renderer.dispose();
     this.container.replaceChildren();
   }
@@ -537,6 +591,8 @@ export class StructureViewer {
     for (const j of vis.joints) box.expandByPoint(v.set(j.x, j.y, j.z));
     const deformed = this.deformedBounds;
     if (deformed) box.union(deformed);
+    const moment = this.momentBounds;
+    if (moment) box.union(moment);
     // Lưới trục cũng nằm trong khung.
     const z = vis.plane?.axis === "z" ? vis.plane.value : 0;
     for (const g of m.grids) {
@@ -1011,6 +1067,15 @@ export class StructureViewer {
   #render(): void {
     const { width, height } = this.#size();
     if (!width || !height) return;
+    const motion = this.#deformationMotion;
+    if (motion && this.#deformationStart !== null) {
+      // Lặp giữa hình gốc và kết quả tĩnh, dùng chung mốc thời gian giữa các ô.
+      motion.progress = (1 - Math.cos((performance.now() - this.#deformationStart) * 2 * Math.PI / 2400)) / 2;
+      const values = motion.buffer.array;
+      for (let k = 0; k < values.length; k++) values[k] = motion.origin[k]! + (motion.target[k]! - motion.origin[k]!) * motion.progress;
+      motion.buffer.needsUpdate = true;
+      this.invalidate();
+    }
     this.#renderer.render(this.#scene, this.#camera);
     this.#labels.render(this.#scene, this.#camera);
     this.#drawTriad();
