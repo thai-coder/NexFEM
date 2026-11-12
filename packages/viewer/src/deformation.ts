@@ -1,8 +1,10 @@
 import type { Joint, Model } from "@nexfem/model-core";
 import { Box3, Vector3 } from "three";
+import type { VisibleSet } from "./filter.ts";
 
 export interface DeformedFrames {
   positions: Float32Array;
+  frameOffsets: ReadonlyMap<string, number>;
   scale: number;
 }
 
@@ -22,6 +24,7 @@ export function buildDeformedFrames(
   }
 
   const segments: [End, End][] = [];
+  const frameOffsets = new Map<string, number>();
   const bounds = new Box3();
   const point = new Vector3();
   let maxDisplacement = 0;
@@ -29,6 +32,7 @@ export function buildDeformedFrames(
     const a = ends.get(frame.i);
     const b = ends.get(frame.j);
     if (!a || !b) continue;
+    frameOffsets.set(frame.id, segments.length * 6);
     segments.push([a, b]);
     if (requestedScale === null) {
       for (const { joint, ux, uy, uz } of [a, b]) {
@@ -59,5 +63,23 @@ export function buildDeformedFrames(
       positions[offset++] = z;
     }
   }
-  return { positions, scale };
+  return { positions, frameOffsets, scale };
+}
+
+/** Lọc theo thanh thuộc mặt phẳng gốc, rồi chiếu hai đầu đã dịch chuyển lên mặt phẳng đó. */
+export function projectDeformedFrames(shape: DeformedFrames, visible: VisibleSet): Float32Array | null {
+  const { plane } = visible;
+  if (!plane || !visible.frames.length) return null;
+  const normal = { x: 0, y: 1, z: 2 }[plane.axis];
+  const positions = new Float32Array(visible.frames.length * 6);
+  let offset = 0;
+  for (const { id } of visible.frames) {
+    const start = shape.frameOffsets.get(id);
+    if (start === undefined) continue;
+    positions.set(shape.positions.subarray(start, start + 6), offset);
+    positions[offset + normal] = plane.value;
+    positions[offset + 3 + normal] = plane.value;
+    offset += 6;
+  }
+  return offset ? positions.subarray(0, offset) : null;
 }

@@ -1,14 +1,15 @@
 import { expect, test, type Page } from "@playwright/test";
 
 type Viewer = {
-  deformedBounds: { min: { z: number }; max: { x: number } } | null;
+  deformedBounds: { min: { x: number; y: number; z: number }; max: { x: number; y: number; z: number } } | null;
   cameraState: { position: number[]; target: number[] };
   worldToScreen(x: number, y: number, z: number): [number, number];
 };
 
 const cantilever = {
   schemaVersion: 1, name: "Cantilever", units: { force: "kN", length: "mm", temperature: "C" },
-  grids: [], stories: [{ id: "base", name: "Base", elevation: 0, height: 0 }],
+  grids: [{ id: "g", name: "Grid", x: [{ id: "x0", label: "X0", coord: 0 }], y: [{ id: "y0", label: "Y0", coord: 0 }] }],
+  stories: [{ id: "base", name: "Base", elevation: 0, height: 0 }],
   materials: [{ id: "m", name: "Steel", type: "steel", E: 2e8, nu: 0.3, gamma: 0 }],
   frameSections: [{ id: "s", name: "Rect", material: "m", geometry: { shape: "rect", b: 0.2, h: 0.4 } }],
   shellSections: [], shells: [],
@@ -56,13 +57,23 @@ test("biến dạng công xôn theo chuyển vị tổng thể, hệ số và tr
   const auto = pane.getByRole("button", { name: "Tự động" });
   await expect(auto).toHaveAttribute("aria-pressed", "true");
   await expect.poll(async () => (await bounds(page, 1))?.min.z).toBeCloseTo(-0.08 * 3, 3);
-  expect(await bounds(page, 0)).toBeNull();
+  await expect.poll(async () => (await bounds(page, 0))?.min.z).toBe(0);
 
   const tipUz = (-10 * 3 ** 3) / (3 * 2e8 * (0.2 * 0.4 ** 3 / 12));
   await scale.fill("1");
   await expect.poll(async () => (await bounds(page, 1))?.min.z).toBeCloseTo(tipUz, 8);
   await scale.fill("1000");
   await expect.poll(async () => (await bounds(page, 1))?.min.z).toBeCloseTo(1000 * tipUz, 6);
+  const plane = page.getByTestId("pane-0");
+  await expect(plane.getByTestId("deformation-scale")).toHaveValue("1000");
+  await plane.locator(".pane-title").selectOption("elev:g:y0");
+  await expect.poll(async () => (await bounds(page, 0))?.min.z).toBeCloseTo(1000 * tipUz, 6);
+  expect((await bounds(page, 0))?.max.y).toBe(0);
+  await plane.locator(".pane-title").selectOption("elev:g:x0");
+  await expect.poll(() => bounds(page, 0)).toBeNull();
+  await expect(plane.getByRole("status")).toContainText("không có thanh có kết quả biến dạng");
+  await plane.locator(".pane-title").selectOption("plan:base");
+  await expect.poll(async () => (await bounds(page, 0))?.min.z).toBe(0);
   await scale.fill("0");
   await expect(scale).toHaveAttribute("aria-invalid", "true");
   await scale.press("Tab");
@@ -89,6 +100,7 @@ test("biến dạng công xôn theo chuyển vị tổng thể, hệ số và tr
   await page.keyboard.press("F6");
   await expect(pane.getByTestId("deformation-controls")).toHaveCount(0);
   await expect.poll(() => bounds(page, 1)).toBeNull();
+  await expect.poll(() => bounds(page, 0)).toBeNull();
   await expect(await displayMenu(page)).toBeDisabled();
 });
 
@@ -98,16 +110,21 @@ test("lớp biến dạng dùng được với 1/2/4 ô và giữ thao tác trê
   await page.keyboard.press("Control+1");
   await (await displayMenu(page)).click();
   const pane = page.getByTestId("pane-0");
-  await expect(pane.locator(".pane-title")).toHaveValue("3d");
+  await expect(pane.locator(".pane-title")).toHaveValue("plan:story-3");
   await expect.poll(() => bounds(page, 0)).not.toBeNull();
+  const planCanvas = (await pane.locator(".pane-canvas").boundingBox())!;
+  const planPoint = await page.evaluate(() => (window as unknown as { __nexfemViewers: Viewer[] }).__nexfemViewers[0]!.worldToScreen(3, 0, 11.1));
+  await page.mouse.click(planCanvas.x + planPoint[0], planCanvas.y + planPoint[1]);
+  await expect(page.getByTestId("selection-count")).toHaveText("1 đã chọn");
   await page.keyboard.press("Control+2");
   await expect.poll(() => bounds(page, 1)).not.toBeNull();
   await page.keyboard.press("Control+4");
   await expect(page.getByTestId("pane-3")).toBeVisible();
-  await expect(page.getByTestId("deformation-controls")).toHaveCount(2);
-  await expect.poll(() => bounds(page, 2)).toBeNull();
+  await expect(page.getByTestId("deformation-controls")).toHaveCount(4);
+  await expect.poll(async () => (await bounds(page, 2))?.min.x).toBe(6);
 
   await page.keyboard.press("Control+1");
+  await pane.locator(".pane-title").selectOption("3d");
   await pane.getByTestId("preset-front").click();
   const canvas = (await pane.locator(".pane-canvas").boundingBox())!;
   const at = await page.evaluate(() => (window as unknown as { __nexfemViewers: Viewer[] }).__nexfemViewers[0]!.worldToScreen(3, 0, 11.1));

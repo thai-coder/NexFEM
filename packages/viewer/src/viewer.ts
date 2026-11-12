@@ -5,6 +5,7 @@ import { LineMaterial } from "three/addons/lines/LineMaterial.js";
 import { LineSegments2 } from "three/addons/lines/LineSegments2.js";
 import { LineSegmentsGeometry } from "three/addons/lines/LineSegmentsGeometry.js";
 import { CSS2DObject, CSS2DRenderer } from "three/addons/renderers/CSS2DRenderer.js";
+import { projectDeformedFrames, type DeformedFrames } from "./deformation.ts";
 import { TOL, findGridLine, segmentIntersectsRect, visibleObjects, type ViewSpec, type VisibleSet } from "./filter.ts";
 import { gridLines, orthoLock, pickSnap, snapPoints, type GridHit, type P3, type SnapKind, type SnapModes, type SnapPoint } from "./snap.ts";
 
@@ -138,6 +139,7 @@ export class StructureViewer {
   #scene = new THREE.Scene();
   #content = new THREE.Group();
   #overlay = new THREE.Group();
+  #deformedShape: DeformedFrames | null = null;
   #deformedLine: LineSegments2 | null = null;
   #persp: THREE.PerspectiveCamera;
   #ortho: THREE.OrthographicCamera;
@@ -257,10 +259,10 @@ export class StructureViewer {
     const changed = JSON.stringify(view) !== JSON.stringify(this.#view);
     const kindChanged = view.kind !== this.#view.kind;
     this.#view = view;
-    if (view.kind !== "3d") this.setDeformedShape(null);
     if (kindChanged || this.#camera === this.#persp !== (view.kind === "3d")) this.#setupCamera();
     if (changed) {
       this.#rebuild();
+      this.#updateDeformedLine();
       this.zoomExtents();
     }
   }
@@ -333,7 +335,13 @@ export class StructureViewer {
   }
 
   /** Lớp kết quả riêng, nằm ngoài các đối tượng chọn và bắt điểm. */
-  setDeformedShape(positions: Float32Array | null): void {
+  setDeformedShape(shape: DeformedFrames | null): void {
+    if (shape === this.#deformedShape) return;
+    this.#deformedShape = shape;
+    this.#updateDeformedLine();
+  }
+
+  #updateDeformedLine(): void {
     const previous = this.#deformedLine;
     if (previous) {
       this.#scene.remove(previous);
@@ -341,7 +349,11 @@ export class StructureViewer {
       previous.material.dispose();
       this.#deformedLine = null;
     }
-    if (positions?.length && this.#view.kind === "3d") {
+    const shape = this.#deformedShape;
+    const positions = shape && this.#visible && (this.#view.kind === "3d"
+      ? shape.positions
+      : projectDeformedFrames(shape, this.#visible));
+    if (positions?.length) {
       const geometry = new LineSegmentsGeometry().setPositions(positions);
       const material = new LineMaterial({ color: new THREE.Color(this.#theme.deformed).getHex(), linewidth: 2, depthTest: false, depthWrite: false });
       const { width, height } = this.#size();
@@ -352,6 +364,10 @@ export class StructureViewer {
       this.#deformedLine = line;
     }
     if (previous || this.#deformedLine) this.invalidate();
+  }
+
+  get hasDeformedShape(): boolean {
+    return this.#deformedLine !== null;
   }
 
   /** Phạm vi hình đã biến dạng, theo toạ độ mô hình. */

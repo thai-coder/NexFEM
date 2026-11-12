@@ -1,7 +1,7 @@
 import { frameLength, jointMap, sectionProperties, toDisplay, unitLabel } from "@nexfem/model-core";
 import { readToken } from "@nexfem/ui";
 import { buildDeformedFrames, DARK_THEME, LIGHT_THEME, StructureViewer, viewTitle, type DeformedFrames, type ViewSpec, type ViewerTheme } from "@nexfem/viewer";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { NumberField } from "../../components/fields.tsx";
 import { useT } from "../../i18n/index.ts";
 import { openContextMenu } from "../../commands/context.ts";
@@ -66,6 +66,7 @@ function Pane({ index, deformed, deformationCaseName, showDeformed }: {
   const T = useT();
   const host = useRef<HTMLDivElement>(null);
   const viewer = useRef<StructureViewer | null>(null);
+  const [hasDeformedShape, setHasDeformedShape] = useState(false);
   const model = useModel((s) => s.model);
   const selection = useModel((s) => s.selection);
   const view = useUi((s) => s.views[index]) ?? { kind: "3d" };
@@ -81,7 +82,7 @@ function Pane({ index, deformed, deformationCaseName, showDeformed }: {
   const display = useUi((s) => s.display);
   const selectFilter = useUi((s) => s.selectFilter);
   const zoomAll = useUi((s) => s.zoomAll);
-  const deformedPositions = view.kind === "3d" ? deformed?.positions : undefined;
+  const viewKey = JSON.stringify(view);
 
   useEffect(() => {
     const el = host.current;
@@ -125,13 +126,16 @@ function Pane({ index, deformed, deformationCaseName, showDeformed }: {
   }, [theme]);
   useEffect(() => {
     viewer.current?.setView(view);
-  }, [JSON.stringify(view)]);
+  }, [viewKey]);
   useEffect(() => {
     viewer.current?.setModel(model);
   }, [model]);
   useEffect(() => {
-    viewer.current?.setDeformedShape(deformedPositions ?? null);
-  }, [model, deformedPositions]);
+    const v = viewer.current;
+    if (!v) return;
+    v.setDeformedShape(deformed);
+    setHasDeformedShape(v.hasDeformedShape);
+  }, [model, deformed, viewKey]);
   useEffect(() => {
     viewer.current?.setSelection(selection);
   }, [selection]);
@@ -154,7 +158,7 @@ function Pane({ index, deformed, deformationCaseName, showDeformed }: {
         ? { modes: snapModes, preview: drawPoints ?? [], closed: isPolygonTool(tool, view), labels: { joint: T0.joint, grid: T0.grid, mid: T0.mid, gridline: T0.gridline } }
         : null,
     );
-  }, [drawing, snapModes, drawPoints, tool, JSON.stringify(view), model, T]);
+  }, [drawing, snapModes, drawPoints, tool, viewKey, model, T]);
 
   const labels = { plan: T.view.plan, elevation: T.view.elevation, view3d: T.view.view3d, axis: T.view.axis };
   const grid = model.grids[0];
@@ -208,8 +212,14 @@ function Pane({ index, deformed, deformationCaseName, showDeformed }: {
         )}
       </header>
       <div className="pane-canvas" ref={host} />
-      {view.kind === "3d" && showDeformed && (
-        <DeformationControls caseName={deformationCaseName} appliedScale={deformed?.scale} color={(theme === "dark" ? DARK_THEME : LIGHT_THEME).deformed} />
+      {showDeformed && (
+        <DeformationControls
+          caseName={deformationCaseName}
+          appliedScale={deformed?.scale}
+          hasDeformedShape={hasDeformedShape}
+          projected={view.kind !== "3d"}
+          color={(theme === "dark" ? DARK_THEME : LIGHT_THEME).deformed}
+        />
       )}
       {hover && !drawing && <HoverTip id={hover.id} x={hover.x} y={hover.y} />}
       {tool !== "select" && active && <div className="draw-hint">{drawing ? T.draw.hint[tool] : T.draw.not3d}</div>}
@@ -217,7 +227,13 @@ function Pane({ index, deformed, deformationCaseName, showDeformed }: {
   );
 }
 
-function DeformationControls({ caseName, appliedScale, color }: { caseName: string | undefined; appliedScale: number | undefined; color: string }) {
+function DeformationControls({ caseName, appliedScale, hasDeformedShape, projected, color }: {
+  caseName: string | undefined;
+  appliedScale: number | undefined;
+  hasDeformedShape: boolean;
+  projected: boolean;
+  color: string;
+}) {
   const { deformation: labels } = useT().analysis;
   const scale = useResults((s) => s.deformationScale);
   const setScale = useResults((s) => s.setDeformationScale);
@@ -225,7 +241,7 @@ function DeformationControls({ caseName, appliedScale, color }: { caseName: stri
     <div className="pane-deformation" style={{ borderInlineStartColor: color }} data-testid="deformation-controls">
       {caseName === undefined ? <span role="status">{labels.unsupported}</span> : (
         <>
-          <span title={labels.chordHint}>{labels.frames} · {caseName}</span>
+          <span title={projected ? labels.projectionHint : labels.chordHint}>{labels.frames} · {caseName}</span>
           <label>
             {labels.scale}
             <NumberField value={scale ?? appliedScale ?? 1} onChange={setScale} min={Number.MIN_VALUE} label={labels.scale} width={76} testId="deformation-scale" />
@@ -233,6 +249,7 @@ function DeformationControls({ caseName, appliedScale, color }: { caseName: stri
           </label>
           <button type="button" className="preset-btn" aria-pressed={scale === null} onClick={() => setScale(null)}>{labels.auto}</button>
           {appliedScale === undefined && <span role="status">{labels.unavailable}</span>}
+          {appliedScale !== undefined && !hasDeformedShape && <span role="status">{labels.noVisibleFrames}</span>}
         </>
       )}
     </div>
