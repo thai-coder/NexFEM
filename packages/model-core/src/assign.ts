@@ -39,6 +39,67 @@ const loadId = (prefix: string, d: Model) => {
 };
 
 export const assignCommands = {
+  offsets: defineCommand({
+    name: "frame.assignOffsets",
+    title: "Gán vùng cứng đầu thanh",
+    mutates: true,
+    args: z.object({
+      frames: z.array(z.string()).min(1),
+      offsets: z.object({ i: z.number().min(0), j: z.number().min(0) }),
+    }),
+    run(d, a) {
+      const fs = framesIn(d, a.frames);
+      const joints = new Map(d.joints.map((j) => [j.id, j]));
+      for (const f of fs) {
+        const i = joints.get(f.i), j = joints.get(f.j);
+        if (!i || !j) throw new CommandError("Thanh tham chiếu tới nút không tồn tại", "invalid_args");
+        const length = Math.hypot(j.x - i.x, j.y - i.y, j.z - i.z);
+        if (a.offsets.i + a.offsets.j >= length - 1e-6)
+          throw new CommandError(`Thanh ${f.label}: tổng vùng cứng vượt chiều dài hữu hiệu`, "invalid_args");
+      }
+      for (const f of fs) {
+        if (a.offsets.i === 0 && a.offsets.j === 0) delete f.offsets;
+        else f.offsets = { ...a.offsets };
+      }
+      return fs.length;
+    },
+  }),
+
+  diaphragm: defineCommand({
+    name: "diaphragm.set",
+    title: "Gán diaphragm tuyệt đối cứng",
+    mutates: true,
+    args: z.object({ id: z.string().min(1), name: z.string().min(1), master: z.string(), slaves: z.array(z.string()).min(1) }),
+    run(d, a) {
+      const ids = [a.master, ...a.slaves];
+      if (new Set(ids).size !== ids.length) throw new CommandError("Master/slave trùng nút", "invalid_args");
+      const joints = new Map(d.joints.map((j) => [j.id, j]));
+      const master = joints.get(a.master);
+      if (!master) throw new CommandError("Master không tồn tại", "invalid_args");
+      for (const id of a.slaves) {
+        const slave = joints.get(id);
+        if (!slave || Math.abs(slave.z - master.z) > 1e-6 || slave.restraint?.[0] || slave.restraint?.[1] || slave.restraint?.[5])
+          throw new CommandError("Slave không hợp lệ: nút/cao độ/gối UX-UY-RZ", "invalid_args");
+      }
+      const other = (d.diaphragms ?? []).filter((x) => x.id !== a.id);
+      if (other.some((x) => x.name.toLowerCase() === a.name.toLowerCase()))
+        throw new CommandError("Tên diaphragm đã tồn tại", "duplicate");
+      const claimed = new Set(other.flatMap((x) => [x.master, ...x.slaves]));
+      if (ids.some((id) => claimed.has(id)))
+        throw new CommandError("Nút đã thuộc một diaphragm khác", "invalid_args");
+      d.diaphragms = [...other, { id: a.id, name: a.name, master: a.master, slaves: [...a.slaves] }];
+      return a.id;
+    },
+  }),
+
+  diaphragmRemove: defineCommand({
+    name: "diaphragm.remove",
+    title: "Xóa diaphragm",
+    mutates: true,
+    args: z.object({ id: z.string() }),
+    run(d, a) { d.diaphragms = (d.diaphragms ?? []).filter((x) => x.id !== a.id); },
+  }),
+
   releases: defineCommand({
     name: "frame.assignReleases",
     title: "Gán nhả liên kết",

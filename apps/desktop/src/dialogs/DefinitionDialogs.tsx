@@ -214,6 +214,25 @@ function frameSectionSection(T: Strings, model: Model): DefineSection<FrameSecti
                 />
               </Field>
             ))}
+            <Field label={T.dlg.frameSections.shear}>
+              <label>
+                <input type="checkbox" checked={!!s.shearAreas}
+                  onChange={(e) => update({ shearAreas: e.target.checked ? { a2: p.A * 5 / 6, a3: p.A * 5 / 6 } : undefined })} />
+                {T.dlg.frameSections.timoshenko}
+              </label>
+            </Field>
+            {s.shearAreas && (
+              <>
+                <Field label="A_s2">
+                  <NF value={s.shearAreas.a2} onChange={(v) => update({ shearAreas: { ...s.shearAreas!, a2: v } })}
+                    q="area" min={1e-9} label="A_s2" />
+                </Field>
+                <Field label="A_s3">
+                  <NF value={s.shearAreas.a3} onChange={(v) => update({ shearAreas: { ...s.shearAreas!, a3: v } })}
+                    q="area" min={1e-9} label="A_s3" />
+                </Field>
+              </>
+            )}
             <h4 className="form-subtitle">{T.dlg.frameSections.props}</h4>
             <dl className="props-list">
               <dt>A</dt>

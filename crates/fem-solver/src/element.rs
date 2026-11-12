@@ -52,6 +52,21 @@ pub struct SectionProps {
 
 /// Ma trận độ cứng cục bộ 12×12.
 pub fn local_stiffness(p: &SectionProps, l: f64) -> M12 {
+    local_stiffness_with_shear(p, l, None)
+}
+
+/// Timoshenko khi cung cấp diện tích chịu cắt hữu hiệu [A2,A3] (m²).
+/// Không có giá trị: Euler–Bernoulli chính xác như các dự án cũ.
+pub fn local_stiffness_with_shear(p: &SectionProps, l: f64, shear_areas: Option<[f64; 2]>) -> M12 {
+    let (phi2, phi3) = match shear_areas {
+        Some([a2, a3]) => (
+            12.0 * p.e * p.i33 / (p.g * a2 * l * l),
+            12.0 * p.e * p.i22 / (p.g * a3 * l * l),
+        ),
+        None => (0.0, 0.0),
+    };
+    let psi2 = 1.0 / (1.0 + phi2);
+    let psi3 = 1.0 / (1.0 + phi3);
     let mut k = [[0.0; 12]; 12];
     let (ea, gj) = (p.e * p.a / l, p.g * p.j / l);
     let (ez, ey) = (p.e * p.i33, p.e * p.i22);
@@ -67,27 +82,27 @@ pub fn local_stiffness(p: &SectionProps, l: f64) -> M12 {
     set(3, 9, -gj);
     set(9, 9, gj);
     // Uốn trong mặt phẳng 1-2 (u2, θ3), dùng I33.
-    set(1, 1, 12.0 * ez / l3);
-    set(1, 5, 6.0 * ez / l2);
-    set(1, 7, -12.0 * ez / l3);
-    set(1, 11, 6.0 * ez / l2);
-    set(5, 5, 4.0 * ez / l);
-    set(5, 7, -6.0 * ez / l2);
-    set(5, 11, 2.0 * ez / l);
-    set(7, 7, 12.0 * ez / l3);
-    set(7, 11, -6.0 * ez / l2);
-    set(11, 11, 4.0 * ez / l);
+    set(1, 1, 12.0 * ez * psi2 / l3);
+    set(1, 5, 6.0 * ez * psi2 / l2);
+    set(1, 7, -12.0 * ez * psi2 / l3);
+    set(1, 11, 6.0 * ez * psi2 / l2);
+    set(5, 5, (4.0 + phi2) * ez * psi2 / l);
+    set(5, 7, -6.0 * ez * psi2 / l2);
+    set(5, 11, (2.0 - phi2) * ez * psi2 / l);
+    set(7, 7, 12.0 * ez * psi2 / l3);
+    set(7, 11, -6.0 * ez * psi2 / l2);
+    set(11, 11, (4.0 + phi2) * ez * psi2 / l);
     // Uốn trong mặt phẳng 1-3 (u3, θ2), dùng I22.
-    set(2, 2, 12.0 * ey / l3);
-    set(2, 4, -6.0 * ey / l2);
-    set(2, 8, -12.0 * ey / l3);
-    set(2, 10, -6.0 * ey / l2);
-    set(4, 4, 4.0 * ey / l);
-    set(4, 8, 6.0 * ey / l2);
-    set(4, 10, 2.0 * ey / l);
-    set(8, 8, 12.0 * ey / l3);
-    set(8, 10, 6.0 * ey / l2);
-    set(10, 10, 4.0 * ey / l);
+    set(2, 2, 12.0 * ey * psi3 / l3);
+    set(2, 4, -6.0 * ey * psi3 / l2);
+    set(2, 8, -12.0 * ey * psi3 / l3);
+    set(2, 10, -6.0 * ey * psi3 / l2);
+    set(4, 4, (4.0 + phi3) * ey * psi3 / l);
+    set(4, 8, 6.0 * ey * psi3 / l2);
+    set(4, 10, (2.0 - phi3) * ey * psi3 / l);
+    set(8, 8, 12.0 * ey * psi3 / l3);
+    set(8, 10, 6.0 * ey * psi3 / l2);
+    set(10, 10, (4.0 + phi3) * ey * psi3 / l);
     k
 }
 
@@ -251,4 +266,56 @@ pub fn stiffness_to_global(ax: &[V3; 3], k: &M12) -> M12 {
         }
     }
     g
+}
+
+/// Rigid-link kinematics: u_end = u_joint + theta_joint × r; theta_end = theta_joint.
+pub fn rigid_end_displacement(u: &[f64; 12], ri: V3, rj: V3) -> [f64; 12] {
+    let mut out = *u;
+    for (offset, r) in [(0, ri), (6, rj)] {
+        let theta = [u[offset + 3], u[offset + 4], u[offset + 5]];
+        let extra = cross(theta, r);
+        for c in 0..3 {
+            out[offset + c] += extra[c];
+        }
+    }
+    out
+}
+
+/// Công nút: F_joint = F_end và M_joint = M_end + r × F_end.
+pub fn rigid_end_force(f: &[f64; 12], ri: V3, rj: V3) -> [f64; 12] {
+    let mut out = *f;
+    for (offset, r) in [(0, ri), (6, rj)] {
+        let force = [f[offset], f[offset + 1], f[offset + 2]];
+        let extra = cross(r, force);
+        for c in 0..3 {
+            out[offset + 3 + c] += extra[c];
+        }
+    }
+    out
+}
+
+/// K tại tim nút = T_rᵀ · K_đầu_mềm · T_r, hệ tổng thể.
+pub fn rigid_end_stiffness(k: &M12, ri: V3, rj: V3) -> M12 {
+    let mut t = [[0.0; 12]; 12];
+    for j in 0..12 {
+        let mut e = [0.0; 12];
+        e[j] = 1.0;
+        let v = rigid_end_displacement(&e, ri, rj);
+        for i in 0..12 {
+            t[i][j] = v[i];
+        }
+    }
+    let mut kt = [[0.0; 12]; 12];
+    for i in 0..12 {
+        for j in 0..12 {
+            kt[i][j] = (0..12).map(|h| k[i][h] * t[h][j]).sum();
+        }
+    }
+    let mut out = [[0.0; 12]; 12];
+    for i in 0..12 {
+        for j in 0..12 {
+            out[i][j] = (0..12).map(|h| t[h][i] * kt[h][j]).sum();
+        }
+    }
+    out
 }

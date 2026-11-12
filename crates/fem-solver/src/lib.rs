@@ -3,6 +3,7 @@
 
 pub mod analysis;
 pub mod element;
+pub mod matrix;
 pub mod skyline;
 
 pub use analysis::{analyze, AnalysisError, CaseResult, FrameForces, Options, Results, Warning};

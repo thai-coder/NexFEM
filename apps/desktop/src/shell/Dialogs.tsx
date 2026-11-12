@@ -8,6 +8,8 @@ import { ReplicateDialog } from "../dialogs/ReplicateDialog.tsx";
 import {
   AssignFrameLoadDialog,
   AssignReleasesDialog,
+  AssignOffsetsDialog,
+  AssignDiaphragmDialog,
   AssignRestraintDialog,
   AssignSectionDialog,
   AssignShellLoadDialog,
@@ -50,6 +52,10 @@ export function Dialogs() {
       return <AssignSectionDialog onClose={close} />;
     case "assignReleases":
       return <AssignReleasesDialog onClose={close} />;
+    case "assignOffsets":
+      return <AssignOffsetsDialog onClose={close} />;
+    case "assignDiaphragm":
+      return <AssignDiaphragmDialog onClose={close} />;
     case "assignFrameLoad":
       return <AssignFrameLoadDialog onClose={close} />;
     case "assignShellLoad":

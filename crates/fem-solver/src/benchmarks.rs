@@ -314,3 +314,147 @@ fn rejects_impossible_section_dimensions_in_solver_without_ui() {
         "invalid_section"
     );
 }
+
+#[test]
+fn timoshenko_cantilever_deflection_adds_shear_compliance() {
+    let l = 1.0_f64;
+    let p = 10.0_f64;
+    let mut m = model(
+        json!([{"id":"a","label":"1","x":0,"y":0,"z":0,"restraint":FIX},{"id":"b","label":"2","x":l,"y":0,"z":0}]),
+        json!([{"id":"f","label":"B1","kind":"beam","i":"a","j":"b","section":"s"}]),
+        json!([{"id":"l","frame":"f","pattern":"p","kind":"point","direction":"gravity","value":p,"at":1.0}]),
+    );
+    let baseline = run(&m).cases[0].displacements["b"][2];
+    let a2 = A * 5.0 / 6.0;
+    m.frame_sections[0].shear_areas = Some(fem_core::ShearAreas { a2, a3: a2 });
+    let deflection = run(&m).cases[0].displacements["b"][2];
+    let g = E / (2.0 * (1.0 + NU));
+    let expected = -p * l.powi(3) / (3.0 * E * I33) - p * l / (g * a2);
+    assert!(
+        close(deflection, expected, 1e-9),
+        "Timoshenko: {deflection} != {expected}"
+    );
+    assert!(
+        deflection < baseline,
+        "Ứng xử chịu cắt phải mềm hơn Euler–Bernoulli"
+    );
+}
+
+#[test]
+fn envelope_min_max_and_srss_are_componentwise_not_equilibrium_cases() {
+    let mut m = model(
+        json!([{"id":"a","label":"1","x":0,"y":0,"z":0,"restraint":FIX},{"id":"b","label":"2","x":3,"y":0,"z":0}]),
+        json!([{"id":"f","label":"B1","kind":"beam","i":"a","j":"b","section":"s"}]),
+        json!([{"id":"l","frame":"f","pattern":"p","kind":"point","direction":"gravity","value":10.0,"at":1.0}]),
+    );
+    m.load_cases.push(serde_json::from_value(json!({
+        "id":"reverse","name":"Reverse","type":"linearStatic","loads":[{"pattern":"p","factor":-2.0}]
+    })).unwrap());
+    m.combos = serde_json::from_value(json!([
+        {"id":"env","name":"ENV","type":"envelope","items":[{"case":"c","factor":1.0},{"case":"reverse","factor":1.0}]},
+        {"id":"rss","name":"RSS","type":"srss","items":[{"case":"c","factor":1.0},{"case":"reverse","factor":1.0}]}
+    ])).unwrap();
+    let r = run(&m);
+    let baseline = r.cases.iter().find(|c| c.id == "c").unwrap().displacements["b"][2];
+    let max = r.cases.iter().find(|c| c.id == "env:max").unwrap();
+    let min = r.cases.iter().find(|c| c.id == "env:min").unwrap();
+    let rss = r.cases.iter().find(|c| c.id == "rss").unwrap();
+    assert_eq!(max.kind, "envelopeMax");
+    assert!(close(max.displacements["b"][2], -2.0 * baseline, 1e-10));
+    assert!(close(min.displacements["b"][2], baseline, 1e-10));
+    assert!(close(
+        rss.displacements["b"][2],
+        baseline.abs() * 5.0_f64.sqrt(),
+        1e-10
+    ));
+    assert_eq!(rss.applied, [0.0; 3]);
+    // Lồng envelope dưới linearAdd là sai ngữ nghĩa kỹ thuật.
+    m.combos.push(
+        serde_json::from_value(json!({
+            "id":"bad","name":"bad","type":"linearAdd","items":[{"case":"env","factor":1.0}]
+        }))
+        .unwrap(),
+    );
+    assert_eq!(
+        analyze(&m, &Options::default()).err().unwrap().code,
+        "nonlinear_combo_dependency"
+    );
+}
+
+#[test]
+fn rigid_end_offset_reduces_flexible_span_and_transfers_support_moment() {
+    let l = 3.0_f64;
+    let p = 10.0_f64;
+    let rigid = 0.8_f64;
+    let mut m = model(
+        json!([{"id":"a","label":"1","x":0,"y":0,"z":0,"restraint":FIX},{"id":"b","label":"2","x":l,"y":0,"z":0}]),
+        json!([{"id":"f","label":"B1","kind":"beam","i":"a","j":"b","section":"s","offsets":{"i":rigid,"j":0.0}}]),
+        json!([{"id":"load","frame":"f","pattern":"p","kind":"point","direction":"gravity","value":p,"at":1.0}]),
+    );
+    let r = run(&m);
+    let c = &r.cases[0];
+    let expected_uz = -p * (l - rigid).powi(3) / (3.0 * E * I33);
+    assert!(close(c.displacements["b"][2], expected_uz, 1e-9));
+    assert!(close(c.reactions["a"][2], p, 1e-9));
+    assert!(
+        close(c.reactions["a"][4], -p * l, 1e-9),
+        "base reaction = {:?}",
+        c.reactions["a"]
+    );
+    assert!(close(c.frames["f"].x[0], rigid, 1e-9));
+    m.frames[0].offsets = Some(fem_core::FrameOffsets { i: l, j: 0.0 });
+    assert_eq!(
+        analyze(&m, &Options::default()).err().unwrap().code,
+        "invalid_offsets"
+    );
+}
+
+#[test]
+fn rigid_diaphragm_shares_horizontal_shear_between_two_columns() {
+    let l = 3.0_f64;
+    let p = 10.0_f64;
+    let mut m = model(
+        json!([
+            {"id":"a0","label":"a0","x":0,"y":0,"z":0,"restraint":FIX},
+            {"id":"a1","label":"a1","x":0,"y":0,"z":l},
+            {"id":"b0","label":"b0","x":4,"y":0,"z":0,"restraint":FIX},
+            {"id":"b1","label":"b1","x":4,"y":0,"z":l}
+        ]),
+        json!([
+            {"id":"col-a","label":"C1","kind":"column","i":"a0","j":"a1","section":"s"},
+            {"id":"col-b","label":"C2","kind":"column","i":"b0","j":"b1","section":"s"}
+        ]),
+        json!([
+            {"id":"horizontal","frame":"col-a","pattern":"p","kind":"point","direction":"globalX","value":p,"at":1.0}
+        ]),
+    );
+    let free = run(&m).cases[0].displacements["a1"][0];
+    m.diaphragms = serde_json::from_value(json!([{
+        "id":"D1","name":"Roof","master":"a1","slaves":["b1"]
+    }]))
+    .unwrap();
+    let r = run(&m);
+    let c = &r.cases[0];
+    let u1 = c.displacements["a1"][0];
+    let u2 = c.displacements["b1"][0];
+    assert!(
+        close(u1, u2, 1e-9),
+        "Diaphragm does not constrain Ux: {u1}, {u2}"
+    );
+    assert!(
+        close(u1, free / 2.0, 1e-8),
+        "Shared drift: {u1}, free: {free}"
+    );
+    assert!(close(c.sum_reactions[0], -p, 1e-8));
+    assert!(close(c.reactions["a0"][0], -p / 2.0, 1e-8));
+    assert!(close(c.reactions["b0"][0], -p / 2.0, 1e-8));
+    m.joints
+        .iter_mut()
+        .find(|j| j.id == "b1")
+        .unwrap()
+        .restraint = Some([true, false, false, false, false, false]);
+    assert_eq!(
+        analyze(&m, &Options::default()).err().unwrap().code,
+        "invalid_diaphragm"
+    );
+}

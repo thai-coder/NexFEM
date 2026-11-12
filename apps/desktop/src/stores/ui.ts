@@ -23,6 +23,8 @@ export type DialogKind =
   | "assignRestraint"
   | "assignSection"
   | "assignReleases"
+  | "assignOffsets"
+  | "assignDiaphragm"
   | "assignFrameLoad"
   | "assignShellLoad"
   | "rename";

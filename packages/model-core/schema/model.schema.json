@@ -353,6 +353,23 @@
                 ]
               }
             ]
+          },
+          "shearAreas": {
+            "type": "object",
+            "properties": {
+              "a2": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "a3": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            },
+            "required": [
+              "a2",
+              "a3"
+            ]
           }
         },
         "required": [
@@ -471,6 +488,39 @@
         ]
       }
     },
+    "diaphragms": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string"
+          },
+          "master": {
+            "type": "string",
+            "minLength": 1
+          },
+          "slaves": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "master",
+          "slaves"
+        ]
+      }
+    },
     "frames": {
       "type": "array",
       "items": {
@@ -525,6 +575,23 @@
                 "items": {
                   "type": "boolean"
                 }
+              }
+            },
+            "required": [
+              "i",
+              "j"
+            ]
+          },
+          "offsets": {
+            "type": "object",
+            "properties": {
+              "i": {
+                "type": "number",
+                "minimum": 0
+              },
+              "j": {
+                "type": "number",
+                "minimum": 0
               }
             },
             "required": [

@@ -1,8 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
 
 type M = {
-  joints: { id: string; label: string; restraint?: boolean[] }[];
-  frames: { id: string; label: string; kind: string; section: string; releases?: { i: boolean[]; j: boolean[] } }[];
+  joints: { id: string; label: string; z: number; restraint?: boolean[] }[];
+  frames: { id: string; label: string; kind: string; section: string; offsets?: { i: number; j: number }; releases?: { i: boolean[]; j: boolean[] } }[];
+  diaphragms?: { id: string; name: string; master: string; slaves: string[] }[];
   shells: { id: string }[];
   frameLoads: { frame: string; pattern: string; value: number }[];
   shellLoads: { shell: string; pattern: string; value: number }[];
@@ -87,4 +88,26 @@ test("gán tải sàn và tiết diện", async ({ page }) => {
   await page.getByTestId("dialog-ok").click();
   const m2 = await model(page);
   expect(m2.frames.filter((f) => f.kind === "beam").slice(0, 2).map((f) => f.section)).toEqual(["sec-col", "sec-col"]);
+});
+
+test("Assign rigid zones lưu đúng chiều dài i/j", async ({ page }) => {
+  await select(page, "(m) => [m.frames.find((f) => f.label === 'B1').id]");
+  await menu(page, "Vùng cứng đầu thanh…");
+  await page.getByTestId("offset-i").fill("0.25");
+  await page.getByTestId("offset-j").fill("0.3");
+  await page.getByTestId("dialog-ok").click();
+  expect((await model(page)).frames.find((f) => f.label === "B1")?.offsets).toEqual({ i: 0.25, j: 0.3 });
+});
+
+test("Assign diaphragm từ hai nút cùng cao độ", async ({ page }) => {
+  await select(page, "(m) => m.joints.filter((j) => j.z > 0).slice(0, 2).map((j) => j.id)");
+  const ids = (await model(page)).joints.filter((j) => j.z > 0).slice(0, 2).map((j) => j.id);
+  await menu(page, "Diaphragm tuyệt đối cứng…");
+  await page.getByTestId("diaphragm-name").fill("D_TEST");
+  await page.getByTestId("diaphragm-master").selectOption(ids[0]!);
+  await page.getByTestId("dialog-ok").click();
+  expect((await model(page)).diaphragms?.[0]).toMatchObject({ name: "D_TEST", master: ids[0], slaves: [ids[1]] });
+  await menu(page, "Diaphragm tuyệt đối cứng…");
+  await page.getByTestId("diaphragm-remove").click();
+  expect((await model(page)).diaphragms).toEqual([]);
 });
