@@ -337,6 +337,9 @@ export const commands = {
     args: z.object({ ids: z.array(z.string()).min(1) }),
     run(d, a) {
       const ids = new Set(a.ids);
+      const protectedJoints = new Set((d.diaphragms ?? []).flatMap((g) => [g.master, ...g.slaves]));
+      if (d.joints.some((j) => ids.has(j.id) && protectedJoints.has(j.id)))
+        throw new CommandError("Nút đang thuộc diaphragm: hãy xoá diaphragm trước", "in_use");
       const before = d.frames.length + d.shells.length + d.joints.length;
       d.frames = d.frames.filter((f) => !ids.has(f.id));
       d.shells = d.shells.filter((s) => !ids.has(s.id));
