@@ -181,6 +181,15 @@ pub struct Frame {
     /// Nhả liên kết đầu i / j: [P, V2, V3, T, M2, M3].
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub releases: Option<Releases>,
+    /// Rigid end zones từ tim nút dọc trục thanh (m).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offsets: Option<FrameOffsets>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct FrameOffsets {
+    pub i: f64,
+    pub j: f64,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
