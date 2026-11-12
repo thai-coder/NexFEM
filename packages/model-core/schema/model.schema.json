@@ -353,6 +353,23 @@
                 ]
               }
             ]
+          },
+          "shearAreas": {
+            "type": "object",
+            "properties": {
+              "a2": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "a3": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            },
+            "required": [
+              "a2",
+              "a3"
+            ]
           }
         },
         "required": [

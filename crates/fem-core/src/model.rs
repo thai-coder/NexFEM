@@ -125,6 +125,15 @@ pub struct FrameSection {
     pub name: String,
     pub material: String,
     pub geometry: FrameShape,
+    /// Opt-in diện tích chịu cắt hữu hiệu dọc 2/3 (m²); None = Euler–Bernoulli.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub shear_areas: Option<ShearAreas>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ShearAreas {
+    pub a2: f64,
+    pub a3: f64,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

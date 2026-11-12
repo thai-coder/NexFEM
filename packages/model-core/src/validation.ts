@@ -47,7 +47,13 @@ export function checkModel(model: Model): ModelMessage[] {
     const invalid = g.shape === "I" ? (2 * g.tf >= g.h || g.tw >= g.bf)
       : g.shape === "box" ? (2 * g.t >= g.h || 2 * g.t >= g.b)
       : g.shape === "pipe" ? (2 * g.t >= g.d) : false;
-    if (invalid) out.push({ level: "error", code: "invalid_section", objects: [sec.id], params: { name: sec.name } });
+    const area = g.shape === "rect" ? g.b * g.h
+      : g.shape === "circle" ? Math.PI * g.d ** 2 / 4
+      : g.shape === "I" ? 2 * g.bf * g.tf + (g.h - 2 * g.tf) * g.tw
+      : g.shape === "box" ? g.b * g.h - (g.b - 2 * g.t) * (g.h - 2 * g.t)
+      : Math.PI * (g.d ** 2 - (g.d - 2 * g.t) ** 2) / 4;
+    const badShear = sec.shearAreas && (sec.shearAreas.a2 > area || sec.shearAreas.a3 > area);
+    if (invalid || badShear) out.push({ level: "error", code: "invalid_section", objects: [sec.id], params: { name: sec.name } });
   }
 
   const pairs = new Map<string, string>();

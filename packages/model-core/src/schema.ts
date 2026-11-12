@@ -71,6 +71,8 @@ export const FrameSectionSchema = z.object({
   name: z.string(),
   material: Id,
   geometry: FrameShapeSchema,
+  /** Diện tích chịu cắt hữu hiệu dọc trục cục bộ 2/3 (m²); bỏ trống → Euler–Bernoulli. */
+  shearAreas: z.object({ a2: Num.positive(), a3: Num.positive() }).optional(),
 });
 
 export const ShellSectionSchema = z.object({

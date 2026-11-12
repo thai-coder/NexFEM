@@ -52,6 +52,21 @@ pub struct SectionProps {
 
 /// Ma trận độ cứng cục bộ 12×12.
 pub fn local_stiffness(p: &SectionProps, l: f64) -> M12 {
+    local_stiffness_with_shear(p, l, None)
+}
+
+/// Timoshenko khi cung cấp diện tích chịu cắt hữu hiệu [A2,A3] (m²).
+/// Không có giá trị: Euler–Bernoulli chính xác như các dự án cũ.
+pub fn local_stiffness_with_shear(p: &SectionProps, l: f64, shear_areas: Option<[f64; 2]>) -> M12 {
+    let (phi2, phi3) = match shear_areas {
+        Some([a2, a3]) => (
+            12.0 * p.e * p.i33 / (p.g * a2 * l * l),
+            12.0 * p.e * p.i22 / (p.g * a3 * l * l),
+        ),
+        None => (0.0, 0.0),
+    };
+    let psi2 = 1.0 / (1.0 + phi2);
+    let psi3 = 1.0 / (1.0 + phi3);
     let mut k = [[0.0; 12]; 12];
     let (ea, gj) = (p.e * p.a / l, p.g * p.j / l);
     let (ez, ey) = (p.e * p.i33, p.e * p.i22);
@@ -67,27 +82,27 @@ pub fn local_stiffness(p: &SectionProps, l: f64) -> M12 {
     set(3, 9, -gj);
     set(9, 9, gj);
     // Uốn trong mặt phẳng 1-2 (u2, θ3), dùng I33.
-    set(1, 1, 12.0 * ez / l3);
-    set(1, 5, 6.0 * ez / l2);
-    set(1, 7, -12.0 * ez / l3);
-    set(1, 11, 6.0 * ez / l2);
-    set(5, 5, 4.0 * ez / l);
-    set(5, 7, -6.0 * ez / l2);
-    set(5, 11, 2.0 * ez / l);
-    set(7, 7, 12.0 * ez / l3);
-    set(7, 11, -6.0 * ez / l2);
-    set(11, 11, 4.0 * ez / l);
+    set(1, 1, 12.0 * ez * psi2 / l3);
+    set(1, 5, 6.0 * ez * psi2 / l2);
+    set(1, 7, -12.0 * ez * psi2 / l3);
+    set(1, 11, 6.0 * ez * psi2 / l2);
+    set(5, 5, (4.0 + phi2) * ez * psi2 / l);
+    set(5, 7, -6.0 * ez * psi2 / l2);
+    set(5, 11, (2.0 - phi2) * ez * psi2 / l);
+    set(7, 7, 12.0 * ez * psi2 / l3);
+    set(7, 11, -6.0 * ez * psi2 / l2);
+    set(11, 11, (4.0 + phi2) * ez * psi2 / l);
     // Uốn trong mặt phẳng 1-3 (u3, θ2), dùng I22.
-    set(2, 2, 12.0 * ey / l3);
-    set(2, 4, -6.0 * ey / l2);
-    set(2, 8, -12.0 * ey / l3);
-    set(2, 10, -6.0 * ey / l2);
-    set(4, 4, 4.0 * ey / l);
-    set(4, 8, 6.0 * ey / l2);
-    set(4, 10, 2.0 * ey / l);
-    set(8, 8, 12.0 * ey / l3);
-    set(8, 10, 6.0 * ey / l2);
-    set(10, 10, 4.0 * ey / l);
+    set(2, 2, 12.0 * ey * psi3 / l3);
+    set(2, 4, -6.0 * ey * psi3 / l2);
+    set(2, 8, -12.0 * ey * psi3 / l3);
+    set(2, 10, -6.0 * ey * psi3 / l2);
+    set(4, 4, (4.0 + phi3) * ey * psi3 / l);
+    set(4, 8, 6.0 * ey * psi3 / l2);
+    set(4, 10, (2.0 - phi3) * ey * psi3 / l);
+    set(8, 8, 12.0 * ey * psi3 / l3);
+    set(8, 10, 6.0 * ey * psi3 / l2);
+    set(10, 10, (4.0 + phi3) * ey * psi3 / l);
     k
 }
 

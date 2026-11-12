@@ -314,3 +314,22 @@ fn rejects_impossible_section_dimensions_in_solver_without_ui() {
         "invalid_section"
     );
 }
+
+#[test]
+fn timoshenko_cantilever_deflection_adds_shear_compliance() {
+    let l = 1.0_f64;
+    let p = 10.0_f64;
+    let mut m = model(
+        json!([{"id":"a","label":"1","x":0,"y":0,"z":0,"restraint":FIX},{"id":"b","label":"2","x":l,"y":0,"z":0}]),
+        json!([{"id":"f","label":"B1","kind":"beam","i":"a","j":"b","section":"s"}]),
+        json!([{"id":"l","frame":"f","pattern":"p","kind":"point","direction":"gravity","value":p,"at":1.0}]),
+    );
+    let baseline = run(&m).cases[0].displacements["b"][2];
+    let a2 = A * 5.0 / 6.0;
+    m.frame_sections[0].shear_areas = Some(fem_core::ShearAreas { a2, a3: a2 });
+    let deflection = run(&m).cases[0].displacements["b"][2];
+    let g = E / (2.0 * (1.0 + NU));
+    let expected = -p * l.powi(3) / (3.0 * E * I33) - p * l / (g * a2);
+    assert!(close(deflection, expected, 1e-9), "Timoshenko: {deflection} != {expected}");
+    assert!(deflection < baseline, "Ứng xử chịu cắt phải mềm hơn Euler–Bernoulli");
+}

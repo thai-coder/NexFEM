@@ -365,7 +365,19 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
             i33,
             j,
         };
-        let k_local = local_stiffness(&props, l);
+        let shear = if let Some(s) = &sec.shear_areas {
+            if [s.a2, s.a3].iter().any(|x| !x.is_finite() || *x <= 0.0 || *x > area) {
+                return Err(AnalysisError::new(
+                    "invalid_section",
+                    format!("Tiết diện {}: diện tích chịu cắt không hợp lệ", sec.name),
+                    vec![sec.id.clone()],
+                ));
+            }
+            Some([s.a2, s.a3])
+        } else {
+            None
+        };
+        let k_local = local_stiffness_with_shear(&props, l, shear);
         let mut released = [false; 12];
         if let Some(r) = &f.releases {
             for c in 0..6 {
