@@ -149,7 +149,7 @@ export async function runAnalysis(): Promise<boolean> {
       s.log("info", t().fmt(t().analysis.balance, { name: c.name, applied: f(c.applied[2]!), reaction: f(c.sumReactions[2]!), unit: unitLabel("force", u) }), "analysis");
     }
     s.log("success", t().fmt(t().analysis.done, { joints: r.joints, frames: r.frames, dof: r.dof, cases: r.cases.length, ms }), "analysis");
-    useResults.getState().set({ results: r, elapsed: ms, activeCase: r.cases[0]?.id ?? null });
+    useResults.getState().setResult(r, ms);
     succeeded = true;
     return true;
   } catch (e) {
