@@ -43,9 +43,12 @@ test.beforeEach(async ({ page }) => {
 
 test("biến dạng công xôn theo chuyển vị tổng thể, hệ số và trường hợp tải", async ({ page }) => {
   await expect(await displayMenu(page)).toBeDisabled();
-  await page.keyboard.press("Escape");
-  const [chooser] = await Promise.all([page.waitForEvent("filechooser"), page.keyboard.press("Control+o")]);
-  await chooser.setFiles({ name: "cantilever.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(cantilever)) });
+  await page.getByTestId("toolbar").locator('[data-command="file.open"]').click();
+  await page.getByTestId("open-input").setInputFiles({
+    name: "cantilever.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(JSON.stringify(cantilever)),
+  });
   await expect(page).toHaveTitle(/cantilever\.json/);
   await page.keyboard.press("F5");
   const cases = page.getByTestId("toolbar-result-case");

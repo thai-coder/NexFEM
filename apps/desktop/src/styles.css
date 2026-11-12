@@ -562,22 +562,25 @@ select:disabled {
   white-space: nowrap;
 }
 
+.pane-body,
 .pane-canvas {
   position: relative;
   flex: 1;
   min-height: 0;
 }
 
-.pane-deformation {
-  position: absolute;
-  z-index: 4;
-  top: 28px;
-  right: 6px;
+.pane-body {
   display: flex;
+  flex-direction: column;
+}
+
+.pane-deformation {
+  display: flex;
+  flex: none;
   flex-wrap: wrap;
   align-items: center;
   gap: 6px;
-  max-width: calc(100% - 12px);
+  margin: 3px 6px;
   padding: 3px 6px;
   border: 1px solid var(--color-border);
   border-inline-start-width: 3px;

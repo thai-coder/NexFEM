@@ -211,7 +211,6 @@ function Pane({ index, deformed, deformationCaseName, showDeformed }: {
           </span>
         )}
       </header>
-      <div className="pane-canvas" ref={host} />
       {showDeformed && (
         <DeformationControls
           caseName={deformationCaseName}
@@ -221,8 +220,11 @@ function Pane({ index, deformed, deformationCaseName, showDeformed }: {
           color={(theme === "dark" ? DARK_THEME : LIGHT_THEME).deformed}
         />
       )}
-      {hover && !drawing && <HoverTip id={hover.id} x={hover.x} y={hover.y} />}
-      {tool !== "select" && active && <div className="draw-hint">{drawing ? T.draw.hint[tool] : T.draw.not3d}</div>}
+      <div className="pane-body">
+        <div className="pane-canvas" ref={host} />
+        {hover && !drawing && <HoverTip id={hover.id} x={hover.x} y={hover.y} />}
+        {tool !== "select" && active && <div className="draw-hint">{drawing ? T.draw.hint[tool] : T.draw.not3d}</div>}
+      </div>
     </section>
   );
 }
@@ -276,7 +278,7 @@ function HoverTip({ id, x, y }: { id: string; x: number; y: number }) {
   }
   if (!lines.length) return null;
   return (
-    <div className="hover-tip" style={{ left: x + 14, top: y + 34 }} role="tooltip">
+    <div className="hover-tip" style={{ left: x + 14, top: y + 12 }} role="tooltip">
       {lines.map((l, i) => (
         <div key={i} className={i === 0 ? "strong" : undefined}>
           {l}
