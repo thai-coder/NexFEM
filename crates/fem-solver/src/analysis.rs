@@ -150,6 +150,10 @@ struct Elem {
     k_local: M12,
     released: [bool; 12],
     k_cond: M12,
+    /// Offset hình học của đầu mềm so với tim nút, theo hệ tổng thể.
+    offset_i: V3,
+    offset_j: V3,
+    offset_i_length: f64,
     /// Bậc tự do tổng thể của 12 thành phần (None = bị gối giữ).
     dofs: [Option<usize>; 12],
     ji: usize,
@@ -331,14 +335,28 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
         })?;
         let (ji, jj) = pair(f);
         let (a, b) = (pos(ji), pos(jj));
-        let l = norm(sub(b, a));
-        if l < 1e-9 {
+        let full_length = norm(sub(b, a));
+        if full_length < 1e-9 {
             return Err(AnalysisError::new(
                 "zero_length",
                 format!("Thanh {} có chiều dài bằng 0", f.label),
                 vec![f.id.clone()],
             ));
         }
+        let start = f.offsets.as_ref().map_or(0.0, |o| o.i);
+        let end = f.offsets.as_ref().map_or(0.0, |o| o.j);
+        if !start.is_finite() || !end.is_finite() || start < 0.0 || end < 0.0
+            || start + end >= full_length - 1e-9
+        {
+            return Err(AnalysisError::new(
+                "invalid_offsets",
+                format!("Thanh {}: vùng cứng không hợp lệ so với chiều dài thanh", f.label),
+                vec![f.id.clone()],
+            ));
+        }
+        let l = full_length - start - end;
+        let e1 = scale(sub(b, a), 1.0 / full_length);
+        let (offset_i, offset_j) = (scale(e1, start), scale(e1, -end));
         let geometry_ok = match &sec.geometry {
             FrameShape::I { h, bf, tf, tw } => 2.0 * *tf < *h && *tw < *bf,
             FrameShape::Box { h, b, t } => 2.0 * *t < *h && 2.0 * *t < *b,
@@ -408,6 +426,9 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
             k_local,
             released,
             k_cond,
+            offset_i,
+            offset_j,
+            offset_i_length: start,
             dofs,
             ji,
             jj,
@@ -425,7 +446,11 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
     }
     let mut k = Skyline::new(first);
     for e in &elems {
-        let kg = stiffness_to_global(&e.ax, &e.k_cond);
+        let kg = rigid_end_stiffness(
+            &stiffness_to_global(&e.ax, &e.k_cond),
+            e.offset_i,
+            e.offset_j,
+        );
         for a in 0..12 {
             let Some(da) = e.dofs[a] else { continue };
             for b in a..12 {
@@ -699,7 +724,7 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
                     vec![e.id.clone()],
                 )
             })?;
-            let fg = to_global(&e.ax, &fc);
+            let fg = rigid_end_force(&to_global(&e.ax, &fc), e.offset_i, e.offset_j);
             for c in 0..12 {
                 if let Some(g) = e.dofs[c] {
                     rhs[g] += fg[c];
@@ -746,22 +771,24 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
             let mut ug = [0.0; 12];
             ug[..6].copy_from_slice(&di);
             ug[6..].copy_from_slice(&dj);
-            let ul = to_local(&e.ax, &ug);
+            let ug_end = rigid_end_displacement(&ug, e.offset_i, e.offset_j);
+            let ul = to_local(&e.ax, &ug_end);
             let mut fl = [0.0; 12];
             for a in 0..12 {
                 fl[a] = (0..12).map(|b| e.k_cond[a][b] * ul[b]).sum::<f64>()
                     - feq_cond.get(&ei).map_or(0.0, |f| f[a]);
             }
-            let fg = to_global(&e.ax, &fl);
+            let fg = rigid_end_force(&to_global(&e.ax, &fl), e.offset_i, e.offset_j);
             for c in 0..6 {
                 joint_sum[e.ji][c] += fg[c];
                 joint_sum[e.jj][c] += fg[6 + c];
             }
             let loads: Vec<(f64, &MemberLoad)> = member_loads.get(&ei).cloned().unwrap_or_default();
-            frames.insert(
-                e.id.clone(),
-                stations(&fl, &loads, e.l, opts.stations.max(2)),
-            );
+            let mut frame_forces = stations(&fl, &loads, e.l, opts.stations.max(2));
+            for x in &mut frame_forces.x {
+                *x += e.offset_i_length;
+            }
+            frames.insert(e.id.clone(), frame_forces);
         }
         let mut reactions = BTreeMap::new();
         let mut sum_reactions = [0.0; 3];
