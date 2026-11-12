@@ -21,7 +21,8 @@ export interface ModelMessage {
     | "missing_load_pattern"
     | "missing_load_case"
     | "invalid_combo_cycle"
-    | "invalid_offsets";
+    | "invalid_offsets"
+    | "invalid_diaphragm";
   /** Đối tượng liên quan, để nhảy tới khi bấm vào thông điệp. */
   objects: string[];
   params?: Record<string, string | number>;
@@ -126,6 +127,25 @@ export function checkModel(model: Model): ModelMessage[] {
   for (const id of cyclic) {
     const co = combos.get(id)!;
     out.push({ level: "error", code: "invalid_combo_cycle", objects: [id], params: { name: co.name } });
+  }
+
+  // Rigid diaphragm chỉ dùng với nút khung cùng cao độ; slave UX/UY/Rz
+  // không được có gối để tránh ràng buộc mâu thuẫn/chuyển phản lực sai.
+  const usedDiaphragmJoints = new Set<string>();
+  for (const diaphragm of model.diaphragms ?? []) {
+    const master = joints.get(diaphragm.master);
+    const members = [diaphragm.master, ...diaphragm.slaves];
+    const invalid = !master || new Set(members).size !== members.length
+      || members.some((id) => {
+        const j = joints.get(id);
+        return !j || Math.abs(j.z - master.z) > 1e-6 || usedDiaphragmJoints.has(id);
+      })
+      || diaphragm.slaves.some((id) => {
+        const r = joints.get(id)?.restraint;
+        return r && (r[0] || r[1] || r[5]);
+      });
+    if (invalid) out.push({ level: "error", code: "invalid_diaphragm", objects: [diaphragm.id], params: { name: diaphragm.name } });
+    members.forEach((id) => usedDiaphragmJoints.add(id));
   }
 
   const seen = new Map<string, string>();
