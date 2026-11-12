@@ -380,3 +380,24 @@ fn envelope_min_max_and_srss_are_componentwise_not_equilibrium_cases() {
         "nonlinear_combo_dependency"
     );
 }
+
+#[test]
+fn rigid_end_offset_reduces_flexible_span_and_transfers_support_moment() {
+    let l = 3.0_f64;
+    let p = 10.0_f64;
+    let rigid = 0.8_f64;
+    let mut m = model(
+        json!([{"id":"a","label":"1","x":0,"y":0,"z":0,"restraint":FIX},{"id":"b","label":"2","x":l,"y":0,"z":0}]),
+        json!([{"id":"f","label":"B1","kind":"beam","i":"a","j":"b","section":"s","offsets":{"i":rigid,"j":0.0}}]),
+        json!([{"id":"load","frame":"f","pattern":"p","kind":"point","direction":"gravity","value":p,"at":1.0}]),
+    );
+    let r = run(&m);
+    let c = &r.cases[0];
+    let expected_uz = -p * (l - rigid).powi(3) / (3.0 * E * I33);
+    assert!(close(c.displacements["b"][2], expected_uz, 1e-9));
+    assert!(close(c.reactions["a"][2], p, 1e-9));
+    assert!(close(c.reactions["a"][4], -p * l, 1e-9), "base reaction = {:?}", c.reactions["a"]);
+    assert!(close(c.frames["f"].x[0], rigid, 1e-9));
+    m.frames[0].offsets = Some(fem_core::FrameOffsets { i: l, j: 0.0 });
+    assert_eq!(analyze(&m, &Options::default()).err().unwrap().code, "invalid_offsets");
+}
