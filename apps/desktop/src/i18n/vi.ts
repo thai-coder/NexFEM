@@ -186,6 +186,7 @@ export const vi = {
     no_supports: "Mô hình chưa có gối nào",
     unused_section: "Tiết diện {name} chưa được dùng",
     invalid_section: "Tiết diện {name} có kích thước không hợp lệ",
+    invalid_offsets: "Thanh {name}: tổng vùng cứng vượt chiều dài thanh",
     invalid_releases: "Thanh {name}: nhả liên kết cả hai đầu không hợp lệ",
     missing_load_target: "Tải {name}: đối tượng gán tải không tồn tại hoặc vị trí tải sai",
     missing_load_pattern: "{name}: mẫu tải không tồn tại",
