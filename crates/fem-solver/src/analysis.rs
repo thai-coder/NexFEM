@@ -1225,8 +1225,7 @@ fn nonlinear_combine(
     let aggregate = |values: Vec<f64>| nonlinear_value(values.into_iter(), kind);
     let displacements = base
         .displacements
-        .iter()
-        .map(|(id, _)| {
+        .keys().map(|id| {
             (
                 id.clone(),
                 std::array::from_fn(|i| {
@@ -1242,8 +1241,7 @@ fn nonlinear_combine(
         .collect();
     let reactions = base
         .reactions
-        .iter()
-        .map(|(id, _)| {
+        .keys().map(|id| {
             (
                 id.clone(),
                 std::array::from_fn(|i| {
