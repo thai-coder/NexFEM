@@ -36,8 +36,9 @@ test.beforeEach(async ({ page }) => {
 test("tạo mô hình mới chỉ có lưới trục", async ({ page }) => {
   await page.keyboard.press("Control+n");
   const dlg = page.getByTestId("dlg-newModel");
-  await dlg.getByRole("radio", { name: /Chỉ lưới trục/ }).click();
   await page.getByTestId("new-name").fill("Nha_kho");
+  await page.getByTestId("new-next").click();
+  await dlg.getByRole("radio", { name: /Chỉ lưới trục/ }).click();
   await page.getByTestId("new-xs").fill("2@5");
   await page.getByTestId("new-ys").fill("4");
   await page.getByTestId("new-hs").fill("3@3");
@@ -54,6 +55,7 @@ test("tạo mô hình mới chỉ có lưới trục", async ({ page }) => {
 
 test("ô nhịp sai thì không cho tạo", async ({ page }) => {
   await page.keyboard.press("Control+n");
+  await page.getByTestId("new-next").click();
   await page.getByTestId("new-xs").fill("6, -2");
   await expect(page.getByTestId("create-model")).toBeDisabled();
 });
@@ -133,6 +135,7 @@ test("lưu .nxf rồi mở lại", async ({ page }) => {
 
   // Đổi mô hình rồi mở lại file đã lưu.
   await page.keyboard.press("Control+n");
+  await page.getByTestId("new-next").click();
   await page.getByTestId("dlg-newModel").getByRole("radio", { name: /Trống/ }).click();
   await page.getByTestId("create-model").click();
   expect((await model(page)).frames.length).toBe(0);

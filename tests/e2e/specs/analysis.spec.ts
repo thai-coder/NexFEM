@@ -72,6 +72,7 @@ test("nhãn kết quả 5B đúng loại và New/Open xoá case đang xem", asyn
   await toolbarCase.selectOption("co-srss");
 
   await page.keyboard.press("Control+n");
+  await page.getByTestId("new-next").click();
   await page.getByTestId("create-model").click();
   await expect(toolbarCase).toHaveCount(0);
   expect(await state(page)).toBe(false);
@@ -102,6 +103,7 @@ test("mô hình thiếu gối: báo mất ổn định và chọn nút có vấn
 
 test("không mất trạng thái mô hình chưa lưu sau khi tạo mới", async ({ page }) => {
   await page.keyboard.press("Control+n");
+  await page.getByTestId("new-next").click();
   await page.getByTestId("create-model").click();
   const dirty = await page.evaluate(() => (window as unknown as { __nexfem: { model: { getState(): { dirty: boolean } } } }).__nexfem.model.getState().dirty);
   expect(dirty).toBe(true);

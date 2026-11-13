@@ -1,4 +1,4 @@
-import { PROJECT_EXTENSION, parseProject, serializeProject } from "@nexfem/model-core";
+import { PROJECT_EXTENSION, parseProject, serializeProject, type Model } from "@nexfem/model-core";
 import { t } from "../i18n/index.ts";
 import { useModel } from "../stores/model.ts";
 import { load, save } from "../stores/persist.ts";
@@ -103,6 +103,42 @@ export async function openProject(): Promise<boolean> {
     document.body.appendChild(input);
     input.click();
   });
+}
+
+/** Chọn một file dự án chỉ để đọc thiết lập (đơn vị, tiêu chuẩn); không nạp vào ứng dụng. */
+export async function pickProjectModel(): Promise<{ model: Model; name: string } | null> {
+  try {
+    if (isTauri()) {
+      const { invoke, dialog } = await tauri();
+      const path = await dialog.open({ multiple: false, directory: false, filters: filters() });
+      if (typeof path !== "string") return null;
+      const data = await invoke<number[]>("read_project_file", { path });
+      return { model: parseProject(new Uint8Array(data)).model, name: basename(path) };
+    }
+    return await new Promise((resolve) => {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = `.${PROJECT_EXTENSION},.json`;
+      input.style.display = "none";
+      input.dataset.testid = "settings-input";
+      input.addEventListener("change", async () => {
+        const file = input.files?.[0];
+        input.remove();
+        if (!file) return resolve(null);
+        try {
+          resolve({ model: parseProject(new Uint8Array(await file.arrayBuffer())).model, name: file.name });
+        } catch (e) {
+          fail("openFailed", e);
+          resolve(null);
+        }
+      });
+      document.body.appendChild(input);
+      input.click();
+    });
+  } catch (e) {
+    fail("openFailed", e);
+    return null;
+  }
 }
 
 export async function saveProject(saveAs = false): Promise<boolean> {

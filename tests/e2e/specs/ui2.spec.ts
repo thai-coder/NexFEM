@@ -98,6 +98,7 @@ test("chọn tiêu chuẩn khi tạo mô hình mới", async ({ page }) => {
   await page.keyboard.press("Control+n");
   await page.getByTestId("code-concrete").selectOption("EN 1992-1-1");
   await page.getByTestId("code-steel").selectOption("AISC 360-22");
+  await page.getByTestId("new-next").click();
   await page.getByTestId("create-model").click();
   expect((await m(page)).designCodes).toMatchObject({ concrete: "EN 1992-1-1", steel: "AISC 360-22", loads: "TCVN 2737:2023" });
 });
