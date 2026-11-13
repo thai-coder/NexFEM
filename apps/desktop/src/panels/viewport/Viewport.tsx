@@ -1,6 +1,6 @@
 import { frameLength, jointMap, sectionProperties, toDisplay, unitLabel, type UnitSystem } from "@nexfem/model-core";
 import { readToken } from "@nexfem/ui";
-import { buildDeformedFrames, buildMomentDiagram, DARK_THEME, LIGHT_THEME, StructureViewer, viewTitle, type DeformedFrames, type MomentDiagram, type ViewSpec, type ViewerTheme } from "@nexfem/viewer";
+import { buildDeformedFrames, buildMomentDiagram, DARK_THEME, LIGHT_THEME, StructureViewer, viewTitle, type DeformedFrames, type MomentComponent, type MomentDiagram, type ViewSpec, type ViewerTheme } from "@nexfem/viewer";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { NumberField } from "../../components/fields.tsx";
 import { useT } from "../../i18n/index.ts";
@@ -17,7 +17,7 @@ export function Viewport() {
   const showDeformed = useResults((s) => s.showDeformed);
   const deformationCase = useResults(selectDeformationCase);
   const scale = useResults((s) => s.deformationScale);
-  const showMoment = useResults((s) => s.showMoment);
+  const momentComponent = useResults((s) => s.momentComponent);
   const momentScale = useResults((s) => s.momentScale);
   const current = useResults(selectActiveCase);
   const deformed = useMemo(
@@ -25,15 +25,15 @@ export function Viewport() {
     [showDeformed, deformationCase, model, scale],
   );
   const moment = useMemo(
-    () => showMoment && current ? buildMomentDiagram(model, current.frames, momentScale) : null,
-    [showMoment, current, model, momentScale],
+    () => momentComponent && current ? buildMomentDiagram(model, current.frames, momentScale, momentComponent) : null,
+    [momentComponent, current, model, momentScale],
   );
   const panes = Array.from({ length: layout }, (_, i) => i);
   return (
     <div className={`viewport-grid layout-${layout}`} data-testid="viewport">
       {panes.map((i) => (
         <Pane key={i} index={i} deformed={deformed} deformationCaseName={deformationCase?.name} showDeformed={showDeformed}
-          moment={moment} momentCase={showMoment ? current : undefined} />
+          moment={moment} momentComponent={momentComponent} momentCase={current} />
       ))}
     </div>
   );
@@ -66,12 +66,13 @@ function decode(s: string): ViewSpec {
   return { kind: "3d" };
 }
 
-function Pane({ index, deformed, deformationCaseName, showDeformed, moment, momentCase }: {
+function Pane({ index, deformed, deformationCaseName, showDeformed, moment, momentComponent, momentCase }: {
   index: number;
   deformed: DeformedFrames | null;
   deformationCaseName: string | undefined;
   showDeformed: boolean;
   moment: MomentDiagram | null;
+  momentComponent: MomentComponent | null;
   momentCase: CaseResult | undefined;
 }) {
   const T = useT();
@@ -233,7 +234,7 @@ function Pane({ index, deformed, deformationCaseName, showDeformed, moment, mome
           color={(theme === "dark" ? DARK_THEME : LIGHT_THEME).deformed}
         />
       )}
-      {momentCase && <MomentControls result={momentCase} units={model.units} appliedScale={moment?.scale}
+      {momentComponent && momentCase && <MomentControls component={momentComponent} result={momentCase} units={model.units} appliedScale={moment?.scale}
         visible={hasResultShape} color={(theme === "dark" ? DARK_THEME : LIGHT_THEME).moment} />}
       <div className="pane-body">
         <div className="pane-canvas" ref={host} />
@@ -277,21 +278,24 @@ function DeformationControls({ caseName, appliedScale, hasDeformedShape, project
   );
 }
 
-function MomentControls({ result, units, appliedScale, visible, color }: {
+function MomentControls({ component, result, units, appliedScale, visible, color }: {
+  component: MomentComponent;
   result: CaseResult;
   units: UnitSystem;
   appliedScale: number | undefined;
   visible: boolean;
   color: string;
 }) {
-  const { moment: labels, caseKinds, deformation } = useT().analysis;
+  const T = useT();
+  const { moment: labels, caseKinds, deformation } = T.analysis;
+  const params = { component: component.toUpperCase(), axis: component === "m2" ? "+3" : "−2" };
   const scale = useResults((s) => s.momentScale);
   const setScale = useResults((s) => s.setMomentScale);
   const scaleConversion = toDisplay(1, "length", units) / toDisplay(1, "moment", units);
   const scaleUnit = `${unitLabel("length", units)}/(${unitLabel("moment", units)})`;
   return (
     <div className="pane-deformation" style={{ borderInlineStartColor: color }} data-testid="moment-controls">
-      <span title={labels.directionHint}>{labels.title} · {result.name} · {caseKinds[result.kind]}</span>
+      <span title={T.fmt(labels.directionHint, params)}>{T.fmt(labels.title, params)} · {result.name} · {caseKinds[result.kind]}</span>
       <label title={labels.scaleHint}>
         {labels.scale}
         <NumberField value={(scale ?? appliedScale ?? 1) * scaleConversion} onChange={(value) => setScale(value / scaleConversion)}
@@ -299,7 +303,7 @@ function MomentControls({ result, units, appliedScale, visible, color }: {
         {scaleUnit}
       </label>
       <button type="button" className="preset-btn" aria-pressed={scale === null} onClick={() => setScale(null)}>{deformation.auto}</button>
-      {!visible && <span role="status">{labels.unavailable}</span>}
+      {!visible && <span role="status">{T.fmt(labels.unavailable, params)}</span>}
     </div>
   );
 }

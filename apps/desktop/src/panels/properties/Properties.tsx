@@ -232,20 +232,23 @@ function FrameProps({ frame, model, locked }: { frame: Frame; model: Model; lock
 
 function FrameMomentStations({ id, model }: { id: string; model: Model }) {
   const T = useT();
-  const result = useResults((s) => s.showMoment ? selectActiveCase(s) : undefined);
+  const component = useResults((s) => s.momentComponent);
+  const result = useResults(selectActiveCase);
   const forces = result && Object.hasOwn(result.frames, id) ? result.frames[id] : undefined;
-  if (!forces || !result) return <div className="muted span2">{T.props.resultsLater}</div>;
+  if (!component || !forces || !result) return <div className="muted span2">{T.props.resultsLater}</div>;
+  const name = component.toUpperCase();
+  const values = forces[component];
   const units = model.units;
   return (
     <div className="span2">
       <div className="muted">{result.name} · {T.analysis.caseKinds[result.kind]}</div>
-      <table className="data-table" aria-label={T.analysis.moment.stations} data-testid="moment-stations">
-        <thead><tr><th>{T.analysis.station} ({unitLabel("length", units)})</th><th>M3 ({unitLabel("moment", units)})</th></tr></thead>
+      <table className="data-table" aria-label={T.fmt(T.analysis.moment.stations, { component: name })} data-testid="moment-stations">
+        <thead><tr><th>{T.analysis.station} ({unitLabel("length", units)})</th><th>{name} ({unitLabel("moment", units)})</th></tr></thead>
         <tbody>
           {forces.x.map((x, k) => (
             <tr key={k}>
               <td className="num">{toDisplay(x, "length", units).toFixed(3)}</td>
-              <td className="num">{toDisplay(forces.m3[k]!, "moment", units).toFixed(2)}</td>
+              <td className="num">{toDisplay(values[k]!, "moment", units).toFixed(2)}</td>
             </tr>
           ))}
         </tbody>
