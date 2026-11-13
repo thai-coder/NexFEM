@@ -1,4 +1,5 @@
 import { frameLength, jointMap } from "./query.ts";
+import { sectionProperties } from "./sections.ts";
 import type { Model } from "./schema.ts";
 
 export type MessageLevel = "error" | "warning" | "info";
@@ -46,12 +47,12 @@ export function checkModel(model: Model): ModelMessage[] {
   // Một tiết diện hợp lệ về schema (các chiều > 0) vẫn có thể vô lý về hình học.
   for (const sec of model.frameSections) {
     const g = sec.geometry;
-    const invalid = g.shape === "I" ? (2 * g.tf >= g.h || g.tw >= g.bf)
+    const invalid = g.shape === "I" ? (2 * g.tf + 2 * (g.r ?? 0) >= g.h || g.tw + 2 * (g.r ?? 0) >= g.bf)
       : g.shape === "box" ? (2 * g.t >= g.h || 2 * g.t >= g.b)
       : g.shape === "pipe" ? (2 * g.t >= g.d) : false;
     const area = g.shape === "rect" ? g.b * g.h
       : g.shape === "circle" ? Math.PI * g.d ** 2 / 4
-      : g.shape === "I" ? 2 * g.bf * g.tf + (g.h - 2 * g.tf) * g.tw
+      : g.shape === "I" ? sectionProperties(g).A
       : g.shape === "box" ? g.b * g.h - (g.b - 2 * g.t) * (g.h - 2 * g.t)
       : Math.PI * (g.d ** 2 - (g.d - 2 * g.t) ** 2) / 4;
     const badShear = sec.shearAreas && (sec.shearAreas.a2 > area || sec.shearAreas.a3 > area);

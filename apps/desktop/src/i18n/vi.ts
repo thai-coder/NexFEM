@@ -361,7 +361,7 @@ export const vi = {
       title: "Tiết diện thanh",
       shape: "Hình dạng",
       shapes: { rect: "Chữ nhật", circle: "Tròn đặc", I: "Chữ I", box: "Hộp", pipe: "Ống" },
-      dims: { b: "Rộng b", h: "Cao h", d: "Đường kính d", bf: "Rộng cánh bf", tf: "Dày cánh tf", tw: "Dày bụng tw", t: "Dày t" },
+      dims: { b: "Rộng b", h: "Cao h", d: "Đường kính d", bf: "Rộng cánh bf", tf: "Dày cánh tf", tw: "Dày bụng tw", t: "Dày t", r: "Bán kính lượn chân r (0 = tiết diện hàn)" },
       props: "Đặc trưng hình học",
       shear: "Biến dạng cắt",
       timoshenko: "Timoshenko (bật tính cắt, mặc định Euler–Bernoulli)",

@@ -97,7 +97,7 @@ const SHAPE_DEFAULTS: Record<FrameShape["shape"], FrameShape> = {
 const DIM_KEYS: Record<FrameShape["shape"], string[]> = {
   rect: ["b", "h"],
   circle: ["d"],
-  I: ["h", "bf", "tf", "tw"],
+  I: ["h", "bf", "tf", "tw", "r"],
   box: ["h", "b", "t"],
   pipe: ["d", "t"],
 };
@@ -205,10 +205,10 @@ function frameSectionSection(T: Strings, model: Model): DefineSection<FrameSecti
             {DIM_KEYS[g.shape].map((k) => (
               <Field key={`${g.shape}-${k}`} label={T.dlg.frameSections.dims[k as keyof Strings["dlg"]["frameSections"]["dims"]]}>
                 <NF
-                  value={(g as unknown as Record<string, number>)[k]!}
+                  value={(g as unknown as Record<string, number | undefined>)[k] ?? 0}
                   onChange={(v) => update({ geometry: { ...g, [k]: v } as FrameShape })}
                   q="length"
-                  min={1e-6}
+                  min={k === "r" ? 0 : 1e-6}
                   label={k}
                   testId={`dim-${k}`}
                 />

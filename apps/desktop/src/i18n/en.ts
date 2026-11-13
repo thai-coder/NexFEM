@@ -362,7 +362,7 @@ export const en: Strings = {
       title: "Frame sections",
       shape: "Shape",
       shapes: { rect: "Rectangle", circle: "Solid circle", I: "I-shape", box: "Box", pipe: "Pipe" },
-      dims: { b: "Width b", h: "Depth h", d: "Diameter d", bf: "Flange width bf", tf: "Flange thickness tf", tw: "Web thickness tw", t: "Thickness t" },
+      dims: { b: "Width b", h: "Depth h", d: "Diameter d", bf: "Flange width bf", tf: "Flange thickness tf", tw: "Web thickness tw", t: "Thickness t", r: "Root radius r (0 = welded section)" },
       props: "Section properties",
       shear: "Shear deformation",
       timoshenko: "Timoshenko (include shear, default Euler–Bernoulli)",

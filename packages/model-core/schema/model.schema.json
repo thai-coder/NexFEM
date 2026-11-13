@@ -293,6 +293,10 @@
                   "tw": {
                     "type": "number",
                     "exclusiveMinimum": 0
+                  },
+                  "r": {
+                    "type": "number",
+                    "minimum": 0
                   }
                 },
                 "required": [
