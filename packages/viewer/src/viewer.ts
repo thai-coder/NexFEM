@@ -7,6 +7,7 @@ import { LineSegmentsGeometry } from "three/addons/lines/LineSegmentsGeometry.js
 import { CSS2DObject, CSS2DRenderer } from "three/addons/renderers/CSS2DRenderer.js";
 import { projectDeformedFrames, type DeformedFrames } from "./deformation.ts";
 import { momentDiagramPositions, type MomentDiagram } from "./moment.ts";
+import { DEFAULT_DISPLAY, applyDisplayFilter, normalizeDisplay, type DisplayOptions } from "./display.ts";
 import { TOL, findGridLine, segmentIntersectsRect, visibleObjects, type ViewSpec, type VisibleSet } from "./filter.ts";
 import { gridLines, orthoLock, pickSnap, snapPoints, type GridHit, type P3, type SnapKind, type SnapModes, type SnapPoint } from "./snap.ts";
 
@@ -101,13 +102,7 @@ export interface ViewerCallbacks {
 }
 
 /** Tuỳ chọn hiển thị trên khung nhìn. */
-export interface DisplayOptions {
-  joints: boolean;
-  jointLabels: boolean;
-  frameLabels: boolean;
-  /** Ký hiệu gối và nhả liên kết. */
-  restraints: boolean;
-}
+export type { DisplayOptions } from "./display.ts";
 
 /** Loại đối tượng được phép chọn. */
 export interface SelectFilter {
@@ -183,7 +178,7 @@ export class StructureViewer {
   // chế độ vẽ
   #drawing: DrawingOptions | null = null;
   #loadPattern: string | null = null;
-  #display: DisplayOptions = { joints: true, jointLabels: false, frameLabels: false, restraints: true };
+  #display: DisplayOptions = { ...DEFAULT_DISPLAY };
   /** Ký hiệu có kích thước theo mét: to ra khi phóng gần, nhưng luôn đủ lớn để thấy. */
   #symbolMats: { mat: THREE.PointsMaterial; world: number; min: number; max: number }[] = [];
   #filter: SelectFilter = { joint: true, frame: true, shell: true };
@@ -296,10 +291,16 @@ export class StructureViewer {
     if (was !== !!this.#drawing) this.#renderer.domElement.style.cursor = this.#drawing ? "crosshair" : "default";
   }
 
-  setDisplay(d: DisplayOptions): void {
-    if (JSON.stringify(d) === JSON.stringify(this.#display)) return;
-    this.#display = d;
+  /** Tuỳ chọn hiển thị của khung nhìn này; khoá thiếu lấy giá trị mặc định. */
+  setDisplay(d: Partial<DisplayOptions>): void {
+    const next = normalizeDisplay(d);
+    if (JSON.stringify(next) === JSON.stringify(this.#display)) return;
+    this.#display = next;
     this.#rebuild();
+  }
+
+  get display(): DisplayOptions {
+    return { ...this.#display };
   }
 
   setSelectFilter(f: SelectFilter): void {
@@ -649,13 +650,14 @@ export class StructureViewer {
     this.#selRect.style.background = `${this.#theme.selection}22`;
     const m = this.#model;
     if (!m) return this.invalidate();
-    const vis = visibleObjects(m, this.#view);
+    // Đối tượng bị ẩn theo tuỳ chọn hiển thị không vẽ, không chọn và không bắt điểm.
+    const vis = applyDisplayFilter(visibleObjects(m, this.#view), this.#display);
     this.#visible = vis;
     const joints = new Map(m.joints.map((j) => [j.id, j]));
     const t = this.#theme;
     const color = new THREE.Color();
 
-    this.#buildGrid(m, vis);
+    if (this.#display.grid) this.#buildGrid(m, vis);
 
     // Thanh: một LineSegments2 cho tất cả, màu theo loại.
     const pos: number[] = [];
@@ -709,7 +711,8 @@ export class StructureViewer {
       const mat = new THREE.MeshBasicMaterial({
         vertexColors: true,
         transparent: true,
-        opacity: this.#view.kind === "3d" ? 0.22 : 0.14,
+        // Tắt tô màu: mặt vẫn có (opacity 0) để bấm chọn sàn/vách được, chỉ còn đường viền.
+        opacity: this.#display.fillShells ? (this.#view.kind === "3d" ? 0.22 : 0.14) : 0,
         side: THREE.DoubleSide,
         depthWrite: false,
       });
@@ -766,7 +769,7 @@ export class StructureViewer {
       if (f.releases.i.some(Boolean)) rel.push(...at(0.08));
       if (f.releases.j.some(Boolean)) rel.push(...at(0.92));
     }
-    if (rel.length && this.#display.restraints) {
+    if (rel.length && this.#display.releases) {
       const g = new THREE.BufferGeometry();
       g.setAttribute("position", new THREE.Float32BufferAttribute(rel, 3));
       const mat = new THREE.PointsMaterial({ color: t.hover, size: 12, sizeAttenuation: false, map: symbolSprite("ring"), alphaTest: 0.5, depthTest: false });
@@ -777,7 +780,7 @@ export class StructureViewer {
     }
     this.#updateSymbolSizes();
 
-    if (this.#loadPattern) this.#buildLoads(m, vis, joints);
+    if (this.#loadPattern && this.#display.loads) this.#buildLoads(m, vis, joints);
     this.#buildTags(vis, joints);
 
     // Cột cắt qua mặt bằng: ô vuông.
@@ -905,11 +908,25 @@ export class StructureViewer {
     if (this.#display.jointLabels && this.#display.joints && vis.joints.length <= MAX_LABELS) {
       for (const j of vis.joints) tag(j.label, new THREE.Vector3(j.x, j.y, j.z), t.joint);
     }
-    if (this.#display.frameLabels && vis.frames.length <= MAX_LABELS) {
+    const { frameLabels, sectionNames, shellLabels } = this.#display;
+    if ((frameLabels || sectionNames) && vis.frames.length <= MAX_LABELS) {
+      const secName = new Map((this.#model?.frameSections ?? []).map((s) => [s.id, s.name]));
       for (const f of vis.frames) {
         const a = joints.get(f.i);
         const b = joints.get(f.j);
-        if (a && b) tag(f.label, new THREE.Vector3((a.x + b.x) / 2, (a.y + b.y) / 2, (a.z + b.z) / 2), f.kind === "column" ? t.column : f.kind === "beam" ? t.beam : t.brace);
+        if (!a || !b) continue;
+        const text = [frameLabels ? f.label : "", sectionNames ? (secName.get(f.section) ?? "?") : ""].filter(Boolean).join(" · ");
+        tag(text, new THREE.Vector3((a.x + b.x) / 2, (a.y + b.y) / 2, (a.z + b.z) / 2), f.kind === "column" ? t.column : f.kind === "beam" ? t.beam : t.brace);
+      }
+    }
+    if (shellLabels && vis.shells.length <= MAX_LABELS) {
+      for (const s of vis.shells) {
+        const pts = s.joints.map((id) => joints.get(id)).filter((j) => j !== undefined);
+        if (!pts.length) continue;
+        const c = new THREE.Vector3();
+        for (const p of pts) c.add(new THREE.Vector3(p.x, p.y, p.z));
+        c.divideScalar(pts.length);
+        tag(s.label, c, s.kind === "wall" ? t.wall : t.slab);
       }
     }
   }
@@ -1128,10 +1145,12 @@ export class StructureViewer {
     if (!d || !m || !vis?.plane) return null;
     const cursor = this.#cursorPoint(ev);
     if (!cursor) return null;
-    this.#snapCache ??= { points: snapPoints(m, vis, d.modes), lines: gridLines(m, vis) };
+    // Lưới trục đang ẩn thì không bắt điểm vào lưới.
+    const modes = this.#display.grid ? d.modes : { ...d.modes, grid: false, gridline: false };
+    this.#snapCache ??= { points: snapPoints(m, vis, modes), lines: gridLines(m, vis) };
     const r = this.#renderer.domElement.getBoundingClientRect();
     const px: [number, number] = [ev.clientX - r.left, ev.clientY - r.top];
-    let snap = pickSnap(cursor, px, this.#snapCache.points, this.#snapCache.lines, d.modes, (p) => this.worldToScreen(...p), 12, this.#worldPerPixel());
+    let snap = pickSnap(cursor, px, this.#snapCache.points, this.#snapCache.lines, modes, (p) => this.worldToScreen(...p), 12, this.#worldPerPixel());
     const anchor = d.preview.at(-1);
     if (ev.shiftKey && anchor && (snap.kind === "free" || snap.kind === "gridline")) {
       snap = { kind: snap.kind, p: orthoLock(anchor, snap.p, vis.plane.axis) };
@@ -1351,7 +1370,7 @@ export class StructureViewer {
   #gridAt(ev: { clientX: number; clientY: number }): GridHit | null {
     const m = this.#model;
     const vis = this.#visible;
-    if (!m || !vis?.plane) return null;
+    if (!m || !vis?.plane || !this.#display.grid) return null;
     const r = this.#renderer.domElement.getBoundingClientRect();
     const c: [number, number] = [ev.clientX - r.left, ev.clientY - r.top];
     let best: GridHit | null = null;

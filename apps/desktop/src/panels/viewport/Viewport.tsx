@@ -92,7 +92,7 @@ function Pane({ index, deformed, deformationCaseName, showDeformed, moment, mome
   const drawPoints = useUi((s) => (s.drawPane === index ? s.drawPoints : null));
   const drawing = tool !== "select" && canDrawIn(view);
   const loadDisplay = useUi((s) => s.loadDisplay);
-  const display = useUi((s) => s.display);
+  const display = useUi((s) => s.viewDisplay[index]!);
   const selectFilter = useUi((s) => s.selectFilter);
   const zoomAll = useUi((s) => s.zoomAll);
   const viewKey = JSON.stringify(view);
@@ -218,6 +218,15 @@ function Pane({ index, deformed, deformationCaseName, showDeformed, moment, mome
             ))}
           </span>
         )}
+        <button
+          className="preset-btn pane-options"
+          title={T.dlg.viewOptions.button}
+          aria-label={T.dlg.viewOptions.button}
+          data-testid={`view-options-${index}`}
+          onClick={() => useUi.getState().set({ activePane: index, dialog: { kind: "viewOptions", pane: index } })}
+        >
+          ⚙
+        </button>
         {tool !== "select" && (
           <span className={`pane-tool${drawing ? "" : " off"}`} title={drawing ? T.draw.hint[tool] : T.draw.not3d}>
             {T.cmd[`draw.${tool}`]}

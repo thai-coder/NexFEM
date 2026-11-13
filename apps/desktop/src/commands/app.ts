@@ -1,5 +1,5 @@
 import { checkModel } from "@nexfem/model-core";
-import type { ViewSpec } from "@nexfem/viewer";
+import type { DisplayOptions, ViewSpec } from "@nexfem/viewer";
 import { t } from "../i18n/index.ts";
 import type { Strings } from "../i18n/vi.ts";
 import { useModel } from "../stores/model.ts";
@@ -64,10 +64,14 @@ function toggleFocus() {
   }
 }
 
-function toggleDisplay(k: "joints" | "jointLabels" | "frameLabels" | "restraints") {
-  const d = ui().display;
-  ui().set({ display: { ...d, [k]: !d[k] } });
+/** Bật/tắt nhanh một tuỳ chọn hiển thị của ô đang hoạt động (giống ETABS: áp dụng cho cửa sổ hiện hành). */
+function toggleDisplay(k: keyof DisplayOptions) {
+  const s = ui();
+  const d = s.viewDisplay[s.activePane]!;
+  s.setViewDisplay(s.activePane, { ...d, [k]: !d[k] });
 }
+
+const activeDisplay = () => ui().viewDisplay[ui().activePane]!;
 
 function setActiveView(view: ViewSpec) {
   ui().setView(ui().activePane, view);
@@ -276,10 +280,11 @@ export const COMMANDS: AppCommand[] = [
     run: () => toggleFocus(),
     checked: () => ui().focusMode,
   },
-  { id: "view.showRestraints", run: () => toggleDisplay("restraints"), checked: () => ui().display.restraints },
-  { id: "view.showJoints", run: () => toggleDisplay("joints"), checked: () => ui().display.joints },
-  { id: "view.jointLabels", run: () => toggleDisplay("jointLabels"), checked: () => ui().display.jointLabels },
-  { id: "view.frameLabels", run: () => toggleDisplay("frameLabels"), checked: () => ui().display.frameLabels },
+  { id: "view.showRestraints", run: () => toggleDisplay("restraints"), checked: () => activeDisplay().restraints },
+  { id: "view.showJoints", run: () => toggleDisplay("joints"), checked: () => activeDisplay().joints },
+  { id: "view.jointLabels", run: () => toggleDisplay("jointLabels"), checked: () => activeDisplay().jointLabels },
+  { id: "view.frameLabels", run: () => toggleDisplay("frameLabels"), checked: () => activeDisplay().frameLabels },
+  { id: "view.options", icon: "view3d", run: () => ui().set({ dialog: { kind: "viewOptions", pane: ui().activePane } }) },
   {
     id: "ctx.info",
     icon: "info",
@@ -451,6 +456,7 @@ export const MENUS: { id: keyof Strings["menu"]; items: MenuItem[] }[] = [
       "view.jointLabels",
       "view.frameLabels",
       "view.showRestraints",
+      "view.options",
       "-",
       "view.toggleExplorer",
       "view.toggleProperties",
