@@ -562,10 +562,43 @@ select:disabled {
   white-space: nowrap;
 }
 
+.pane-body,
 .pane-canvas {
   position: relative;
   flex: 1;
   min-height: 0;
+}
+
+.pane-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.pane-deformation {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 3px 6px;
+  padding: 3px 6px;
+  border: 1px solid var(--color-border);
+  border-inline-start-width: 3px;
+  border-radius: 4px;
+  background: var(--color-surface);
+  font-size: var(--font-size-sm);
+  overflow-wrap: anywhere;
+}
+
+.pane-deformation label {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.pane-deformation button[aria-pressed="true"] {
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
 }
 
 .hover-tip {

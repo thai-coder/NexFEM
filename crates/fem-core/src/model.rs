@@ -19,6 +19,8 @@ pub struct Model {
     pub frame_sections: Vec<FrameSection>,
     pub shell_sections: Vec<ShellSection>,
     pub joints: Vec<Joint>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub diaphragms: Vec<Diaphragm>,
     pub frames: Vec<Frame>,
     pub shells: Vec<Shell>,
     pub load_patterns: Vec<LoadPattern>,
@@ -125,6 +127,15 @@ pub struct FrameSection {
     pub name: String,
     pub material: String,
     pub geometry: FrameShape,
+    /// Opt-in diện tích chịu cắt hữu hiệu dọc 2/3 (m²); None = Euler–Bernoulli.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub shear_areas: Option<ShearAreas>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ShearAreas {
+    pub a2: f64,
+    pub a3: f64,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -151,6 +162,14 @@ pub struct Joint {
     pub restraint: Option<[bool; 6]>,
 }
 
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Diaphragm {
+    pub id: String,
+    pub name: String,
+    pub master: String,
+    pub slaves: Vec<String>,
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum FrameKind {
@@ -172,6 +191,15 @@ pub struct Frame {
     /// Nhả liên kết đầu i / j: [P, V2, V3, T, M2, M3].
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub releases: Option<Releases>,
+    /// Rigid end zones từ tim nút dọc trục thanh (m).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offsets: Option<FrameOffsets>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct FrameOffsets {
+    pub i: f64,
+    pub j: f64,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

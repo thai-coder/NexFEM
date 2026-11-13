@@ -3,9 +3,10 @@ import { frameLength, jointMap, toDisplay, unitLabel } from "@nexfem/model-core"
 import { Icon } from "@nexfem/ui";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { currentStory, runCommand } from "../../commands/app.ts";
+import { ResultCaseSelect } from "../../components/ResultCaseSelect.tsx";
 import { useT } from "../../i18n/index.ts";
 import { useModel } from "../../stores/model.ts";
-import { useResults } from "../../stores/results.ts";
+import { selectActiveCase, useResults } from "../../stores/results.ts";
 import type { CaseResult } from "../../services/solver.ts";
 import { useUi, type BottomTab, type LogEntry } from "../../stores/ui.ts";
 import { parseConsole } from "./parse.ts";
@@ -314,10 +315,9 @@ function Tables() {
     window.addEventListener("nexfem:table", h);
     return () => window.removeEventListener("nexfem:table", h);
   }, []);
-  const results = useResults((s) => s.results);
-  const activeCase = useResults((s) => s.activeCase);
+  const hasResults = useResults((s) => s.results !== null);
+  const current = useResults(selectActiveCase);
   const isResult = RESULT_KINDS.includes(kind);
-  const current = results?.cases.find((c) => c.id === activeCase) ?? results?.cases[0];
   const { rows, cols } = isResult ? resultTable(kind, model, current, T) : tableDef(kind, model, T);
   const shown = rows.slice(0, 3000);
   const rowSel = (id: string) => id.split("#")[0]!;
@@ -339,19 +339,13 @@ function Tables() {
             ))}
           </select>
         </label>
-        {isResult && results && (
+        {isResult && current && (
           <label>
             {T.analysis.case}{" "}
-            <select value={current?.id ?? ""} onChange={(e) => useResults.getState().set({ activeCase: e.target.value })} data-testid="result-case">
-              {results.cases.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
+            <ResultCaseSelect testId="result-case" />
           </label>
         )}
-        {isResult && !results && <span className="muted">{T.analysis.noResults}</span>}
+        {isResult && !current && <span className="muted">{hasResults ? T.analysis.noAvailableCases : T.analysis.noResults}</span>}
         <span className="muted">{T.fmt(T.tables.rows, { n: rows.length })}</span>
       </div>
       <div className="table-scroll">

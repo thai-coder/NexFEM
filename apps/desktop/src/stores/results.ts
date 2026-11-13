@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import type { MomentComponent } from "@nexfem/viewer";
 import type { Results } from "../services/solver.ts";
 
 interface ResultsState {
@@ -7,14 +8,62 @@ interface ResultsState {
   elapsed: number;
   /** Trường hợp tải / tổ hợp đang xem. */
   activeCase: string | null;
-  set(patch: Partial<ResultsState>): void;
+  showDeformed: boolean;
+  /** null: tự tính hệ số từ mô hình và chuyển vị của case hiện tại. */
+  deformationScale: number | null;
+  deformationAnimationStart: number | null;
+  momentComponent: MomentComponent | null;
+  momentScale: number | null;
+  setResult(results: Results, elapsed: number): void;
+  selectCase(id: string): void;
+  toggleDeformed(): void;
+  setDeformationScale(scale: number | null): void;
+  toggleDeformationAnimation(): void;
+  toggleMoment(component: MomentComponent): void;
+  setMomentScale(scale: number | null): void;
   clear(): void;
 }
 
-export const useResults = create<ResultsState>((set) => ({
+export const useResults = create<ResultsState>((set, get) => ({
   results: null,
   elapsed: 0,
   activeCase: null,
-  set: (patch) => set(patch),
-  clear: () => set({ results: null, activeCase: null, elapsed: 0 }),
+  showDeformed: false,
+  deformationScale: null,
+  deformationAnimationStart: null,
+  momentComponent: null,
+  momentScale: null,
+  setResult: (results, elapsed) => set({ results, elapsed, activeCase: results.cases[0]?.id ?? null }),
+  selectCase: (id) => {
+    if (get().activeCase !== id && get().results?.cases.some((c) => c.id === id)) set({ activeCase: id, deformationAnimationStart: null });
+  },
+  toggleDeformed: () => set((s) => ({ showDeformed: !s.showDeformed, momentComponent: null, deformationAnimationStart: null })),
+  setDeformationScale: (scale) => {
+    if (scale === null || (Number.isFinite(scale) && scale > 0)) set({ deformationScale: scale });
+  },
+  toggleDeformationAnimation: () => {
+    const s = get();
+    if (s.showDeformed && selectDeformationCase(s)) {
+      set({ deformationAnimationStart: s.deformationAnimationStart === null ? performance.now() : null });
+    }
+  },
+  toggleMoment: (component) => set((s) => ({
+    momentComponent: s.momentComponent === component ? null : component,
+    showDeformed: false,
+    deformationAnimationStart: null,
+  })),
+  setMomentScale: (scale) => {
+    if (scale === null || (Number.isFinite(scale) && scale > 0)) set({ momentScale: scale });
+  },
+  clear: () => set({
+    results: null, activeCase: null, elapsed: 0, showDeformed: false, deformationScale: null,
+    deformationAnimationStart: null, momentComponent: null, momentScale: null,
+  }),
 }));
+
+export const selectActiveCase = (state: ResultsState) => state.results?.cases.find((c) => c.id === state.activeCase);
+
+export function selectDeformationCase(state: ResultsState) {
+  const result = selectActiveCase(state);
+  return result?.kind === "case" || result?.kind === "combo" ? result : undefined;
+}

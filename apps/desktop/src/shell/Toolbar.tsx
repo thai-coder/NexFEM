@@ -1,8 +1,10 @@
 import { Icon } from "@nexfem/ui";
 import { command, currentStory, runCommand, type CommandId } from "../commands/app.ts";
+import { ResultCaseSelect } from "../components/ResultCaseSelect.tsx";
 import { SplitButton } from "../components/SplitButton.tsx";
 import { useT } from "../i18n/index.ts";
 import { useModel } from "../stores/model.ts";
+import { useResults } from "../stores/results.ts";
 import { useUi } from "../stores/ui.ts";
 
 /** Một hàng thanh công cụ kiểu ETABS: tệp, sửa, khung nhìn, tầng, Define/Assign, phân tích. */
@@ -45,7 +47,7 @@ export function Toolbar() {
           label={T.menu.assign}
           icon="joint"
           title={T.menu.assign}
-          items={["assign.restraint", "assign.section", "assign.releases", "assign.frameLoad", "assign.shellLoad"]}
+          items={["assign.restraint", "assign.section", "assign.releases", "assign.offsets", "assign.diaphragm", "assign.frameLoad", "assign.shellLoad"]}
         />
       </Group>
       <Group>
@@ -54,7 +56,22 @@ export function Toolbar() {
         <Btn id="analyze.unlock" />
       </Group>
       <LoadDisplay />
+      <ResultCaseGroup />
     </div>
+  );
+}
+
+function ResultCaseGroup() {
+  const T = useT();
+  const hasCase = useResults((s) => s.activeCase !== null);
+  if (!hasCase) return null;
+  return (
+    <Group>
+      <label>
+        {T.props.results}{" "}
+        <ResultCaseSelect testId="toolbar-result-case" className="tb-select" />
+      </label>
+    </Group>
   );
 }
 

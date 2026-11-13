@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "id": "etabs-23.2.0-owner-e2k",
+  "source": {
+    "program": "ETABS",
+    "version": "23.2.0",
+    "textFile": "main:tests/fixtures/csi/etabs/23217_SMFs 3D model_updated v4.e2k",
+    "gitBlob": "c49d07245a3d87705570ad467eba897b917a52f4",
+    "forceUnit": "LB",
+    "lengthUnit": "IN",
+    "temperatureUnit": "C"
+  },
+  "status": "reference-results-pending",
+  "supportedComparisons": [],
+  "missing": [
+    "independent joint displacement tables",
+    "independent support reaction tables",
+    "independent frame-force tables",
+    "conventions mapping",
+    "supported-construct mapping",
+    "numerical tolerances by case"
+  ],
+  "note": "This is a real model text export, not ETABS numerical result evidence. Do not mark any solver comparison passed until reference tables exist."
+}

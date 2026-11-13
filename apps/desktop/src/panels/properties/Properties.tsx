@@ -21,6 +21,7 @@ import { NumberField } from "../../components/fields.tsx";
 import { runCommand } from "../../commands/app.ts";
 import { useT } from "../../i18n/index.ts";
 import { useModel } from "../../stores/model.ts";
+import { selectActiveCase, useResults } from "../../stores/results.ts";
 import { useUi } from "../../stores/ui.ts";
 import { DrawProps } from "./DrawProps.tsx";
 
@@ -211,7 +212,7 @@ function FrameProps({ frame, model, locked }: { frame: Frame; model: Model; lock
         <Row label={T.props.loads}>{loads ? T.fmt(T.props.loadCount, { n: loads }) : T.props.none}</Row>
       </Section>
       <Section title={T.props.results}>
-        <div className="muted span2">{T.props.resultsLater}</div>
+        <FrameMomentStations id={frame.id} model={model} />
       </Section>
       <ApplyBar
         dirty={dirty}
@@ -226,6 +227,33 @@ function FrameProps({ frame, model, locked }: { frame: Frame; model: Model; lock
         }}
       />
     </>
+  );
+}
+
+function FrameMomentStations({ id, model }: { id: string; model: Model }) {
+  const T = useT();
+  const component = useResults((s) => s.momentComponent);
+  const result = useResults(selectActiveCase);
+  const forces = result && Object.hasOwn(result.frames, id) ? result.frames[id] : undefined;
+  if (!component || !forces || !result) return <div className="muted span2">{T.props.resultsLater}</div>;
+  const name = component.toUpperCase();
+  const values = forces[component];
+  const units = model.units;
+  return (
+    <div className="span2">
+      <div className="muted">{result.name} · {T.analysis.caseKinds[result.kind]}</div>
+      <table className="data-table" aria-label={T.fmt(T.analysis.moment.stations, { component: name })} data-testid="moment-stations">
+        <thead><tr><th>{T.analysis.station} ({unitLabel("length", units)})</th><th>{name} ({unitLabel("moment", units)})</th></tr></thead>
+        <tbody>
+          {forces.x.map((x, k) => (
+            <tr key={k}>
+              <td className="num">{toDisplay(x, "length", units).toFixed(3)}</td>
+              <td className="num">{toDisplay(values[k]!, "moment", units).toFixed(2)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 

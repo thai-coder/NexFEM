@@ -4,7 +4,7 @@ import { t } from "../i18n/index.ts";
 import type { Strings } from "../i18n/vi.ts";
 import { useModel } from "../stores/model.ts";
 import { openProject, saveProject } from "../services/files.ts";
-import { useResults } from "../stores/results.ts";
+import { selectActiveCase, selectDeformationCase, useResults } from "../stores/results.ts";
 import { solve } from "../services/solver.ts";
 import { toDisplay, unitLabel } from "@nexfem/model-core";
 import { cancel as cancelDraw, finish as finishDraw, undoPoint } from "../tools/draw.ts";
@@ -108,8 +108,14 @@ export function runCheck(): number {
   return count("error");
 }
 
-/** Chạy phân tích: kiểm tra mô hình → bộ giải WebAssembly → khoá mô hình và lưu kết quả. */
+/** Khoá mô hình trước khi gửi sang Web Worker; không nhận F5/F6 chồng nhau. */
+let analysisInProgress = false;
+export function isAnalysisRunning(): boolean {
+  return analysisInProgress;
+}
+
 export async function runAnalysis(): Promise<boolean> {
+  if (analysisInProgress || model().locked) return false;
   const s = ui();
   s.set({ panels: { ...s.panels, bottom: true }, tool: "select", drawPoints: [] });
   const errors = runCheck();
@@ -118,34 +124,43 @@ export async function runAnalysis(): Promise<boolean> {
     s.set({ bottomTab: "messages" });
     return false;
   }
+  const m = model().model;
+  analysisInProgress = true;
+  useModel.setState({ locked: true });
   s.log("info", t().analysis.running, "analysis");
   s.set({ bottomTab: "log" });
-  const m = model().model;
   const t0 = performance.now();
-  let out;
+  let succeeded = false;
   try {
-    out = await solve(m);
+    const out = await solve(m);
+    // New/Open/reset during an asynchronous solve must never attach obsolete results.
+    if (model().model !== m) return false;
+    const ms = Math.round(performance.now() - t0);
+    if (!out.ok) {
+      s.log("error", t().fmt(t().analysis.failed, { message: out.error.message }), "analysis");
+      if (out.error.objects?.length) model().select(out.error.objects);
+      return false;
+    }
+    const r = out.results;
+    for (const w of r.warnings) s.log("warning", w.message, "analysis");
+    const u = m.units;
+    for (const c of r.cases.filter((x) => x.kind === "case")) {
+      const f = (v: number) => toDisplay(v, "force", u).toFixed(3);
+      s.log("info", t().fmt(t().analysis.balance, { name: c.name, applied: f(c.applied[2]!), reaction: f(c.sumReactions[2]!), unit: unitLabel("force", u) }), "analysis");
+    }
+    s.log("success", t().fmt(t().analysis.done, { joints: r.joints, frames: r.frames, dof: r.dof, cases: r.cases.length, ms }), "analysis");
+    useResults.getState().setResult(r, ms);
+    succeeded = true;
+    return true;
   } catch (e) {
-    s.log("error", t().fmt(t().analysis.loadFailed, { message: e instanceof Error ? e.message : String(e) }), "analysis");
+    if (model().model === m) {
+      s.log("error", t().fmt(t().analysis.loadFailed, { message: e instanceof Error ? e.message : String(e) }), "analysis");
+    }
     return false;
+  } finally {
+    analysisInProgress = false;
+    if (!succeeded && model().model === m) useModel.setState({ locked: false });
   }
-  const ms = Math.round(performance.now() - t0);
-  if (!out.ok) {
-    s.log("error", t().fmt(t().analysis.failed, { message: out.error.message }), "analysis");
-    if (out.error.objects?.length) model().select(out.error.objects);
-    return false;
-  }
-  const r = out.results;
-  for (const w of r.warnings) s.log("warning", w.message, "analysis");
-  const u = m.units;
-  for (const c of r.cases.filter((x) => x.kind === "case")) {
-    const f = (v: number) => toDisplay(v, "force", u).toFixed(3);
-    s.log("info", t().fmt(t().analysis.balance, { name: c.name, applied: f(c.applied[2]!), reaction: f(c.sumReactions[2]!), unit: unitLabel("force", u) }), "analysis");
-  }
-  s.log("success", t().fmt(t().analysis.done, { joints: r.joints, frames: r.frames, dof: r.dof, cases: r.cases.length, ms }), "analysis");
-  useResults.getState().set({ results: r, elapsed: ms, activeCase: r.cases[0]?.id ?? null });
-  useModel.setState({ locked: true });
-  return true;
 }
 
 const draw = (tool: Tool, icon: string, key?: string): AppCommand => ({
@@ -324,6 +339,8 @@ export const COMMANDS: AppCommand[] = [
   { id: "assign.restraint", icon: "joint", run: () => dialog("assignRestraint"), enabled: unlocked },
   { id: "assign.section", icon: "section", run: () => dialog("assignSection"), enabled: unlocked },
   { id: "assign.releases", icon: "beam", run: () => dialog("assignReleases"), enabled: unlocked },
+  { id: "assign.offsets", icon: "beam", run: () => dialog("assignOffsets"), enabled: unlocked },
+  { id: "assign.diaphragm", icon: "joint", run: () => dialog("assignDiaphragm"), enabled: unlocked },
   { id: "assign.frameLoad", icon: "load", run: () => dialog("assignFrameLoad"), enabled: unlocked },
   { id: "assign.shellLoad", icon: "slab", run: () => dialog("assignShellLoad"), enabled: unlocked },
 
@@ -353,11 +370,33 @@ export const COMMANDS: AppCommand[] = [
       useResults.getState().clear();
       ui().log("info", t().analysis.unlocked, "analysis");
     },
-    enabled: () => model().locked,
+    enabled: () => model().locked && !isAnalysisRunning(),
   },
 
-  later("display.deformed", 6, "deformed"),
-  later("display.moment", 6, "moment"),
+  {
+    id: "display.deformed",
+    icon: "deformed",
+    enabled: () => {
+      const s = useResults.getState();
+      return s.showDeformed || !!selectDeformationCase(s);
+    },
+    checked: () => useResults.getState().showDeformed,
+    run: () => useResults.getState().toggleDeformed(),
+  },
+  {
+    id: "display.moment",
+    icon: "moment",
+    enabled: () => !!selectActiveCase(useResults.getState()),
+    checked: () => useResults.getState().momentComponent === "m3",
+    run: () => useResults.getState().toggleMoment("m3"),
+  },
+  {
+    id: "display.momentM2",
+    icon: "moment",
+    enabled: () => !!selectActiveCase(useResults.getState()),
+    checked: () => useResults.getState().momentComponent === "m2",
+    run: () => useResults.getState().toggleMoment("m2"),
+  },
   later("display.shear", 6, "shear"),
   later("display.axial", 6, "axial"),
   later("design.concrete", 10),
@@ -437,9 +476,9 @@ export const MENUS: { id: keyof Strings["menu"]; items: MenuItem[] }[] = [
   },
   { id: "draw", items: ["draw.select", "-", "draw.joint", "draw.beam", "draw.column", "draw.brace", "draw.slab", "draw.wall", "-", "draw.finish", "draw.undoPoint"] },
   { id: "select", items: ["edit.selectAll", "select.byStory", "select.invert", "select.clear"] },
-  { id: "assign", items: ["assign.restraint", "-", "assign.section", "assign.releases", "-", "assign.frameLoad", "assign.shellLoad"] },
+  { id: "assign", items: ["assign.restraint", "-", "assign.section", "assign.releases", "assign.offsets", "assign.diaphragm", "-", "assign.frameLoad", "assign.shellLoad"] },
   { id: "analyze", items: ["analyze.check", "analyze.run", "analyze.unlock"] },
-  { id: "display", items: ["display.deformed", "display.moment", "display.shear", "display.axial"] },
+  { id: "display", items: ["display.deformed", "display.moment", "display.momentM2", "display.shear", "display.axial"] },
   { id: "design", items: ["design.concrete", "design.steel"] },
   { id: "tools", items: ["tools.palette", "-", "tools.theme", "tools.language", "tools.preferences"] },
   { id: "help", items: ["help.shortcuts", "help.about"] },

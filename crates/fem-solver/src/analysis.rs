@@ -8,10 +8,11 @@
 //! - Chỉ có trường hợp tải tĩnh tuyến tính và tổ hợp cộng tuyến tính.
 
 use crate::element::*;
-use crate::skyline::{reverse_cuthill_mckee, Skyline};
+use crate::matrix::{Matrix, SolveError};
+use crate::skyline::reverse_cuthill_mckee;
 use fem_core::{FrameShape, Model};
 use serde::Serialize;
-use std::collections::{BTreeMap, HashMap};
+use std::collections::{BTreeMap, HashMap, HashSet};
 
 const DOF_NAMES: [&str; 6] = ["Ux", "Uy", "Uz", "Rx", "Ry", "Rz"];
 
@@ -150,8 +151,12 @@ struct Elem {
     k_local: M12,
     released: [bool; 12],
     k_cond: M12,
+    /// Offset hình học của đầu mềm so với tim nút, theo hệ tổng thể.
+    offset_i: V3,
+    offset_j: V3,
+    offset_i_length: f64,
     /// Bậc tự do tổng thể của 12 thành phần (None = bị gối giữ).
-    dofs: [Option<usize>; 12],
+    dofs: [Vec<(usize, f64)>; 12],
     ji: usize,
     jj: usize,
 }
@@ -180,6 +185,76 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
         ));
     }
 
+    // Dữ liệu có thể được gọi thẳng từ API/WASM; không được tin rằng UI đã Check model.
+    // Tránh trường hợp tải biến mất im lặng nhưng vẫn trả "ok: true".
+    let pattern_ids: HashSet<&str> = model.load_patterns.iter().map(|x| x.id.as_str()).collect();
+    let frame_ids: HashSet<&str> = model.frames.iter().map(|x| x.id.as_str()).collect();
+    let shell_ids: HashSet<&str> = model.shells.iter().map(|x| x.id.as_str()).collect();
+    let case_ids: HashSet<&str> = model.load_cases.iter().map(|x| x.id.as_str()).collect();
+    let combo_ids: HashSet<&str> = model.combos.iter().map(|x| x.id.as_str()).collect();
+    for load in &model.frame_loads {
+        if !frame_ids.contains(load.frame.as_str()) || !pattern_ids.contains(load.pattern.as_str())
+        {
+            return Err(AnalysisError::new(
+                "invalid_frame_load",
+                format!(
+                    "Tải thanh {} tham chiếu tới thanh hoặc mẫu tải không tồn tại",
+                    load.id
+                ),
+                vec![load.id.clone()],
+            ));
+        }
+        if load.kind == "point" && !load.at.is_some_and(|a| (0.0..=1.0).contains(&a)) {
+            return Err(AnalysisError::new(
+                "invalid_frame_load",
+                format!("Tải tập trung {} có vị trí không hợp lệ", load.id),
+                vec![load.id.clone()],
+            ));
+        }
+    }
+    for load in &model.shell_loads {
+        if !shell_ids.contains(load.shell.as_str()) || !pattern_ids.contains(load.pattern.as_str())
+        {
+            return Err(AnalysisError::new(
+                "invalid_shell_load",
+                format!(
+                    "Tải sàn/vách {} tham chiếu tới đối tượng hoặc mẫu tải không tồn tại",
+                    load.id
+                ),
+                vec![load.id.clone()],
+            ));
+        }
+    }
+    for case in &model.load_cases {
+        if case
+            .loads
+            .iter()
+            .any(|x| !pattern_ids.contains(x.pattern.as_str()))
+        {
+            return Err(AnalysisError::new(
+                "invalid_load_case",
+                format!("Trường hợp {} chứa mẫu tải không tồn tại", case.name),
+                vec![case.id.clone()],
+            ));
+        }
+    }
+    for co in &model.combos {
+        if co
+            .items
+            .iter()
+            .any(|x| !case_ids.contains(x.case.as_str()) && !combo_ids.contains(x.case.as_str()))
+        {
+            return Err(AnalysisError::new(
+                "invalid_combo",
+                format!(
+                    "Tổ hợp {} tham chiếu trường hợp/tổ hợp không tồn tại",
+                    co.name
+                ),
+                vec![co.id.clone()],
+            ));
+        }
+    }
+
     // ---- nút tham gia phân tích: nút của các thanh
     let joint_by_id: HashMap<&str, usize> = model
         .joints
@@ -202,6 +277,70 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
     }
     let nodes: Vec<usize> = (0..model.joints.len()).filter(|&k| used[k]).collect();
     let node_of: HashMap<usize, usize> = nodes.iter().enumerate().map(|(n, &k)| (k, n)).collect();
+    // Master/slave thuộc cùng diaphragm; dùng MPC chính xác theo mặt phẳng XY:
+    // Ux_s = Ux_m - (y_s-y_m)*Rz_m; Uy_s = Uy_m + (x_s-x_m)*Rz_m; Rz_s=Rz_m.
+    let mut bindings: Vec<(usize, usize, f64, f64)> = Vec::new();
+    let mut occupied: HashSet<usize> = HashSet::new();
+    let mut slave_nodes: HashSet<usize> = HashSet::new();
+    for group in &model.diaphragms {
+        let mut members: Vec<usize> = Vec::new();
+        for id in std::iter::once(&group.master).chain(&group.slaves) {
+            let index = joint_by_id
+                .get(id.as_str())
+                .and_then(|&i| node_of.get(&i))
+                .copied()
+                .ok_or_else(|| {
+                    AnalysisError::new(
+                        "invalid_diaphragm",
+                        format!(
+                            "Diaphragm {} chứa nút không thuộc phần tử thanh",
+                            group.name
+                        ),
+                        vec![group.id.clone()],
+                    )
+                })?;
+            if !occupied.insert(index) {
+                return Err(AnalysisError::new(
+                    "invalid_diaphragm",
+                    format!("Diaphragm {} có nút lặp hoặc trùng nhóm khác", group.name),
+                    vec![group.id.clone()],
+                ));
+            }
+            members.push(index);
+        }
+        if members.len() < 2 {
+            return Err(AnalysisError::new(
+                "invalid_diaphragm",
+                format!("Diaphragm {} cần master và ít nhất một slave", group.name),
+                vec![group.id.clone()],
+            ));
+        }
+        let master = members[0];
+        let jm = &model.joints[nodes[master]];
+        for &slave in &members[1..] {
+            let js = &model.joints[nodes[slave]];
+            if (jm.z - js.z).abs() > 1e-6 {
+                return Err(AnalysisError::new(
+                    "invalid_diaphragm",
+                    format!("Diaphragm {} có nút khác cao độ", group.name),
+                    vec![group.id.clone()],
+                ));
+            }
+            let r = js.restraint.unwrap_or([false; 6]);
+            if r[0] || r[1] || r[5] {
+                return Err(AnalysisError::new(
+                    "invalid_diaphragm",
+                    format!(
+                        "Diaphragm {}: gối UX/UY/RZ trên slave không được hỗ trợ",
+                        group.name
+                    ),
+                    vec![group.id.clone()],
+                ));
+            }
+            slave_nodes.insert(slave);
+            bindings.push((slave, master, js.x - jm.x, js.y - jm.y));
+        }
+    }
     let pos = |n: usize| -> V3 {
         let j = &model.joints[nodes[n]];
         [j.x, j.y, j.z]
@@ -220,19 +359,46 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
         adj[a].push(b);
         adj[b].push(a);
     }
+    for &(slave, master, _, _) in &bindings {
+        adj[slave].push(master);
+        adj[master].push(slave);
+    }
     let order = reverse_cuthill_mckee(&adj);
     let mut dof_of = vec![[None; 6]; nodes.len()];
     let mut dof_owner: Vec<(usize, usize)> = Vec::new();
     for &n in &order {
         let r = model.joints[nodes[n]].restraint.unwrap_or([false; 6]);
         for d in 0..6 {
-            if !r[d] {
+            if !r[d] && !(slave_nodes.contains(&n) && matches!(d, 0 | 1 | 5)) {
                 dof_of[n][d] = Some(dof_owner.len());
                 dof_owner.push((n, d));
             }
         }
     }
     let ndof = dof_owner.len();
+    let mut dof_weights: Vec<[Vec<(usize, f64)>; 6]> = (0..nodes.len())
+        .map(|_| std::array::from_fn(|_| Vec::new()))
+        .collect();
+    for n in 0..nodes.len() {
+        for d in 0..6 {
+            if let Some(g) = dof_of[n][d] {
+                dof_weights[n][d].push((g, 1.0));
+            }
+        }
+    }
+    for &(slave, master, dx, dy) in &bindings {
+        dof_weights[slave][0] = dof_weights[master][0].clone();
+        dof_weights[slave][1] = dof_weights[master][1].clone();
+        if let Some(g) = dof_of[master][5] {
+            if dy != 0.0 {
+                dof_weights[slave][0].push((g, -dy));
+            }
+            if dx != 0.0 {
+                dof_weights[slave][1].push((g, dx));
+            }
+        }
+        dof_weights[slave][5] = dof_weights[master][5].clone();
+    }
 
     // ---- phần tử
     let materials: HashMap<&str, &fem_core::Material> =
@@ -261,15 +427,52 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
         })?;
         let (ji, jj) = pair(f);
         let (a, b) = (pos(ji), pos(jj));
-        let l = norm(sub(b, a));
-        if l < 1e-9 {
+        let full_length = norm(sub(b, a));
+        if full_length < 1e-9 {
             return Err(AnalysisError::new(
                 "zero_length",
                 format!("Thanh {} có chiều dài bằng 0", f.label),
                 vec![f.id.clone()],
             ));
         }
+        let start = f.offsets.as_ref().map_or(0.0, |o| o.i);
+        let end = f.offsets.as_ref().map_or(0.0, |o| o.j);
+        if !start.is_finite()
+            || !end.is_finite()
+            || start < 0.0
+            || end < 0.0
+            || start + end >= full_length - 1e-9
+        {
+            return Err(AnalysisError::new(
+                "invalid_offsets",
+                format!(
+                    "Thanh {}: vùng cứng không hợp lệ so với chiều dài thanh",
+                    f.label
+                ),
+                vec![f.id.clone()],
+            ));
+        }
+        let l = full_length - start - end;
+        let e1 = scale(sub(b, a), 1.0 / full_length);
+        let (offset_i, offset_j) = (scale(e1, start), scale(e1, -end));
+        let geometry_ok = match &sec.geometry {
+            FrameShape::I { h, bf, tf, tw } => 2.0 * *tf < *h && *tw < *bf,
+            FrameShape::Box { h, b, t } => 2.0 * *t < *h && 2.0 * *t < *b,
+            FrameShape::Pipe { d, t } => 2.0 * *t < *d,
+            _ => true,
+        };
         let (area, i22, i33, j) = section_props(&sec.geometry);
+        if !geometry_ok
+            || [area, i22, i33, j, mat.e]
+                .iter()
+                .any(|v| !v.is_finite() || *v <= 0.0)
+        {
+            return Err(AnalysisError::new(
+                "invalid_section",
+                format!("Tiết diện {} không có đặc trưng hình học hợp lệ", sec.name),
+                vec![sec.id.clone()],
+            ));
+        }
         let props = SectionProps {
             e: mat.e,
             g: mat.e / (2.0 * (1.0 + mat.nu)),
@@ -278,7 +481,22 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
             i33,
             j,
         };
-        let k_local = local_stiffness(&props, l);
+        let shear = if let Some(s) = &sec.shear_areas {
+            if [s.a2, s.a3]
+                .iter()
+                .any(|x| !x.is_finite() || *x <= 0.0 || *x > area)
+            {
+                return Err(AnalysisError::new(
+                    "invalid_section",
+                    format!("Tiết diện {}: diện tích chịu cắt không hợp lệ", sec.name),
+                    vec![sec.id.clone()],
+                ));
+            }
+            Some([s.a2, s.a3])
+        } else {
+            None
+        };
+        let k_local = local_stiffness_with_shear(&props, l, shear);
         let mut released = [false; 12];
         if let Some(r) = &f.releases {
             for c in 0..6 {
@@ -286,11 +504,17 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
                 released[6 + c] = r.j.get(c).copied().unwrap_or(false);
             }
         }
-        let (k_cond, _) = condense(&k_local, &[0.0; 12], &released);
-        let mut dofs = [None; 12];
+        let (k_cond, _) = condense(&k_local, &[0.0; 12], &released).map_err(|e| {
+            AnalysisError::new(
+                "invalid_releases",
+                format!("Thanh {}: {}", f.label, e),
+                vec![f.id.clone()],
+            )
+        })?;
+        let mut dofs: [Vec<(usize, f64)>; 12] = std::array::from_fn(|_| Vec::new());
         for d in 0..6 {
-            dofs[d] = dof_of[ji][d];
-            dofs[6 + d] = dof_of[jj][d];
+            dofs[d] = dof_weights[ji][d].clone();
+            dofs[6 + d] = dof_weights[jj][d].clone();
         }
         self_weight.push(mat.gamma * area);
         elems.push(Elem {
@@ -300,39 +524,59 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
             k_local,
             released,
             k_cond,
+            offset_i,
+            offset_j,
+            offset_i_length: start,
             dofs,
             ji,
             jj,
         });
     }
 
-    // ---- lắp ghép ma trận độ cứng (skyline)
+    // ---- lắp ghép MPC-reduced stiffness matrix (profile skyline).
     let mut first: Vec<usize> = (0..ndof).collect();
     for e in &elems {
-        if let Some(m) = e.dofs.iter().flatten().min() {
-            for &d in e.dofs.iter().flatten() {
-                first[d] = first[d].min(*m);
+        let involved: Vec<usize> = e.dofs.iter().flatten().map(|(g, _)| *g).collect();
+        if let Some(&min) = involved.iter().min() {
+            for &g in &involved {
+                first[g] = first[g].min(min);
             }
         }
     }
-    let mut k = Skyline::new(first);
+    let mut k = Matrix::new(first);
+    let backend = k.backend();
     for e in &elems {
-        let kg = stiffness_to_global(&e.ax, &e.k_cond);
+        let kg = rigid_end_stiffness(
+            &stiffness_to_global(&e.ax, &e.k_cond),
+            e.offset_i,
+            e.offset_j,
+        );
+        // Full a,b loops preserve both K_ab contributions when two DOFs collapse
+        // into the same generalized coordinate (rigid diaphragm).
         for a in 0..12 {
-            let Some(da) = e.dofs[a] else { continue };
-            for b in a..12 {
-                let Some(db) = e.dofs[b] else { continue };
-                if kg[a][b] != 0.0 || a == b {
-                    k.add(da, db, kg[a][b]);
+            for b in 0..12 {
+                if kg[a][b] == 0.0 {
+                    continue;
+                }
+                for &(da, wa) in &e.dofs[a] {
+                    for &(db, wb) in &e.dofs[b] {
+                        if da <= db {
+                            k.add(da, db, kg[a][b] * wa * wb);
+                        }
+                    }
                 }
             }
         }
     }
     // Bậc tự do xoay không có độ cứng (mọi thanh nối vào đều nhả mô men) → thêm lò xo đơn vị và cảnh báo.
     let mut stabilized = Vec::new();
+    let mut zero_rotation_dofs = Vec::new();
     for d in 0..ndof {
         if k.get(d, d) == 0.0 && dof_owner[d].1 >= 3 {
+            // Chỉ để loại bỏ bậc tự do xoay không có độ cứng và KHÔNG chịu tải.
+            // Nếu có mô men đặt vào đây, báo lỗi thay vì biến nó thành lò xo giả.
             k.add(d, d, 1.0);
+            zero_rotation_dofs.push(d);
             stabilized.push(model.joints[nodes[dof_owner[d].0]].label.clone());
         }
     }
@@ -347,6 +591,10 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
         );
     }
     let profile = k.profile();
+    if backend == "sparse_pcg_jacobi" {
+        warn(&mut warnings, "sparse_pcg",
+            "Đã chuyển sang giải thưa PCG; chưa thể coi đây là Cholesky trực tiếp và yêu cầu kiểm tra hội tụ".into(), vec![]);
+    }
     k.factor(1e-11).map_err(|s| {
         let (n, d) = dof_owner[s.dof];
         let jt = &model.joints[nodes[n]];
@@ -400,7 +648,11 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
         // Tải trên thanh.
         for fl in model.frame_loads.iter().filter(|l| l.pattern == lp.id) {
             let Some(&ei) = frame_by_id.get(fl.frame.as_str()) else {
-                continue;
+                return Err(AnalysisError::new(
+                    "invalid_frame_load",
+                    format!("Không có thanh cho tải {}", fl.id),
+                    vec![fl.id.clone()],
+                ));
             };
             let e = &elems[ei];
             let v = fl.value;
@@ -502,15 +754,14 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
     if !lost_joints.is_empty() {
         lost_joints.sort();
         lost_joints.dedup();
-        warn(
-            &mut warnings,
+        return Err(AnalysisError::new(
             "lost_loads",
             format!(
-                "Tải đặt lên {} nút không nối với thanh nào đã bị bỏ qua",
+                "{} nút có tải nhưng không nối với phần tử thanh: dừng phân tích để tránh mất tải",
                 lost_joints.len()
             ),
             lost_joints,
-        );
+        ));
     }
 
     // ---- giải từng trường hợp tải tĩnh tuyến tính
@@ -552,8 +803,8 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
         let mut applied = [0.0; 3];
         for (&n, v) in &joint_loads {
             for d in 0..6 {
-                if let Some(g) = dof_of[n][d] {
-                    rhs[g] += v[d];
+                for &(g, weight) in &dof_weights[n][d] {
+                    rhs[g] += weight * v[d];
                 }
             }
             for c in 0..3 {
@@ -577,24 +828,58 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
                     applied[c] += fac * tg[c];
                 }
             }
-            let (_, fc) = condense(&e.k_local, &feq, &e.released);
-            let fg = to_global(&e.ax, &fc);
+            let (_, fc) = condense(&e.k_local, &feq, &e.released).map_err(|msg| {
+                AnalysisError::new(
+                    "invalid_releases",
+                    format!("Thanh {}: {}", e.id, msg),
+                    vec![e.id.clone()],
+                )
+            })?;
+            let fg = rigid_end_force(&to_global(&e.ax, &fc), e.offset_i, e.offset_j);
             for c in 0..12 {
-                if let Some(g) = e.dofs[c] {
-                    rhs[g] += fg[c];
+                for &(g, weight) in &e.dofs[c] {
+                    rhs[g] += weight * fg[c];
                 }
             }
             feq_cond.insert(ei, fc);
         }
-        k.solve(&mut rhs);
+        let rhs_scale = rhs.iter().map(|x| x.abs()).fold(0.0_f64, f64::max);
+        for &d in &zero_rotation_dofs {
+            if rhs[d].abs() > 1e-10 * (1.0 + rhs_scale) {
+                let (n, direction) = dof_owner[d];
+                let joint = &model.joints[nodes[n]];
+                return Err(AnalysisError::new(
+                    "unrestrained_moment",
+                    format!(
+                        "Nút {}: mô men đặt vào bậc tự do xoay {} không có độ cứng",
+                        joint.label, DOF_NAMES[direction]
+                    ),
+                    vec![joint.id.clone()],
+                ));
+            }
+        }
+        k.solve(&mut rhs).map_err(|err| {
+            let (code, msg) = match err {
+                SolveError::NonConverged => (
+                    "sparse_no_convergence",
+                    "PCG thưa không hội tụ trong giới hạn; không xuất kết quả".to_string(),
+                ),
+                SolveError::Indefinite => (
+                    "sparse_indefinite",
+                    "Ma trận không xác định dương hoặc có cơ cấu mất ổn định".to_string(),
+                ),
+            };
+            AnalysisError::new(code, msg, vec![])
+        })?;
         let u = rhs;
 
         let disp_of = |n: usize| -> [f64; 6] {
             let mut d = [0.0; 6];
             for c in 0..6 {
-                if let Some(g) = dof_of[n][c] {
-                    d[c] = u[g];
-                }
+                d[c] = dof_weights[n][c]
+                    .iter()
+                    .map(|&(g, weight)| weight * u[g])
+                    .sum();
             }
             d
         };
@@ -610,22 +895,38 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
             let mut ug = [0.0; 12];
             ug[..6].copy_from_slice(&di);
             ug[6..].copy_from_slice(&dj);
-            let ul = to_local(&e.ax, &ug);
+            let ug_end = rigid_end_displacement(&ug, e.offset_i, e.offset_j);
+            let ul = to_local(&e.ax, &ug_end);
             let mut fl = [0.0; 12];
             for a in 0..12 {
                 fl[a] = (0..12).map(|b| e.k_cond[a][b] * ul[b]).sum::<f64>()
                     - feq_cond.get(&ei).map_or(0.0, |f| f[a]);
             }
-            let fg = to_global(&e.ax, &fl);
+            let fg = rigid_end_force(&to_global(&e.ax, &fl), e.offset_i, e.offset_j);
             for c in 0..6 {
                 joint_sum[e.ji][c] += fg[c];
                 joint_sum[e.jj][c] += fg[6 + c];
             }
             let loads: Vec<(f64, &MemberLoad)> = member_loads.get(&ei).cloned().unwrap_or_default();
-            frames.insert(
-                e.id.clone(),
-                stations(&fl, &loads, e.l, opts.stations.max(2)),
-            );
+            let mut frame_forces = stations(&fl, &loads, e.l, opts.stations.max(2));
+            for x in &mut frame_forces.x {
+                *x += e.offset_i_length;
+            }
+            frames.insert(e.id.clone(), frame_forces);
+        }
+        // Nội lực - ngoại lực tại mỗi nút. Chuyển phản lực ràng buộc slave
+        // về master (kèm mô men do cánh tay đòn), tránh mất cân bằng lực.
+        let mut residual = joint_sum;
+        for (&n, loads) in &joint_loads {
+            for c in 0..6 {
+                residual[n][c] -= loads[c];
+            }
+        }
+        for &(slave, master, dx, dy) in &bindings {
+            let r = residual[slave];
+            residual[master][0] += r[0];
+            residual[master][1] += r[1];
+            residual[master][5] += r[5] + dx * r[1] - dy * r[0];
         }
         let mut reactions = BTreeMap::new();
         let mut sum_reactions = [0.0; 3];
@@ -635,11 +936,10 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
             if !r.iter().any(|x| *x) {
                 continue;
             }
-            let applied_here = joint_loads.get(&n).copied().unwrap_or([0.0; 6]);
             let mut rv = [0.0; 6];
             for c in 0..6 {
                 if r[c] {
-                    rv[c] = joint_sum[n][c] - applied_here[c];
+                    rv[c] = residual[n][c];
                 }
             }
             for c in 0..3 {
@@ -659,37 +959,99 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
         });
     }
 
-    // ---- tổ hợp cộng tuyến tính (có thể lồng tổ hợp khác đã tính trước)
+    // ---- tổ hợp cộng tuyến tính: giải theo quan hệ phụ thuộc, không phụ thuộc thứ tự khai báo.
+    let mut pending: Vec<&fem_core::LoadCombo> = Vec::new();
     for co in &model.combos {
-        if co.kind != "linearAdd" {
+        if matches!(co.kind.as_str(), "linearAdd" | "envelope" | "srss") {
+            pending.push(co);
+        } else {
             warn(
                 &mut warnings,
                 "combo_skipped",
                 format!("Tổ hợp {} ({}) chưa được hỗ trợ, bỏ qua", co.name, co.kind),
                 vec![co.id.clone()],
             );
-            continue;
         }
-        let parts: Vec<(f64, &CaseResult)> = co
-            .items
-            .iter()
-            .filter_map(|it| {
-                cases
-                    .iter()
-                    .find(|c| c.id == it.case)
-                    .map(|c| (it.factor, c))
-            })
-            .collect();
-        if parts.len() != co.items.len() {
-            warn(
-                &mut warnings,
-                "combo_incomplete",
-                format!("Tổ hợp {} có thành phần chưa được tính, bỏ qua", co.name),
-                vec![co.id.clone()],
-            );
-            continue;
+    }
+    // Không được cộng đại số một kết quả bao/SRSS: đây là cực trị hoặc đại lượng
+    // thống kê theo thành phần, không phải trường hợp tải có nội lực đồng thời.
+    for co in &pending {
+        for part in &co.items {
+            if let Some(parent) = model.combos.iter().find(|p| p.id == part.case) {
+                if parent.kind != "linearAdd" {
+                    return Err(AnalysisError::new(
+                        "nonlinear_combo_dependency",
+                        format!(
+                            "Tổ hợp {} không được lồng kết quả {} ({})",
+                            co.name, parent.name, parent.kind
+                        ),
+                        vec![co.id.clone(), parent.id.clone()],
+                    ));
+                }
+            }
         }
-        cases.push(combine(co.id.clone(), co.name.clone(), &parts));
+    }
+    while !pending.is_empty() {
+        let before = pending.len();
+        pending.retain(|co| {
+            let parts: Vec<(f64, &CaseResult)> = co
+                .items
+                .iter()
+                .filter_map(|it| {
+                    cases
+                        .iter()
+                        .find(|c| c.id == it.case)
+                        .map(|c| (it.factor, c))
+                })
+                .collect();
+            if parts.len() != co.items.len() {
+                return true;
+            }
+            if parts.is_empty() {
+                return true; // Chặn tổ hợp trống phía dưới.
+            }
+            let computed = match co.kind.as_str() {
+                "linearAdd" => vec![combine(co.id.clone(), co.name.clone(), &parts)],
+                "srss" => vec![nonlinear_combine(
+                    co.id.clone(),
+                    co.name.clone(),
+                    &parts,
+                    "srss",
+                )],
+                "envelope" => vec![
+                    nonlinear_combine(
+                        format!("{}:max", co.id),
+                        format!("{} [MAX]", co.name),
+                        &parts,
+                        "envelopeMax",
+                    ),
+                    nonlinear_combine(
+                        format!("{}:min", co.id),
+                        format!("{} [MIN]", co.name),
+                        &parts,
+                        "envelopeMin",
+                    ),
+                ],
+                _ => unreachable!(),
+            };
+            cases.extend(computed);
+            false
+        });
+        if pending.len() == before {
+            let stuck = pending
+                .iter()
+                .map(|x| x.name.as_str())
+                .collect::<Vec<_>>()
+                .join(", ");
+            return Err(AnalysisError::new(
+                "combo_dependency",
+                format!(
+                    "Tổ hợp tải có phụ thuộc vòng hoặc thành phần chưa tính được: {}",
+                    stuck
+                ),
+                pending.iter().map(|x| x.id.clone()).collect(),
+            ));
+        }
     }
 
     Ok(Results {
@@ -844,4 +1206,102 @@ fn combine(id: String, name: String, parts: &[(f64, &CaseResult)]) -> CaseResult
         }
     }
     r
+}
+
+/// Tính từng thành phần của envelope (MAX/MIN) hoặc SRSS. Các cực trị không
+/// đồng thời, tổng tải/tổng phản lực **không** được dùng để kiểm tra cân bằng.
+/// SRSS ở đây là phép cộng căn tổng bình phương của các CASE tĩnh độc lập,
+/// không thay thế phân tích phổ phản ứng/modal.
+fn nonlinear_value<I: Iterator<Item = f64>>(values: I, kind: &str) -> f64 {
+    match kind {
+        "envelopeMax" => values.fold(f64::NEG_INFINITY, f64::max),
+        "envelopeMin" => values.fold(f64::INFINITY, f64::min),
+        "srss" => values.map(|v| v * v).sum::<f64>().sqrt(),
+        _ => unreachable!(),
+    }
+}
+
+fn nonlinear_combine(
+    id: String,
+    name: String,
+    parts: &[(f64, &CaseResult)],
+    kind: &str,
+) -> CaseResult {
+    let base = parts[0].1;
+    let aggregate = |values: Vec<f64>| nonlinear_value(values.into_iter(), kind);
+    let displacements = base
+        .displacements
+        .keys()
+        .map(|id| {
+            (
+                id.clone(),
+                std::array::from_fn(|i| {
+                    aggregate(
+                        parts
+                            .iter()
+                            .map(|(fac, c)| fac * c.displacements[id][i])
+                            .collect(),
+                    )
+                }),
+            )
+        })
+        .collect();
+    let reactions = base
+        .reactions
+        .keys()
+        .map(|id| {
+            (
+                id.clone(),
+                std::array::from_fn(|i| {
+                    aggregate(
+                        parts
+                            .iter()
+                            .map(|(fac, c)| fac * c.reactions[id][i])
+                            .collect(),
+                    )
+                }),
+            )
+        })
+        .collect();
+    let frames = base
+        .frames
+        .iter()
+        .map(|(id, v)| {
+            let series = |get: fn(&FrameForces) -> &Vec<f64>| -> Vec<f64> {
+                (0..v.x.len())
+                    .map(|i| {
+                        aggregate(
+                            parts
+                                .iter()
+                                .map(|(fac, c)| fac * get(&c.frames[id])[i])
+                                .collect(),
+                        )
+                    })
+                    .collect()
+            };
+            (
+                id.clone(),
+                FrameForces {
+                    x: v.x.clone(),
+                    p: series(|f| &f.p),
+                    v2: series(|f| &f.v2),
+                    v3: series(|f| &f.v3),
+                    t: series(|f| &f.t),
+                    m2: series(|f| &f.m2),
+                    m3: series(|f| &f.m3),
+                },
+            )
+        })
+        .collect();
+    CaseResult {
+        id,
+        name,
+        kind: kind.into(),
+        displacements,
+        reactions,
+        frames,
+        // Không có ý nghĩa cân bằng vì các thành phần không đồng thời.
+        applied: [0.0; 3],
+        sum_reactions: [0.0; 3],
+    }
 }
