@@ -303,6 +303,18 @@ export const en: Strings = {
       storyMode: "Story type",
       steelDbNote: "The steel section database will be added once a section table source is available.",
     },
+    steelLibrary: {
+      import: "Load steel library (CSV)…",
+      clear: "Remove library",
+      none: "No steel library loaded. Load a CSV from a standard or catalogue you are licensed to use (TCVN 7571, EN 10365, AISC); see docs/steel-library.md.",
+      status: "{name}: {n} sections; {checked} checked against the table, {flagged} outside tolerance.",
+      imported: "Steel library {name}: {n} sections loaded, {e} rows with errors.",
+      noSteel: "The model has no steel material: library sections will use the first material. Add a steel material in Define ▸ Materials.",
+      errors: "{n} rows could not be read",
+      errorLine: "Row {line}: {message}",
+      flaggedTitle: "{n} sections differ from the table beyond tolerance (A, I ≤ 1 %, box ≤ 3 %, J ≤ 5 %)",
+      section: "Section",
+    },
     viewOptions: {
       title: "View options",
       objects: "Objects",

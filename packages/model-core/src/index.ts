@@ -4,6 +4,7 @@ export * from "./sections.ts";
 export * from "./library.ts";
 export * from "./query.ts";
 export * from "./templates.ts";
+export * from "./steel-library.ts";
 export * from "./commands.ts";
 export * from "./validation.ts";
 export * from "./definitions.ts";

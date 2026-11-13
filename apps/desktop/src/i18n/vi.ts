@@ -302,6 +302,18 @@ export const vi = {
       storyMode: "Kiểu tầng",
       steelDbNote: "Cơ sở dữ liệu thép hình sẽ thêm khi có nguồn bảng thép.",
     },
+    steelLibrary: {
+      import: "Nạp thư viện thép (CSV)…",
+      clear: "Gỡ thư viện",
+      none: "Chưa nạp thư viện thép. Nạp file CSV từ bảng tiêu chuẩn hoặc catalogue bạn có quyền dùng (TCVN 7571, EN 10365, AISC); xem docs/steel-library.md.",
+      status: "{name}: {n} tiết diện; đối chiếu được {checked}, lệch quá ngưỡng {flagged}.",
+      imported: "Thư viện thép {name}: nạp {n} tiết diện, {e} dòng lỗi.",
+      noSteel: "Mô hình chưa có vật liệu thép: tiết diện lấy từ thư viện sẽ dùng vật liệu đầu tiên. Thêm vật liệu thép ở Define ▸ Vật liệu.",
+      errors: "{n} dòng không đọc được",
+      errorLine: "Dòng {line}: {message}",
+      flaggedTitle: "{n} tiết diện lệch quá ngưỡng so với bảng (A, I ≤ 1 %, hộp ≤ 3 %, J ≤ 5 %)",
+      section: "Tiết diện",
+    },
     viewOptions: {
       title: "Tuỳ chọn hiển thị",
       objects: "Đối tượng",

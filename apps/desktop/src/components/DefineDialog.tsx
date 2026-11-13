@@ -20,6 +20,10 @@ export interface DefineSection<T extends Item = Item> {
   form(item: T, update: (patch: Partial<T>) => void, ctx: { model: Model; drafts: Drafts }): ReactNode;
   /** Danh sách mẫu để "Thêm từ thư viện". */
   library?: T[];
+  /** Nhóm của mục thư viện (hiển thị thành optgroup). */
+  libraryGroup?(item: T): string;
+  /** Nội dung thêm dưới danh sách (ví dụ nạp thư viện thép). */
+  toolbar?: ReactNode;
   icon?: string;
 }
 
@@ -200,13 +204,24 @@ export function DefineDialog({
               }}
             >
               <option value="">{T.dlg.fromLibrary}</option>
-              {section.library.map((x) => (
-                <option key={x.id} value={x.id}>
-                  {x.name}
-                </option>
-              ))}
+              {section.libraryGroup
+                ? [...new Set(section.library.map((x) => section.libraryGroup!(x)))].map((g) => (
+                    <optgroup key={g} label={g}>
+                      {section.library!.filter((x) => section.libraryGroup!(x) === g).map((x) => (
+                        <option key={x.id} value={x.id}>
+                          {x.name}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))
+                : section.library.map((x) => (
+                    <option key={x.id} value={x.id}>
+                      {x.name}
+                    </option>
+                  ))}
             </select>
           )}
+          {section.toolbar}
         </div>
         <div className="define-form">
           {current ? (
