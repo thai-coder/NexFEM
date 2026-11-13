@@ -1,5 +1,9 @@
 # NexFEM — Instructions for Claude
 
+## Bàn giao giữa các phiên
+
+Đọc [PROJECT_STATUS.md](PROJECT_STATUS.md) và [quy trình bàn giao](docs/HANDOFF.md) khi bắt đầu hoặc tiếp tục nhiệm vụ. Ghi checkpoint sau mỗi mốc có thể tiếp tục và ngay khi có dấu hiệu sắp chạm giới hạn. Nếu đang dở khi phải dừng, lưu trạng thái `PAUSED`, nơi khôi phục mã và hành động đầu tiên cho phiên sau.
+
 ## Owner-approved decision — 2026-11-09
 
 **Prioritize CSI Text Import (.e2k for ETABS; .s2k for SAP2000) and a reproducible ETABS/SAP2000 benchmark/validation suite BEFORE developing the live CSI OAPI bridge.**
