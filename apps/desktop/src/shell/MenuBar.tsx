@@ -15,7 +15,7 @@ export function MenuBar() {
   useModel();
   useResults((s) => s.activeCase);
   useResults((s) => s.showDeformed);
-  useResults((s) => s.showMoment);
+  useResults((s) => s.momentComponent);
   const theme = useUi((s) => s.theme);
   const lang = useUi((s) => s.lang);
   const name = useModel((s) => s.model.name);

@@ -2,7 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 
 type Viewer = {
   deformedBounds: { min: { x: number; y: number; z: number }; max: { x: number; y: number; z: number } } | null;
-  momentBounds: { min: { z: number }; max: { z: number } } | null;
+  momentBounds: { min: { y: number; z: number }; max: { y: number; z: number } } | null;
   deformationAnimationProgress: number | null;
   cameraState: { position: number[]; target: number[] };
   worldToScreen(x: number, y: number, z: number): [number, number];
@@ -37,10 +37,10 @@ async function displayMenu(page: Page, label = "Biến dạng") {
   return page.getByRole("menuitem", { name: label, exact: true });
 }
 
-async function openCantilever(page: Page) {
+async function openCantilever(page: Page, model = cantilever) {
   await page.getByTestId("toolbar").locator('[data-command="file.open"]').click();
   await page.getByTestId("open-input").setInputFiles({
-    name: "cantilever.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(cantilever)),
+    name: "cantilever.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(model)),
   });
   await expect(page).toHaveTitle(/cantilever\.json/);
 }
@@ -178,6 +178,63 @@ test("chạy và dừng hình biến dạng tĩnh, đổi case đưa hình về 
   await (await displayMenu(page, "Biểu đồ M3")).click();
   await expect(pane.getByTestId("moment-controls")).toBeVisible();
   await expect.poll(progress).toBeNull();
+});
+
+test("biểu đồ M2 của công xôn chịu tải ngang, đổi M2/M3 giữ scale và case", async ({ page }) => {
+  await expect(await displayMenu(page, "Biểu đồ M2")).toBeDisabled();
+  await openCantilever(page, {
+    ...cantilever,
+    frameLoads: [...cantilever.frameLoads, { id: "ly", frame: "f", pattern: "p", kind: "point", direction: "globalY", value: 10, at: 1 }],
+  });
+  await page.keyboard.press("F5");
+  const cases = page.getByTestId("toolbar-result-case");
+  await expect(cases).toHaveValue("c");
+  await (await displayMenu(page, "Biểu đồ M2")).click();
+
+  const moment = (index: number) => page.evaluate((i) =>
+    (window as unknown as { __nexfemViewers: Viewer[] }).__nexfemViewers[i]!.momentBounds, index);
+  const plan = page.getByTestId("pane-0");
+  const pane = page.getByTestId("pane-1");
+  const controls = pane.getByTestId("moment-controls");
+  const scale = controls.getByTestId("moment-scale");
+  await expect(controls).toContainText("Biểu đồ M2");
+  await expect.poll(async () => (await moment(1))?.min.y).toBeCloseTo(-0.18, 6);
+  await expect.poll(async () => (await moment(0))?.min.y).toBeCloseTo(-0.18, 6);
+  await plan.locator(".pane-title").selectOption("elev:g:y0");
+  await expect.poll(() => moment(0)).toBeNull();
+  await expect(plan.getByRole("status")).toContainText("M2");
+
+  await scale.fill("0.01");
+  await expect.poll(async () => (await moment(1))?.min.y).toBeCloseTo(-0.30, 6);
+  await pane.getByTestId("preset-front").click();
+  const canvas = (await pane.locator(".pane-canvas").boundingBox())!;
+  const point = await page.evaluate(() => (window as unknown as { __nexfemViewers: Viewer[] }).__nexfemViewers[1]!.worldToScreen(1.5, 0, 0));
+  await page.mouse.click(canvas.x + point[0], canvas.y + point[1]);
+  const stations = page.getByRole("table", { name: "M2 tại các điểm tính" });
+  const rows = stations.locator("tbody tr");
+  await expect(rows).toHaveCount(9);
+  const values = await rows.evaluateAll((items) => items.map((row) =>
+    Array.from(row.querySelectorAll("td"), (cell) => Number(cell.textContent))));
+  values.forEach(([x, m2], k) => {
+    const station = 3 * k / 8;
+    expect(x).toBeCloseTo(1000 * station, 3);
+    expect(m2).toBeCloseTo(1000 * 10 * (3 - station), 2);
+  });
+
+  await cases.selectOption("k");
+  await expect.poll(async () => (await moment(1))?.min.y).toBeCloseTo(-0.45, 6);
+  await (await displayMenu(page, "Biểu đồ M3")).click();
+  await expect(controls).toContainText("Biểu đồ M3");
+  await expect(scale).toHaveValue("0.01");
+  await expect(cases).toHaveValue("k");
+  await expect.poll(async () => (await moment(1))?.max.z).toBeCloseTo(0.45, 6);
+  await (await displayMenu(page, "Biểu đồ M2")).click();
+  await expect.poll(async () => (await moment(1))?.min.y).toBeCloseTo(-0.45, 6);
+  await controls.getByRole("button", { name: "Tự động" }).click();
+  await expect.poll(async () => (await moment(1))?.min.y).toBeCloseTo(-0.18, 6);
+  await page.keyboard.press("F6");
+  await expect(controls).toHaveCount(0);
+  await expect.poll(() => moment(1)).toBeNull();
 });
 
 test("lớp biến dạng dùng được với 1/2/4 ô và giữ thao tác trên mô hình gốc", async ({ page }) => {
