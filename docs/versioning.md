@@ -1,14 +1,27 @@
 # Đánh số phiên bản
 
-Cập nhật: 07/11/2026
+Cập nhật: 14/11/2026
 
 ## Quy tắc
 
-- Phiên bản có dạng **`MAJOR.MINOR.BUILD`**, ví dụ `0.1.16`.
-- `MAJOR.MINOR` ghi trong file [`VERSION`](../VERSION) ở gốc repo (hiện `0.1`); đổi tay khi có mốc lớn.
-- `BUILD` là **số lần chạy CI** (`github.run_number`): **mỗi lần đẩy code lên nhánh phát triển là một phiên bản mới**, luôn tăng dần, không trùng.
+Phiên bản có dạng **`X.Y.Z`** (quy tắc do chủ dự án chốt ngày 14/11/2026):
+
+| Phần | Ý nghĩa | Công thức | Ví dụ |
+| --- | --- | --- | --- |
+| `X` | năm | `năm − 2026` | 2026 → 0, 2027 → 1, 2028 → 2 |
+| `Y` | tháng, **đếm liên tục** từ tháng 10/2026, không quay về 1 khi sang năm | `12 × (năm − 2026) + tháng − 10` | 11/2026 → 1, 12/2026 → 2, 01/2027 → 3, 10/2027 → 12 |
+| `Z` | số lần cải tiến = số lần chạy CI (`github.run_number`) | tăng mãi, **không đặt lại** khi đổi tháng hay năm | 153 → 154 → 155 … |
+
+- Hôm nay (11/2026) là `0.1.Z`; bản `0.1.153` là bản cuối đã theo đúng quy tắc, các bản sau là `0.1.154`, … cho đến hết tháng 11. Sang 12/2026 thì `0.2.Z` với `Z` tiếp tục tăng (không về 0). Sang 01/2027 thì `1.3.Z`.
+- **Mỗi lần đẩy code lên nhánh phát triển là một phiên bản mới**, luôn tăng dần, không trùng.
+- `X.Y` hiện lấy từ file [`VERSION`](../VERSION) ở gốc repo (đang `0.1`) và **phải đổi tay đầu mỗi tháng** theo công thức trên. Việc tính tự động `X.Y` từ ngày chạy CI trong `scripts/set-version.mjs` chưa làm (ghi trong "Việc tiếp theo").
+- Giới hạn kỹ thuật: MSI chỉ nhận phần thứ nhất ≤ 255, thứ hai ≤ 255, thứ ba ≤ 65535, nên `Z` còn dùng được đến 65535 lần chạy CI (hiện 153).
 - Ở Windows, phiên bản file hiển thị 4 số: `0.1.16.0`.
 - Bản chạy `pnpm dev`/`cargo build` trên máy lập trình mang phiên bản `0.1.0` (chưa qua CI).
+
+## Việc tiếp theo
+
+- Cho `scripts/set-version.mjs --build` tự tính `X.Y` từ ngày chạy CI (UTC) thay vì đọc `VERSION`, để không quên đổi tay đầu tháng; thêm test cho các mốc 11/2026, 12/2026, 01/2027.
 
 ## Phiên bản xuất hiện ở đâu
 
