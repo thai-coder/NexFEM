@@ -284,6 +284,7 @@ test("lớp biến dạng dùng được với 1/2/4 ô và giữ thao tác trê
   await expect.poll(() => bounds(page, 0)).not.toBeNull();
 
   await page.keyboard.press("Control+n");
+  await page.getByTestId("new-next").click();
   await page.getByTestId("create-model").click();
   await expect(page.getByTestId("deformation-controls")).toHaveCount(0);
   await expect.poll(() => bounds(page, 0)).toBeNull();

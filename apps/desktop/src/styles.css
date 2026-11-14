@@ -1926,3 +1926,21 @@ input[aria-invalid="true"] {
 .start-page .link:hover {
   text-decoration: underline;
 }
+
+/* ---------------------------------------------- new model: two steps */
+
+.init-modes {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 8px 0;
+}
+.radio-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0;
+}
+.init-block {
+  margin: 2px 0 8px 22px;
+}

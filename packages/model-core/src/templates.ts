@@ -16,10 +16,30 @@ export interface RcFrameOptions {
   concrete?: string;
   /** Có tạo sàn không (mặc định có). */
   slabs?: boolean;
-  /** "frame": dựng cột, dầm, sàn; "grid": chỉ lưới trục, tầng và định nghĩa. */
-  objects?: "frame" | "grid";
+  /**
+   * "frame": cột, dầm, sàn; "grid": chỉ lưới trục, tầng và định nghĩa;
+   * "flatSlab": cột và sàn, không dầm; "flatSlabBeams": cột và sàn, chỉ có dầm biên (chu vi).
+   * Sàn phẳng chưa có độ cứng shell (Giai đoạn 9): tải sàn chuyển thẳng về cột qua các nút.
+   */
+  objects?: TemplateObjects;
   units?: Model["units"];
   designCodes?: Model["designCodes"];
+}
+
+export type TemplateObjects = "frame" | "grid" | "flatSlab" | "flatSlabBeams";
+
+/** Mẫu không có dầm nội bộ (không cần tiết diện dầm nếu không có dầm nào). */
+export const FLAT_SLAB_TEMPLATES: readonly TemplateObjects[] = ["flatSlab", "flatSlabBeams"];
+
+/** n nhịp đều nhau, mỗi nhịp `spacing` (m). */
+export function uniformSpans(count: number, spacing: number): number[] {
+  return Array.from({ length: Math.max(0, Math.floor(count)) }, () => spacing);
+}
+
+/** Chiều cao tầng cho kiểu "tầng đơn giản": tầng 1 cao `bottom`, các tầng còn lại cao `typical`. */
+export function simpleStoryHeights(count: number, typical: number, bottom: number): number[] {
+  const n = Math.max(0, Math.floor(count));
+  return Array.from({ length: n }, (_, k) => (k === 0 ? bottom : typical));
 }
 
 const X_LABELS = "ABCDEFGHJKLMNPQRSTUVWXYZ";
@@ -75,10 +95,13 @@ export function createRcFrameModel(opts: RcFrameOptions): Model {
 
   const colName = `C${mm(col.b)}x${mm(col.h)}`;
   const beamName = `D${mm(beam.b)}x${mm(beam.h)}`;
-  model.frameSections.push(
-    { id: "sec-col", name: colName, material: conc.id, geometry: { shape: "rect", b: col.b, h: col.h } },
-    { id: "sec-beam", name: beamName, material: conc.id, geometry: { shape: "rect", b: beam.b, h: beam.h } },
-  );
+  const kind = opts.objects ?? "frame";
+  // Mẫu sàn phẳng không dầm thì không định nghĩa tiết diện dầm thừa.
+  const hasBeamSection = kind !== "flatSlab";
+  model.frameSections.push({ id: "sec-col", name: colName, material: conc.id, geometry: { shape: "rect", b: col.b, h: col.h } });
+  if (hasBeamSection) {
+    model.frameSections.push({ id: "sec-beam", name: beamName, material: conc.id, geometry: { shape: "rect", b: beam.b, h: beam.h } });
+  }
   model.shellSections.push({
     id: "sec-slab",
     name: `S${mm(slabT)}`,
@@ -120,7 +143,13 @@ export function createRcFrameModel(opts: RcFrameOptions): Model {
         });
       }
     }
+    const lastX = xs.length - 1;
+    const lastY = ys.length - 1;
+    // Dầm: đủ lưới ("frame"), chỉ chu vi ("flatSlabBeams") hoặc không có ("flatSlab").
+    const beamX = (iy: number) => kind === "frame" || (kind === "flatSlabBeams" && (iy === 0 || iy === lastY));
+    const beamY = (ix: number) => kind === "frame" || (kind === "flatSlabBeams" && (ix === 0 || ix === lastX));
     for (let iy = 0; iy < ys.length; iy++) {
+      if (!beamX(iy)) continue;
       for (let ix = 0; ix + 1 < xs.length; ix++) {
         frames.push({
           id: `bx-${ix}-${iy}-${k}`,
@@ -134,6 +163,7 @@ export function createRcFrameModel(opts: RcFrameOptions): Model {
       }
     }
     for (let ix = 0; ix < xs.length; ix++) {
+      if (!beamY(ix)) continue;
       for (let iy = 0; iy + 1 < ys.length; iy++) {
         frames.push({
           id: `by-${ix}-${iy}-${k}`,
