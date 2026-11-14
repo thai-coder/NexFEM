@@ -69,7 +69,7 @@ fn reveal_main(app: &tauri::AppHandle) {
 /// (phiên bản, tài khoản Windows, thư mục dữ liệu riêng của tài khoản) vào file đó rồi thoát.
 /// CI dùng chế độ này để kiểm tra bản đã cài chạy được với từng tài khoản trên máy.
 #[tauri::command]
-fn frontend_ready(app: tauri::AppHandle) -> Result<bool, String> {
+fn frontend_ready(app: tauri::AppHandle, opened: Option<String>) -> Result<bool, String> {
     use tauri::Manager;
     // Trong các chế độ tự kiểm tra thì hiện cửa sổ chính ngay; bình thường thì để splash hiện đủ lâu để đọc được.
     let smoke =
@@ -107,6 +107,8 @@ fn frontend_ready(app: tauri::AppHandle) -> Result<bool, String> {
         "user": std::env::var("USERNAME").or_else(|_| std::env::var("USER")).unwrap_or_default(),
         "exe": std::env::current_exe().map(|p| p.display().to_string()).unwrap_or_default(),
         "appLocalData": data_dir,
+        // Tên mô hình đã mở từ file truyền vào dòng lệnh (bấm đúp file .nxf), nếu có.
+        "opened": opened,
     });
     std::fs::write(&out, report.to_string()).map_err(|e| format!("{out}: {e}"))?;
     // Trong phiên không có màn hình (Task Scheduler), WebView2 có thể giữ vòng lặp sự kiện
@@ -164,6 +166,22 @@ fn read_project_file(path: String) -> Result<Vec<u8>, String> {
         return Err("file quá lớn".into());
     }
     std::fs::read(p).map_err(|e| format!("{}: {e}", p.display()))
+}
+
+/// File dự án được truyền vào dòng lệnh, ví dụ khi bấm đúp file `.nxf` trong Explorer
+/// (Windows chạy `NexFEM.exe "đường dẫn"`). Bỏ qua tham số bắt đầu bằng `-` và file không tồn tại.
+fn launch_file_from(args: impl Iterator<Item = std::ffi::OsString>) -> Option<String> {
+    args.skip(1)
+        .map(std::path::PathBuf::from)
+        .filter(|p| !p.to_string_lossy().starts_with('-'))
+        .find(|p| check_extension(p).is_ok() && p.is_file())
+        .map(|p| std::path::absolute(&p).unwrap_or(p).display().to_string())
+}
+
+/// Đường dẫn file dự án mở cùng app (nếu có), để giao diện mở file đó thay cho mô hình trống.
+#[tauri::command]
+fn launch_file() -> Option<String> {
+    launch_file_from(std::env::args_os())
 }
 
 /// Ghi file dự án an toàn: ghi ra file tạm cùng thư mục rồi đổi tên, tránh hỏng file khi đang ghi thì mất điện.
@@ -231,6 +249,7 @@ pub fn run() {
             frontend_ready,
             read_project_file,
             write_project_file,
+            launch_file,
             write_report_file
         ])
         .build(tauri::generate_context!())
@@ -254,6 +273,42 @@ mod tests {
         assert!(check_extension(std::path::Path::new("a/b.JSON")).is_ok());
         assert!(check_extension(std::path::Path::new("a/b.exe")).is_err());
         assert!(check_extension(std::path::Path::new("a/noext")).is_err());
+    }
+
+    #[test]
+    fn launch_file_takes_the_first_existing_project_argument() {
+        let dir = std::env::temp_dir().join(format!("nexfem-launch-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let nxf = dir.join("Du an.nxf");
+        std::fs::write(&nxf, b"{}").unwrap();
+        let args = |v: &[&str]| {
+            v.iter()
+                .map(std::ffi::OsString::from)
+                .collect::<Vec<_>>()
+                .into_iter()
+        };
+        let p = nxf.to_string_lossy().to_string();
+        assert_eq!(
+            launch_file_from(args(&["NexFEM.exe", &p])).as_deref(),
+            Some(p.as_str())
+        );
+        // Tham số khác, file không tồn tại hoặc sai đuôi thì bỏ qua.
+        assert_eq!(
+            launch_file_from(args(&["NexFEM.exe", "--flag", &p])).as_deref(),
+            Some(p.as_str())
+        );
+        assert_eq!(launch_file_from(args(&["NexFEM.exe"])), None);
+        assert_eq!(
+            launch_file_from(args(&["NexFEM.exe", "khong-co.nxf"])),
+            None
+        );
+        let exe = dir.join("x.exe");
+        std::fs::write(&exe, b"").unwrap();
+        assert_eq!(
+            launch_file_from(args(&["NexFEM.exe", &exe.to_string_lossy()])),
+            None
+        );
+        std::fs::remove_dir_all(&dir).unwrap();
     }
 
     #[test]

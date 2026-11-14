@@ -16,8 +16,8 @@ import { ModelExplorer } from "./panels/model-explorer/ModelExplorer.tsx";
 import { Properties } from "./panels/properties/Properties.tsx";
 import { showStartAtStartup, StartPage } from "./panels/start/StartPage.tsx";
 import { Viewport } from "./panels/viewport/Viewport.tsx";
-import { basename, confirmDiscardAsync } from "./services/files.ts";
-import { notifyReady, onCloseRequested, setWindowTitle } from "./services/tauri.ts";
+import { basename, confirmDiscardAsync, openPath } from "./services/files.ts";
+import { launchFile, notifyReady, onCloseRequested, setWindowTitle } from "./services/tauri.ts";
 import { CommandPalette } from "./shell/CommandPalette.tsx";
 import { ContextMenu } from "./shell/ContextMenu.tsx";
 import { Dialogs } from "./shell/Dialogs.tsx";
@@ -153,7 +153,12 @@ export function App() {
 
   useEffect(() => {
     // Cửa sổ chính đang ẩn nên requestAnimationFrame không chạy; dùng bộ đếm giờ để đợi bố cục xong.
-    const id = window.setTimeout(() => void notifyReady(), 60);
+    // Mở app bằng bấm đúp file .nxf: nạp file đó (mô hình trống chưa sửa nên không hỏi lưu) rồi mới báo sẵn sàng.
+    const id = window.setTimeout(async () => {
+      const path = await launchFile();
+      const opened = path && (await openPath(path)) ? useModel.getState().model.name : undefined;
+      void notifyReady(opened);
+    }, 60);
     // Khi cửa sổ vừa hiện, áp lại kích thước các bảng (lúc ẩn dockview đo được 0).
     const onVisible = () => {
       const api = apiRef.current;

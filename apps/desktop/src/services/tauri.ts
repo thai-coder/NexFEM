@@ -33,11 +33,21 @@ export async function onCloseRequested(allow: () => boolean | Promise<boolean>):
   });
 }
 
-/** Báo cho backend biết giao diện đã sẵn sàng (dùng cho kiểm tra sau cài đặt). */
-export async function notifyReady(): Promise<void> {
+/** File dự án truyền vào khi mở app (bấm đúp file .nxf); null nếu không có hoặc chạy trên trình duyệt. */
+export async function launchFile(): Promise<string | null> {
+  if (!isTauri()) return null;
+  const { invoke } = await import("@tauri-apps/api/core");
+  return invoke<string | null>("launch_file").catch(() => null);
+}
+
+/**
+ * Báo cho backend biết giao diện đã sẵn sàng (dùng cho kiểm tra sau cài đặt).
+ * `opened`: tên mô hình đã mở từ file truyền vào dòng lệnh, để CI kiểm tra mở file bằng bấm đúp.
+ */
+export async function notifyReady(opened?: string): Promise<void> {
   if (!isTauri()) return;
   const { invoke } = await import("@tauri-apps/api/core");
-  const closeMode = await invoke<boolean>("frontend_ready").catch(() => false);
+  const closeMode = await invoke<boolean>("frontend_ready", { opened: opened ?? null }).catch(() => false);
   if (closeMode) {
     const { getCurrentWindow } = await import("@tauri-apps/api/window");
     await getCurrentWindow().close();

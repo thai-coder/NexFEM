@@ -80,3 +80,9 @@ type %TEMP%\nexfem-check.json
 - Chữ ký số cho bộ cài (SmartScreen sẽ cảnh báo "Windows protected your PC" → More info → Run anyway).
 - Bộ cài tiếng Việt.
 - Tự động cập nhật.
+
+## Kiểu file `.nxf`
+
+Bộ cài (MSI và NSIS) đăng ký đuôi `.nxf` với NexFEM: file dự án mang biểu tượng chữ N (lấy từ `NexFEM.exe`) và bấm đúp thì mở NexFEM với đúng file đó. App đọc đường dẫn file từ dòng lệnh (`NexFEM.exe "đường dẫn"`) và nạp nó thay cho mô hình trống lúc khởi động. Mỗi lần bấm đúp mở một cửa sổ NexFEM riêng, như ETABS. Gỡ cài đặt thì gỡ luôn kiểu file.
+
+CI kiểm tra: khoá `HKCR\.nxf` và biểu tượng, mở một file `.nxf` có dấu cách trong tên bằng ShellExecute (như bấm đúp) và kiểm tra app đã nạp đúng mô hình, rồi kiểm tra gỡ cài đặt đã xoá kiểu file.

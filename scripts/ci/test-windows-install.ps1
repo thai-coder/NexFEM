@@ -165,6 +165,39 @@ Step "Chạy thử bằng tài khoản hiện tại (quản trị)"
 $admin = Invoke-SmokeAsCurrentUser $exe (Join-Path $env:RUNNER_TEMP "nexfem-smoke-admin.json")
 $Results["Chạy bằng tài khoản quản trị"] = $admin.user
 
+Step "Kiểu file .nxf: biểu tượng chữ N và mở bằng NexFEM"
+$progId = (Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\.nxf" -ErrorAction SilentlyContinue).'(default)'
+if (-not $progId) { throw "Bộ cài chưa đăng ký đuôi .nxf (HKCR\.nxf trống)" }
+$openKey = "Registry::HKEY_CLASSES_ROOT\$progId\shell\open\command"
+$iconKey = "Registry::HKEY_CLASSES_ROOT\$progId\DefaultIcon"
+$openCmd = (Get-ItemProperty $openKey -ErrorAction SilentlyContinue).'(default)'
+$iconVal = (Get-ItemProperty $iconKey -ErrorAction SilentlyContinue).'(default)'
+Write-Host ".nxf -> $progId | lệnh mở: $openCmd | biểu tượng: $iconVal"
+if (-not (Test-Path $openKey)) { throw "Thiếu lệnh mở cho $progId ($openKey)" }
+if (-not $iconVal -or $iconVal -notlike "*NexFEM.exe*") { throw "Biểu tượng file .nxf không lấy từ NexFEM.exe: '$iconVal'" }
+$Results["Kiểu file .nxf"] = "$progId, biểu tượng $iconVal"
+
+# Mở file như bấm đúp trong Explorer (ShellExecute theo kiểu file); tên có khoảng trắng để kiểm tra ngoặc kép "%1".
+$sample = Join-Path $env:RUNNER_TEMP "Mau thu.nxf"
+Copy-Item (Join-Path $PSScriptRoot "..\..\resources\templates\sample-frame.json") $sample -Force
+$openOut = Join-Path $env:RUNNER_TEMP "nexfem-open.json"
+Remove-Item $openOut -ErrorAction SilentlyContinue
+$env:NEXFEM_SMOKE_TEST = $openOut
+try {
+  Start-Process -FilePath $sample | Out-Null
+  # Tiến trình có thể chưa xuất hiện ngay sau ShellExecute: chỉ chờ báo cáo, tối đa 120 giây.
+  for ($i = 0; $i -lt 120 -and -not (Test-Path $openOut); $i++) { Start-Sleep 1 }
+  $ok = Test-Path $openOut
+} finally {
+  Remove-Item Env:NEXFEM_SMOKE_TEST -ErrorAction SilentlyContinue
+}
+if (-not $ok) { Show-Panic $openOut; throw "Bấm đúp file .nxf không mở được NexFEM (không có báo cáo)" }
+$opened = (Get-Content $openOut -Raw | ConvertFrom-Json).opened
+Write-Host "Mở bằng bấm đúp: mô hình '$opened'"
+if ($opened -ne "Toa_nha_A") { throw "NexFEM mở nhưng không nạp file được bấm đúp (opened = '$opened')" }
+$Results["Bấm đúp file .nxf mở đúng mô hình"] = $opened
+for ($i = 0; $i -lt 30 -and (Get-Process -Name "NexFEM" -ErrorAction SilentlyContinue); $i++) { Start-Sleep 1 }
+
 Step "Đóng ứng dụng bằng nút đóng cửa sổ (như người dùng bấm X)"
 $closeOut = Join-Path $env:RUNNER_TEMP "nexfem-close.json"
 Remove-Item $closeOut -ErrorAction SilentlyContinue
@@ -217,6 +250,13 @@ $reg = Get-ChildItem "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"
   Where-Object { (Get-ItemProperty $_.PSPath -ErrorAction SilentlyContinue).DisplayName -eq "NexFEM" }
 if ($reg) { throw "Còn mục NexFEM trong Programs and Features sau khi gỡ" }
 $Results["Gỡ cài đặt sạch"] = "có"
+
+$leftAssoc = (Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\.nxf" -ErrorAction SilentlyContinue).'(default)'
+if ($leftAssoc -and (Test-Path "Registry::HKEY_CLASSES_ROOT\$leftAssoc\shell\open\command")) {
+  $cmdLeft = (Get-ItemProperty "Registry::HKEY_CLASSES_ROOT\$leftAssoc\shell\open\command").'(default)'
+  if ($cmdLeft -like "*NexFEM*") { throw "Gỡ cài đặt còn để lại kiểu file .nxf trỏ tới NexFEM: $cmdLeft" }
+}
+$Results["Gỡ kiểu file .nxf khi gỡ cài đặt"] = "có"
 
 Step "Kết quả ($Kind)"
 $Results.GetEnumerator() | ForEach-Object { Write-Host ("  ✔ {0}: {1}" -f $_.Key, $_.Value) }

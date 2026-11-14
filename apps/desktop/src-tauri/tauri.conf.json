@@ -75,7 +75,18 @@
         "dialogImagePath": "installer/wix-dialog.bmp"
       }
     },
-    "copyright": "Copyright (c) lkat.vn. All rights reserved."
+    "copyright": "Copyright (c) lkat.vn. All rights reserved.",
+    "fileAssociations": [
+      {
+        "ext": [
+          "nxf"
+        ],
+        "name": "NexFEM.Project",
+        "description": "NexFEM Project",
+        "role": "Editor",
+        "mimeType": "application/x-nexfem-project"
+      }
+    ]
   },
   "mainBinaryName": "NexFEM"
 }
