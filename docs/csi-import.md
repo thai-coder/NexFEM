@@ -45,7 +45,8 @@ Cột "File mẫu" cho biết cú pháp đã có trong file ETABS 23.2.0 thật 
 | `LOADPATTERN` TYPE, SELFWEIGHT | mẫu tải | có |
 | `LOADCASE` Linear Static (LOADPAT/SF), Modal | trường hợp tải | có |
 | `COMBO` Linear Add / Envelope / SRSS / Absolute Add, LOADCASE và LOADCOMBO | tổ hợp (kể cả lồng nhau) | Linear Add |
-| `LINELOAD` UNIFF; TRAPF | tải đều; hình thang đổi thành tải đều giữ hợp lực (cảnh báo) | có |
+| `LINELOAD` UNIFF; TRAPF, phương GRAV, X, Y, Z, 1 | tải đều; hình thang đổi thành tải đều giữ hợp lực (cảnh báo) | GRAV |
+| `LINELOAD` phương 2, 3 (trục địa phương) | **không nhập** (lỗi): quy ước trục địa phương chưa đối chiếu với ETABS | chưa |
 | `AREALOAD` UNIFF GRAV/Z | tải sàn | GRAV |
 
 **Không nhập, có báo cáo:** tải tập trung tại nút (NexFEM chưa có), lò xo dọc thanh và lò xo nền dưới sàn, góc xoay trục địa phương `ANG`, điểm chèn `CARDINALPT`, đoạn lệch đầu thanh khác 0, liên kết nửa cứng `PARFIXM*`, giới hạn kéo/nén, sàn cứng, P-Delta, trường hợp tải khác Linear Static/Modal, Range Add.

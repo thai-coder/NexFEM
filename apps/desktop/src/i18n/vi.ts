@@ -642,6 +642,7 @@ export const vi = {
       pattern_type_mapped: "Mẫu tải loại {from} nhập thành {to}",
       load_target_missing: "Tải gán cho đối tượng không nhập được: bỏ tải",
       line_load_unsupported: "Tải thanh loại {type}, phương {dir} chưa hỗ trợ: bỏ",
+      line_load_local_axis: "Tải thanh theo trục địa phương {dir}: quy ước trục địa phương chưa đối chiếu với ETABS, không nhập",
       line_load_approximated: "Tải hình thang hoặc trên một đoạn thanh: đổi thành tải đều suốt chiều dài, giữ tổng lực",
       area_load_unsupported: "Tải sàn loại {type}, phương {dir} chưa hỗ trợ: bỏ",
       point_loads_unsupported: "Tải tập trung tại nút (mẫu {pattern}) chưa hỗ trợ: bỏ",

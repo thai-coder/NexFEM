@@ -672,7 +672,9 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
   // ------------------------------------------------------------------ tải trên thanh
   const frameLoads: FrameLoad[] = [];
   const lineLoadRecs = e2kSection(file, "FRAME OBJECT LOADS");
-  const DIRS: Record<string, FrameLoad["direction"]> = { GRAV: "gravity", X: "globalX", Y: "globalY", Z: "globalZ", "1": "localX", "2": "local2", "3": "local3" };
+  // Trục địa phương 2, 3 của NexFEM chưa được đối chiếu với quy ước ETABS (và góc xoay ANG chưa nhập),
+  // nên tải theo trục 2, 3 không được nhập. Trục 1 luôn là trục thanh i → j.
+  const DIRS: Record<string, FrameLoad["direction"]> = { GRAV: "gravity", X: "globalX", Y: "globalY", Z: "globalZ", "1": "localX" };
   for (const r of lineLoadRecs) {
     const name = r.tokens[1]?.text ?? "";
     const stName = r.tokens[2]?.text ?? "";
@@ -687,7 +689,8 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
       continue;
     }
     if (!dir) {
-      d.add("error", "line_load_unsupported", { type, dir: p.get("DIR")?.text ?? "?" }, at);
+      const raw = (p.get("DIR")?.text ?? "").toUpperCase();
+      d.add("error", raw === "2" || raw === "3" ? "line_load_local_axis" : "line_load_unsupported", { type, dir: p.get("DIR")?.text ?? "?" }, at);
       continue;
     }
     let w: number;

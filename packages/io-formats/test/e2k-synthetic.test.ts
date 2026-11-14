@@ -71,6 +71,24 @@ describe("nhập dữ liệu tự tạo", () => {
     expect(bad.report.diagnostics.map((d) => d.code)).toEqual(expect.arrayContaining(["unknown_units", "missing_units"]));
   });
 
+  it("tải thanh theo trục địa phương 2/3 không được nhập; trục 1 và phương toàn cục được nhập", () => {
+    const withLoads = SMALL.replace(
+      "$ END OF MODEL FILE",
+      [
+        "$ LOAD PATTERNS",
+        '  LOADPATTERN "D"  TYPE  "Dead"  SELFWEIGHT  0',
+        "$ FRAME OBJECT LOADS",
+        '  LINELOAD  "B1"  "S1"  TYPE "UNIFF"  DIR "2"  LC "D"  FVAL 1',
+        '  LINELOAD  "B1"  "S1"  TYPE "UNIFF"  DIR "1"  LC "D"  FVAL 2',
+        '  LINELOAD  "B1"  "S1"  TYPE "UNIFF"  DIR "X"  LC "D"  FVAL 3',
+        "$ END OF MODEL FILE",
+      ].join("\n"),
+    );
+    const r = importE2k(withLoads);
+    expect(r.model.frameLoads.map((l) => [l.direction, l.value])).toEqual([["localX", 2], ["globalX", 3]]);
+    expect(r.report.diagnostics.find((d) => d.code === "line_load_local_axis")!.count).toBe(1);
+  });
+
   it("giải mã Windows-1252 khi file không phải UTF-8", () => {
     expect(decodeE2k(new Uint8Array([0x24, 0x20, 0xb0]))).toBe("$ °");
   });

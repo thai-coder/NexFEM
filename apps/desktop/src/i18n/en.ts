@@ -643,6 +643,7 @@ export const en: Strings = {
       pattern_type_mapped: "Load pattern type {from} imported as {to}",
       load_target_missing: "Load on an object that was not imported: load dropped",
       line_load_unsupported: "Frame load type {type}, direction {dir} is not supported: dropped",
+      line_load_local_axis: "Frame load along local axis {dir}: local axis conventions not yet checked against ETABS, not imported",
       line_load_approximated: "Trapezoidal or partial-length load: converted to a full-length uniform load with the same total force",
       area_load_unsupported: "Area load type {type}, direction {dir} is not supported: dropped",
       point_loads_unsupported: "Joint point load (pattern {pattern}) is not supported: dropped",
