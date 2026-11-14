@@ -20,7 +20,7 @@ import {
   type Story,
 } from "@nexfem/model-core";
 import { Diagnostics } from "./diagnostics.ts";
-import { locatePoint } from "./locate.ts";
+import { locatePoint, remapFrameLoads, splitFramesAtJoints } from "./locate.ts";
 import type { E2kImportResult } from "./e2k-import.ts";
 import { parseS2k, s2kNumber, s2kTable, s2kYes, type S2kFile, type S2kRecord } from "./s2k-parse.ts";
 import { conv, unitFactors } from "./units.ts";
@@ -54,6 +54,7 @@ const TABLES_USED = new Set([
   "FRAME INSERTION POINT ASSIGNMENTS",
   "FRAME OFFSET ALONG LENGTH ASSIGNMENTS",
   "FRAME PROPERTY MODIFIERS",
+  "FRAME AUTO MESH ASSIGNMENTS",
   "AREA SECTION ASSIGNMENTS",
   "LOAD PATTERN DEFINITIONS",
   "LOAD CASE DEFINITIONS",
@@ -465,6 +466,18 @@ export function importS2k(input: string | S2kFile, opts: { name?: string } = {})
     shellByName.set(name, shell);
   }
   count("shells", areaRecs.length, shells.length);
+
+  // Chia thanh tại nút nằm trên thân thanh khi SAP2000 bật AutoMesh tại nút (AutoMesh=Yes, AtJoints=Yes),
+  // như SAP2000 làm lúc phân tích. Tải trên thanh gốc được chuyển sang các đoạn ở cuối bộ nhập.
+  const meshAtJoints = new Set(T("FRAME AUTO MESH ASSIGNMENTS").filter((r) => s2kYes(f(r, "AutoMesh")) && s2kYes(f(r, "AtJoints"))).map((r) => f(r, "Frame") ?? ""));
+  const meshHosts = new Set([...frameByName].filter(([name]) => meshAtJoints.has(name)).map(([, fr]) => fr.id));
+  const splitTol = (() => {
+    const mt = s2kNumber(T("PREFERENCES - DIMENSIONAL")[0]?.fields.get("MergeTol"));
+    return mt > 0 ? L(mt) : 1e-3;
+  })();
+  const split = splitFramesAtJoints(frames, joints, shells.flatMap((x) => x.joints), (fr) => meshHosts.has(fr.id), splitTol);
+  frames.splice(0, frames.length, ...split.frames);
+  if (split.segments.size) d.add("info", "frames_split", { hosts: split.segments.size, segments: [...split.segments.values()].reduce((t, l) => t + l.length, 0) });
   count("shellSections", areaSecRecs.length, shellSections.length);
 
   // ------------------------------------------------------------------ mẫu tải, trường hợp, tổ hợp
@@ -706,7 +719,7 @@ export function importS2k(input: string | S2kFile, opts: { name?: string } = {})
     loadPatterns: patterns,
     loadCases,
     combos,
-    frameLoads,
+    frameLoads: remapFrameLoads(frameLoads, split.segments),
     shellLoads,
     jointLoads,
   } satisfies Model);
@@ -720,7 +733,7 @@ export function importS2k(input: string | S2kFile, opts: { name?: string } = {})
       diagnostics: d.list(),
       mapping: {
         joints: Object.fromEntries([...jointByName].map(([k, v]) => [k, v.id])),
-        frames: Object.fromEntries([...frameByName].map(([k, v]) => [k, v.id])),
+        frames: Object.fromEntries([...frameByName].map(([k, v]) => [k, split.segments.get(v.id)?.[0]?.id ?? v.id])),
         shells: Object.fromEntries([...shellByName].map(([k, v]) => [k, v.id])),
       },
     },

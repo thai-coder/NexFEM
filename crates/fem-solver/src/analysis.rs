@@ -183,7 +183,29 @@ pub fn section_props(g: &FrameShape) -> (f64, f64, f64, f64) {
             let i = PI * (ro.powi(4) - ri.powi(4)) / 4.0;
             (PI * (ro * ro - ri * ri), i, i, 2.0 * i)
         }
+        FrameShape::L { h, b, tw, tf } => angle_section(h, b, tw, tf),
+        FrameShape::General { a, i33, i22, j, .. } => (a, i22, i33, j),
     }
+}
+
+/// Thép góc chữ L, trục hình học qua trọng tâm (giống `angleSection` của model-core).
+/// Trả về (A, I22, I33, J).
+pub fn angle_section(h: f64, b: f64, tw: f64, tf: f64) -> (f64, f64, f64, f64) {
+    let a1 = h * tw;
+    let a2 = (b - tw) * tf;
+    let a = a1 + a2;
+    let y = (a1 * h / 2.0 + a2 * tf / 2.0) / a;
+    let x = (a1 * tw / 2.0 + a2 * (tw + (b - tw) / 2.0)) / a;
+    let i33 = tw * h.powi(3) / 12.0
+        + a1 * (h / 2.0 - y).powi(2)
+        + (b - tw) * tf.powi(3) / 12.0
+        + a2 * (tf / 2.0 - y).powi(2);
+    let i22 = h * tw.powi(3) / 12.0
+        + a1 * (tw / 2.0 - x).powi(2)
+        + tf * (b - tw).powi(3) / 12.0
+        + a2 * (tw + (b - tw) / 2.0 - x).powi(2);
+    let j = ((h - tf / 2.0) * tw.powi(3) + (b - tw / 2.0) * tf.powi(3)) / 3.0;
+    (a, i22, i33, j)
 }
 
 enum MemberLoad {
@@ -533,6 +555,7 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
                 2.0 * *t < *h && 2.0 * *t < *b && *r >= 0.0 && *r <= h.min(*b) / 2.0
             }
             FrameShape::Pipe { d, t } => 2.0 * *t < *d,
+            FrameShape::L { h, b, tw, tf } => *tw < *b && *tf < *h,
             _ => true,
         };
         let (area, i22, i33, j) = section_props(&sec.geometry);

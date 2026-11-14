@@ -20,7 +20,7 @@ import {
 } from "@nexfem/model-core";
 import { e2kNumber, e2kPairs, e2kSection, parseE2k, type E2kFile, type E2kRecord, type E2kToken } from "./e2k-parse.ts";
 import { Diagnostics, type ImportDiagnostic } from "./diagnostics.ts";
-import { cornerAreas, frameAxes, globalAxisOf, locatePoint } from "./locate.ts";
+import { cornerAreas, frameAxes, globalAxisOf, locatePoint, remapFrameLoads, splitFramesAtJoints } from "./locate.ts";
 import { conv, unitFactors, type UnitFactors } from "./units.ts";
 
 export type { ImportDiagnostic, ImportLevel } from "./diagnostics.ts";
@@ -286,13 +286,27 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
       else d.add("info", "section_no_corner_radius", {}, at);
     } else if (shape === "Concrete Rectangular" && D > 0 && B > 0) {
       geometry = { shape: "rect", b: L(B), h: L(D) };
+    } else if (shape === "Steel Angle" && D > 0 && B > 0 && TF > 0 && TW > 0 && TW < B && TF < D) {
+      // D: cánh dọc trục 2 (dày TW), B: cánh dọc trục 3 (dày TF).
+      geometry = { shape: "L", h: L(D), b: L(B), tw: L(TW), tf: L(TF) };
+      d.add("warning", "section_angle_geometric_axes", {}, at);
+    }
+    let shear: Pick<FrameSection, "shearAreas"> = {};
+    if (shape === "General") {
+      const [A, I33, I22, J] = ["AREA", "I33", "I22", "TORSION"].map((k) => num(m, k));
+      if ([A, I33, I22, J].every((v) => v! > 0)) {
+        geometry = { shape: "general", A: A! * U.l ** 2, I33: I33! * U.l ** 4, I22: I22! * U.l ** 4, J: J! * U.l ** 4, ...(D > 0 ? { h: L(D) } : {}), ...(B > 0 ? { b: L(B) } : {}) };
+        const [as2, as3] = ["AS2", "AS3"].map((k) => num(m, k)! * U.l ** 2);
+        if (as2! > 0 && as3! > 0 && as2! <= geometry.A && as3! <= geometry.A) shear = { shearAreas: { a2: as2!, a3: as3! } };
+        d.add("info", "section_general_imported", {}, at);
+      }
     }
     if (!geometry) {
       d.add("error", "section_unsupported", { shape: shape || "?" }, at);
       continue;
     }
     const id = `fs-${frameSections.length + 1}`;
-    frameSections.push({ id, name, material: mat, geometry });
+    frameSections.push({ id, name, material: mat, geometry, ...shear });
     secByName.set(name, id);
   }
   count("frameSections", secRecs.size, frameSections.length);
@@ -411,6 +425,7 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
   const lineSprings = springDefs("LINE SPRING PROPERTIES", "LINESPRING");
   const areaSprings = springDefs("AREA SPRING PROPERTIES", "AREASPRING");
   const frameSpring = new Map<string, string>();
+  const autoMeshKeys = new Set<string>();
   const shellSpring = new Map<string, string>();
 
   const pendingFrames: { key: string; frame: Omit<Frame, "i" | "j">; iKey: string; jKey: string }[] = [];
@@ -498,6 +513,7 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
       else if (k === "PARFIXM3I" || k === "PARFIXM3J" || k === "PARFIXM2I" || k === "PARFIXM2J") d.add("warning", "frame_partial_fixity_ignored", {}, at);
       else d.add("warning", "frame_key_unsupported", { key: k }, at);
     }
+    if ((str(m, "AUTOMESH") ?? "").toUpperCase() === "YES") autoMeshKeys.add(key);
     pendingFrames.push({ key, frame, iKey, jKey });
   }
 
@@ -652,6 +668,14 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
   count("shells", areaAssigns.size, shells.length);
   void skippedShells;
 
+  // ------------------------------------------------------------------ chia thanh tại nút nằm trên thân thanh
+  // ETABS tự chia thanh (AUTOMESH "YES") tại đầu thanh khác hoặc góc sàn nằm trên thân thanh; không chia thì thanh tựa lên
+  // thân thanh khác sẽ treo lơ lửng (mất ổn định). Tải trên thanh gốc được chuyển sang các đoạn ở cuối bộ nhập.
+  const autoHosts = new Set([...frameIdByKey].filter(([k]) => autoMeshKeys.has(k)).map(([, id]) => id));
+  const split = splitFramesAtJoints(frames, joints, shells.flatMap((s) => s.joints), (f) => autoHosts.has(f.id), tolM);
+  frames.splice(0, frames.length, ...split.frames);
+  if (split.segments.size) d.add("info", "frames_split", { hosts: split.segments.size, segments: [...split.segments.values()].reduce((t, l) => t + l.length, 0) });
+
   // ------------------------------------------------------------------ lò xo dọc thanh / diện tích → lò xo nút
   // NexFEM chưa có phần tử nền đàn hồi: quy về lò xo nút (hệ tổng thể). Thanh: mỗi đầu k·L/2 theo trục địa phương;
   // sàn: k·(diện tích chịu tải của góc). Chỉ nhận được khi trục địa phương trùng một trục tổng thể.
@@ -663,7 +687,8 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
     j.springs = s;
   };
   for (const f of frames) {
-    const key = [...frameIdByKey].find(([, id]) => id === f.id)?.[0];
+    const hostId = split.hostOf.get(f.id) ?? f.id;
+    const key = [...frameIdByKey].find(([, id]) => id === hostId)?.[0];
     const name = key ? frameSpring.get(key) : undefined;
     if (!name) continue;
     const def = lineSprings.get(name)!;
@@ -957,7 +982,7 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
     loadPatterns: patterns,
     loadCases,
     combos,
-    frameLoads,
+    frameLoads: remapFrameLoads(frameLoads, split.segments),
     shellLoads,
     jointLoads,
   } satisfies Model);
@@ -970,7 +995,7 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
       units: { force: U.force, length: U.length, temperature: U.temperature },
       counts,
       diagnostics: d.list(),
-      mapping: { joints: mappingJoints, frames: Object.fromEntries(frameIdByKey), shells: Object.fromEntries(shellIdByKey) },
+      mapping: { joints: mappingJoints, frames: Object.fromEntries([...frameIdByKey].map(([k, id]) => [k, split.segments.get(id)?.[0]?.id ?? id])), shells: Object.fromEntries(shellIdByKey) },
     },
   };
 }

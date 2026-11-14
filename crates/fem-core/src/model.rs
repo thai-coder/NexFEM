@@ -141,6 +141,25 @@ pub enum FrameShape {
     },
     #[serde(rename = "pipe")]
     Pipe { d: f64, t: f64 },
+    /// Thép góc: cánh h (trục 2) dày tw, cánh b (trục 3) dày tf; trục hình học, không bán kính lượn.
+    #[serde(rename = "L")]
+    L { h: f64, b: f64, tw: f64, tf: f64 },
+    /// Tiết diện tổng quát: A, I33, I22, J nhập thẳng; h, b chỉ để vẽ.
+    #[serde(rename = "general")]
+    General {
+        #[serde(rename = "A")]
+        a: f64,
+        #[serde(rename = "I33")]
+        i33: f64,
+        #[serde(rename = "I22")]
+        i22: f64,
+        #[serde(rename = "J")]
+        j: f64,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        h: Option<f64>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        b: Option<f64>,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

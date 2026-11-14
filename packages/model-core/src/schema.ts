@@ -73,6 +73,21 @@ export const FrameShapeSchema = z.discriminatedUnion("shape", [
     r: Num.nonnegative().optional(),
   }),
   z.object({ shape: z.literal("pipe"), d: Num.positive(), t: Num.positive() }),
+  /**
+   * Thép góc (chữ L), góc ngoài ở gốc: cánh `h` dọc trục cục bộ 2 dày `tw`, cánh `b` dọc trục cục bộ 3 dày `tf` (m).
+   * Đặc trưng tính theo trục hình học song song với cánh (bỏ tích quán tính I23), không tính bán kính lượn.
+   */
+  z.object({ shape: z.literal("L"), h: Num.positive(), b: Num.positive(), tw: Num.positive(), tf: Num.positive() }),
+  /** Tiết diện tổng quát: nhập thẳng A (m²), I33, I22, J (m⁴); `h`, `b` (m) chỉ để vẽ. */
+  z.object({
+    shape: z.literal("general"),
+    A: Num.positive(),
+    I33: Num.positive(),
+    I22: Num.positive(),
+    J: Num.positive(),
+    h: Num.positive().optional(),
+    b: Num.positive().optional(),
+  }),
 ]);
 
 export const FrameSectionSchema = z.object({

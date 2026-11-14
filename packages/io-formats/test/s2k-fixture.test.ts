@@ -164,6 +164,12 @@ describe("Roof_model.2k (SAP2000 25.3.1, kip-ft, mặt None)", () => {
     expect(codes(r, "error")).toEqual([]);
   });
 
+  it("AutoMesh tại nút (AtJoints=Yes): 7 thanh có nút nằm trên thân được chia thành 14 đoạn", () => {
+    expect(diag(r, "frames_split")?.params).toEqual({ hosts: 7, segments: 14 });
+    expect(new Set(model.frames.map((f) => f.label.replace(/-\d+$/, ""))).size).toBe(13);
+    expect(r.report.mapping.frames["1"]).toBe(model.frames.find((f) => f.label === "1-1")!.id);
+  });
+
   it("gối: đủ 6 bậc tự do hoạt động, gối con lăn ở nút 9", () => {
     expect(diag(r, "active_dof_restrained")).toBeUndefined();
     expect(model.joints.filter((x) => x.restraint).length).toBe(7);

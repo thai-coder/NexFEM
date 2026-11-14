@@ -24,7 +24,7 @@ export interface Report {
 /** Chuỗi tiêu đề cột cho từng báo cáo; app cung cấp để dịch (vi/en). */
 export type ReportLabels = Record<string, string>;
 
-const SHAPE_NAME: Record<string, string> = { rect: "Rect", circle: "Circle", I: "I", box: "Box", pipe: "Pipe" };
+const SHAPE_NAME: Record<string, string> = { rect: "Rect", circle: "Circle", I: "I", box: "Box", pipe: "Pipe", L: "Angle", general: "General" };
 
 const sig = (v: number, digits = 4) => Number(v.toPrecision(digits));
 

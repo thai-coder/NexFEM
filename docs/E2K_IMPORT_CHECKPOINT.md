@@ -15,6 +15,8 @@
   - Frame local-axis angle is done (schema `Frame.angle`, solver, viewer, Properties, both importers).
   - Joint loads are done (schema `Model.jointLoads`, solver, validation, Assign ▸ Joint loads, viewer, both importers). Points lying inside a frame become frame point loads.
   - Joint springs are done (schema `Joint.springs`, solver with spring reactions, validation, Properties, viewer symbol). ETABS line and area springs are lumped into joint springs, with warnings.
-  - Next: angle (L) sections. The ETABS sample stops at F5 because its 24 L3X3X1/2 braces are missing. After that: General sections and concentrated moments on frames.
-  - **Schema note for Codex:** `Frame.angle` (optional), `Model.jointLoads` (default `[]`) and `Joint.springs` (optional) are new and backward compatible; files without them still open.
+  - Angle (L) and General sections are done (schema, TypeScript, Rust, dialog, ETABS import). Frames are split at joints lying on them, as ETABS/SAP2000 auto mesh does. The ETABS import now has no errors.
+  - Open question for the owner: F5 on the ETABS sample stops at joint 253 (X). That joint has only pinned members in one plane, and diaphragm D1 is defined but never assigned in the file. Options: assign a diaphragm or restraints, or add a small stiffness with a warning, as CSI programs do.
+  - Next: concentrated moments on frames; an elastic-foundation element.
+  - **Schema note for Codex:** `Frame.angle` (optional), `Model.jointLoads` (default `[]`) `Joint.springs` (optional) and frame shapes `L` and `general` are new and backward compatible; files without them still open.
 - **M1 completion condition:** the user imports other ETABS/SAP2000 files and confirms the mapping assumptions (DZ, PINNED, partial fixity, None area).

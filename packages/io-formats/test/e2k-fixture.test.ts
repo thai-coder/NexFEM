@@ -56,6 +56,9 @@ describe("file mẫu ETABS 23.2.0: cú pháp", () => {
 
 describe("file mẫu ETABS 23.2.0: nhập vào NexFEM", () => {
   const { model, report } = importE2k(text);
+  /** Nhãn thanh gốc của một đoạn ("B8-2" → "B8"); nhãn trong file mẫu không có dạng "-số". */
+  const host = (label: string) => label.replace(/-\d+$/, "");
+  const codesAt = (level: string) => [...new Set(report.diagnostics.filter((x) => x.level === level).map((x) => x.code))];
   const diag = (code: string) => report.diagnostics.filter((x) => x.code === code);
   const total = (code: string) => diag(code).reduce((s, x) => s + x.count, 0);
 
@@ -87,21 +90,30 @@ describe("file mẫu ETABS 23.2.0: nhập vào NexFEM", () => {
     expect(model.materials.find((m) => m.name === "4000Psi")!.type).toBe("concrete");
   });
 
-  it("tiết diện: chữ I, ống hộp, bê tông chữ nhật; chữ L và General không hỗ trợ", () => {
+  it("tiết diện: chữ I, ống hộp, bê tông chữ nhật, chữ L, General", () => {
     const sec = (name: string) => model.frameSections.find((s) => s.name === name)!;
     expect(sec("W8X18").geometry).toEqual({ shape: "I", h: 8.14 * IN, bf: 5.25 * IN, tf: 0.33 * IN, tw: 0.23 * IN });
     expect(sec("HSS10X6X1/2").geometry).toEqual({ shape: "box", h: 10 * IN, b: 6 * IN, t: 0.465 * IN });
     expect(sec("GB48x60").geometry).toEqual({ shape: "rect", b: 48 * IN, h: 60 * IN });
-    expect(model.frameSections.length).toBe(305 - 3 - 8);
-    expect(total("section_unsupported")).toBe(11);
-    expect(diag("section_unsupported").map((x) => x.params.shape).sort()).toEqual(["General", "Steel Angle"]);
+    expect(model.frameSections.length).toBe(305);
+    expect(total("section_unsupported")).toBe(0);
+    // Steel Angle: D 3 B 3 TF 0.5 TW 0.5 → cánh h dọc trục 2 dày TW, cánh b dọc trục 3 dày TF.
+    expect(sec("L3X3X1/2").geometry).toEqual({ shape: "L", h: 3 * IN, b: 3 * IN, tw: 0.5 * IN, tf: 0.5 * IN });
+    expect(total("section_angle_geometric_axes")).toBe(8);
+    // General: AREA 59.67 AS2 5.94 AS3 6.625 I33 1468.75 I22 1528.03 TORSION 1 (in², in⁴).
+    const g = sec("W14x120 & W14x82");
+    expect(g.geometry).toEqual({ shape: "general", A: 59.67 * IN ** 2, I33: 1468.75 * IN ** 4, I22: 1528.03 * IN ** 4, J: 1 * IN ** 4, h: 14.89 * IN, b: 14.48 * IN });
+    expect(g.shearAreas).toEqual({ a2: 5.94 * IN ** 2, a3: 6.625 * IN ** 2 });
+    expect(total("section_general_imported")).toBe(3);
     expect(diag("section_filled_tube")[0]!.objects).toEqual(["HSS16x16x5/8 with concrete"]);
   });
 
   it("cao độ nút = cao độ tầng − DZ: mọi cột đứng thẳng và đi từ dưới lên", () => {
     const joint = new Map(model.joints.map((j) => [j.id, j]));
     const cols = model.frames.filter((f) => f.kind === "column");
-    expect(cols.length).toBe(54);
+    // 54 cột; một số được chia tại nút nằm trên thân cột (đoạn "Cxx-1", "Cxx-2"…).
+    expect(new Set(cols.map((c) => host(c.label))).size).toBe(54);
+    expect(cols.length).toBe(63);
     for (const c of cols) {
       const a = joint.get(c.i)!;
       const b = joint.get(c.j)!;
@@ -118,13 +130,33 @@ describe("file mẫu ETABS 23.2.0: nhập vào NexFEM", () => {
     expect(c1.releases?.i).toEqual([false, false, false, false, true, true]);
   });
 
-  it("thanh: 244 dầm + 54 cột; 24 giằng tiết diện chữ L bị bỏ và được liệt kê", () => {
-    expect(model.frames.filter((f) => f.kind === "beam").length).toBe(244);
-    expect(model.frames.filter((f) => f.kind === "brace").length).toBe(0);
-    expect(total("frame_section_unavailable")).toBe(24);
-    expect(report.counts.frames).toEqual({ source: 322, imported: 298 });
-    const pinned = model.frames.find((f) => f.label === "B8")!;
-    expect(pinned.releases).toEqual({ i: [false, false, false, false, true, true], j: [false, false, false, false, true, true] });
+  it("thanh: 244 dầm + 54 cột + 24 giằng chữ L (khớp hai đầu, chỉ chịu kéo trong ETABS)", () => {
+    expect(new Set(model.frames.filter((f) => f.kind === "beam").map((f) => host(f.label))).size).toBe(244);
+    expect(model.frames.filter((f) => f.kind === "brace").length).toBe(24);
+    expect(total("frame_section_unavailable")).toBe(0);
+    expect(report.counts.frames).toEqual({ source: 322, imported: 322 });
+    expect(total("frame_limit_ignored")).toBeGreaterThanOrEqual(24);
+    // B8 khớp hai đầu, bị chia làm hai đoạn: nhả liên kết giữ ở hai đầu ngoài, chỗ chia liền.
+    const b8 = model.frames.filter((f) => host(f.label) === "B8");
+    expect(b8.map((f) => [f.label, f.releases])).toEqual([
+      ["B8-1", { i: [false, false, false, false, true, true], j: [false, false, false, false, false, false] }],
+      ["B8-2", { i: [false, false, false, false, false, false], j: [false, false, false, false, true, true] }],
+    ]);
+  });
+
+  it("ETABS tự chia thanh tại nút nằm trên thân thanh: NexFEM chia giống vậy, các đoạn nối đúng nút", () => {
+    expect(diag("frames_split")[0]!.params).toEqual({ hosts: 87, segments: 287 });
+    // B180 (dầm khớp) tựa lên thân hai dầm khác: sau khi chia, hai đầu của nó nằm trên các đoạn khác (không treo).
+    const ends = (lbl: string) => model.frames.filter((f) => host(f.label) === lbl).flatMap((f) => [f.i, f.j]);
+    const b180 = model.frames.find((f) => f.label === "B180")!;
+    for (const id of [b180.i, b180.j]) expect(model.frames.filter((f) => f.i === id || f.j === id).length).toBeGreaterThan(1);
+    expect(ends("B180").length).toBe(2);
+    // Tổng chiều dài các đoạn bằng chiều dài thanh gốc.
+    const jm = new Map(model.joints.map((j) => [j.id, j]));
+    const len = (f: (typeof model.frames)[number]) => Math.hypot(jm.get(f.j)!.x - jm.get(f.i)!.x, jm.get(f.j)!.y - jm.get(f.i)!.y, jm.get(f.j)!.z - jm.get(f.i)!.z);
+    const b8 = model.frames.filter((f) => host(f.label) === "B8");
+    const [a, b] = [jm.get(b8[0]!.i)!, jm.get(b8[b8.length - 1]!.j)!];
+    expect(b8.reduce((t, f) => t + len(f), 0)).toBeCloseTo(Math.hypot(b.x - a.x, b.y - a.y, b.z - a.z), 9);
   });
 
   it("sàn: 29 sàn với tiết diện đã định nghĩa", () => {
@@ -136,11 +168,12 @@ describe("file mẫu ETABS 23.2.0: nhập vào NexFEM", () => {
   it("tải: mẫu, tải thanh (hình thang giữ hợp lực), tải sàn, tải tập trung tại nút", () => {
     expect(model.loadPatterns.map((p) => p.name)).toEqual(["CDL", "SDL", "LL", "Lr", "WX", "WY", "EX", "EY", "S", "R", "H"]);
     expect(model.loadPatterns[0]!.selfWeight).toBe(1);
-    const frameId = new Map(model.frames.map((f) => [f.label, f.id]));
-    const load = (label: string) => model.frameLoads.find((l) => l.frame === frameId.get(label))!;
+    const ids = (label: string) => new Set(model.frames.filter((f) => host(f.label) === label).map((f) => f.id));
+    const load = (label: string) => model.frameLoads.find((l) => ids(label).has(l.frame))!;
     expect(load("B93").value).toBeCloseTo((29.75 * LB) / IN, 9);
     expect(load("B2").value).toBeCloseTo((21.25 * (0.9916667 - 0.008333334) * LB) / IN, 9);
-    expect(model.frameLoads.filter((l) => l.kind === "distributed").length).toBe(24);
+    // 24 tải phân bố trên thanh gốc; thanh bị chia nhận tải trên mọi đoạn.
+    expect(model.frameLoads.filter((l) => l.kind === "distributed").length).toBe(60);
     expect(total("line_load_approximated")).toBe(9);
     // 0,6944444 psi = 100 psf ≈ 4,788 kN/m².
     expect(model.shellLoads[0]!.value).toBeCloseTo(4.788, 3);
@@ -159,7 +192,7 @@ describe("file mẫu ETABS 23.2.0: nhập vào NexFEM", () => {
     expect(onBeam.length).toBe(23);
     expect(onBeam.every((l) => l.direction === "globalX")).toBe(true);
     // Điểm "198" (x = 6 in) nằm trên dầm B7 (từ điểm "36" tại x = 0): vị trí 6 in tính từ đầu i.
-    const b7 = model.frames.find((f) => f.label === "B7")!;
+    const b7 = model.frames.find((f) => host(f.label) === "B7")!; // đoạn đầu tiên nếu B7 bị chia
     const [i7, j7] = [b7.i, b7.j].map((id) => model.joints.find((j) => j.id === id)!);
     const first = onBeam.find((l) => l.frame === b7.id)!;
     expect(first.at! * Math.hypot(j7!.x - i7!.x, j7!.y - i7!.y, j7!.z - i7!.z)).toBeCloseTo(6 * IN, 9);
@@ -181,10 +214,10 @@ describe("file mẫu ETABS 23.2.0: nhập vào NexFEM", () => {
     expect(total("frame_angle_imported")).toBe(34);
     // 34 cột xoay 90° (ANG 90): trục khoẻ quay sang phương kia.
     const rotated = model.frames.filter((f) => f.angle !== undefined);
-    expect(rotated.length).toBe(34);
+    expect(new Set(rotated.map((f) => host(f.label))).size).toBe(34);
     expect(rotated.every((f) => f.kind === "column" && f.angle === 90)).toBe(true);
     expect(total("frame_cardinal_ignored")).toBe(60);
-    expect(report.diagnostics[0]!.level).toBe("error");
+    expect(codesAt("error")).toEqual([]);
   });
 
   it("lò xo dọc dầm móng và lò xo nền dưới móng quy về lò xo nút, bảo toàn tổng độ cứng; mô hình có gối", () => {

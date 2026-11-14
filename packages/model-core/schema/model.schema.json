@@ -359,6 +359,78 @@
                   "d",
                   "t"
                 ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "shape": {
+                    "type": "string",
+                    "const": "L"
+                  },
+                  "h": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "b": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "tw": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "tf": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  }
+                },
+                "required": [
+                  "shape",
+                  "h",
+                  "b",
+                  "tw",
+                  "tf"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "shape": {
+                    "type": "string",
+                    "const": "general"
+                  },
+                  "A": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "I33": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "I22": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "J": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "h": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "b": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  }
+                },
+                "required": [
+                  "shape",
+                  "A",
+                  "I33",
+                  "I22",
+                  "J"
+                ]
               }
             ]
           },

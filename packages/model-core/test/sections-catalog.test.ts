@@ -59,3 +59,21 @@ describe("độ chính xác các hình khác", () => {
     }
   });
 });
+
+describe("thép góc chữ L và tiết diện tổng quát", () => {
+  it("L3X3X1/2: khớp công thức trục hình học và bảng AISC (không bán kính lượn)", async () => {
+    const { sectionProperties } = await import("../src/index.ts");
+    const p = sectionProperties({ shape: "L", h: 3, b: 3, tw: 0.5, tf: 0.5 });
+    expect(p.A).toBeCloseTo(2.75, 12);
+    expect(p.I33).toBeCloseTo(2.2163826, 6); // giống angle_section của fem-solver; bảng AISC 2,20 (có bán kính lượn)
+    expect(p.I22).toBeCloseTo(p.I33, 12);
+    expect(p.J).toBeCloseTo((2 * 2.75 * 0.125) / 3, 12);
+    const u = sectionProperties({ shape: "L", h: 6, b: 4, tw: 0.5, tf: 0.5 });
+    expect(u.I33).toBeGreaterThan(u.I22);
+  });
+
+  it("tiết diện tổng quát trả về đúng giá trị nhập", async () => {
+    const { sectionProperties } = await import("../src/index.ts");
+    expect(sectionProperties({ shape: "general", A: 1, I33: 2, I22: 3, J: 4 })).toEqual({ A: 1, I33: 2, I22: 3, J: 4 });
+  });
+});

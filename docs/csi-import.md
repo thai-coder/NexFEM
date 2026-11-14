@@ -47,7 +47,10 @@ Cột "File mẫu" cho biết cú pháp đã có trong file ETABS 23.2.0 thật 
 | "Steel Tube" D, B, TF | ống hộp (góc vuông) | có |
 | "Filled Steel Tube" | ống thép rỗng, **bỏ phần bê tông** (cảnh báo) | có |
 | "Concrete Rectangular" D, B | chữ nhật | có |
-| "Steel Angle", "General", hình khác | **không nhập** (lỗi), thanh dùng chúng bị bỏ | Angle, General |
+| "Steel Angle" D, B, TF, TW | chữ L (trục hình học, bỏ I23 và bán kính lượn; cảnh báo) | 8 tiết diện, 24 giằng |
+| "General" AREA, AS2, AS3, I33, I22, TORSION | tiết diện tổng quát, nhập thẳng đặc trưng và diện tích chịu cắt | 3 tiết diện |
+| hình khác | **không nhập** (lỗi), thanh dùng chúng bị bỏ | — |
+| `LINEASSIGN AUTOMESH "YES"` | chia thanh tại nút nằm trên thân thanh (xem "Chia thanh tại nút") | 322 thanh |
 | `SHELLPROP` Slab/Wall: MATERIAL, MODELINGTYPE, thickness | tiết diện sàn/vách | có |
 | Deck | **không nhập** (cảnh báo) | có |
 | `POINT` X Y [DZ] | nút, z = cao độ tầng − DZ | có |
@@ -76,6 +79,30 @@ Cột "File mẫu" cho biết cú pháp đã có trong file ETABS 23.2.0 thật 
 NexFEM dùng đúng quy ước mặc định của ETABS/SAP2000. Trục 1 đi từ đầu i đến đầu j. Thanh không thẳng đứng có trục 2 hướng lên, trong mặt phẳng đứng chứa thanh. Thanh thẳng đứng có trục 2 = +X tổng thể. Trục 3 = 1 × 2.
 
 `Frame.angle` (độ) xoay trục 2, 3 quanh trục 1: e2' = cos·e2 + sin·e3, dương ngược chiều kim đồng hồ khi nhìn từ đầu +1. Bộ giải (`crates/fem-solver/src/element.rs::local_axes`), biểu đồ mô men (`packages/viewer/src/moment.ts`) và cả hai bộ nhập dùng chung quy ước này. Sửa góc trong bảng Properties của thanh. Test: `local_axis_angle_turns_the_strong_axis_like_csi` kiểm tra cột công xôn tải theo Y ở góc 0°, 90° và 30°, so với lời giải giải tích theo I22 và I33.
+
+## Chia thanh tại nút
+
+ETABS (`AUTOMESH "YES"`) và SAP2000 (`FRAME AUTO MESH ASSIGNMENTS` AutoMesh=Yes, AtJoints=Yes) tự chia thanh khi phân tích, tại nút nằm trên thân thanh: đầu thanh khác hoặc góc sàn, trong dung sai MERGETOL / MergeTol. Nếu không chia, thanh tựa lên thân thanh khác sẽ treo lơ lửng. Bộ nhập chia giống vậy (`splitFramesAtJoints` trong `locate.ts`):
+
+- Các đoạn mang nhãn `B6-1`, `B6-2`, …
+- Nhả liên kết và vùng cứng giữ ở hai đầu ngoài.
+- Tiết diện, góc xoay, tầng chép sang mọi đoạn.
+- Tải phân bố chép cho mọi đoạn. Tải tập trung vào đoạn chứa vị trí, đổi lại vị trí tương đối.
+- Lò xo dọc thanh quy về nút theo từng đoạn.
+
+Chia tại nút là chính xác với phần tử dầm tuyến tính. Chia tại giao điểm của hai thanh cắt nhau không có nút chung (`MESHATINTERSECTIONS`, `AtFrames`) chưa làm.
+
+Kết quả: file ETABS mẫu có 87 thanh được chia thành 287 đoạn; Roof_model có 7 thanh thành 14 đoạn.
+
+## Thép góc chữ L và tiết diện tổng quát
+
+`{ shape: "L", h, b, tw, tf }`: cánh `h` dọc trục 2 dày `tw`, cánh `b` dọc trục 3 dày `tf`. I33, I22 tính quanh trục hình học qua trọng tâm, song song với cánh. Bỏ tích quán tính I23 (trục chính xoay 45° với thép góc đều) và bán kính lượn. J thành mỏng.
+
+Đối chiếu L3X3X1/2 với bảng AISC: trọng tâm 0,932 in (bảng 0,929), I 2,216 in⁴ (bảng 2,20). TypeScript và Rust cùng công thức; test ở cả hai bên.
+
+Hầu hết thép góc dùng làm giằng khớp hai đầu, chỉ chịu lực dọc, nên sai số uốn ít ảnh hưởng.
+
+`{ shape: "general", A, I33, I22, J, h?, b? }`: nhập thẳng đặc trưng; `h`, `b` chỉ để vẽ. Có trong hộp thoại Tiết diện thanh.
 
 ## Lò xo nút
 
@@ -110,15 +137,15 @@ Test: `joint_forces_and_moments_in_global_axes` (bộ giải: công xôn với l
 
 | Loại | Trong file | Đã nhập | Ghi chú |
 | --- | ---: | ---: | --- |
-| Thanh | 322 | 298 | 24 giằng dùng tiết diện chữ L bị bỏ |
-| Tiết diện thanh | 305 | 294 | 8 chữ L, 3 General |
+| Thanh | 322 | 322 | 87 thanh được chia thành 287 đoạn tại nút nằm trên thân thanh |
+| Tiết diện thanh | 305 | 305 | 8 chữ L, 3 General |
 | Sàn | 29 | 29 | 21 sàn móng có lò xo nền: quy về lò xo nút |
 | Nút có lò xo | | 108 | tổng Kz = k_dọc_thanh·ΣL + k_nền·ΣA (test kiểm tra) |
 | Tải thanh / tải sàn | 24 / 16 | 24 / 16 | 9 tải hình thang đổi thành tải đều |
 | Tải tập trung tại nút | 31 | 31 | 8 tại nút đầu thanh; 23 ở điểm riêng nằm trên dầm, đổi thành tải tập trung trên dầm |
 | Trường hợp tải / tổ hợp | 12 / 87 | 12 / 87 | |
 
-Mô hình nhập dùng lò xo nút thay cho gối, như file gốc. F5 hiện **dừng vì mất ổn định tại nút 128**: nút này chỉ nối với dầm B180 (đã nhả liên kết) và các giằng chữ L `L3X3X1/2`. 24 giằng đó chưa nhập được vì NexFEM chưa có tiết diện chữ L. Kết quả phân tích **chưa so được với ETABS**, và sẽ khác ETABS vì: thiếu giằng; lò xo nền quy về nút và tuyến tính (file gốc chỉ chịu nén); cột HSS nhồi bê tông tính như ống rỗng.
+Báo cáo nhập file ETABS mẫu **không còn lỗi**. Mô hình dùng lò xo nút thay cho gối, như file gốc. F5 hiện **dừng vì mất ổn định tại nút 253 theo X**: nút này chỉ nối các thanh khớp hai đầu (cột C47, dầm B152/B153, giằng D11) nằm trong mặt phẳng x = const, nên không có gì giữ theo X. File có định nghĩa sàn cứng `D1` nhưng không gán cho nút hay sàn nào. Cách xử lý (gán sàn cứng, thêm gối, hoặc tự thêm độ cứng nhỏ như ETABS) cần chủ dự án quyết định. Kết quả phân tích **chưa so được với ETABS**, và sẽ khác ETABS vì: lò xo nền quy về nút và tuyến tính (file gốc chỉ chịu nén); giằng chữ L tuyến tính (file gốc chỉ chịu kéo, `LIMITCOMPRESSION 0`); cột HSS nhồi bê tông tính như ống rỗng.
 
 Mô hình này đặt hầu hết đối tượng bằng DZ dưới một tầng duy nhất (Story1, cao 12 in), nên mặt bằng của tầng chỉ thấy những gì nằm đúng cao độ tầng. Xem bằng khung nhìn 3D hoặc mặt đứng.
 
@@ -182,7 +209,7 @@ File OMF là khung phẳng YZ, hai cột xoay 90°: nhờ góc xoay, trục 2 c�
 
 ## Việc tiếp theo
 
-1. Tiết diện General (A, I, J nhập trực tiếp) và chữ L.
+1. Ổn định của file ETABS mẫu (nút 253): chờ chủ dự án chọn cách xử lý.
 2. Phần tử nền đàn hồi cho thanh/sàn (thay cho quy lò xo về nút); lò xo SAP2000 khi có file thật; lò xo chỉ chịu nén (phân tích phi tuyến).
 3. Mô men tập trung trên thanh (để nhập mô men ở điểm nằm giữa thanh).
 4. Đối chiếu kết quả (M2) khi có bảng chuyển vị, phản lực, nội lực xuất từ ETABS/SAP2000.

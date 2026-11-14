@@ -95,6 +95,8 @@ const SHAPE_DEFAULTS: Record<FrameShape["shape"], FrameShape> = {
   I: { shape: "I", h: 0.4, bf: 0.2, tf: 0.013, tw: 0.008 },
   box: { shape: "box", h: 0.3, b: 0.3, t: 0.012 },
   pipe: { shape: "pipe", d: 0.3, t: 0.01 },
+  L: { shape: "L", h: 0.1, b: 0.1, tw: 0.01, tf: 0.01 },
+  general: { shape: "general", A: 0.01, I33: 1e-4, I22: 5e-5, J: 1e-6 },
 };
 
 const DIM_KEYS: Record<FrameShape["shape"], string[]> = {
@@ -103,7 +105,12 @@ const DIM_KEYS: Record<FrameShape["shape"], string[]> = {
   I: ["h", "bf", "tf", "tw", "r"],
   box: ["h", "b", "t", "r"],
   pipe: ["d", "t"],
+  L: ["h", "b", "tw", "tf"],
+  general: ["A", "I33", "I22", "J", "h", "b"],
 };
+
+/** Đại lượng của từng kích thước (tiết diện tổng quát nhập thẳng đặc trưng). */
+const DIM_QUANTITY: Record<string, Quantity> = { A: "area", I33: "inertia", I22: "inertia", J: "inertia" };
 
 /** Hình tiết diện vẽ đúng tỉ lệ. */
 export function SectionPreview({ g }: { g: FrameShape }) {
@@ -131,6 +138,16 @@ export function SectionPreview({ g }: { g: FrameShape }) {
       break;
     case "box":
       shape = <path fillRule="evenodd" d={`M${x0},${y0}h${W}v${H}h${-W}zM${x0 + g.t * S},${y0 + g.t * S}v${H - 2 * g.t * S}h${W - 2 * g.t * S}v${-(H - 2 * g.t * S)}z`} />;
+      break;
+    case "L": {
+      // Góc ngoài ở dưới trái: cánh đứng (h, tw) và cánh ngang (b, tf).
+      const tw = g.tw * S;
+      const tf = g.tf * S;
+      shape = <path d={`M${x0},${y0}h${tw}v${H - tf}h${W - tw}v${tf}h${-W}z`} />;
+      break;
+    }
+    case "general":
+      shape = <rect x={x0} y={y0} width={W} height={H} strokeDasharray="4 3" fillOpacity={0.25} />;
       break;
     case "I": {
       const tf = g.tf * S;
@@ -216,12 +233,23 @@ function frameSectionSection(T: Strings, model: Model, steel: SteelLibraryRow[] 
               </div>
             </Field>
             {DIM_KEYS[g.shape].map((k) => (
-              <Field key={`${g.shape}-${k}`} label={g.shape === "box" && k === "r" ? T.dlg.frameSections.dims.rBox : T.dlg.frameSections.dims[k as keyof Strings["dlg"]["frameSections"]["dims"]]}>
+              <Field
+                key={`${g.shape}-${k}`}
+                label={
+                  g.shape === "box" && k === "r"
+                    ? T.dlg.frameSections.dims.rBox
+                    : g.shape === "L" && (k === "tw" || k === "tf")
+                      ? T.dlg.frameSections.dims[k === "tw" ? "twL" : "tfL"]
+                      : g.shape === "general" && (k === "h" || k === "b")
+                        ? T.dlg.frameSections.dims[k === "h" ? "hDraw" : "bDraw"]
+                        : (T.dlg.frameSections.dims as Record<string, string>)[k] ?? k
+                }
+              >
                 <NF
                   value={(g as unknown as Record<string, number | undefined>)[k] ?? 0}
-                  onChange={(v) => update({ geometry: { ...g, [k]: v } as FrameShape })}
-                  q="length"
-                  min={k === "r" ? 0 : 1e-6}
+                  onChange={(v) => update({ geometry: { ...g, [k]: g.shape === "general" && (k === "h" || k === "b") && !(v > 0) ? undefined : v } as FrameShape })}
+                  q={DIM_QUANTITY[k] ?? "length"}
+                  min={k === "r" || (g.shape === "general" && (k === "h" || k === "b")) ? 0 : 1e-12}
                   label={k}
                   testId={`dim-${k}`}
                 />

@@ -225,6 +225,19 @@ fn joint_spring_carries_load_and_shows_in_reactions() {
 }
 
 #[test]
+fn angle_section_matches_aisc_and_typescript() {
+    // L3X3X1/2 (in): trọng tâm 0,929 in và I 2,20 in⁴ theo bảng AISC (có bán kính lượn); công thức không lượn cho 2,2164.
+    let (a, i22, i33, j) = crate::analysis::angle_section(3.0, 3.0, 0.5, 0.5);
+    assert!(close(a, 2.75, 1e-12));
+    assert!(close(i33, 2.216_382, 1e-6), "I33 = {i33}");
+    assert!(close(i22, i33, 1e-12));
+    assert!(close(j, 2.0 * 2.75 * 0.125 / 3.0, 1e-12));
+    // Thép góc không đều: I33 lớn hơn I22 khi cánh h dài hơn.
+    let (_, i22u, i33u, _) = crate::analysis::angle_section(6.0, 4.0, 0.5, 0.5);
+    assert!(i33u > i22u);
+}
+
+#[test]
 fn simply_supported_udl() {
     let (l, w): (f64, f64) = (6.0, 12.0);
     let m = model(

@@ -37,7 +37,29 @@ export function sectionProperties(g: FrameShape): SectionProperties {
       const I = (Math.PI * (ro ** 4 - ri ** 4)) / 4;
       return { A: Math.PI * (ro * ro - ri * ri), I33: I, I22: I, J: 2 * I };
     }
+    case "L":
+      return angleSection(g.h, g.b, g.tw, g.tf);
+    case "general":
+      return { A: g.A, I33: g.I33, I22: g.I22, J: g.J };
   }
+}
+
+/**
+ * Thép góc chữ L (không bán kính lượn). Cánh đứng h × tw (gồm phần góc), cánh ngang (b − tw) × tf.
+ * I33, I22 quanh trục qua trọng tâm song song với cánh (trục hình học, không phải trục chính);
+ * J thành mỏng Σ b·t³/3 với chiều dài cánh trừ nửa bề dày cánh kia.
+ * Đối chiếu L3X3X1/2 (AISC): trọng tâm 0,932 in (bảng 0,929), I 2,216 in⁴ (bảng 2,20).
+ */
+export function angleSection(h: number, b: number, tw: number, tf: number): SectionProperties {
+  const a1 = h * tw;
+  const a2 = (b - tw) * tf;
+  const A = a1 + a2;
+  const y = (a1 * (h / 2) + a2 * (tf / 2)) / A; // trọng tâm dọc cánh h
+  const x = (a1 * (tw / 2) + a2 * (tw + (b - tw) / 2)) / A; // trọng tâm dọc cánh b
+  const I33 = (tw * h ** 3) / 12 + a1 * (h / 2 - y) ** 2 + ((b - tw) * tf ** 3) / 12 + a2 * (tf / 2 - y) ** 2;
+  const I22 = (h * tw ** 3) / 12 + a1 * (tw / 2 - x) ** 2 + (tf * (b - tw) ** 3) / 12 + a2 * (tw + (b - tw) / 2 - x) ** 2;
+  const J = ((h - tf / 2) * tw ** 3 + (b - tw / 2) * tf ** 3) / 3;
+  return { A, I33, I22, J };
 }
 
 /**
@@ -116,5 +138,9 @@ export function sectionExtent(g: FrameShape): [number, number] {
       return [g.b, g.h];
     case "pipe":
       return [g.d, g.d];
+    case "L":
+      return [g.b, g.h];
+    case "general":
+      return [g.b ?? Math.sqrt(g.A), g.h ?? Math.sqrt(g.A)];
   }
 }
