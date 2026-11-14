@@ -97,6 +97,35 @@ impl Default for Options {
     }
 }
 
+/// Tiết diện chữ I, trả về (A, I22, I33, J); giống `iSection` trong `packages/model-core/src/sections.ts`.
+/// r > 0: thêm bốn góc lượn chân (hình vuông r×r trừ phần tư hình tròn) và J theo El Darwish & Johnston.
+/// r = 0: công thức thành mỏng như trước.
+pub fn i_section(h: f64, bf: f64, tf: f64, tw: f64, r: f64) -> (f64, f64, f64, f64) {
+    use std::f64::consts::PI;
+    let hw = h - 2.0 * tf;
+    let mut a = 2.0 * bf * tf + hw * tw;
+    let mut i33 = (bf * h.powi(3) - (bf - tw) * hw.powi(3)) / 12.0;
+    let mut i22 = (2.0 * tf * bf.powi(3) + hw * tw.powi(3)) / 12.0;
+    let mut j = (2.0 * bf * tf.powi(3) + hw * tw.powi(3)) / 3.0;
+    if r > 0.0 {
+        let af = (1.0 - PI / 4.0) * r * r;
+        let e = r * (10.0 - 3.0 * PI) / (12.0 - 3.0 * PI);
+        let own = (1.0 - 5.0 * PI / 16.0) * r.powi(4) - af * e * e;
+        let y = h / 2.0 - tf - e;
+        let z = tw / 2.0 + e;
+        a += 4.0 * af;
+        i33 += 4.0 * (own + af * y * y);
+        i22 += 4.0 * (own + af * z * z);
+        let alpha = -0.042 + 0.2204 * tw / tf + 0.1355 * r / tf
+            - 0.0865 * r * tw / (tf * tf)
+            - 0.0725 * tw * tw / (tf * tf);
+        let d = ((tf + r).powi(2) + tw * (r + tw / 4.0)) / (2.0 * r + tf);
+        j = 2.0 / 3.0 * bf * tf.powi(3) + hw * tw.powi(3) / 3.0 + 2.0 * alpha * d.powi(4)
+            - 0.42 * tf.powi(4);
+    }
+    (a, i22, i33, j)
+}
+
 /// Đặc trưng tiết diện (m), giống `packages/model-core/src/sections.ts`.
 pub fn section_props(g: &FrameShape) -> (f64, f64, f64, f64) {
     use std::f64::consts::PI;
@@ -113,14 +142,7 @@ pub fn section_props(g: &FrameShape) -> (f64, f64, f64, f64) {
             let i = PI * r.powi(4) / 4.0;
             (PI * r * r, i, i, 2.0 * i)
         }
-        FrameShape::I { h, bf, tf, tw } => {
-            let hw = h - 2.0 * tf;
-            let a = 2.0 * bf * tf + hw * tw;
-            let i33 = (bf * h.powi(3) - (bf - tw) * hw.powi(3)) / 12.0;
-            let i22 = (2.0 * tf * bf.powi(3) + hw * tw.powi(3)) / 12.0;
-            let j = (2.0 * bf * tf.powi(3) + hw * tw.powi(3)) / 3.0;
-            (a, i22, i33, j)
-        }
+        FrameShape::I { h, bf, tf, tw, r } => i_section(h, bf, tf, tw, r),
         FrameShape::Box { h, b, t } => {
             let (hi, bi) = (h - 2.0 * t, b - 2.0 * t);
             let a = b * h - bi * hi;
@@ -456,7 +478,9 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
         let e1 = scale(sub(b, a), 1.0 / full_length);
         let (offset_i, offset_j) = (scale(e1, start), scale(e1, -end));
         let geometry_ok = match &sec.geometry {
-            FrameShape::I { h, bf, tf, tw } => 2.0 * *tf < *h && *tw < *bf,
+            FrameShape::I { h, bf, tf, tw, r } => {
+                *r >= 0.0 && 2.0 * (*tf + *r) < *h && *tw + 2.0 * *r < *bf
+            }
             FrameShape::Box { h, b, t } => 2.0 * *t < *h && 2.0 * *t < *b,
             FrameShape::Pipe { d, t } => 2.0 * *t < *d,
             _ => true,

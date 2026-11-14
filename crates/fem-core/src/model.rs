@@ -106,6 +106,10 @@ pub struct Material {
     pub code: Option<String>,
 }
 
+fn is_zero(v: &f64) -> bool {
+    *v == 0.0
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "shape")]
 pub enum FrameShape {
@@ -114,7 +118,15 @@ pub enum FrameShape {
     #[serde(rename = "circle")]
     Circle { d: f64 },
     #[serde(rename = "I")]
-    I { h: f64, bf: f64, tf: f64, tw: f64 },
+    I {
+        h: f64,
+        bf: f64,
+        tf: f64,
+        tw: f64,
+        /// Bán kính lượn chân (m); 0 = tiết diện hàn không có góc lượn.
+        #[serde(default, skip_serializing_if = "is_zero")]
+        r: f64,
+    },
     #[serde(rename = "box")]
     Box { h: f64, b: f64, t: f64 },
     #[serde(rename = "pipe")]

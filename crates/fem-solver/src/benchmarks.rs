@@ -458,3 +458,55 @@ fn rigid_diaphragm_shares_horizontal_shear_between_two_columns() {
         "invalid_diaphragm"
     );
 }
+
+// Đặc trưng tiết diện thép cán so với bảng EN 10365:2017; cùng số liệu với
+// `packages/model-core/test/sections-catalog.test.ts` để bảo đảm TypeScript và Rust giống nhau.
+#[cfg(test)]
+mod rolled_sections {
+    use crate::analysis::i_section;
+
+    /// (tên, h, b, tw, tf, r [mm], A [cm²], Iy [cm⁴], Iz [cm⁴], It [cm⁴])
+    type Row = (&'static str, f64, f64, f64, f64, f64, f64, f64, f64, f64);
+    const CATALOG: [Row; 4] = [
+        (
+            "IPE 200", 200.0, 100.0, 5.6, 8.5, 12.0, 28.48, 1943.0, 142.4, 6.98,
+        ),
+        (
+            "IPE 300", 300.0, 150.0, 7.1, 10.7, 15.0, 53.81, 8356.0, 603.8, 20.12,
+        ),
+        (
+            "HEA 200", 190.0, 200.0, 6.5, 10.0, 18.0, 53.83, 3692.0, 1336.0, 20.98,
+        ),
+        (
+            "HEB 300", 300.0, 300.0, 11.0, 19.0, 27.0, 149.1, 25170.0, 8563.0, 185.0,
+        ),
+    ];
+
+    fn rel(got: f64, want: f64) -> f64 {
+        (got - want).abs() / want
+    }
+
+    #[test]
+    fn i_sections_match_en10365_catalogue() {
+        for (name, h, b, tw, tf, r, a, iy, iz, it) in CATALOG {
+            let mm = 1e-3;
+            let (ga, gi22, gi33, gj) = i_section(h * mm, b * mm, tf * mm, tw * mm, r * mm);
+            assert!(rel(ga * 1e4, a) < 1e-3, "{name} A");
+            assert!(rel(gi33 * 1e8, iy) < 1e-3, "{name} Iy");
+            assert!(rel(gi22 * 1e8, iz) < 1e-3, "{name} Iz");
+            assert!(rel(gj * 1e8, it) < 0.025, "{name} It");
+        }
+    }
+
+    #[test]
+    fn zero_root_radius_keeps_thin_walled_formula() {
+        let (a, i22, i33, j) = i_section(0.3, 0.15, 0.01, 0.006, 0.0);
+        let hw: f64 = 0.28;
+        assert!((a - (2.0 * 0.15 * 0.01 + hw * 0.006)).abs() < 1e-15);
+        assert!((i33 - (0.15 * 0.3f64.powi(3) - 0.144 * hw.powi(3)) / 12.0).abs() < 1e-15);
+        assert!(
+            (i22 - (2.0 * 0.01 * 0.15f64.powi(3) + hw * 0.006f64.powi(3)) / 12.0).abs() < 1e-15
+        );
+        assert!((j - (2.0 * 0.15 * 0.01f64.powi(3) + hw * 0.006f64.powi(3)) / 3.0).abs() < 1e-15);
+    }
+}

@@ -61,6 +61,8 @@ export const FrameShapeSchema = z.discriminatedUnion("shape", [
     bf: Num.positive(),
     tf: Num.positive(),
     tw: Num.positive(),
+    /** Bán kính lượn chân (thép cán), m. Bỏ trống hoặc 0: tiết diện tổ hợp hàn không có góc lượn. */
+    r: Num.nonnegative().optional(),
   }),
   z.object({ shape: z.literal("box"), h: Num.positive(), b: Num.positive(), t: Num.positive() }),
   z.object({ shape: z.literal("pipe"), d: Num.positive(), t: Num.positive() }),
