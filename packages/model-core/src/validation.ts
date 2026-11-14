@@ -163,7 +163,7 @@ export function checkModel(model: Model): ModelMessage[] {
     else seen.set(key, j.id);
   }
 
-  if (model.joints.length > 0 && !model.joints.some((j) => j.restraint?.some(Boolean))) {
+  if (model.joints.length > 0 && !model.joints.some((j) => j.restraint?.some(Boolean) || j.springs?.some((k) => k > 0))) {
     out.push({ level: "error", code: "no_supports", objects: [] });
   }
 

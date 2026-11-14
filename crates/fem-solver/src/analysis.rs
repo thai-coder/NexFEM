@@ -642,6 +642,33 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
             }
         }
     }
+    // Lò xo nút (hệ tổng thể, không ghép): cộng vào đường chéo; bậc tự do đã giữ thì bỏ qua lò xo.
+    let springs_of = |n: usize| -> [f64; 6] {
+        let j = &model.joints[nodes[n]];
+        let r = j.restraint.unwrap_or([false; 6]);
+        let mut s = j.springs.unwrap_or([0.0; 6]);
+        for d in 0..6 {
+            if r[d] || !s[d].is_finite() || s[d] < 0.0 {
+                s[d] = 0.0;
+            }
+        }
+        s
+    };
+    for n in 0..nodes.len() {
+        let s = springs_of(n);
+        for d in 0..6 {
+            if s[d] == 0.0 {
+                continue;
+            }
+            for &(da, wa) in &dof_weights[n][d] {
+                for &(db, wb) in &dof_weights[n][d] {
+                    if da <= db {
+                        k.add(da, db, s[d] * wa * wb);
+                    }
+                }
+            }
+        }
+    }
     // Bậc tự do xoay không có độ cứng (mọi thanh nối vào đều nhả mô men) → thêm lò xo đơn vị và cảnh báo.
     let mut stabilized = Vec::new();
     let mut zero_rotation_dofs = Vec::new();
@@ -1018,14 +1045,19 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
         let mut sum_reactions = [0.0; 3];
         for n in 0..nodes.len() {
             let jt = &model.joints[nodes[n]];
-            let Some(r) = jt.restraint else { continue };
-            if !r.iter().any(|x| *x) {
+            let r = jt.restraint.unwrap_or([false; 6]);
+            let s = springs_of(n);
+            if !r.iter().any(|x| *x) && !s.iter().any(|x| *x != 0.0) {
                 continue;
             }
+            // Phản lực = lực gối (bậc tự do bị giữ) + lực lò xo −k·u (bậc tự do có lò xo).
+            let d = disp_of(n);
             let mut rv = [0.0; 6];
             for c in 0..6 {
                 if r[c] {
                     rv[c] = residual[n][c];
+                } else if s[c] != 0.0 {
+                    rv[c] = -s[c] * d[c];
                 }
             }
             for c in 0..3 {

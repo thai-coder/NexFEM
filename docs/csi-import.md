@@ -62,9 +62,12 @@ Cột "File mẫu" cho biết cú pháp đã có trong file ETABS 23.2.0 thật 
 | `LINELOAD` phương 2, 3 (trục địa phương) | tải theo trục 2, 3 của NexFEM (cùng quy ước CSI, ghi chú: chưa có file thật có loại tải này) | chưa |
 | `LINEASSIGN` ANG | góc xoay trục địa phương `Frame.angle` | 34 cột ANG 90 |
 | `AREALOAD` UNIFF GRAV/Z | tải sàn | GRAV |
+| `LINESPRING` U1, U2, U3 (lực/dài²) + `LINEASSIGN SPRINGPROP` | lò xo nút ở hai đầu thanh, mỗi đầu k·L/2 theo trục địa phương (cảnh báo: gần đúng) | 24 dầm móng, U2 |
+| `AREASPRING` U1, U2, U3 (lực/dài³) + `AREAASSIGN SPRINGPROP` | lò xo nút ở các góc sàn ngang, k × diện tích chịu tải của góc (cảnh báo: gần đúng) | 21 móng, U3 |
+| `NONLINEAROPT* "Compression Only"` | lò xo tuyến tính, chịu cả kéo (cảnh báo) | có |
 | `POINTLOAD` TYPE FORCE: FX, FY, FZ, MX, MY, MZ | tải nút `jointLoads` (hệ tổng thể); điểm riêng nằm trên thanh: tải tập trung trên thanh (xem dưới) | FX, FY |
 
-**Không nhập, có báo cáo:** lò xo dọc thanh và lò xo nền dưới sàn, điểm chèn `CARDINALPT`, đoạn lệch đầu thanh khác 0, liên kết nửa cứng `PARFIXM*`, giới hạn kéo/nén, sàn cứng, P-Delta, trường hợp tải khác Linear Static/Modal, Range Add.
+**Không nhập, có báo cáo:** lò xo nút (`POINTASSIGN SPRINGPROP`, chưa có trong file mẫu), điểm chèn `CARDINALPT`, đoạn lệch đầu thanh khác 0, liên kết nửa cứng `PARFIXM*`, giới hạn kéo/nén, sàn cứng, P-Delta, trường hợp tải khác Linear Static/Modal, Range Add.
 
 **Bỏ qua (ghi chú):** chia lưới, trạm xuất kết quả, thiết kế, nhóm, nhật ký, thông tin dự án, cốt thép, cáp, liên kết, panel zone, hàm phổ/lịch sử, nguồn khối lượng.
 
@@ -73,6 +76,12 @@ Cột "File mẫu" cho biết cú pháp đã có trong file ETABS 23.2.0 thật 
 NexFEM dùng đúng quy ước mặc định của ETABS/SAP2000. Trục 1 đi từ đầu i đến đầu j. Thanh không thẳng đứng có trục 2 hướng lên, trong mặt phẳng đứng chứa thanh. Thanh thẳng đứng có trục 2 = +X tổng thể. Trục 3 = 1 × 2.
 
 `Frame.angle` (độ) xoay trục 2, 3 quanh trục 1: e2' = cos·e2 + sin·e3, dương ngược chiều kim đồng hồ khi nhìn từ đầu +1. Bộ giải (`crates/fem-solver/src/element.rs::local_axes`), biểu đồ mô men (`packages/viewer/src/moment.ts`) và cả hai bộ nhập dùng chung quy ước này. Sửa góc trong bảng Properties của thanh. Test: `local_axis_angle_turns_the_strong_axis_like_csi` kiểm tra cột công xôn tải theo Y ở góc 0°, 90° và 30°, so với lời giải giải tích theo I22 và I33.
+
+## Lò xo nút
+
+`Joint.springs` = [Kx, Ky, Kz] (kN/m) và [Krx, Kry, Krz] (kN·m/rad) theo hệ tổng thể, không ghép; bậc tự do đã giữ thì bỏ qua lò xo. Bộ giải cộng vào đường chéo ma trận độ cứng và đưa lực lò xo −k·u vào phản lực (kiểm tra cân bằng). Check model coi nút có lò xo là gối. Sửa trong Properties của nút; khung nhìn vẽ ký hiệu zigzag cho nút chỉ có lò xo. Test: `joint_spring_carries_load_and_shows_in_reactions` (công xôn trên lò xo: chuyển vị, phản lực, tổ hợp, chỉ lò xo không gối).
+
+Lò xo dọc thanh và lò xo nền của ETABS được **quy về lò xo nút** vì NexFEM chưa có phần tử nền đàn hồi. Chỉ nhận khi trục địa phương của lò xo trùng một trục tổng thể (thanh/sàn xiên: lỗi). Lò xo SAP2000 (`… SPRING ASSIGNMENTS`) báo lỗi vì chưa có file thật để kiểm chứng cú pháp.
 
 ## Tải tại nút
 
@@ -103,12 +112,13 @@ Test: `joint_forces_and_moments_in_global_axes` (bộ giải: công xôn với l
 | --- | ---: | ---: | --- |
 | Thanh | 322 | 298 | 24 giằng dùng tiết diện chữ L bị bỏ |
 | Tiết diện thanh | 305 | 294 | 8 chữ L, 3 General |
-| Sàn | 29 | 29 | 21 sàn móng có lò xo nền bị bỏ lò xo |
+| Sàn | 29 | 29 | 21 sàn móng có lò xo nền: quy về lò xo nút |
+| Nút có lò xo | | 108 | tổng Kz = k_dọc_thanh·ΣL + k_nền·ΣA (test kiểm tra) |
 | Tải thanh / tải sàn | 24 / 16 | 24 / 16 | 9 tải hình thang đổi thành tải đều |
 | Tải tập trung tại nút | 31 | 31 | 8 tại nút đầu thanh; 23 ở điểm riêng nằm trên dầm, đổi thành tải tập trung trên dầm |
 | Trường hợp tải / tổ hợp | 12 / 87 | 12 / 87 | |
 
-Mô hình nhập **không có gối**, vì file dựa vào lò xo nền. Phải gán gối trước khi chạy F5. Kết quả phân tích **chưa so được với ETABS**, và sẽ khác ETABS vì: thiếu giằng, thiếu lò xo, cột HSS nhồi bê tông tính như ống rỗng.
+Mô hình nhập dùng lò xo nút thay cho gối, như file gốc. F5 hiện **dừng vì mất ổn định tại nút 128**: nút này chỉ nối với dầm B180 (đã nhả liên kết) và các giằng chữ L `L3X3X1/2`. 24 giằng đó chưa nhập được vì NexFEM chưa có tiết diện chữ L. Kết quả phân tích **chưa so được với ETABS**, và sẽ khác ETABS vì: thiếu giằng; lò xo nền quy về nút và tuyến tính (file gốc chỉ chịu nén); cột HSS nhồi bê tông tính như ống rỗng.
 
 Mô hình này đặt hầu hết đối tượng bằng DZ dưới một tầng duy nhất (Story1, cao 12 in), nên mặt bằng của tầng chỉ thấy những gì nằm đúng cao độ tầng. Xem bằng khung nhìn 3D hoặc mặt đứng.
 
@@ -173,6 +183,6 @@ File OMF là khung phẳng YZ, hai cột xoay 90°: nhờ góc xoay, trục 2 c�
 ## Việc tiếp theo
 
 1. Tiết diện General (A, I, J nhập trực tiếp) và chữ L.
-2. Lò xo nút / lò xo nền (bộ giải hiện chỉ có gối cứng).
+2. Phần tử nền đàn hồi cho thanh/sàn (thay cho quy lò xo về nút); lò xo SAP2000 khi có file thật; lò xo chỉ chịu nén (phân tích phi tuyến).
 3. Mô men tập trung trên thanh (để nhập mô men ở điểm nằm giữa thanh).
 4. Đối chiếu kết quả (M2) khi có bảng chuyển vị, phản lực, nội lực xuất từ ETABS/SAP2000.

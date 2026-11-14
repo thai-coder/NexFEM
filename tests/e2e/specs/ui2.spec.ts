@@ -152,3 +152,17 @@ test("gán tải tại nút cho nút đang chọn; Properties đếm tải nút"
   expect(loads.map((l) => [l.joint, l.values[0], l.values[2]])).toEqual([[joint.id, 12, 0]]);
   await expect(page.getByTestId("properties")).toContainText("1 tải");
 });
+
+test("sửa lò xo nút trong Properties", async ({ page }) => {
+  const joint = (await m(page)).joints[0]!;
+  await page.getByTestId("console-input").fill(`select ${joint.label}`);
+  await page.getByTestId("console-input").press("Enter");
+  const props = page.getByTestId("properties");
+  await props.getByTestId("spring-kz").fill("5000");
+  await props.getByTestId("apply").click();
+  const springs = async () => ((await m(page)).joints.find((x) => x.id === joint.id) as { springs?: number[] }).springs;
+  expect(await springs()).toEqual([0, 0, 5000, 0, 0, 0]);
+  await props.getByTestId("spring-kz").fill("0");
+  await props.getByTestId("apply").click();
+  expect(await springs()).toBeUndefined();
+});

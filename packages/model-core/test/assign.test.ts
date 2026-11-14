@@ -80,3 +80,21 @@ describe("joint.assignLoad", () => {
     expect(() => s.execute("joint.assignLoad", { joints: ["khong-co"], pattern: "lp-sdl", values: [1, 0, 0, 0, 0, 0] })).toThrow(/Chưa chọn nút/);
   });
 });
+
+describe("joint.assignSprings", () => {
+  it("gán và bỏ lò xo; lò xo được tính là gối khi Check model", async () => {
+    const { checkModel } = await import("../src/index.ts");
+    const s = stack();
+    const id = s.model.joints[0]!.id;
+    s.execute("joint.assignSprings", { joints: [id], springs: [0, 0, 5000, 0, 0, 0] });
+    expect(s.model.joints[0]!.springs).toEqual([0, 0, 5000, 0, 0, 0]);
+    // Bỏ hết gối, chỉ còn lò xo: không còn lỗi no_supports.
+    const ids = s.model.joints.map((j) => j.id);
+    s.execute("joint.assignRestraint", { joints: ids, restraint: [false, false, false, false, false, false] });
+    expect(checkModel(s.model).some((m) => m.code === "no_supports")).toBe(false);
+    s.execute("joint.assignSprings", { joints: [id], springs: [0, 0, 0, 0, 0, 0] });
+    expect(s.model.joints[0]!.springs).toBeUndefined();
+    expect(checkModel(s.model).some((m) => m.code === "no_supports")).toBe(true);
+    expect(() => s.execute("joint.assignSprings", { joints: [id], springs: [-1, 0, 0, 0, 0, 0] })).toThrow();
+  });
+});

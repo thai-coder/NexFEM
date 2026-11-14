@@ -176,6 +176,55 @@ fn joint_forces_and_moments_in_global_axes() {
 }
 
 #[test]
+fn joint_spring_carries_load_and_shows_in_reactions() {
+    // Công xôn dọc X; nút a giữ mọi bậc tự do trừ Uz, thay bằng lò xo Kz. Tải nút Fz = −P tại b.
+    // uz_a = −P/Kz; uz_b = uz_a − P L³/(3EI); phản lực lò xo tại a = +P; tổng phản lực Z cân bằng tải.
+    let (l, p, ks): (f64, f64, f64) = (3.0, 10.0, 2000.0);
+    let mut m = model(
+        json!([
+            {"id":"a","label":"1","x":0,"y":0,"z":0,"restraint":[true,true,false,true,true,true],"springs":[5.0,5.0,ks,5.0,5.0,5.0]},
+            {"id":"b","label":"2","x":l,"y":0,"z":0}
+        ]),
+        json!([{"id":"f","label":"B1","kind":"beam","i":"a","j":"b","section":"s"}]),
+        json!([]),
+    );
+    m.joint_loads = serde_json::from_value(
+        json!([{"id":"j1","joint":"b","pattern":"p","values":[0.0,0.0,-p,0.0,0.0,0.0]}]),
+    )
+    .unwrap();
+    let r = run(&m);
+    let c = &r.cases[0];
+    let ua = -p / ks;
+    assert!(
+        close(c.displacements["a"][2], ua, 1e-9),
+        "uz_a = {}",
+        c.displacements["a"][2]
+    );
+    assert!(close(
+        c.displacements["b"][2],
+        ua - p * l.powi(3) / (3.0 * E * I33),
+        1e-9
+    ));
+    // Lò xo trên bậc tự do đã giữ bị bỏ qua: phản lực Ux, My vẫn là lực gối.
+    assert!(
+        close(c.reactions["a"][2], p, 1e-9),
+        "Rz = {}",
+        c.reactions["a"][2]
+    );
+    assert!(close(c.reactions["a"][4], -p * l, 1e-9));
+    assert!(close(c.sum_reactions[2], -c.applied[2], 1e-9));
+    // Tổ hợp 1.5 × C cũng cộng phản lực lò xo.
+    assert!(close(r.cases[1].reactions["a"][2], 1.5 * p, 1e-9));
+
+    // Chỉ có lò xo (không gối nào): vẫn giải được khi lò xo đủ giữ mọi phương.
+    let mut free = m.clone();
+    free.joints[0].restraint = None;
+    free.joints[0].springs = Some([1e6, 1e6, ks, 1e6, 1e6, 1e6]);
+    let r = run(&free);
+    assert!(close(r.cases[0].sum_reactions[2], p, 1e-9));
+}
+
+#[test]
 fn simply_supported_udl() {
     let (l, w): (f64, f64) = (6.0, 12.0);
     let m = model(

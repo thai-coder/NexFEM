@@ -351,6 +351,10 @@ function JointProps({ joint, model, locked }: { joint: Joint; model: Model; lock
   const initial: Restraint = joint.restraint ?? PRESETS.free!;
   const jointLoadCount = model.jointLoads.filter((l) => l.joint === joint.id).length;
   const [r, setR] = useState<Restraint>(initial);
+  type Six = [number, number, number, number, number, number];
+  const initialSprings: Six = joint.springs ?? [0, 0, 0, 0, 0, 0];
+  const [k, setK] = useState<Six>(initialSprings);
+  useEffect(() => setK(joint.springs ?? [0, 0, 0, 0, 0, 0]), [joint.springs]);
   const [pt, setPt] = useState<[number, number, number]>([joint.x, joint.y, joint.z]);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
@@ -361,7 +365,8 @@ function JointProps({ joint, model, locked }: { joint: Joint; model: Model; lock
     setError(null);
   }, [joint.x, joint.y, joint.z, joint.id]);
   const moved = pt[0] !== joint.x || pt[1] !== joint.y || pt[2] !== joint.z;
-  const dirty = moved || r.some((v, i) => v !== initial[i]);
+  const springsChanged = k.some((v, i) => v !== initialSprings[i]);
+  const dirty = moved || r.some((v, i) => v !== initial[i]) || springsChanged;
   const setAxis = (k: 0 | 1 | 2, v: number) => setPt((p) => p.map((x, i) => (i === k ? v : x)) as [number, number, number]);
   return (
     <>
@@ -387,6 +392,14 @@ function JointProps({ joint, model, locked }: { joint: Joint; model: Model; lock
           <RestraintEditor value={r} onChange={setR} disabled={locked} />
         </div>
       </Section>
+      <Section title={T.props.springs}>
+        {(["Kx", "Ky", "Kz", "Krx", "Kry", "Krz"] as const).map((name, i) => (
+          <Row key={name} label={name}>
+            <NumberField value={k[i]!} min={0} onChange={(v) => setK((old) => old.map((x, c) => (c === i ? Math.max(0, v) : x)) as Six)} quantity={i < 3 ? "forcePerLength" : "moment"} units={model.units} label={name} testId={`spring-${name.toLowerCase()}`} />
+          </Row>
+        ))}
+        <div className="muted span2">{T.props.springsHint}</div>
+      </Section>
       <Section title={T.props.assigns}>
         <Row label={T.props.loads}>{jointLoadCount ? T.fmt(T.props.loadCount, { n: jointLoadCount }) : T.props.none}</Row>
       </Section>
@@ -398,13 +411,14 @@ function JointProps({ joint, model, locked }: { joint: Joint; model: Model; lock
       <ApplyBar
         dirty={dirty}
         locked={locked}
-        onRevert={() => (setR(initial), setPt([joint.x, joint.y, joint.z]), setError(null))}
+        onRevert={() => (setR(initial), setK(initialSprings), setPt([joint.x, joint.y, joint.z]), setError(null))}
         onApply={() => {
           if (moved) {
             const res = useModel.getState().run("joint.move", { joint: joint.id, point: pt }, T.props.coords);
             if (!res.ok) return setError(res.error);
           }
           if (r.some((v, i) => v !== initial[i])) execute("joint.assignRestraint", { joints: [joint.id], restraint: r });
+          if (springsChanged) execute("joint.assignSprings", { joints: [joint.id], springs: k });
           setError(null);
         }}
       />

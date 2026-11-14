@@ -32,16 +32,16 @@ test("nhập file ETABS thật: báo cáo số lượng và phần không nhập
   const errors = page.getByTestId("csi-error");
   await expect(errors).not.toContainText("Tải tại nút");
   await expect(page.getByTestId("csi-warning")).toContainText("đổi thành tải tập trung trên thanh");
-  await expect(errors).toContainText("Lò xo nền dưới sàn");
   await expect(errors).toContainText("Steel Angle");
-  await expect(errors).toContainText("không có gối");
+  await expect(errors).not.toContainText("không có gối");
+  await expect(page.getByTestId("csi-warning")).toContainText("Lò xo nền dưới sàn quy về lò xo nút");
   await expect(page.getByTestId("csi-warning")).not.toContainText("Góc xoay");
   await expect(page.getByTestId("csi-info")).toContainText("Góc xoay trục địa phương của thanh được nhập");
   // Chưa mở: mô hình hiện tại không đổi.
   expect((await model(page)).name).toBe("Toa_nha_A");
 });
 
-test("mở mô hình đã nhập; F5 bị chặn vì thiếu gối", async ({ page }) => {
+test("mở mô hình đã nhập; lò xo làm gối; F5 dừng vì thiếu 24 giằng chữ L", async ({ page }) => {
   await importFixture(page);
   await page.getByTestId("csi-open").click();
   await expect(page.getByTestId("dlg-csiImport")).toHaveCount(0);
@@ -55,8 +55,8 @@ test("mở mô hình đã nhập; F5 bị chặn vì thiếu gối", async ({ pa
   expect(m.frameLoads.filter((l) => l.kind === "point").length).toBe(23);
   await expect(page.getByTestId("bottom")).toContainText("Đã nhập 23217_SMFs 3D model_updated v4.e2k");
   await page.keyboard.press("F5");
-  // Bị chặn: tab Messages hiện lỗi thiếu gối.
-  await expect(page.getByTestId("bottom")).toContainText("Mô hình chưa có gối nào");
+  // Lò xo dưới móng thay cho gối; giằng chữ L chưa nhập nên nút 128 (chỉ nối dầm B180) mất ổn định.
+  await expect(page.getByTestId("bottom")).toContainText("mất ổn định tại nút 128");
 });
 
 test("Huỷ thì không đổi mô hình", async ({ page }) => {

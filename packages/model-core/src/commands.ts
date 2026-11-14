@@ -7,6 +7,7 @@ import {
   FrameSectionSchema,
   MaterialSchema,
   RestraintSchema,
+  JointSchema,
   UnitSystemSchema,
   type CollectionName,
   type Model,
@@ -283,6 +284,23 @@ export const commands = {
       let n = 0;
       for (const f of d.frames) if (set.has(f.id)) (f.section = a.section), n++;
       return n;
+    },
+  }),
+
+  assignSprings: defineCommand({
+    name: "joint.assignSprings",
+    title: "Gán lò xo nút",
+    mutates: true,
+    args: z.object({ joints: z.array(z.string()).min(1), springs: JointSchema.shape.springs.unwrap() }),
+    run(d, a) {
+      const ids = new Set(a.joints);
+      const joints = d.joints.filter((j) => ids.has(j.id));
+      if (!joints.length) throw new CommandError("Chưa chọn nút nào", "invalid_args");
+      for (const j of joints) {
+        if (a.springs.some((k) => k > 0)) j.springs = [...a.springs];
+        else delete j.springs;
+      }
+      return joints.length;
     },
   }),
 

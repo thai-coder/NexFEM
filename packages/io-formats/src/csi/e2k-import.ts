@@ -20,7 +20,7 @@ import {
 } from "@nexfem/model-core";
 import { e2kNumber, e2kPairs, e2kSection, parseE2k, type E2kFile, type E2kRecord, type E2kToken } from "./e2k-parse.ts";
 import { Diagnostics, type ImportDiagnostic } from "./diagnostics.ts";
-import { locatePoint } from "./locate.ts";
+import { cornerAreas, frameAxes, globalAxisOf, locatePoint } from "./locate.ts";
 import { conv, unitFactors, type UnitFactors } from "./units.ts";
 
 export type { ImportDiagnostic, ImportLevel } from "./diagnostics.ts";
@@ -389,6 +389,30 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
   }
   const frames: Frame[] = [];
   const frameIdByKey = new Map<string, string>();
+  // Lò xo dọc thanh (lực/dài²) và lò xo diện tích (lực/dài³) theo trục địa phương 1, 2, 3 (cú pháp từ file mẫu thật).
+  type SpringDef = { u: [number, number, number]; nonlinear: boolean; line: number };
+  const springDefs = (section: string, head: string) => {
+    const out = new Map<string, SpringDef>();
+    for (const r of e2kSection(file, section)) {
+      if (r.tokens[0]?.text !== head || !r.tokens[1]) continue;
+      const p = new Map(e2kPairs(r, 2));
+      const u = (["U1", "U2", "U3"] as const).map((k) => (p.has(k) ? e2kNumber(p.get(k)!.text) : 0)) as SpringDef["u"];
+      if (u.some((v) => !Number.isFinite(v) || v < 0)) {
+        d.add("error", "spring_invalid", {}, { line: r.line, object: r.tokens[1].text });
+        continue;
+      }
+      const nonlinear = [...p.entries()].some(([k, v]) => k.startsWith("NONLINEAROPT") && v.text.toLowerCase() !== "none" && v.text.toLowerCase() !== "linear");
+      if (nonlinear) d.add("warning", "spring_compression_only_linear", {}, { line: r.line, object: r.tokens[1].text });
+      for (const k of p.keys()) if (!["U1", "U2", "U3", "NOTES"].includes(k) && !k.startsWith("NONLINEAROPT")) d.add("warning", "spring_key_unsupported", { key: k }, { line: r.line, object: r.tokens[1].text });
+      out.set(r.tokens[1].text, { u, nonlinear, line: r.line });
+    }
+    return out;
+  };
+  const lineSprings = springDefs("LINE SPRING PROPERTIES", "LINESPRING");
+  const areaSprings = springDefs("AREA SPRING PROPERTIES", "AREASPRING");
+  const frameSpring = new Map<string, string>();
+  const shellSpring = new Map<string, string>();
+
   const pendingFrames: { key: string; frame: Omit<Frame, "i" | "j">; iKey: string; jKey: string }[] = [];
   let skippedFrames = 0;
   for (const [key, m] of lineAssigns) {
@@ -467,8 +491,10 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
         }
       } else if (k === "CARDINALPT") {
         if (val !== 10) d.add("warning", "frame_cardinal_ignored", { point: v.text }, at);
-      } else if (k === "SPRINGPROP") d.add("error", "frame_spring_unsupported", { spring: v.text }, at);
-      else if (k === "LIMITCOMPRESSION" || k === "LIMITTENSION") d.add("warning", "frame_limit_ignored", { key: k }, at);
+      } else if (k === "SPRINGPROP") {
+        if (lineSprings.has(v.text)) frameSpring.set(key, v.text);
+        else d.add("error", "frame_spring_unsupported", { spring: v.text }, at);
+      } else if (k === "LIMITCOMPRESSION" || k === "LIMITTENSION") d.add("warning", "frame_limit_ignored", { key: k }, at);
       else if (k === "PARFIXM3I" || k === "PARFIXM3J" || k === "PARFIXM2I" || k === "PARFIXM2J") d.add("warning", "frame_partial_fixity_ignored", {}, at);
       else d.add("warning", "frame_key_unsupported", { key: k }, at);
     }
@@ -522,8 +548,10 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
       if (k === "SECTION" || AREA_KEYS_IGNORED.has(k)) continue;
       if (k === "ADDRESTRAINT") {
         if (v.text.toLowerCase() !== "no") d.add("error", "area_restraint_unsupported", {}, at);
-      } else if (k === "SPRINGPROP") d.add("error", "area_spring_unsupported", { spring: v.text }, at);
-      else d.add("warning", "area_key_unsupported", { key: k }, at);
+      } else if (k === "SPRINGPROP") {
+        if (areaSprings.has(v.text)) shellSpring.set(key, v.text);
+        else d.add("error", "area_spring_unsupported", { spring: v.text }, at);
+      } else d.add("warning", "area_key_unsupported", { key: k }, at);
     }
     if (m.pairs.has("MASS")) d.add("info", "area_mass_ignored", {}, at);
     pendingShells.push({
@@ -623,6 +651,66 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
   }
   count("shells", areaAssigns.size, shells.length);
   void skippedShells;
+
+  // ------------------------------------------------------------------ lò xo dọc thanh / diện tích → lò xo nút
+  // NexFEM chưa có phần tử nền đàn hồi: quy về lò xo nút (hệ tổng thể). Thanh: mỗi đầu k·L/2 theo trục địa phương;
+  // sàn: k·(diện tích chịu tải của góc). Chỉ nhận được khi trục địa phương trùng một trục tổng thể.
+  const jointById = new Map(joints.map((j) => [j.id, j]));
+  const addSpring = (id: string, axis: number, k: number) => {
+    const j = jointById.get(id)!;
+    const s: NonNullable<Joint["springs"]> = j.springs ?? [0, 0, 0, 0, 0, 0];
+    s[axis as 0 | 1 | 2] += k;
+    j.springs = s;
+  };
+  for (const f of frames) {
+    const key = [...frameIdByKey].find(([, id]) => id === f.id)?.[0];
+    const name = key ? frameSpring.get(key) : undefined;
+    if (!name) continue;
+    const def = lineSprings.get(name)!;
+    const a = jointById.get(f.i)!;
+    const b = jointById.get(f.j)!;
+    const len = Math.hypot(b.x - a.x, b.y - a.y, b.z - a.z);
+    const axes = frameAxes(a, b, f.angle ?? 0);
+    let ok = true;
+    def.u.forEach((k, c) => {
+      if (!(k > 0)) return;
+      const g = globalAxisOf(axes[c]!);
+      if (g < 0) {
+        ok = false;
+        return;
+      }
+      const kn = (conv.stress(U, k) * len) / 2;
+      addSpring(f.i, g, kn);
+      addSpring(f.j, g, kn);
+    });
+    if (ok) d.add("warning", "frame_spring_lumped", {}, { object: f.label });
+    else d.add("error", "spring_direction_unsupported", {}, { object: f.label });
+  }
+  for (const s of shells) {
+    const key = [...shellIdByKey].find(([, id]) => id === s.id)?.[0];
+    const name = key ? shellSpring.get(key) : undefined;
+    if (!name) continue;
+    const def = areaSprings.get(name)!;
+    const pts = s.joints.map((id) => jointById.get(id)!);
+    const nrm: [number, number, number] = [0, 0, 0];
+    pts.forEach((p, k) => {
+      const q = pts[(k + 1) % pts.length]!;
+      nrm[0] += (p.y - q.y) * (p.z + q.z);
+      nrm[1] += (p.z - q.z) * (p.x + q.x);
+      nrm[2] += (p.x - q.x) * (p.y + q.y);
+    });
+    const nl = Math.hypot(...nrm);
+    // Sàn ngang: trục 3 = Z; trục 1, 2 trong mặt phẳng lấy theo X, Y (trục mặc định của sàn ETABS).
+    if (Math.abs(nrm[2]) / nl < 1 - 1e-6) {
+      d.add("error", "spring_direction_unsupported", {}, { object: s.label });
+      continue;
+    }
+    if (def.u[0] !== def.u[1]) d.add("warning", "area_spring_inplane_assumed", {}, { object: s.label });
+    const areas = cornerAreas(pts);
+    pts.forEach((p, k) => def.u.forEach((ku, c) => ku > 0 && addSpring(p.id, c, conv.unitWeight(U, ku) * areas[k]!)));
+    d.add("warning", "area_spring_lumped", {}, { object: s.label });
+  }
+  for (const j of joints) if (j.springs) j.springs = j.springs.map((v) => (v === 0 ? 0 : Number(v.toPrecision(12)))) as NonNullable<Joint["springs"]>;
   count("joints", points.size, joints.length);
 
   // ------------------------------------------------------------------ mẫu tải
@@ -851,7 +939,7 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
     if (SECTIONS_USED.has(name) || name.startsWith("STORIES") || !recs.length) continue;
     d.add("info", "section_ignored", { section: name, records: recs.length }, { line: file.sectionLines.get(name) });
   }
-  if (!joints.some((j) => j.restraint?.some(Boolean))) d.add("error", "no_supports_imported");
+  if (!joints.some((j) => j.restraint?.some(Boolean) || j.springs?.some((k) => k > 0))) d.add("error", "no_supports_imported");
 
   const model = parseModel({
     schemaVersion: MODEL_SCHEMA_VERSION,

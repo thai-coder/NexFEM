@@ -104,6 +104,8 @@ export const JointSchema = z.object({
   z: Num,
   story: Id.optional(),
   restraint: RestraintSchema.optional(),
+  /** Lò xo nút theo hệ tổng thể, không ghép: [Kx, Ky, Kz] (kN/m), [Krx, Kry, Krz] (kN·m/rad). Bậc tự do đã giữ thì bỏ qua lò xo. */
+  springs: z.tuple([Num.nonnegative(), Num.nonnegative(), Num.nonnegative(), Num.nonnegative(), Num.nonnegative(), Num.nonnegative()]).optional(),
 });
 
 export const FrameSchema = z.object({

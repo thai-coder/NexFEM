@@ -682,6 +682,11 @@ export function importS2k(input: string | S2kFile, opts: { name?: string } = {})
   // ------------------------------------------------------------------ bảng bỏ qua
   for (const [name, recs] of file.tables) {
     if (TABLES_USED.has(name) || !recs.length) continue;
+    // Lò xo ảnh hưởng trực tiếp tới phân tích; chưa có file SAP2000 thật có lò xo để kiểm chứng cú pháp, nên báo lỗi thay vì ghi chú.
+    if (/SPRING/.test(name) && /ASSIGN/.test(name)) {
+      d.add("error", "springs_not_verified", { section: name, records: recs.length }, { line: file.tableLines.get(name) });
+      continue;
+    }
     d.add("info", "section_ignored", { section: name, records: recs.length }, { line: file.tableLines.get(name) });
   }
 

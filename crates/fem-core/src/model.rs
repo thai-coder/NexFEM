@@ -182,6 +182,9 @@ pub struct Joint {
     /// Bậc tự do bị giữ: [Ux, Uy, Uz, Rx, Ry, Rz].
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub restraint: Option<[bool; 6]>,
+    /// Lò xo nút theo hệ tổng thể: [Kx, Ky, Kz] (kN/m), [Krx, Kry, Krz] (kN·m/rad).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub springs: Option<[f64; 6]>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

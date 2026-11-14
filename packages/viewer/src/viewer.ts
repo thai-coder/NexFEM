@@ -727,7 +727,7 @@ export class StructureViewer {
 
     // Nút và gối.
     const jp: number[] = [];
-    const supports: Record<"fixed" | "pinned" | "other", number[]> = { fixed: [], pinned: [], other: [] };
+    const supports: Record<"fixed" | "pinned" | "other" | "spring", number[]> = { fixed: [], pinned: [], other: [], spring: [] };
     this.#jointIds = [];
     for (const j of vis.joints) {
       jp.push(j.x, j.y, j.z);
@@ -736,7 +736,7 @@ export class StructureViewer {
       if (r?.some(Boolean)) {
         const kind = r.every(Boolean) ? "fixed" : r[0] && r[1] && r[2] && !r[3] && !r[4] && !r[5] ? "pinned" : "other";
         supports[kind].push(j.x, j.y, j.z);
-      }
+      } else if (j.springs?.some((k) => k > 0)) supports.spring.push(j.x, j.y, j.z);
     }
     this.#jointPoints = null;
     if (jp.length && this.#display.joints) {
@@ -747,7 +747,7 @@ export class StructureViewer {
       this.#content.add(this.#jointPoints);
     }
     this.#symbolMats = [];
-    for (const kind of ["fixed", "pinned", "other"] as const) {
+    for (const kind of ["fixed", "pinned", "other", "spring"] as const) {
       if (!supports[kind].length || !this.#display.restraints) continue;
       const g = new THREE.BufferGeometry();
       g.setAttribute("position", new THREE.Float32BufferAttribute(supports[kind], 3));
@@ -1573,7 +1573,7 @@ export class StructureViewer {
 
 const sprites = new Map<string, THREE.Texture>();
 /** Ký hiệu: gối ngàm (vuông), khớp (tam giác), gối khác (tròn), nhả liên kết (vòng tròn rỗng). */
-function symbolSprite(kind: "fixed" | "pinned" | "other" | "ring"): THREE.Texture {
+function symbolSprite(kind: "fixed" | "pinned" | "other" | "spring" | "ring"): THREE.Texture {
   const hit = sprites.get(kind);
   if (hit) return hit;
   const c = document.createElement("canvas");
@@ -1583,6 +1583,17 @@ function symbolSprite(kind: "fixed" | "pinned" | "other" | "ring"): THREE.Textur
   ctx.strokeStyle = "#fff";
   ctx.lineWidth = 5;
   ctx.beginPath();
+  if (kind === "spring") {
+    // Lò xo: đường zigzag thẳng đứng.
+    ctx.lineWidth = 3;
+    ctx.moveTo(16, 1);
+    for (let k = 0; k < 6; k++) ctx.lineTo(k % 2 ? 6 : 26, 5 + k * 4.5);
+    ctx.lineTo(16, 31);
+    ctx.stroke();
+    const tex = new THREE.CanvasTexture(c);
+    sprites.set(kind, tex);
+    return tex;
+  }
   if (kind === "fixed") ctx.rect(5, 5, 22, 22);
   else if (kind === "pinned") {
     ctx.moveTo(16, 4);

@@ -14,6 +14,7 @@
 - **First action when resuming:** read "Next steps" in `docs/csi-import.md`.
   - Frame local-axis angle is done (schema `Frame.angle`, solver, viewer, Properties, both importers).
   - Joint loads are done (schema `Model.jointLoads`, solver, validation, Assign ▸ Joint loads, viewer, both importers). Points lying inside a frame become frame point loads.
-  - Next: General/angle sections, springs, concentrated moments on frames (see "Next steps").
-  - **Schema note for Codex:** `Frame.angle` (optional) and `Model.jointLoads` (default `[]`) are new and backward compatible; files without them still open.
+  - Joint springs are done (schema `Joint.springs`, solver with spring reactions, validation, Properties, viewer symbol). ETABS line and area springs are lumped into joint springs, with warnings.
+  - Next: angle (L) sections. The ETABS sample stops at F5 because its 24 L3X3X1/2 braces are missing. After that: General sections and concentrated moments on frames.
+  - **Schema note for Codex:** `Frame.angle` (optional), `Model.jointLoads` (default `[]`) and `Joint.springs` (optional) are new and backward compatible; files without them still open.
 - **M1 completion condition:** the user imports other ETABS/SAP2000 files and confirms the mapping assumptions (DZ, PINNED, partial fixity, None area).

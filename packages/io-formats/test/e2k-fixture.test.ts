@@ -176,9 +176,7 @@ describe("file mẫu ETABS 23.2.0: nhập vào NexFEM", () => {
     expect(total("combo_item_missing")).toBe(0);
   });
 
-  it("báo rõ các thứ chưa hỗ trợ: lò xo, điểm chèn, không có gối; góc xoay trục ANG được nhập", () => {
-    expect(total("frame_spring_unsupported")).toBe(24);
-    expect(total("area_spring_unsupported")).toBe(21);
+  it("báo rõ các thứ chưa hỗ trợ: điểm chèn; góc xoay trục ANG được nhập", () => {
     expect(total("frame_angle_ignored")).toBe(0);
     expect(total("frame_angle_imported")).toBe(34);
     // 34 cột xoay 90° (ANG 90): trục khoẻ quay sang phương kia.
@@ -186,13 +184,50 @@ describe("file mẫu ETABS 23.2.0: nhập vào NexFEM", () => {
     expect(rotated.length).toBe(34);
     expect(rotated.every((f) => f.kind === "column" && f.angle === 90)).toBe(true);
     expect(total("frame_cardinal_ignored")).toBe(60);
-    expect(total("no_supports_imported")).toBe(1);
     expect(report.diagnostics[0]!.level).toBe("error");
   });
 
-  it("mô hình hợp lệ theo schema; kiểm tra mô hình chỉ còn lỗi thiếu gối", () => {
+  it("lò xo dọc dầm móng và lò xo nền dưới móng quy về lò xo nút, bảo toàn tổng độ cứng; mô hình có gối", () => {
+    expect(total("frame_spring_unsupported")).toBe(0);
+    expect(total("area_spring_unsupported")).toBe(0);
+    expect(total("frame_spring_lumped")).toBe(24);
+    expect(total("area_spring_lumped")).toBe(21);
+    expect(total("spring_compression_only_linear")).toBe(2);
+    expect(total("no_supports_imported")).toBe(0);
+    // LINESPRING U2 = 4166.6665 lb/in² (dầm ngang: trục 2 = Z), AREASPRING U3 = 86.80556 lb/in³ (sàn ngang: trục 3 = Z).
+    const kLine = (4166.6665 * LB) / IN ** 2;
+    const kArea = (86.80556 * LB) / IN ** 3;
+    const byId = new Map(model.joints.map((j) => [j.id, j]));
+    const len = (f: (typeof model.frames)[number]) => {
+      const [a, b] = [byId.get(f.i)!, byId.get(f.j)!];
+      return Math.hypot(b.x - a.x, b.y - a.y, b.z - a.z);
+    };
+    const area = (ids: string[]) => {
+      const p = ids.map((id) => byId.get(id)!);
+      let s2 = 0;
+      p.forEach((q, k) => {
+        const r = p[(k + 1) % p.length]!;
+        s2 += q.x * r.y - r.x * q.y;
+      });
+      return Math.abs(s2) / 2;
+    };
+    // Danh sách đối tượng có SPRINGPROP lấy thẳng từ file (báo cáo chỉ liệt kê tối đa 20 tên).
+    const f = parseE2k(text);
+    const withSpring = (sec: string) => e2kSection(f, sec).filter((r) => r.tokens.some((t) => t.text === "SPRINGPROP")).map((r) => [r.tokens[1]!.text, r.tokens[2]!.text]);
+    const label = (list: { label: string }[], [n, st]: string[]) => (list.some((o) => o.label === `${n}@${st}`) ? `${n}@${st}` : n!);
+    const lineFrames = withSpring("LINE ASSIGNS").map((x) => label(model.frames, x));
+    const areaShells = withSpring("AREA ASSIGNS").map((x) => label(model.shells, x));
+    expect([lineFrames.length, areaShells.length]).toEqual([24, 21]);
+    const sumL = model.frames.filter((f) => lineFrames.includes(f.label)).reduce((t, f) => t + len(f), 0);
+    const sumA = model.shells.filter((x) => areaShells.includes(x.label)).reduce((t, x) => t + area(x.joints), 0);
+    const kz = model.joints.reduce((t, j) => t + (j.springs?.[2] ?? 0), 0);
+    expect(kz).toBeCloseTo(kLine * sumL + kArea * sumA, 3);
+    expect(model.joints.filter((j) => j.springs).length).toBe(108);
+  });
+
+  it("mô hình hợp lệ theo schema; kiểm tra mô hình không còn lỗi", () => {
     const errors = checkModel(model).filter((i) => i.level === "error").map((i) => i.code);
-    expect([...new Set(errors)]).toEqual(["no_supports"]);
+    expect([...new Set(errors)]).toEqual([]);
   });
 
   it("nhập hai lần cho cùng kết quả (ổn định để so sánh và kiểm thử)", () => {

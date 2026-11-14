@@ -249,6 +249,14 @@ describe("tải nút (dữ liệu tự tạo, chỉ để kiểm tra quy tắc)"
   });
 });
 
+describe("bảng lò xo SAP2000 (chưa có file thật để kiểm chứng)", () => {
+  it("báo lỗi, không xếp vào mục bỏ qua", () => {
+    const text = roofText.replace("END TABLE DATA", 'TABLE:  "JOINT SPRING ASSIGNMENTS 1 - UNCOUPLED"\r\n   Joint=1   CoordSys=GLOBAL   U3=100\r\n \r\nEND TABLE DATA');
+    const r = importS2k(text);
+    expect(r.report.diagnostics.find((x) => x.code === "springs_not_verified")).toMatchObject({ level: "error", params: { section: "JOINT SPRING ASSIGNMENTS 1 - UNCOUPLED", records: 1 } });
+  });
+});
+
 describe("nhận diện định dạng", () => {
   it("file .sdb nhị phân: báo rõ, không cố đọc", () => {
     expect(detectCsiBinary(sdbBytes)).toEqual({ format: "sdb", version: "25.3.1" });
