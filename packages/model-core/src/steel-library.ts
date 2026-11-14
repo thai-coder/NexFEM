@@ -121,7 +121,8 @@ function nexfemRow(get: Get, num: Num): SteelLibraryRow | string {
     const r = num("r");
     geometry = { shape: "I", h: mm(need(num("h"), "h")), bf: mm(need(num("b"), "b")), tw: mm(need(num("tw"), "tw")), tf: mm(need(num("tf"), "tf")), ...(r !== undefined && r > 0 ? { r: mm(r) } : {}) };
   } else if (shape === "box") {
-    geometry = { shape: "box", h: mm(need(num("h"), "h")), b: mm(need(num("b"), "b")), t: mm(need(num("t"), "t")) };
+    const r = num("r");
+    geometry = { shape: "box", h: mm(need(num("h"), "h")), b: mm(need(num("b"), "b")), t: mm(need(num("t"), "t")), ...(r !== undefined && r > 0 ? { r: mm(r) } : {}) };
   } else if (shape === "pipe") {
     geometry = { shape: "pipe", d: mm(need(num("d"), "d")), t: mm(need(num("t"), "t")) };
   } else return `shape "${get("shape")}" not supported (I, box, pipe)`;
@@ -191,7 +192,9 @@ export function checkSteelLibrary(rows: SteelLibraryRow[]): LibraryCheck[] {
       if (!want) continue;
       const d = (p[k] - want) / want;
       dev[k] = d;
-      const tol = k === "J" ? LIBRARY_TOLERANCE.J : row.geometry.shape === "box" ? LIBRARY_TOLERANCE.boxAI : LIBRARY_TOLERANCE[k];
+      // Hộp không khai bán kính góc: A, I lớn hơn bảng vài %, nên dùng ngưỡng rộng hơn.
+      const squareBox = row.geometry.shape === "box" && !row.geometry.r;
+      const tol = k === "J" ? LIBRARY_TOLERANCE.J : squareBox ? LIBRARY_TOLERANCE.boxAI : LIBRARY_TOLERANCE[k];
       if (Math.abs(d) > tol) flagged.push(k);
     }
     return { row, dev, flagged };

@@ -41,7 +41,7 @@ Giá trị bảng dùng để đối chiếu (mm; cm², cm⁴): IPE 200 (200×10
 | --- | --- | --- | --- |
 | Chữ nhật đặc | chính xác | Roark, sai ≤ 0,2 % so với lời giải chuỗi | có test |
 | Tròn đặc, ống tròn | chính xác | chính xác | |
-| Hộp (RHS/SHS) | chính xác với góc vuông | Bredt thành mỏng | **chưa tính bán kính góc** của ống hộp cán nóng/nguội: A và I hơi lớn hơn bảng; cần thêm bán kính góc khi có thư viện ống hộp |
+| Hộp (RHS/SHS) | chính xác, kể cả bán kính góc ngoài `r` (góc trong max(r − t, 0)) | `r` = 0: Bredt thành mỏng như cũ. `r` > 0: Bredt theo đường trung bình bo tròn + số hạng St Venant, **gần đúng** | A, I33, I22 được kiểm tra với tích phân đa giác độc lập (TypeScript và Rust, lệch ≤ 0,001 %). J chưa đối chiếu với bảng EN 10210/10219 thật; nếu không khai `r`, A và I lớn hơn bảng vài % |
 
 Chưa có: mô đun dẻo Wpl, hằng số vênh Iw, diện tích chịu cắt tự động (hiện người dùng nhập A_s2, A_s3 nếu muốn tính biến dạng cắt). Những đại lượng này cần cho thiết kế (Giai đoạn 10) và ổn định, không ảnh hưởng bộ giải tuyến tính hiện tại.
 

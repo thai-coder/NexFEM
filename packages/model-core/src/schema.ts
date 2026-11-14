@@ -64,7 +64,14 @@ export const FrameShapeSchema = z.discriminatedUnion("shape", [
     /** Bán kính lượn chân (thép cán), m. Bỏ trống hoặc 0: tiết diện tổ hợp hàn không có góc lượn. */
     r: Num.nonnegative().optional(),
   }),
-  z.object({ shape: z.literal("box"), h: Num.positive(), b: Num.positive(), t: Num.positive() }),
+  z.object({
+    shape: z.literal("box"),
+    h: Num.positive(),
+    b: Num.positive(),
+    t: Num.positive(),
+    /** Bán kính góc ngoài của ống hộp cán/tạo hình (m); bỏ trống hoặc 0 là góc vuông (hộp hàn). Góc trong có bán kính max(r − t, 0). */
+    r: Num.nonnegative().optional(),
+  }),
   z.object({ shape: z.literal("pipe"), d: Num.positive(), t: Num.positive() }),
 ]);
 

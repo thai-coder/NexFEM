@@ -1,3 +1,4 @@
+import { REPORT_KINDS, type ReportKind } from "@nexfem/model-core";
 import { COMMANDS } from "../commands/app.ts";
 import { FrameSectionsDialog, LoadsDialog, MaterialsDialog, ShellSectionsDialog } from "../dialogs/DefinitionDialogs.tsx";
 import { GridStoryDialog } from "../dialogs/GridStoryDialog.tsx";
@@ -5,6 +6,7 @@ import { NewModelDialog } from "../dialogs/NewModelDialog.tsx";
 import { PreferencesDialog } from "../dialogs/PreferencesDialog.tsx";
 import { RenameDialog } from "../dialogs/RenameDialog.tsx";
 import { ReplicateDialog } from "../dialogs/ReplicateDialog.tsx";
+import { ReportDialog } from "../dialogs/ReportDialog.tsx";
 import { ViewOptionsDialog } from "../dialogs/ViewOptionsDialog.tsx";
 import {
   AssignFrameLoadDialog,
@@ -45,6 +47,8 @@ export function Dialogs() {
       return <PreferencesDialog onClose={close} />;
     case "replicate":
       return <ReplicateDialog onClose={close} />;
+    case "report":
+      return <ReportDialog kind={(REPORT_KINDS.find((k) => k === dialog.report) ?? "summary") as ReportKind} onClose={close} />;
     case "viewOptions":
       return <ViewOptionsDialog pane={dialog.pane ?? useUi.getState().activePane} onClose={close} />;
     case "rename":

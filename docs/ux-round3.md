@@ -29,7 +29,7 @@ Nguồn: ảnh chụp ETABS do người dùng cung cấp (splash, Start Page, Mo
 | 13 | Mẫu thép + sàn deck (cần CSDL thép hình) | Trung bình | ⏳ cần nguồn bảng thép hình |
 | 14 | Mẫu waffle, sàn sườn, giàn so le (cần phần tử shell) | Phức tạp | ⏳ sau Giai đoạn 9 |
 | 15 | Hộp thoại Set View Options theo từng view (+ "Apply to All Windows") | Trung bình | ✅ Xong (nút ⚙ trên mỗi cửa sổ, View ▸ Tuỳ chọn hiển thị…, menu chuột phải; ẩn theo loại đối tượng, nhãn, gối, nhả liên kết, tải, lưới, tô màu sàn; "Áp dụng cho tất cả cửa sổ"; lệnh nhanh trong menu View áp dụng cho cửa sổ đang hoạt động) |
-| 16 | Model Explorer thêm tab Reports | Trung bình | ⏳ cùng Giai đoạn 6 |
+| 16 | Model Explorer thêm tab Reports | Trung bình | ✅ Xong phần báo cáo mô hình (tóm tắt, vật liệu, tiết diện, tầng, tải) có xuất CSV. Báo cáo kết quả phân tích (chuyển vị, phản lực, nội lực) thuộc Giai đoạn 6 của Codex, chưa làm |
 | 17 | Khung nhìn là panel dock riêng (đóng/mở từng view, kéo ra màn hình khác) | Trung bình–Phức tạp | ⏳ |
 
 ## Ghi chú

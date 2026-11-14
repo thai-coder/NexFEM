@@ -101,7 +101,7 @@ const DIM_KEYS: Record<FrameShape["shape"], string[]> = {
   rect: ["b", "h"],
   circle: ["d"],
   I: ["h", "bf", "tf", "tw", "r"],
-  box: ["h", "b", "t"],
+  box: ["h", "b", "t", "r"],
   pipe: ["d", "t"],
 };
 
@@ -216,7 +216,7 @@ function frameSectionSection(T: Strings, model: Model, steel: SteelLibraryRow[] 
               </div>
             </Field>
             {DIM_KEYS[g.shape].map((k) => (
-              <Field key={`${g.shape}-${k}`} label={T.dlg.frameSections.dims[k as keyof Strings["dlg"]["frameSections"]["dims"]]}>
+              <Field key={`${g.shape}-${k}`} label={g.shape === "box" && k === "r" ? T.dlg.frameSections.dims.rBox : T.dlg.frameSections.dims[k as keyof Strings["dlg"]["frameSections"]["dims"]]}>
                 <NF
                   value={(g as unknown as Record<string, number | undefined>)[k] ?? 0}
                   onChange={(v) => update({ geometry: { ...g, [k]: v } as FrameShape })}

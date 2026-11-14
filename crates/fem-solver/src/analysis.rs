@@ -126,6 +126,40 @@ pub fn i_section(h: f64, bf: f64, tf: f64, tw: f64, r: f64) -> (f64, f64, f64, f
     (a, i22, i33, j)
 }
 
+/// Hình chữ nhật bo bốn góc bán kính r: (diện tích, I33, I22) quanh trọng tâm, chính xác.
+fn rounded_rect(b: f64, h: f64, r: f64) -> (f64, f64, f64) {
+    use std::f64::consts::PI;
+    if r <= 0.0 {
+        return (b * h, b * h.powi(3) / 12.0, h * b.powi(3) / 12.0);
+    }
+    let ar = (1.0 - PI / 4.0) * r * r;
+    let e = r * (10.0 - 3.0 * PI) / (12.0 - 3.0 * PI);
+    let own = (1.0 - 5.0 * PI / 16.0) * r.powi(4) - ar * e * e;
+    (
+        b * h - 4.0 * ar,
+        b * h.powi(3) / 12.0 - 4.0 * (own + ar * (h / 2.0 - e).powi(2)),
+        h * b.powi(3) / 12.0 - 4.0 * (own + ar * (b / 2.0 - e).powi(2)),
+    )
+}
+
+/// Ống hộp chữ nhật, trả về (A, I22, I33, J); giống `boxSection` trong `packages/model-core/src/sections.ts`.
+/// r = bán kính góc ngoài (0: góc vuông); góc trong có bán kính max(r − t, 0).
+pub fn box_section(h: f64, b: f64, t: f64, r: f64) -> (f64, f64, f64, f64) {
+    use std::f64::consts::PI;
+    let (hi, bi) = (h - 2.0 * t, b - 2.0 * t);
+    let (ao, i33o, i22o) = rounded_rect(b, h, r);
+    let (ai, i33i, i22i) = rounded_rect(bi, hi, (r - t).max(0.0));
+    let (a, i33, i22) = (ao - ai, i33o - i33i, i22o - i22i);
+    if r <= 0.0 {
+        let j = 2.0 * t * (b - t).powi(2) * (h - t).powi(2) / (b + h - 2.0 * t);
+        return (a, i22, i33, j);
+    }
+    let rm = (r - t / 2.0).max(0.0);
+    let ah = (b - t) * (h - t) - (4.0 - PI) * rm * rm;
+    let l = 2.0 * (b - t + h - t) - 8.0 * rm + 2.0 * PI * rm;
+    (a, i22, i33, 4.0 * ah * ah * t / l + t.powi(3) * l / 3.0)
+}
+
 /// Đặc trưng tiết diện (m), giống `packages/model-core/src/sections.ts`.
 pub fn section_props(g: &FrameShape) -> (f64, f64, f64, f64) {
     use std::f64::consts::PI;
@@ -143,14 +177,7 @@ pub fn section_props(g: &FrameShape) -> (f64, f64, f64, f64) {
             (PI * r * r, i, i, 2.0 * i)
         }
         FrameShape::I { h, bf, tf, tw, r } => i_section(h, bf, tf, tw, r),
-        FrameShape::Box { h, b, t } => {
-            let (hi, bi) = (h - 2.0 * t, b - 2.0 * t);
-            let a = b * h - bi * hi;
-            let i33 = (b * h.powi(3) - bi * hi.powi(3)) / 12.0;
-            let i22 = (h * b.powi(3) - hi * bi.powi(3)) / 12.0;
-            let j = 2.0 * t * (b - t).powi(2) * (h - t).powi(2) / (b + h - 2.0 * t);
-            (a, i22, i33, j)
-        }
+        FrameShape::Box { h, b, t, r } => box_section(h, b, t, r),
         FrameShape::Pipe { d, t } => {
             let (ro, ri) = (d / 2.0, d / 2.0 - t);
             let i = PI * (ro.powi(4) - ri.powi(4)) / 4.0;
@@ -481,7 +508,9 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
             FrameShape::I { h, bf, tf, tw, r } => {
                 *r >= 0.0 && 2.0 * (*tf + *r) < *h && *tw + 2.0 * *r < *bf
             }
-            FrameShape::Box { h, b, t } => 2.0 * *t < *h && 2.0 * *t < *b,
+            FrameShape::Box { h, b, t, r } => {
+                2.0 * *t < *h && 2.0 * *t < *b && *r >= 0.0 && *r <= h.min(*b) / 2.0
+            }
             FrameShape::Pipe { d, t } => 2.0 * *t < *d,
             _ => true,
         };

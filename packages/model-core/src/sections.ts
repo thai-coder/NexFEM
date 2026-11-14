@@ -29,16 +29,8 @@ export function sectionProperties(g: FrameShape): SectionProperties {
     }
     case "I":
       return iSection(g.h, g.bf, g.tf, g.tw, g.r ?? 0);
-    case "box": {
-      const { h, b, t } = g;
-      const hi = h - 2 * t;
-      const bi = b - 2 * t;
-      const A = b * h - bi * hi;
-      const I33 = (b * h ** 3 - bi * hi ** 3) / 12;
-      const I22 = (h * b ** 3 - hi * bi ** 3) / 12;
-      const J = (2 * t * (b - t) ** 2 * (h - t) ** 2) / (b + h - 2 * t);
-      return { A, I33, I22, J };
-    }
+    case "box":
+      return boxSection(g.h, g.b, g.t, g.r ?? 0);
     case "pipe": {
       const ro = g.d / 2;
       const ri = ro - g.t;
@@ -75,6 +67,40 @@ export function iSection(h: number, bf: number, tf: number, tw: number, r = 0): 
     J = (2 / 3) * bf * tf ** 3 + (1 / 3) * hw * tw ** 3 + 2 * alpha * D ** 4 - 0.42 * tf ** 4;
   }
   return { A, I33, I22, J };
+}
+
+/** Hình chữ nhật bo tròn bốn góc bán kính r: diện tích và mô men quán tính quanh trọng tâm (chính xác). */
+function roundedRect(b: number, h: number, r: number): { A: number; I33: number; I22: number } {
+  if (r <= 0) return { A: b * h, I33: (b * h ** 3) / 12, I22: (h * b ** 3) / 12 };
+  const ar = (1 - Math.PI / 4) * r * r; // phần vuông r×r trừ 1/4 hình tròn, bị cắt ở mỗi góc
+  const e = (r * (10 - 3 * Math.PI)) / (12 - 3 * Math.PI); // trọng tâm phần bị cắt cách hai cạnh thẳng
+  const own = (1 - (5 * Math.PI) / 16) * r ** 4 - ar * e * e;
+  return {
+    A: b * h - 4 * ar,
+    I33: (b * h ** 3) / 12 - 4 * (own + ar * (h / 2 - e) ** 2),
+    I22: (h * b ** 3) / 12 - 4 * (own + ar * (b / 2 - e) ** 2),
+  };
+}
+
+/**
+ * Ống hộp chữ nhật. r = bán kính góc ngoài (0: góc vuông, hộp hàn); góc trong có bán kính max(r − t, 0).
+ * A, I33, I22 chính xác theo hình học. J: r = 0 giữ công thức Bredt cũ; r > 0 dùng Bredt theo đường trung bình bo tròn
+ * cộng số hạng St Venant t³·L/3 (gần đúng, thường lệch vài % so với bảng EN 10210/10219; chưa đối chiếu bảng thật).
+ */
+export function boxSection(h: number, b: number, t: number, r = 0): SectionProperties {
+  const hi = h - 2 * t;
+  const bi = b - 2 * t;
+  const ri = Math.max(r - t, 0);
+  const o = roundedRect(b, h, r);
+  const i = roundedRect(bi, hi, ri);
+  const A = o.A - i.A;
+  const I33 = o.I33 - i.I33;
+  const I22 = o.I22 - i.I22;
+  if (r <= 0) return { A, I33, I22, J: (2 * t * (b - t) ** 2 * (h - t) ** 2) / (b + h - 2 * t) };
+  const rm = Math.max(r - t / 2, 0); // bán kính đường trung bình
+  const Ah = (b - t) * (h - t) - (4 - Math.PI) * rm * rm; // diện tích bao bởi đường trung bình
+  const L = 2 * (b - t + h - t) - 8 * rm + 2 * Math.PI * rm; // chu vi đường trung bình
+  return { A, I33, I22, J: (4 * Ah * Ah * t) / L + (t ** 3 * L) / 3 };
 }
 
 /** Kích thước bao (m) để vẽ tiết diện: [rộng, cao]. */
