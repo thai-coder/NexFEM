@@ -38,7 +38,7 @@ export function openContextMenu(x: number, y: number, opts: { grid?: GridHit | n
     entries.push({ label: T.fmt(opts.grid.kind === "story" ? T.ctx.storyLine : T.ctx.gridLine, { label: opts.grid.label }), header: true }, "ctx.editGrid");
   }
   sep();
-  entries.push("view.zoomExtents", "edit.selectAll");
+  entries.push("view.zoomExtents", "view.options", "edit.selectAll");
   if (selection.length) entries.push("select.clear");
   if (ui.tool !== "select") entries.push("draw.select");
   void locked;

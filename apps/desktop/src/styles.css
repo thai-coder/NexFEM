@@ -1944,3 +1944,25 @@ input[aria-invalid="true"] {
 .init-block {
   margin: 2px 0 8px 22px;
 }
+
+/* ---------------------------------------------- view options (per window) */
+
+.view-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+.view-options-group {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 6px 10px 8px;
+  margin: 0;
+}
+.view-options-group legend {
+  padding: 0 4px;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+.pane-options {
+  margin-left: auto;
+}

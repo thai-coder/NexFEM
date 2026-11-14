@@ -28,7 +28,7 @@ Nguồn: ảnh chụp ETABS do người dùng cung cấp (splash, Start Page, Mo
 | 12 | Mẫu: sàn phẳng, sàn phẳng có dầm biên | Đơn giản | ✅ Xong, có giới hạn: sàn chưa có độ cứng shell, tải sàn chuyển thẳng về cột (chỉ dùng cho tải đứng) cho đến Giai đoạn 9 |
 | 13 | Mẫu thép + sàn deck (cần CSDL thép hình) | Trung bình | ⏳ cần nguồn bảng thép hình |
 | 14 | Mẫu waffle, sàn sườn, giàn so le (cần phần tử shell) | Phức tạp | ⏳ sau Giai đoạn 9 |
-| 15 | Hộp thoại Set View Options theo từng view (+ "Apply to All Windows") | Trung bình | ⏳ |
+| 15 | Hộp thoại Set View Options theo từng view (+ "Apply to All Windows") | Trung bình | ✅ Xong (nút ⚙ trên mỗi cửa sổ, View ▸ Tuỳ chọn hiển thị…, menu chuột phải; ẩn theo loại đối tượng, nhãn, gối, nhả liên kết, tải, lưới, tô màu sàn; "Áp dụng cho tất cả cửa sổ"; lệnh nhanh trong menu View áp dụng cho cửa sổ đang hoạt động) |
 | 16 | Model Explorer thêm tab Reports | Trung bình | ⏳ cùng Giai đoạn 6 |
 | 17 | Khung nhìn là panel dock riêng (đóng/mở từng view, kéo ra màn hình khác) | Trung bình–Phức tạp | ⏳ |
 

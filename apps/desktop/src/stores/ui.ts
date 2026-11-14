@@ -1,5 +1,5 @@
 import type { Model, ModelMessage } from "@nexfem/model-core";
-import { ALL_SNAPS, type HoverInfo, type P3, type SnapModes, type ViewSpec } from "@nexfem/viewer";
+import { ALL_SNAPS, normalizeDisplay, type DisplayOptions, type HoverInfo, type P3, type SnapModes, type ViewSpec } from "@nexfem/viewer";
 import { create } from "zustand";
 import { load, save } from "./persist.ts";
 
@@ -27,7 +27,8 @@ export type DialogKind =
   | "assignDiaphragm"
   | "assignFrameLoad"
   | "assignShellLoad"
-  | "rename";
+  | "rename"
+  | "viewOptions";
 
 export interface DialogState {
   kind: DialogKind;
@@ -35,6 +36,8 @@ export interface DialogState {
   id?: string;
   /** Tab mở sẵn (hộp thoại Tải trọng: patterns / cases / combos). */
   tab?: string;
+  /** Ô khung nhìn (hộp thoại tuỳ chọn hiển thị). */
+  pane?: number;
 }
 
 /** Mục menu ngữ cảnh: lệnh có sẵn, đường phân cách, hoặc mục tuỳ biến. */
@@ -42,7 +45,15 @@ export type MenuEntry =
   | string
   | { label: string; icon?: string; disabled?: boolean; header?: boolean; run?(): void };
 
-type UiStateDisplay = { joints: boolean; jointLabels: boolean; frameLabels: boolean; restraints: boolean };
+/** Số ô khung nhìn tối đa (bố cục 4 ô). */
+export const MAX_PANES = 4;
+
+/** Tuỳ chọn hiển thị từng ô; dữ liệu cũ (một bộ "display" chung) được dùng cho mọi ô. */
+function loadViewDisplay(): DisplayOptions[] {
+  const saved = load<Partial<DisplayOptions>[] | null>("viewDisplay", null);
+  const legacy = load<Partial<DisplayOptions> | null>("display", null);
+  return Array.from({ length: MAX_PANES }, (_, i) => normalizeDisplay(saved?.[i] ?? legacy));
+}
 
 export interface LogEntry {
   id: number;
@@ -83,8 +94,8 @@ interface UiState {
   /** Chế độ tập trung: ẩn mọi bảng và ribbon; lưu trạng thái cũ để khôi phục. */
   focusMode: boolean;
   focusSaved: { panels: PanelVisibility; toolbarHidden: boolean } | null;
-  /** Hiển thị nút và nhãn trên khung nhìn. */
-  display: { joints: boolean; jointLabels: boolean; frameLabels: boolean; restraints: boolean };
+  /** Tuỳ chọn hiển thị riêng của từng ô khung nhìn (Set View Options). */
+  viewDisplay: DisplayOptions[];
   /** Loại đối tượng được phép chọn. */
   selectFilter: { joint: boolean; frame: boolean; shell: boolean };
   /** true: lệnh "vừa khung" áp dụng cho mọi ô (mở file, tạo mô hình mới). */
@@ -105,6 +116,8 @@ interface UiState {
   setLang(lang: "vi" | "en"): void;
   setLayout(layout: Layout): void;
   setView(pane: number, view: ViewSpec): void;
+  /** Đặt tuỳ chọn hiển thị cho một ô, hoặc mọi ô khi `pane` là "all". */
+  setViewDisplay(pane: number | "all", display: DisplayOptions): void;
   togglePanel(p: keyof PanelVisibility): void;
   log(level: LogEntry["level"], text: string, source?: string): void;
   clearLog(): void;
@@ -152,7 +165,7 @@ export const useUi = create<UiState>((set, get) => ({
   loadDisplay: null,
   focusMode: false,
   focusSaved: null,
-  display: { joints: true, jointLabels: false, frameLabels: false, restraints: true, ...load<Partial<UiStateDisplay>>("display", {}) },
+  viewDisplay: loadViewDisplay(),
   selectFilter: load("selectFilter", { joint: true, frame: true, shell: true }),
   zoomAll: false,
   contextMenu: null,
@@ -174,6 +187,8 @@ export const useUi = create<UiState>((set, get) => ({
     set({ layout, activePane: Math.min(get().activePane, layout - 1) });
   },
   setView: (pane, view) => set({ views: get().views.map((v, i) => (i === pane ? view : v)) }),
+  setViewDisplay: (pane, display) =>
+    set({ viewDisplay: get().viewDisplay.map((d, i) => (pane === "all" || i === pane ? { ...display } : d)) }),
   togglePanel: (p) => {
     const panels = { ...get().panels, [p]: !get().panels[p] };
     save("panels", panels);
@@ -185,7 +200,7 @@ export const useUi = create<UiState>((set, get) => ({
 }));
 
 useUi.subscribe((s, prev) => {
-  if (s.display !== prev.display) save("display", s.display);
+  if (s.viewDisplay !== prev.viewDisplay) save("viewDisplay", s.viewDisplay);
   if (s.selectFilter !== prev.selectFilter) save("selectFilter", s.selectFilter);
   if (s.snapModes !== prev.snapModes) save("snapModes", s.snapModes);
 });
