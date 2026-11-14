@@ -1,4 +1,4 @@
-import { RELEASE_LABELS, RELEASE_PRESETS, type FrameLoad, type Restraint } from "@nexfem/model-core";
+import { RELEASE_LABELS, RELEASE_PRESETS, type FrameLoad, type JointLoad, type Restraint } from "@nexfem/model-core";
 import { useState, type ReactNode } from "react";
 import { Field, NumberField } from "../components/fields.tsx";
 import { ToolWindow } from "../components/ToolWindow.tsx";
@@ -268,6 +268,44 @@ export function AssignFrameLoadDialog({ onClose }: { onClose(): void }) {
           <NumberField value={at} onChange={(v) => setAt(Math.min(1, Math.max(0, v)))} min={0} label={A.at} />
         </Field>
       )}
+      <Field label={A.mode}>
+        <ModeSelect value={mode} onChange={setMode} />
+      </Field>
+    </AssignShell>
+  );
+}
+
+/** Tải tại nút theo hệ toạ độ tổng thể: 3 lực, 3 mô men (quy tắc bàn tay phải). */
+export function AssignJointLoadDialog({ onClose }: { onClose(): void }) {
+  const T = useT();
+  const A = T.assign;
+  const ids = useSelected("joints");
+  const model = useModel((s) => s.model);
+  const [pattern, setPattern] = useState(model.loadPatterns.find((p) => p.type === "wind")?.id ?? model.loadPatterns[0]?.id ?? "");
+  const [values, setValues] = useState<JointLoad["values"]>([0, 0, -10, 0, 0, 0]);
+  const [mode, setMode] = useState<Mode>("replace");
+  const set = (k: number, v: number) => setValues((old) => old.map((x, i) => (i === k ? v : x)) as JointLoad["values"]);
+  return (
+    <AssignShell
+      title={A.jointLoadTitle}
+      what="joints"
+      ids={ids}
+      onClose={() => {
+        if (pattern) showPattern(pattern);
+        onClose();
+      }}
+      testId="dlg-assignJointLoad"
+      build={() => (pattern ? ["joint.assignLoad", { joints: ids, pattern, values, mode }] : null)}
+    >
+      <Field label={A.pattern}>
+        <PatternSelect value={pattern} onChange={setPattern} />
+      </Field>
+      {(["Fx", "Fy", "Fz", "Mx", "My", "Mz"] as const).map((name, k) => (
+        <Field key={name} label={name}>
+          <NumberField value={values[k]!} onChange={(v) => set(k, v)} quantity={k < 3 ? "force" : "moment"} units={model.units} label={name} testId={`joint-load-${name.toLowerCase()}`} />
+        </Field>
+      ))}
+      <p className="form-hint span2">{A.jointLoadHint}</p>
       <Field label={A.mode}>
         <ModeSelect value={mode} onChange={setMode} />
       </Field>

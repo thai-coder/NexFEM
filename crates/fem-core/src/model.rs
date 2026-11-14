@@ -30,6 +30,9 @@ pub struct Model {
     pub frame_loads: Vec<FrameLoad>,
     #[serde(default)]
     pub shell_loads: Vec<ShellLoad>,
+    /// Tải tại nút theo hệ toạ độ tổng thể.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub joint_loads: Vec<JointLoad>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -293,6 +296,15 @@ pub struct FrameLoad {
     pub value: f64,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub at: Option<f64>,
+}
+
+/// Tải tại nút: [Fx, Fy, Fz] (kN) và [Mx, My, Mz] (kN·m) theo hệ toạ độ tổng thể.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct JointLoad {
+    pub id: String,
+    pub joint: String,
+    pub pattern: String,
+    pub values: [f64; 6],
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

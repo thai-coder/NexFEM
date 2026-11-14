@@ -3034,5 +3034,6 @@
       "direction": "gravity",
       "value": 2
     }
-  ]
+  ],
+  "jointLoads": []
 }

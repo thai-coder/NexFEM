@@ -274,6 +274,27 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
             ));
         }
     }
+    let joint_ids: HashSet<&str> = model.joints.iter().map(|x| x.id.as_str()).collect();
+    for load in &model.joint_loads {
+        if !joint_ids.contains(load.joint.as_str()) || !pattern_ids.contains(load.pattern.as_str())
+        {
+            return Err(AnalysisError::new(
+                "invalid_joint_load",
+                format!(
+                    "Tải nút {} tham chiếu tới nút hoặc mẫu tải không tồn tại",
+                    load.id
+                ),
+                vec![load.id.clone()],
+            ));
+        }
+        if load.values.iter().any(|v| !v.is_finite()) {
+            return Err(AnalysisError::new(
+                "invalid_joint_load",
+                format!("Tải nút {} có giá trị không hợp lệ", load.id),
+                vec![load.id.clone()],
+            ));
+        }
+    }
     for case in &model.load_cases {
         if case
             .loads
@@ -724,6 +745,18 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
                 MemberLoad::Uniform(w)
             };
             pl.member.entry(ei).or_default().push(ml);
+        }
+        // Tải tại nút (hệ tổng thể, cả mô men).
+        for jl in model.joint_loads.iter().filter(|l| l.pattern == lp.id) {
+            let jk = joint_by_id[jl.joint.as_str()];
+            if let Some(&n) = node_of.get(&jk) {
+                let e = pl.joint.entry(n).or_insert([0.0; 6]);
+                for c in 0..6 {
+                    e[c] += jl.values[c];
+                }
+            } else if jl.values.iter().any(|v| *v != 0.0) {
+                lost_joints.push(model.joints[jk].label.clone());
+            }
         }
         // Tải sàn/vách và trọng lượng bản thân sàn.
         let shell_sections: HashMap<&str, &fem_core::ShellSection> = model

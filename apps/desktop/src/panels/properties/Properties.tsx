@@ -349,6 +349,7 @@ function JointProps({ joint, model, locked }: { joint: Joint; model: Model; lock
   const T = useT();
   const execute = useModel((s) => s.execute);
   const initial: Restraint = joint.restraint ?? PRESETS.free!;
+  const jointLoadCount = model.jointLoads.filter((l) => l.joint === joint.id).length;
   const [r, setR] = useState<Restraint>(initial);
   const [pt, setPt] = useState<[number, number, number]>([joint.x, joint.y, joint.z]);
   const [error, setError] = useState<string | null>(null);
@@ -385,6 +386,9 @@ function JointProps({ joint, model, locked }: { joint: Joint; model: Model; lock
         <div className="span2">
           <RestraintEditor value={r} onChange={setR} disabled={locked} />
         </div>
+      </Section>
+      <Section title={T.props.assigns}>
+        <Row label={T.props.loads}>{jointLoadCount ? T.fmt(T.props.loadCount, { n: jointLoadCount }) : T.props.none}</Row>
       </Section>
       {error && (
         <div className="warn-text pad" role="alert">

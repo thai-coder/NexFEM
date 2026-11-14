@@ -100,6 +100,12 @@ export function checkModel(model: Model): ModelMessage[] {
     if (!patterns.has(load.pattern))
       out.push({ level: "error", code: "missing_load_pattern", objects: [load.id], params: { name: load.id } });
   }
+  for (const load of model.jointLoads) {
+    if (!joints.has(load.joint))
+      out.push({ level: "error", code: "missing_load_target", objects: [load.id], params: { name: load.id } });
+    if (!patterns.has(load.pattern))
+      out.push({ level: "error", code: "missing_load_pattern", objects: [load.id], params: { name: load.id } });
+  }
   for (const lc of model.loadCases) {
     if (lc.loads.some((item) => !patterns.has(item.pattern)))
       out.push({ level: "error", code: "missing_load_pattern", objects: [lc.id], params: { name: lc.name } });

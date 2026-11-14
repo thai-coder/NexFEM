@@ -15,10 +15,12 @@ import {
   type Model,
   type Shell,
   type ShellLoad,
+  type JointLoad,
   type ShellSection,
   type Story,
 } from "@nexfem/model-core";
 import { Diagnostics } from "./diagnostics.ts";
+import { locatePoint } from "./locate.ts";
 import type { E2kImportResult } from "./e2k-import.ts";
 import { parseS2k, s2kNumber, s2kTable, s2kYes, type S2kFile, type S2kRecord } from "./s2k-parse.ts";
 import { conv, unitFactors } from "./units.ts";
@@ -61,6 +63,7 @@ const TABLES_USED = new Set([
   "FRAME LOADS - POINT",
   "AREA LOADS - UNIFORM",
   "JOINT LOADS - FORCE",
+  "JOINT LOADS - GROUND DISPLACEMENT",
 ]);
 
 /** Ngưỡng so đặc trưng tiết diện NexFEM tự tính với giá trị SAP2000 ghi trong file. */
@@ -621,9 +624,60 @@ export function importS2k(input: string | S2kFile, opts: { name?: string } = {})
   }
   count("shellLoads", areaLoadRecs.length, shellLoads.length);
 
+  // Tải nút: F1..F3 (lực), M1..M3 (lực·dài) theo hệ GLOBAL.
+  // Nút không nối thanh/sàn nào: SAP2000 tự chia thanh tại nút nằm trên thanh, nên định vị theo toạ độ (dung sai MergeTol).
+  const jointLoads: JointLoad[] = [];
+  let convertedToFrame = 0;
+  const connected = new Set([...frames.flatMap((x) => [x.i, x.j]), ...shells.flatMap((x) => x.joints)]);
+  const mergeTol = s2kNumber(T("PREFERENCES - DIMENSIONAL")[0]?.fields.get("MergeTol"));
+  const tol = mergeTol > 0 ? L(mergeTol) : 1e-3;
   const jointLoadRecs = T("JOINT LOADS - FORCE");
-  for (const r of jointLoadRecs) d.add("error", "point_loads_unsupported", { pattern: f(r, "LoadPat") ?? "?" }, { line: r.line, object: f(r, "Joint") ?? "?" });
-  count("pointLoads", jointLoadRecs.length, 0);
+  for (const r of jointLoadRecs) {
+    const at = { line: r.line, object: f(r, "Joint") ?? "?" };
+    const joint = jointByName.get(f(r, "Joint") ?? "");
+    const pat = patByName.get(f(r, "LoadPat") ?? "");
+    if (!joint || !pat) {
+      d.add("error", "load_target_missing", { kind: "joint" }, at);
+      continue;
+    }
+    const sys = f(r, "CoordSys") ?? "GLOBAL";
+    if (sys.toUpperCase() !== "GLOBAL") {
+      d.add("error", "point_load_coord_unsupported", { system: sys }, at);
+      continue;
+    }
+    const raw = ["F1", "F2", "F3", "M1", "M2", "M3"].map((k) => (r.fields.has(k) ? n(r, k) : 0));
+    if (raw.some((v) => !Number.isFinite(v))) {
+      d.add("error", "point_load_type_unsupported", { type: "?" }, at);
+      continue;
+    }
+    const values = raw.map((v, i) => (i < 3 ? conv.force(U, v) : conv.force(U, v) * U.l)) as JointLoad["values"];
+    if (connected.has(joint.id)) {
+      jointLoads.push({ id: `jl-${jointLoads.length + 1}`, joint: joint.id, pattern: pat, values });
+      continue;
+    }
+    const place = locatePoint(joint, joints, frames, tol);
+    if (!place) {
+      d.add("error", "point_load_no_joint", {}, at);
+      continue;
+    }
+    if ("joint" in place) {
+      jointLoads.push({ id: `jl-${jointLoads.length + 1}`, joint: place.joint.id, pattern: pat, values });
+      d.add("info", "point_load_at_joint", {}, { ...at, object: `${at.object} → ${place.joint.label}` });
+      continue;
+    }
+    if (values.slice(3).some((v) => v !== 0)) {
+      d.add("error", "point_load_moment_on_frame", {}, at);
+      continue;
+    }
+    const DIR3 = ["globalX", "globalY", "globalZ"] as const;
+    values.slice(0, 3).forEach((v, c) => {
+      if (v !== 0) frameLoads.push({ id: `fl-${frameLoads.length + 1}`, frame: place.frame.id, pattern: pat, kind: "point", direction: DIR3[c]!, value: v, at: place.at });
+    });
+    convertedToFrame++;
+    d.add("warning", "point_load_on_frame", {}, { ...at, object: `${at.object} → ${place.frame.label} @ ${place.at.toFixed(3)}` });
+  }
+  count("pointLoads", jointLoadRecs.length, jointLoads.length + convertedToFrame);
+  for (const r of T("JOINT LOADS - GROUND DISPLACEMENT")) d.add("error", "ground_displacement_unsupported", { pattern: f(r, "LoadPat") ?? "?" }, { line: r.line, object: f(r, "Joint") ?? "?" });
 
   // ------------------------------------------------------------------ bảng bỏ qua
   for (const [name, recs] of file.tables) {
@@ -649,6 +703,7 @@ export function importS2k(input: string | S2kFile, opts: { name?: string } = {})
     combos,
     frameLoads,
     shellLoads,
+    jointLoads,
   } satisfies Model);
   return {
     model,
@@ -694,5 +749,6 @@ function emptyModel(name: string): Model {
     combos: [],
     frameLoads: [],
     shellLoads: [],
+    jointLoads: [],
   } satisfies Model);
 }

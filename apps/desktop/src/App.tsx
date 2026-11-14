@@ -33,7 +33,7 @@ import { useUi, type PanelVisibility } from "./stores/ui.ts";
 const LAYOUT_KEY = "dock-layout-v3";
 
 /** Cửa sổ công cụ không chặn: phím tắt và thao tác trên khung nhìn vẫn hoạt động khi chúng mở. */
-const MODELESS = new Set(["assignRestraint", "assignSection", "assignReleases", "assignFrameLoad", "assignShellLoad"]);
+const MODELESS = new Set(["assignRestraint", "assignSection", "assignReleases", "assignFrameLoad", "assignShellLoad", "assignJointLoad"]);
 
 /** Giới hạn kích thước từng bảng để bảng không bao giờ che hết khung nhìn. */
 const LIMITS = {

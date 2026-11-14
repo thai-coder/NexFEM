@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 
 const FIXTURE = fileURLToPath(new URL("../../fixtures/csi/etabs/23217_SMFs 3D model_updated v4.e2k", import.meta.url));
 const SAP = (name: string) => fileURLToPath(new URL(`../../fixtures/csi/sap2000/${name}`, import.meta.url));
-type M = { name: string; frames: { kind: string; angle?: number }[]; joints: unknown[]; shells: unknown[]; combos: unknown[] };
+type M = { name: string; frames: { kind: string; angle?: number }[]; joints: unknown[]; shells: unknown[]; combos: unknown[]; jointLoads: unknown[]; frameLoads: { kind: string }[] };
 const model = (page: Page) => page.evaluate(() => (window as unknown as { __nexfem: { model: { getState(): { model: unknown } } } }).__nexfem.model.getState().model as M);
 
 /** File → Nhập file → mục của chương trình (menu con, mỗi định dạng một mục riêng). */
@@ -28,9 +28,10 @@ test("nhập file ETABS thật: báo cáo số lượng và phần không nhập
   const counts = page.getByTestId("csi-counts");
   await expect(counts.locator("tr", { hasText: "Thanh (theo tầng)" })).toContainText("322");
   await expect(counts.locator("tr", { hasText: "Thanh (theo tầng)" })).toContainText("298");
-  await expect(counts.locator("tr", { hasText: "Tải tập trung tại nút" })).toContainText("31");
+  await expect(counts.locator("tr", { hasText: "Tải tập trung tại nút" })).toHaveText(/31\s*31/);
   const errors = page.getByTestId("csi-error");
-  await expect(errors).toContainText("Tải tập trung tại nút");
+  await expect(errors).not.toContainText("Tải tại nút");
+  await expect(page.getByTestId("csi-warning")).toContainText("đổi thành tải tập trung trên thanh");
   await expect(errors).toContainText("Lò xo nền dưới sàn");
   await expect(errors).toContainText("Steel Angle");
   await expect(errors).toContainText("không có gối");
@@ -50,6 +51,8 @@ test("mở mô hình đã nhập; F5 bị chặn vì thiếu gối", async ({ pa
   expect(m.frames.filter((f) => f.kind === "column").length).toBe(54);
   expect(m.shells.length).toBe(29);
   expect(m.combos.length).toBe(87);
+  expect(m.jointLoads.length).toBe(8);
+  expect(m.frameLoads.filter((l) => l.kind === "point").length).toBe(23);
   await expect(page.getByTestId("bottom")).toContainText("Đã nhập 23217_SMFs 3D model_updated v4.e2k");
   await page.keyboard.press("F5");
   // Bị chặn: tab Messages hiện lỗi thiếu gối.
@@ -76,7 +79,7 @@ test("nhập file SAP2000 thật (.s2k): báo cáo rồi mở mô hình", async 
   await expect(page.getByTestId("dlg-csiImport")).toContainText("Nhập file SAP2000");
   await expect(page.getByTestId("csi-source")).toContainText("SAP2000 23.1.0");
   await expect(page.getByTestId("csi-source")).toContainText("LB, FT");
-  await expect(page.getByTestId("csi-error")).toContainText("Tải tập trung tại nút (mẫu WY)");
+  await expect(page.getByTestId("csi-error")).toHaveCount(0);
   await expect(page.getByTestId("csi-info")).toContainText("Góc xoay trục địa phương của thanh được nhập");
   await page.getByTestId("csi-open").click();
   const m = await model(page);
@@ -84,7 +87,11 @@ test("nhập file SAP2000 thật (.s2k): báo cáo rồi mở mô hình", async 
   expect(m.frames.map((f) => f.kind)).toEqual(["column", "column", "beam"]);
   expect(m.frames.map((f) => f.angle)).toEqual([90, 90, undefined]);
   expect(m.combos.length).toBe(87);
+  expect(m.jointLoads.length).toBe(2);
   await expect(page.getByTestId("bottom")).toContainText("Đã nhập 24061_OMF.s2k");
+  // Khung phẳng có gối, góc xoay cột và tải nút: chạy được bộ giải.
+  await page.keyboard.press("F5");
+  await expect(page.getByTestId("bottom")).toContainText("Phân tích xong");
 });
 
 test("file SAP2000 25 có mặt None (.2k)", async ({ page }) => {

@@ -62,8 +62,9 @@ Cột "File mẫu" cho biết cú pháp đã có trong file ETABS 23.2.0 thật 
 | `LINELOAD` phương 2, 3 (trục địa phương) | tải theo trục 2, 3 của NexFEM (cùng quy ước CSI, ghi chú: chưa có file thật có loại tải này) | chưa |
 | `LINEASSIGN` ANG | góc xoay trục địa phương `Frame.angle` | 34 cột ANG 90 |
 | `AREALOAD` UNIFF GRAV/Z | tải sàn | GRAV |
+| `POINTLOAD` TYPE FORCE: FX, FY, FZ, MX, MY, MZ | tải nút `jointLoads` (hệ tổng thể); điểm riêng nằm trên thanh: tải tập trung trên thanh (xem dưới) | FX, FY |
 
-**Không nhập, có báo cáo:** tải tập trung tại nút (NexFEM chưa có), lò xo dọc thanh và lò xo nền dưới sàn, điểm chèn `CARDINALPT`, đoạn lệch đầu thanh khác 0, liên kết nửa cứng `PARFIXM*`, giới hạn kéo/nén, sàn cứng, P-Delta, trường hợp tải khác Linear Static/Modal, Range Add.
+**Không nhập, có báo cáo:** lò xo dọc thanh và lò xo nền dưới sàn, điểm chèn `CARDINALPT`, đoạn lệch đầu thanh khác 0, liên kết nửa cứng `PARFIXM*`, giới hạn kéo/nén, sàn cứng, P-Delta, trường hợp tải khác Linear Static/Modal, Range Add.
 
 **Bỏ qua (ghi chú):** chia lưới, trạm xuất kết quả, thiết kế, nhóm, nhật ký, thông tin dự án, cốt thép, cáp, liên kết, panel zone, hàm phổ/lịch sử, nguồn khối lượng.
 
@@ -72,6 +73,18 @@ Cột "File mẫu" cho biết cú pháp đã có trong file ETABS 23.2.0 thật 
 NexFEM dùng đúng quy ước mặc định của ETABS/SAP2000. Trục 1 đi từ đầu i đến đầu j. Thanh không thẳng đứng có trục 2 hướng lên, trong mặt phẳng đứng chứa thanh. Thanh thẳng đứng có trục 2 = +X tổng thể. Trục 3 = 1 × 2.
 
 `Frame.angle` (độ) xoay trục 2, 3 quanh trục 1: e2' = cos·e2 + sin·e3, dương ngược chiều kim đồng hồ khi nhìn từ đầu +1. Bộ giải (`crates/fem-solver/src/element.rs::local_axes`), biểu đồ mô men (`packages/viewer/src/moment.ts`) và cả hai bộ nhập dùng chung quy ước này. Sửa góc trong bảng Properties của thanh. Test: `local_axis_angle_turns_the_strong_axis_like_csi` kiểm tra cột công xôn tải theo Y ở góc 0°, 90° và 30°, so với lời giải giải tích theo I22 và I33.
+
+## Tải tại nút
+
+`Model.jointLoads` (mỗi tải: nút, mẫu tải, `values` = [Fx, Fy, Fz] kN và [Mx, My, Mz] kN·m theo hệ tổng thể, mô men theo quy tắc bàn tay phải). Bộ giải cộng vào vế phải của nút (cả mô men) và dừng với lỗi `lost_loads` nếu nút không nối với thanh nào, hoặc `invalid_joint_load` nếu tham chiếu sai. Gán bằng Assign ▸ **Tải tại nút…**; xoá nút thì xoá tải của nút; mẫu tải đang có tải nút không xoá được. Khung nhìn vẽ mũi tên theo hợp lực và ghi nhãn mô men khi hiển thị mẫu tải.
+
+**Điểm riêng (không phải đầu thanh/sàn):** ETABS/SAP2000 tự chia thanh tại điểm nằm trên thanh. Bộ nhập định vị theo toạ độ (dung sai MERGETOL / MergeTol của file):
+
+- Trùng một nút đã nhập: tải đặt lên nút đó (ghi chú).
+- Nằm trong đoạn một thanh: lực đổi thành tải tập trung trên thanh (`globalX/Y/Z`) tại đúng vị trí tương đối. Cách này tương đương chính xác về nội lực và chuyển vị của thanh (cảnh báo, vì không có nút để xem chuyển vị tại đó). Mô men ở điểm giữa thanh chưa nhập được (lỗi).
+- Không thuộc trường hợp nào: lỗi.
+
+Test: `joint_forces_and_moments_in_global_axes` (bộ giải: công xôn với lực và mô men, phản lực cân bằng, lỗi mất tải, lỗi tham chiếu), `joint.assignLoad` (model-core), các test nhập file thật và dữ liệu tự tạo.
 
 ## Giả định ánh xạ (cần kiểm chứng thêm)
 
@@ -92,10 +105,10 @@ NexFEM dùng đúng quy ước mặc định của ETABS/SAP2000. Trục 1 đi t
 | Tiết diện thanh | 305 | 294 | 8 chữ L, 3 General |
 | Sàn | 29 | 29 | 21 sàn móng có lò xo nền bị bỏ lò xo |
 | Tải thanh / tải sàn | 24 / 16 | 24 / 16 | 9 tải hình thang đổi thành tải đều |
-| Tải tập trung tại nút | 31 | 0 | NexFEM chưa có |
+| Tải tập trung tại nút | 31 | 31 | 8 tại nút đầu thanh; 23 ở điểm riêng nằm trên dầm, đổi thành tải tập trung trên dầm |
 | Trường hợp tải / tổ hợp | 12 / 87 | 12 / 87 | |
 
-Mô hình nhập **không có gối**, vì file dựa vào lò xo nền. Phải gán gối trước khi chạy F5. Kết quả phân tích **chưa so được với ETABS**, và sẽ khác ETABS vì: thiếu giằng, thiếu tải tập trung (gió, động đất theo phương ngang), thiếu lò xo, cột HSS nhồi bê tông tính như ống rỗng.
+Mô hình nhập **không có gối**, vì file dựa vào lò xo nền. Phải gán gối trước khi chạy F5. Kết quả phân tích **chưa so được với ETABS**, và sẽ khác ETABS vì: thiếu giằng, thiếu lò xo, cột HSS nhồi bê tông tính như ống rỗng.
 
 Mô hình này đặt hầu hết đối tượng bằng DZ dưới một tầng duy nhất (Story1, cao 12 in), nên mặt bằng của tầng chỉ thấy những gì nằm đúng cao độ tầng. Xem bằng khung nhìn 3D hoặc mặt đứng.
 
@@ -126,7 +139,8 @@ File thật trong repo: `tests/fixtures/csi/sap2000/` (xem README: nguồn, SHA-
 | `FRAME LOADS - DISTRIBUTED` (Force; Gravity, X, Y, Z; Local 1, 2, 3) | tải đều; hình thang đổi thành tải đều giữ hợp lực (cảnh báo) | Gravity |
 | `FRAME LOADS - POINT` | tải tập trung trên thanh tại `RelDist` | Gravity |
 | `AREA LOADS - UNIFORM` (Gravity, Z, Local 3) | tải sàn | Gravity, Local 3 |
-| `JOINT LOADS - FORCE` | **không nhập** (lỗi): NexFEM chưa có tải nút | có |
+| `JOINT LOADS - FORCE` (GLOBAL: F1..F3, M1..M3) | tải nút `jointLoads`; hệ khác GLOBAL: lỗi | có |
+| `JOINT LOADS - GROUND DISPLACEMENT` | **không nhập** (lỗi) | chưa |
 
 **Cảnh báo (nhập gần đúng):** điểm chèn khác 10 (trọng tâm), đoạn cứng đầu thanh (RigidFactor > 0), hệ số sửa đặc trưng thanh/tiết diện khác 1, thanh cong (nhập thành thẳng), trục địa phương nâng cao.
 
@@ -142,10 +156,10 @@ File thật trong repo: `tests/fixtures/csi/sap2000/` (xem README: nguồn, SHA-
 | Tiết diện thanh | 273 / 273 | 132 / 132 |
 | Mẫu tải / trường hợp / tổ hợp | 53 / 12 / 87 | 5 / 6 / 18 |
 | Tải thanh / tải sàn | 14 / 0 | 0 / 16 |
-| Không nhập được | 2 tải nút (WY, EY) | không có |
+| Không nhập được | không có | không có |
 | Cảnh báo | liên kết nửa cứng M3 rất cứng (coi như ngàm), điểm chèn 8 của dầm | suy bán kính lượn W8X24 |
 
-File OMF là khung phẳng YZ, hai cột xoay 90°: nhờ góc xoay, trục 2 của cột nằm trong mặt phẳng khung và cột uốn trong mặt phẳng quanh trục khoẻ I33, như SAP2000. Tải gió và động đất WY, EY của file này là tải nút, nên chưa nhập được.
+File OMF là khung phẳng YZ, hai cột xoay 90°: nhờ góc xoay, trục 2 của cột nằm trong mặt phẳng khung và cột uốn trong mặt phẳng quanh trục khoẻ I33, như SAP2000. Tải gió và động đất WY, EY là tải nút tại nút 1, đã nhập; mô hình nhập chạy F5 được.
 
 ## Kiểm thử
 
@@ -153,11 +167,12 @@ File OMF là khung phẳng YZ, hai cột xoay 90°: nhờ góc xoay, trục 2 c�
 - `packages/io-formats/test/e2k-fixture.test.ts` (file thật): toàn vẹn byte, số bản ghi theo ghi chú tiếp nhận, đơn vị, tầng, lưới, vật liệu, tiết diện, hướng cột, nhả liên kết, tải, tổ hợp lồng nhau, mã báo cáo, mô hình hợp lệ, nhập hai lần cho cùng kết quả.
 - `packages/io-formats/test/e2k-synthetic.test.ts` (dữ liệu tự tạo, ghi rõ trong file): gối, nhiều tầng, gộp nút, đơn vị lạ, Windows-1252.
 - `apps/desktop/src/services/csiImport.test.ts`: mọi mã báo cáo của cả hai bộ nhập có bản dịch tiếng Việt và tiếng Anh.
-- `tests/e2e/specs/e2k-import.spec.ts`: menu con Nhập file, nhập file ETABS và SAP2000 thật qua menu, kiểm tra báo cáo, mở mô hình, F5 bị chặn vì thiếu gối, Huỷ, file `.sdb`, chọn nhầm mục.
+- `tests/e2e/specs/e2k-import.spec.ts`: menu con Nhập file, nhập file ETABS và SAP2000 thật qua menu, kiểm tra báo cáo, mở mô hình, F5 bị chặn vì thiếu gối (ETABS), F5 chạy được (SAP2000 OMF), Huỷ, file `.sdb`, chọn nhầm mục.
+- `tests/e2e/specs/ui2.spec.ts`: sửa góc xoay trục trong Properties, gán tải tại nút.
 
 ## Việc tiếp theo
 
-1. Tải tập trung tại nút (cần thêm vào schema và bộ giải; phối hợp với Codex).
-2. Tiết diện General (A, I, J nhập trực tiếp) và chữ L.
-3. Lò xo nút / lò xo nền (bộ giải hiện chỉ có gối cứng).
+1. Tiết diện General (A, I, J nhập trực tiếp) và chữ L.
+2. Lò xo nút / lò xo nền (bộ giải hiện chỉ có gối cứng).
+3. Mô men tập trung trên thanh (để nhập mô men ở điểm nằm giữa thanh).
 4. Đối chiếu kết quả (M2) khi có bảng chuyển vị, phản lực, nội lực xuất từ ETABS/SAP2000.

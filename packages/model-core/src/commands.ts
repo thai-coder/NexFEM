@@ -350,6 +350,8 @@ export const commands = {
       for (const f of d.frames) used.add(f.i).add(f.j);
       for (const s of d.shells) for (const j of s.joints) used.add(j);
       d.joints = d.joints.filter((j) => !ids.has(j.id) || used.has(j.id));
+      const alive = new Set(d.joints.map((j) => j.id));
+      d.jointLoads = d.jointLoads.filter((l) => alive.has(l.joint) && !ids.has(l.id));
       return before - (d.frames.length + d.shells.length + d.joints.length);
     },
   }),

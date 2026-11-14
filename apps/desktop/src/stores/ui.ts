@@ -27,6 +27,7 @@ export type DialogKind =
   | "assignDiaphragm"
   | "assignFrameLoad"
   | "assignShellLoad"
+  | "assignJointLoad"
   | "rename"
   | "viewOptions"
   | "report"

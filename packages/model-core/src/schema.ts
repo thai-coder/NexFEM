@@ -178,6 +178,14 @@ export const ShellLoadSchema = z.object({
   value: Num,
 });
 
+/** Tải tại nút theo hệ toạ độ tổng thể: [Fx, Fy, Fz] (kN), [Mx, My, Mz] (kN·m), mô men theo quy tắc bàn tay phải. */
+export const JointLoadSchema = z.object({
+  id: Id,
+  joint: Id,
+  pattern: Id,
+  values: z.tuple([Num, Num, Num, Num, Num, Num]),
+});
+
 /** Rigid diaphragm mặt phẳng ngang: master và danh sách slave; không tạo độ cứng shell. */
 export const DiaphragmSchema = z.object({
   id: Id,
@@ -207,6 +215,7 @@ export const ModelSchema = z.object({
   combos: z.array(LoadComboSchema),
   frameLoads: z.array(FrameLoadSchema).default([]),
   shellLoads: z.array(ShellLoadSchema).default([]),
+  jointLoads: z.array(JointLoadSchema).default([]),
 });
 
 export type UnitSystem = z.infer<typeof UnitSystemSchema>;
@@ -227,6 +236,7 @@ export type LoadCase = z.infer<typeof LoadCaseSchema>;
 export type LoadCombo = z.infer<typeof LoadComboSchema>;
 export type FrameLoad = z.infer<typeof FrameLoadSchema>;
 export type ShellLoad = z.infer<typeof ShellLoadSchema>;
+export type JointLoad = z.infer<typeof JointLoadSchema>;
 export type Model = z.infer<typeof ModelSchema>;
 
 /** Các bộ sưu tập đối tượng trong mô hình, dùng chung cho cây mô hình, API và bảng. */
@@ -244,6 +254,7 @@ export const COLLECTIONS = [
   "combos",
   "frameLoads",
   "shellLoads",
+  "jointLoads",
 ] as const;
 export type CollectionName = (typeof COLLECTIONS)[number];
 
@@ -271,5 +282,6 @@ export function emptyModel(name = "Mô hình mới", units: UnitSystem = { force
     combos: [],
     frameLoads: [],
     shellLoads: [],
+    jointLoads: [],
   };
 }

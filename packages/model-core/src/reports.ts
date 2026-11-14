@@ -61,6 +61,7 @@ export function buildReport(model: Model, kind: ReportKind, L: ReportLabels = {}
         { item: t("combos"), value: model.combos.length },
         { item: t("frameLoads"), value: model.frameLoads.length },
         { item: t("shellLoads"), value: model.shellLoads.length },
+        { item: t("jointLoads"), value: model.jointLoads.length },
       ];
       return { kind, columns: [left("item"), { key: "value", label: t("value"), align: "right" }], rows };
     }

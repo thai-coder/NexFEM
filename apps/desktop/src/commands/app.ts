@@ -354,6 +354,7 @@ export const COMMANDS: AppCommand[] = [
   { id: "assign.diaphragm", icon: "joint", run: () => dialog("assignDiaphragm"), enabled: unlocked },
   { id: "assign.frameLoad", icon: "load", run: () => dialog("assignFrameLoad"), enabled: unlocked },
   { id: "assign.shellLoad", icon: "slab", run: () => dialog("assignShellLoad"), enabled: unlocked },
+  { id: "assign.jointLoad", icon: "load", run: () => dialog("assignJointLoad"), enabled: unlocked },
 
   {
     id: "analyze.check",
@@ -489,7 +490,7 @@ export const MENUS: { id: keyof Strings["menu"]; items: MenuItem[] }[] = [
   },
   { id: "draw", items: ["draw.select", "-", "draw.joint", "draw.beam", "draw.column", "draw.brace", "draw.slab", "draw.wall", "-", "draw.finish", "draw.undoPoint"] },
   { id: "select", items: ["edit.selectAll", "select.byStory", "select.invert", "select.clear"] },
-  { id: "assign", items: ["assign.restraint", "-", "assign.section", "assign.releases", "assign.offsets", "assign.diaphragm", "-", "assign.frameLoad", "assign.shellLoad"] },
+  { id: "assign", items: ["assign.restraint", "-", "assign.section", "assign.releases", "assign.offsets", "assign.diaphragm", "-", "assign.jointLoad", "assign.frameLoad", "assign.shellLoad"] },
   { id: "analyze", items: ["analyze.check", "analyze.run", "analyze.unlock"] },
   { id: "display", items: ["display.deformed", "display.moment", "display.momentM2", "display.shear", "display.axial"] },
   { id: "design", items: ["design.concrete", "design.steel"] },

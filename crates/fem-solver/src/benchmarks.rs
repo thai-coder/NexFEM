@@ -126,6 +126,56 @@ fn local_axis_angle_turns_the_strong_axis_like_csi() {
 }
 
 #[test]
+fn joint_forces_and_moments_in_global_axes() {
+    // Công xôn dọc X, ngàm tại a. Tải nút tại đầu tự do: Fz = −P và mô men My = M (hệ tổng thể).
+    let (l, p, mm): (f64, f64, f64) = (3.0, 10.0, 4.0);
+    let mut m = model(
+        json!([{"id":"a","label":"1","x":0,"y":0,"z":0,"restraint":FIX},{"id":"b","label":"2","x":l,"y":0,"z":0}]),
+        json!([{"id":"f","label":"B1","kind":"beam","i":"a","j":"b","section":"s"}]),
+        json!([]),
+    );
+    m.joint_loads = serde_json::from_value(json!([
+        {"id":"j1","joint":"b","pattern":"p","values":[0.0, 0.0, -p, 0.0, 0.0, 0.0]},
+        {"id":"j2","joint":"b","pattern":"p","values":[0.0, 0.0, 0.0, 0.0, mm, 0.0]}
+    ]))
+    .unwrap();
+    let r = run(&m);
+    let c = &r.cases[0];
+    // Uz do lực: −P L³/(3EI); mô men My dương (quay từ Z sang X) làm đầu dầm đi xuống: −M L²/(2EI).
+    let want = -p * l.powi(3) / (3.0 * E * I33) - mm * l * l / (2.0 * E * I33);
+    assert!(
+        close(c.displacements["b"][2], want, 1e-9),
+        "uz = {}",
+        c.displacements["b"][2]
+    );
+    assert!(close(c.reactions["a"][2], p, 1e-9));
+    // Cân bằng mô men quanh Y tại ngàm: My_phản lực + M + (−P)·(−L)... = 0 → My_a = −M − P·L.
+    assert!(
+        close(c.reactions["a"][4], -mm - p * l, 1e-9),
+        "My = {}",
+        c.reactions["a"][4]
+    );
+    assert!(close(c.applied[2], -p, 1e-12));
+
+    // Tải tại nút không nối với thanh nào: dừng, không mất tải im lặng.
+    let mut lost = m.clone();
+    lost.joints
+        .push(serde_json::from_value(json!({"id":"c","label":"9","x":5,"y":0,"z":0})).unwrap());
+    lost.joint_loads[0].joint = "c".into();
+    assert_eq!(
+        analyze(&lost, &Options::default()).unwrap_err().code,
+        "lost_loads"
+    );
+    // Tham chiếu sai.
+    let mut bad = m.clone();
+    bad.joint_loads[0].joint = "khong-co".into();
+    assert_eq!(
+        analyze(&bad, &Options::default()).unwrap_err().code,
+        "invalid_joint_load"
+    );
+}
+
+#[test]
 fn simply_supported_udl() {
     let (l, w): (f64, f64) = (6.0, 12.0);
     let m = model(

@@ -13,5 +13,7 @@
 - **Local tests:** typecheck; io-formats (43), desktop i18n; Playwright e2k-import (8 tests, 5 of them new for SAP2000 and the submenu).
 - **First action when resuming:** read "Next steps" in `docs/csi-import.md`.
   - Frame local-axis angle is done (schema `Frame.angle`, solver, viewer, Properties, both importers).
-  - Next: joint loads (schema and solver, coordinate with Codex).
+  - Joint loads are done (schema `Model.jointLoads`, solver, validation, Assign ▸ Joint loads, viewer, both importers). Points lying inside a frame become frame point loads.
+  - Next: General/angle sections, springs, concentrated moments on frames (see "Next steps").
+  - **Schema note for Codex:** `Frame.angle` (optional) and `Model.jointLoads` (default `[]`) are new and backward compatible; files without them still open.
 - **M1 completion condition:** the user imports other ETABS/SAP2000 files and confirms the mapping assumptions (DZ, PINNED, partial fixity, None area).

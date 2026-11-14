@@ -61,7 +61,7 @@ describe("24061_OMF.s2k (SAP2000 23.1.0, khung phẳng YZ, lb-ft)", () => {
       loadCases: { source: 12, imported: 12 },
       combos: { source: 87, imported: 87 },
       frameLoads: { source: 14, imported: 14 },
-      pointLoads: { source: 2, imported: 0 },
+      pointLoads: { source: 2, imported: 2 },
     });
   });
 
@@ -102,9 +102,13 @@ describe("24061_OMF.s2k (SAP2000 23.1.0, khung phẳng YZ, lb-ft)", () => {
     expect(pts.every((l) => l.direction === "gravity")).toBe(true);
   });
 
-  it("tải nút chưa có trong NexFEM: báo lỗi, không bỏ im lặng", () => {
-    const pl = r.report.diagnostics.filter((d) => d.code === "point_loads_unsupported");
-    expect(pl.map((d) => [d.level, d.params.pattern, d.objects])).toEqual([["error", "WY", ["1"]], ["error", "EY", ["1"]]]);
+  it("tải nút (gió WY, động đất EY) tại nút 1, hệ GLOBAL, lb → kN", () => {
+    const pat = (id: string) => model.loadPatterns.find((p) => p.id === id)!.name;
+    expect(model.jointLoads.map((l) => [model.joints.find((j) => j.id === l.joint)!.label, pat(l.pattern)])).toEqual([["1", "WY"], ["1", "EY"]]);
+    expect(model.jointLoads[0]!.values[1]).toBeCloseTo(17500 * LB, 9);
+    expect(model.jointLoads[1]!.values[1]).toBeCloseTo(25600 * LB, 9);
+    expect(model.jointLoads[0]!.values.filter((_, i) => i !== 1)).toEqual([0, 0, 0, 0, 0]);
+    expect(codes(r, "error")).toEqual([]);
   });
 
   it("tổ hợp lồng nhau (ENV) trỏ tới tổ hợp khác; mọi thành phần trỏ tới trường hợp hoặc tổ hợp có thật", () => {
@@ -198,6 +202,50 @@ describe("Roof_model.2k (SAP2000 25.3.1, kip-ft, mặt None)", () => {
 
   it("mô hình hợp lệ", () => {
     expect(checkModel(model).filter((i) => i.level === "error")).toEqual([]);
+  });
+});
+
+describe("tải nút (dữ liệu tự tạo, chỉ để kiểm tra quy tắc)", () => {
+  const S2K = [
+    "File C:\\x\\t.$2k was saved on m/d/yy at h:mm:ss",
+    'TABLE:  "PROGRAM CONTROL"',
+    '   ProgramName=SAP2000   Version=25.3.1   CurrUnits="KN, m, C"',
+    'TABLE:  "JOINT COORDINATES"',
+    "   Joint=1   CoordSys=GLOBAL   CoordType=Cartesian   XorR=0   Y=0   Z=0",
+    "   Joint=2   CoordSys=GLOBAL   CoordType=Cartesian   XorR=4   Y=0   Z=0",
+    "   Joint=3   CoordSys=GLOBAL   CoordType=Cartesian   XorR=1   Y=0   Z=0",
+    'TABLE:  "JOINT RESTRAINT ASSIGNMENTS"',
+    "   Joint=1   U1=Yes   U2=Yes   U3=Yes   R1=Yes   R2=Yes   R3=Yes",
+    'TABLE:  "MATERIAL PROPERTIES 01 - GENERAL"',
+    "   Material=S   Type=Steel",
+    'TABLE:  "MATERIAL PROPERTIES 02 - BASIC MECHANICAL PROPERTIES"',
+    "   Material=S   UnitWeight=0   E1=200000000   U12=0.3",
+    'TABLE:  "FRAME SECTION PROPERTIES 01 - GENERAL"',
+    "   SectionName=R   Material=S   Shape=Rectangular   t3=0.4   t2=0.2",
+    'TABLE:  "CONNECTIVITY - FRAME"',
+    "   Frame=1   JointI=1   JointJ=2",
+    'TABLE:  "FRAME SECTION ASSIGNMENTS"',
+    "   Frame=1   AnalSect=R   MatProp=Default",
+    'TABLE:  "LOAD PATTERN DEFINITIONS"',
+    "   LoadPat=P   DesignType=Live   SelfWtMult=0",
+    'TABLE:  "JOINT LOADS - FORCE"',
+    "   Joint=2   LoadPat=P   CoordSys=GLOBAL   F1=0   F2=0   F3=-5   M1=0   M2=0   M3=2",
+    "   Joint=3   LoadPat=P   CoordSys=GLOBAL   F1=0   F2=0   F3=-10   M1=0   M2=0   M3=0",
+    "   Joint=3   LoadPat=P   CoordSys=GLOBAL   F1=0   F2=0   F3=0   M1=1   M2=0   M3=0",
+    "   Joint=2   LoadPat=P   CoordSys=Local   F1=1",
+    "END TABLE DATA",
+  ].join("\r\n");
+  const r = importS2k(S2K);
+
+  it("nút đầu thanh: tải nút đủ 6 thành phần; nút nằm giữa thanh: tải tập trung trên thanh tại đúng vị trí", () => {
+    expect(r.model.jointLoads.map((l) => l.values)).toEqual([[0, 0, -5, 0, 0, 2]]);
+    expect(r.model.frameLoads).toEqual([{ id: "fl-1", frame: r.model.frames[0]!.id, pattern: r.model.loadPatterns[0]!.id, kind: "point", direction: "globalZ", value: -10, at: 0.25 }]);
+    expect(diag(r, "point_load_on_frame")?.objects).toEqual(["3 → 1 @ 0.250"]);
+    expect(r.report.counts.pointLoads).toEqual({ source: 4, imported: 2 });
+  });
+
+  it("mô men ở nút giữa thanh và hệ toạ độ khác GLOBAL: báo lỗi", () => {
+    expect(codes(r, "error")).toEqual(["point_load_moment_on_frame", "point_load_coord_unsupported"]);
   });
 });
 

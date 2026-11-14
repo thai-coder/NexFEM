@@ -17,6 +17,7 @@ import {
   AssignRestraintDialog,
   AssignSectionDialog,
   AssignShellLoadDialog,
+  AssignJointLoadDialog,
 } from "../dialogs/AssignDialogs.tsx";
 import { useT } from "../i18n/index.ts";
 import { useUi } from "../stores/ui.ts";
@@ -70,6 +71,8 @@ export function Dialogs() {
       return <AssignFrameLoadDialog onClose={close} />;
     case "assignShellLoad":
       return <AssignShellLoadDialog onClose={close} />;
+    case "assignJointLoad":
+      return <AssignJointLoadDialog onClose={close} />;
     default:
       break;
   }

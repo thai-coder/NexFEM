@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { CommandError, defineCommand, requireIn } from "./commands.ts";
-import { FrameLoadSchema, ShellLoadSchema, type Frame, type Model } from "./schema.ts";
+import { FrameLoadSchema, JointLoadSchema, ShellLoadSchema, type Frame, type Model } from "./schema.ts";
 
 const Bool6 = z.tuple([z.boolean(), z.boolean(), z.boolean(), z.boolean(), z.boolean(), z.boolean()]);
 /** Thứ tự thành phần nhả liên kết: [P, V2, V3, T, M2, M3]. */
@@ -31,7 +31,7 @@ function framesIn(d: Model, ids: string[]): Frame[] {
 
 let seq = 0;
 const loadId = (prefix: string, d: Model) => {
-  const used = new Set([...d.frameLoads, ...d.shellLoads].map((l) => l.id));
+  const used = new Set([...d.frameLoads, ...d.shellLoads, ...d.jointLoads].map((l) => l.id));
   let id: string;
   do id = `${prefix}-${Date.now().toString(36)}-${(seq++).toString(36)}`;
   while (used.has(id));
@@ -151,6 +151,29 @@ export const assignCommands = {
         });
       }
       return frames.length;
+    },
+  }),
+
+  jointLoad: defineCommand({
+    name: "joint.assignLoad",
+    title: "Gán tải lên nút",
+    mutates: true,
+    args: z.object({
+      joints: z.array(z.string()).min(1),
+      pattern: z.string(),
+      /** [Fx, Fy, Fz] kN, [Mx, My, Mz] kN·m theo hệ toạ độ tổng thể. */
+      values: JointLoadSchema.shape.values,
+      mode: z.enum(["replace", "add", "delete"]).default("replace"),
+    }),
+    run(d, a) {
+      requireIn(d, "loadPatterns", a.pattern);
+      const set = new Set(a.joints);
+      const joints = d.joints.filter((j) => set.has(j.id));
+      if (!joints.length) throw new CommandError("Chưa chọn nút nào", "invalid_args");
+      if (a.mode !== "add") d.jointLoads = d.jointLoads.filter((l) => !(set.has(l.joint) && l.pattern === a.pattern));
+      if (a.mode === "delete" || a.values.every((v) => v === 0)) return 0;
+      for (const j of joints) d.jointLoads.push({ id: loadId("jl", d), joint: j.id, pattern: a.pattern, values: [...a.values] });
+      return joints.length;
     },
   }),
 

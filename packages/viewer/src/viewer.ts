@@ -806,7 +806,7 @@ export class StructureViewer {
     if (this.#drawing && !vis.plane) this.setDrawing(null);
   }
 
-  /** Mũi tên tải thanh (phân bố/tập trung) và nhãn giá trị tải sàn của mẫu tải đang hiển thị. */
+  /** Mũi tên tải thanh (phân bố/tập trung), tải nút và nhãn giá trị tải sàn của mẫu tải đang hiển thị. */
   #buildLoads(m: Model, vis: VisibleSet, joints: Map<string, Model["joints"][number]>): void {
     const pattern = this.#loadPattern;
     const t = this.#theme;
@@ -816,7 +816,7 @@ export class StructureViewer {
     const loads = m.frameLoads.filter((l) => l.pattern === pattern && frames.has(l.frame));
     const maxQ = Math.max(1e-9, ...loads.filter((l) => l.kind === "distributed").map((l) => Math.abs(l.value)));
     const maxP = Math.max(1e-9, ...loads.filter((l) => l.kind === "point").map((l) => Math.abs(l.value)));
-    const dirOf = (dir: string, value: number, axis: THREE.Vector3): THREE.Vector3 => {
+    const dirOf = (dir: string, value: number, axis: THREE.Vector3, angle = 0): THREE.Vector3 => {
       const s = Math.sign(value) || 1;
       switch (dir) {
         case "gravity":
@@ -831,6 +831,12 @@ export class StructureViewer {
           // Trục 2 cục bộ: thẳng đứng với thanh ngang, theo X với thanh đứng; trục 3 = 1 × 2.
           const vertical = Math.abs(axis.z) > 0.99;
           const l2 = vertical ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 0, 1).sub(axis.clone().multiplyScalar(axis.z)).normalize();
+          // Góc xoay trục địa phương (độ), như fem-solver local_axes: e2' = cos·e2 + sin·e3.
+          if (angle) {
+            const a = (angle * Math.PI) / 180;
+            const l3 = axis.clone().cross(l2);
+            l2.multiplyScalar(Math.cos(a)).addScaledVector(l3, Math.sin(a));
+          }
           const v = dir === "local3" ? axis.clone().cross(l2) : dir === "globalZ" ? new THREE.Vector3(0, 0, 1) : l2;
           return v.multiplyScalar(s);
         }
@@ -855,7 +861,7 @@ export class StructureViewer {
       const A = new THREE.Vector3(a.x, a.y, a.z);
       const B = new THREE.Vector3(b.x, b.y, b.z);
       const axis = B.clone().sub(A).normalize();
-      const d = dirOf(l.direction, l.value, axis);
+      const d = dirOf(l.direction, l.value, axis, f.angle ?? 0);
       if (l.kind === "distributed") {
         const len = 0.35 + 0.65 * (Math.abs(l.value) / maxQ);
         const offA = A.clone().addScaledVector(d, -len);
@@ -870,6 +876,25 @@ export class StructureViewer {
         arrow(tip, d, len);
         this.#valueLabel(`${toDisplay(l.value, "force", u).toFixed(2)} ${unitLabel("force", u)}`, tip.clone().addScaledVector(d, -len - 0.35));
       }
+    }
+    // Tải nút: mũi tên theo hợp lực (Fx, Fy, Fz) chỉ vào nút; mô men ghi nhãn.
+    const visibleJoints = new Set(vis.joints.map((j) => j.id));
+    const jointLoads = m.jointLoads.filter((l) => l.pattern === pattern && visibleJoints.has(l.joint));
+    const maxF = Math.max(1e-9, ...jointLoads.map((l) => Math.hypot(l.values[0], l.values[1], l.values[2])));
+    for (const l of jointLoads) {
+      const j = joints.get(l.joint);
+      if (!j) continue;
+      const tip = new THREE.Vector3(j.x, j.y, j.z);
+      const f = new THREE.Vector3(l.values[0], l.values[1], l.values[2]);
+      const fm = f.length();
+      if (fm > 0) {
+        const len = 0.5 + 1.0 * (fm / maxF);
+        const d = f.clone().divideScalar(fm);
+        arrow(tip, d, len);
+        this.#valueLabel(`${toDisplay(fm, "force", u).toFixed(2)} ${unitLabel("force", u)}`, tip.clone().addScaledVector(d, -len - 0.35));
+      }
+      const mm = Math.hypot(l.values[3], l.values[4], l.values[5]);
+      if (mm > 0) this.#valueLabel(`M ${toDisplay(mm, "moment", u).toFixed(2)} ${unitLabel("moment", u)}`, tip.clone().add(new THREE.Vector3(0.3, 0.3, 0.3)));
     }
     if (pos.length) {
       const g = new LineSegmentsGeometry();

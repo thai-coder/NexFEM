@@ -133,20 +133,37 @@ describe("file mẫu ETABS 23.2.0: nhập vào NexFEM", () => {
     expect(diag("shell_section_unsupported")[0]!.objects).toEqual(["Deck1"]);
   });
 
-  it("tải: mẫu, tải thanh (hình thang giữ hợp lực), tải sàn; tải tập trung tại nút được báo là không nhập", () => {
+  it("tải: mẫu, tải thanh (hình thang giữ hợp lực), tải sàn, tải tập trung tại nút", () => {
     expect(model.loadPatterns.map((p) => p.name)).toEqual(["CDL", "SDL", "LL", "Lr", "WX", "WY", "EX", "EY", "S", "R", "H"]);
     expect(model.loadPatterns[0]!.selfWeight).toBe(1);
     const frameId = new Map(model.frames.map((f) => [f.label, f.id]));
     const load = (label: string) => model.frameLoads.find((l) => l.frame === frameId.get(label))!;
     expect(load("B93").value).toBeCloseTo((29.75 * LB) / IN, 9);
     expect(load("B2").value).toBeCloseTo((21.25 * (0.9916667 - 0.008333334) * LB) / IN, 9);
-    expect(model.frameLoads.length).toBe(24);
+    expect(model.frameLoads.filter((l) => l.kind === "distributed").length).toBe(24);
     expect(total("line_load_approximated")).toBe(9);
     // 0,6944444 psi = 100 psf ≈ 4,788 kN/m².
     expect(model.shellLoads[0]!.value).toBeCloseTo(4.788, 3);
     expect(model.shellLoads.length).toBe(16);
-    expect(total("point_loads_unsupported")).toBe(31);
-    expect(report.counts.pointLoads).toEqual({ source: 31, imported: 0 });
+    // 31 tải tập trung: 8 đặt tại nút đầu thanh; 23 ở điểm riêng (USERJOINT) nằm trên dầm, ETABS chia dầm tại đó,
+    // nên nhập thành tải tập trung trên dầm tại đúng vị trí (tương đương chính xác), có cảnh báo.
+    expect(report.counts.pointLoads).toEqual({ source: 31, imported: 31 });
+    expect(model.jointLoads.length).toBe(8);
+    const jl = model.jointLoads[0]!;
+    expect(model.joints.find((j) => j.id === jl.joint)!.label).toBe("36");
+    expect(model.loadPatterns.find((p) => p.id === jl.pattern)!.name).toBe("WY");
+    expect(jl.values[1]).toBeCloseTo(-10347 * LB, 9);
+    expect(jl.values.filter((_, i) => i !== 1)).toEqual([0, 0, 0, 0, 0]);
+    expect(total("point_load_on_frame")).toBe(23);
+    const onBeam = model.frameLoads.filter((l) => l.kind === "point");
+    expect(onBeam.length).toBe(23);
+    expect(onBeam.every((l) => l.direction === "globalX")).toBe(true);
+    // Điểm "198" (x = 6 in) nằm trên dầm B7 (từ điểm "36" tại x = 0): vị trí 6 in tính từ đầu i.
+    const b7 = model.frames.find((f) => f.label === "B7")!;
+    const [i7, j7] = [b7.i, b7.j].map((id) => model.joints.find((j) => j.id === id)!);
+    const first = onBeam.find((l) => l.frame === b7.id)!;
+    expect(first.at! * Math.hypot(j7!.x - i7!.x, j7!.y - i7!.y, j7!.z - i7!.z)).toBeCloseTo(6 * IN, 9);
+    expect(first.value).toBeCloseTo(4992 * LB, 9);
   });
 
   it("trường hợp tải và 87 tổ hợp, kể cả tổ hợp lồng tổ hợp", () => {

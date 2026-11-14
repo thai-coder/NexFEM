@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
-type W = { __nexfem: { model: { getState(): { model: Record<string, unknown> & { frames: { id: string; label: string }[]; joints: { id: string; label: string; x: number }[]; designCodes: Record<string, string> }; selection: string[]; select(ids: string[]): void } } } };
+type W = { __nexfem: { model: { getState(): { model: Record<string, unknown> & { frames: { id: string; label: string }[]; joints: { id: string; label: string; x: number }[]; designCodes: Record<string, string>; jointLoads: unknown[] }; selection: string[]; select(ids: string[]): void } } } };
 
 const m = (page: Page) => page.evaluate(() => (window as unknown as W).__nexfem.model.getState().model);
 const sel = (page: Page) => page.evaluate(() => (window as unknown as W).__nexfem.model.getState().selection);
@@ -135,4 +135,20 @@ test("Giới thiệu hiện số phiên bản và nhà phát hành lkat.vn", asy
   const text = page.getByTestId("about-text");
   await expect(text).toContainText(/NexFEM \d+\.\d+\.\d+/);
   await expect(text).toContainText("lkat.vn");
+});
+
+test("gán tải tại nút cho nút đang chọn; Properties đếm tải nút", async ({ page }) => {
+  const joint = (await m(page)).joints.find((j) => !(j as { restraint?: unknown }).restraint) ?? (await m(page)).joints[0]!;
+  await page.getByTestId("console-input").fill(`select ${joint.label}`);
+  await page.getByTestId("console-input").press("Enter");
+  await page.getByRole("menuitem", { name: "Assign", exact: true }).click();
+  await page.getByRole("menu").getByRole("menuitem", { name: "Tải tại nút…" }).click();
+  const dlg = page.getByTestId("dlg-assignJointLoad");
+  await expect(dlg).toBeVisible();
+  await dlg.getByTestId("joint-load-fx").fill("12");
+  await dlg.getByTestId("joint-load-fz").fill("0");
+  await dlg.getByRole("button", { name: "OK" }).click();
+  const loads = (await m(page)).jointLoads as { joint: string; values: number[] }[];
+  expect(loads.map((l) => [l.joint, l.values[0], l.values[2]])).toEqual([[joint.id, 12, 0]]);
+  await expect(page.getByTestId("properties")).toContainText("1 tải");
 });

@@ -14,11 +14,13 @@ import {
   type Model,
   type Shell,
   type ShellLoad,
+  type JointLoad,
   type ShellSection,
   type Story,
 } from "@nexfem/model-core";
 import { e2kNumber, e2kPairs, e2kSection, parseE2k, type E2kFile, type E2kRecord, type E2kToken } from "./e2k-parse.ts";
 import { Diagnostics, type ImportDiagnostic } from "./diagnostics.ts";
+import { locatePoint } from "./locate.ts";
 import { conv, unitFactors, type UnitFactors } from "./units.ts";
 
 export type { ImportDiagnostic, ImportLevel } from "./diagnostics.ts";
@@ -716,13 +718,63 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
   }
   count("shellLoads", areaLoadRecs.length, shellLoads.length);
 
-  // ------------------------------------------------------------------ tải tập trung tại nút (NexFEM chưa có)
+  // ------------------------------------------------------------------ tải tập trung tại nút (hệ tổng thể)
+  const jointLoads: JointLoad[] = [];
+  let convertedToFrame = 0;
   const pointLoadRecs = e2kSection(file, "POINT OBJECT LOADS");
+  const PL_KEYS = ["FX", "FY", "FZ", "MX", "MY", "MZ"] as const;
   for (const r of pointLoadRecs) {
+    const pt = r.tokens[1]?.text ?? "?";
+    const stName = r.tokens[2]?.text ?? "?";
+    const at = { line: r.line, object: `${pt}@${stName}` };
     const p = new Map(e2kPairs(r, 3));
-    d.add("error", "point_loads_unsupported", { pattern: p.get("LC")?.text ?? "?" }, { line: r.line, object: `${r.tokens[1]?.text ?? "?"}@${r.tokens[2]?.text ?? "?"}` });
+    const type = (p.get("TYPE")?.text ?? "").toUpperCase();
+    const pat = patByName.get(p.get("LC")?.text ?? "");
+    const key = `${pt}|${stName}`;
+    if (type !== "FORCE") {
+      d.add("error", "point_load_type_unsupported", { type: p.get("TYPE")?.text ?? "?" }, at);
+      continue;
+    }
+    if (!pat) {
+      d.add("error", "load_target_missing", { kind: "joint" }, at);
+      continue;
+    }
+    for (const k of p.keys()) if (k !== "TYPE" && k !== "LC" && !(PL_KEYS as readonly string[]).includes(k)) d.add("warning", "point_load_key_unsupported", { key: k }, at);
+    const raw = PL_KEYS.map((k) => (p.has(k) ? e2kNumber(p.get(k)!.text) : 0));
+    if (raw.some((v) => !Number.isFinite(v))) {
+      d.add("error", "point_load_type_unsupported", { type }, at);
+      continue;
+    }
+    const values = raw.map((v, i) => (i < 3 ? conv.force(U, v) : conv.force(U, v) * U.l)) as JointLoad["values"];
+    if (jointKeys.has(key)) {
+      jointLoads.push({ id: `jl-${jointLoads.length + 1}`, joint: jid(key), pattern: pat, values });
+      continue;
+    }
+    // Điểm riêng (không phải đầu thanh/sàn): ETABS tự chia thanh tại điểm nằm trên thanh, nên định vị theo toạ độ.
+    const pp = points.get(pt);
+    const st = stories.find((s) => s.name === stName);
+    const place = pp && st ? locatePoint({ x: L(pp.x), y: L(pp.y), z: st.elevation - L(pp.dz) }, joints, frames, tolM) : null;
+    if (!place) {
+      d.add("error", "point_load_no_joint", {}, at);
+      continue;
+    }
+    if ("joint" in place) {
+      jointLoads.push({ id: `jl-${jointLoads.length + 1}`, joint: place.joint.id, pattern: pat, values });
+      d.add("info", "point_load_at_joint", {}, { ...at, object: `${at.object} → ${place.joint.label}` });
+      continue;
+    }
+    if (values.slice(3).some((v) => v !== 0)) {
+      d.add("error", "point_load_moment_on_frame", {}, at);
+      continue;
+    }
+    const DIR3 = ["globalX", "globalY", "globalZ"] as const;
+    values.slice(0, 3).forEach((v, c) => {
+      if (v !== 0) frameLoads.push({ id: `fl-${frameLoads.length + 1}`, frame: place.frame.id, pattern: pat, kind: "point", direction: DIR3[c]!, value: v, at: place.at });
+    });
+    convertedToFrame++;
+    d.add("warning", "point_load_on_frame", {}, { ...at, object: `${at.object} → ${place.frame.label} @ ${place.at.toFixed(3)}` });
   }
-  count("pointLoads", pointLoadRecs.length, 0);
+  count("pointLoads", pointLoadRecs.length, jointLoads.length + convertedToFrame);
 
   // ------------------------------------------------------------------ trường hợp tải
   const caseRecs = mergeBy(e2kSection(file, "LOAD CASES"), 1, 2);
@@ -819,6 +871,7 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
     combos,
     frameLoads,
     shellLoads,
+    jointLoads,
   } satisfies Model);
 
   return {
@@ -858,5 +911,6 @@ function emptyImported(name: string): Model {
     combos: [],
     frameLoads: [],
     shellLoads: [],
+    jointLoads: [],
   } satisfies Model);
 }

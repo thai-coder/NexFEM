@@ -69,7 +69,7 @@ export function definitionUsages(d: Model, collection: DefinitionCollection, id:
     case "loadPatterns":
       return [
         ...d.loadCases.filter((c) => c.loads.some((l) => l.pattern === id)).map((c) => c.name),
-        ...(d.frameLoads.some((l) => l.pattern === id) || d.shellLoads.some((l) => l.pattern === id) ? ["tải đã gán"] : []),
+        ...([...d.frameLoads, ...d.shellLoads, ...d.jointLoads].some((l) => l.pattern === id) ? ["tải đã gán"] : []),
       ];
     case "loadCases":
     case "combos":
