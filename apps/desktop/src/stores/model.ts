@@ -1,4 +1,4 @@
-import { CommandError, CommandStack, sampleModel, type Model } from "@nexfem/model-core";
+import { CommandError, CommandStack, emptyModel, sampleModel, type Model } from "@nexfem/model-core";
 import { create } from "zustand";
 import { t } from "../i18n/index.ts";
 import { useResults } from "./results.ts";
@@ -32,7 +32,16 @@ interface ModelState {
   reset(model: Model, fileName?: string | null): void;
 }
 
-const stack = new CommandStack(sampleModel());
+/**
+ * Mô hình lúc mở app: mô hình trống (như ETABS khi chưa mở file). Mô hình mẫu mở bằng
+ * Trang chủ ▸ Mở mô hình mẫu hoặc File ▸ Mở mô hình mẫu. Địa chỉ có `?sample` (kiểm thử e2e) thì nạp sẵn mô hình mẫu.
+ */
+export function startupModel(): Model {
+  const wantsSample = typeof location !== "undefined" && new URLSearchParams(location.search).has("sample");
+  return wantsSample ? sampleModel() : emptyModel(t().app.untitled);
+}
+
+const stack = new CommandStack(startupModel());
 
 function snapshot() {
   return {
@@ -148,6 +157,9 @@ export const useModel = create<ModelState>((set, get) => ({
 function objectIds(m: Model): string[] {
   return [...m.joints, ...m.frames, ...m.shells, ...m.materials, ...m.frameSections, ...m.shellSections].map((o) => o.id);
 }
+
+// Khung nhìn ban đầu theo mô hình lúc mở app (mô hình trống thì cả bốn ô là 3D).
+useUi.getState().set({ views: defaultViewsFor(stack.model) });
 
 /** Truy cập ngăn xếp lệnh (cho kiểm thử, API sau này). */
 export function commandStack(): CommandStack {

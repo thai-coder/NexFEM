@@ -28,7 +28,7 @@ async function screenOf(page: Page, pane: number, p: [number, number, number]) {
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => localStorage.clear());
-  await page.goto("/");
+  await page.goto("/?sample=1");
   await expect(page.getByTestId("viewport")).toBeVisible();
   await page.waitForFunction(() => ((window as unknown as { __nexfemViewers?: unknown[] }).__nexfemViewers?.length ?? 0) >= 2);
 });

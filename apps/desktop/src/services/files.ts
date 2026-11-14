@@ -1,4 +1,4 @@
-import { PROJECT_EXTENSION, parseProject, serializeProject, type Model } from "@nexfem/model-core";
+import { PROJECT_EXTENSION, parseProject, sampleModel, serializeProject, type Model } from "@nexfem/model-core";
 import { t } from "../i18n/index.ts";
 import { useModel } from "../stores/model.ts";
 import { load, save } from "../stores/persist.ts";
@@ -103,6 +103,16 @@ export async function openProject(): Promise<boolean> {
     document.body.appendChild(input);
     input.click();
   });
+}
+
+/** Mở mô hình mẫu (khung BTCT 5 tầng) như một mô hình mới chưa lưu. */
+export async function openSample(): Promise<boolean> {
+  if (!(await confirmDiscardAsync())) return false;
+  const model = sampleModel();
+  useModel.getState().reset(model, null);
+  useUi.getState().log("success", t().fmt(t().log.sampleOpened, { name: model.name }));
+  useUi.getState().set({ zoomSeq: useUi.getState().zoomSeq + 1, zoomAll: true });
+  return true;
 }
 
 /** Chọn một file dự án chỉ để đọc thiết lập (đơn vị, tiêu chuẩn); không nạp vào ứng dụng. */

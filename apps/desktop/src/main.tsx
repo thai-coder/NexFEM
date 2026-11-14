@@ -9,7 +9,11 @@ import { useModel } from "./stores/model.ts";
 import { useUi } from "./stores/ui.ts";
 
 document.documentElement.dataset.theme = useUi.getState().theme;
-useUi.getState().log("info", t().fmt(t().log.ready, { name: useModel.getState().model.name }));
+{
+  const m = useModel.getState().model;
+  // Mô hình trống lúc mở app: chỉ báo sẵn sàng; có nạp mẫu (?sample) thì ghi tên mẫu.
+  useUi.getState().log("info", m.joints.length ? t().fmt(t().log.readySample, { name: m.name }) : t().log.ready);
+}
 
 // Truy cập trạng thái từ kiểm thử e2e và DevTools.
 Object.assign(window, { __nexfem: { ui: useUi, model: useModel } });

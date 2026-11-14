@@ -37,7 +37,7 @@ const ends = (m: M, f: F) => {
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => localStorage.clear());
-  await page.goto("/");
+  await page.goto("/?sample=1");
   await page.waitForFunction(() => ((window as unknown as { __nexfemViewers?: unknown[] }).__nexfemViewers?.length ?? 0) >= 2);
   // Ô 0 là mặt bằng Tầng 3 (z = 11.1).
   await page.getByTestId("pane-0").click({ position: { x: 5, y: 40 } });

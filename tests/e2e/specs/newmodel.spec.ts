@@ -25,7 +25,7 @@ test.beforeEach(async ({ page }) => {
       sessionStorage.setItem("seeded", "1");
     }
   });
-  await page.goto("/");
+  await page.goto("/?sample=1");
   await expect(page.getByTestId("viewport")).toBeVisible();
   await page.keyboard.press("Control+n");
   await expect(page.getByTestId("dlg-newModel")).toBeVisible();

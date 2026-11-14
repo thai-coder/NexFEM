@@ -3,7 +3,7 @@ import { useState } from "react";
 import { runCommand } from "../../commands/app.ts";
 import { useT } from "../../i18n/index.ts";
 import { openExternal } from "../../services/external.ts";
-import { basename, confirmDiscardAsync, openPath, openProject, recentFiles } from "../../services/files.ts";
+import { basename, confirmDiscardAsync, openPath, openProject, openSample, recentFiles } from "../../services/files.ts";
 import { load, save } from "../../stores/persist.ts";
 
 export const SHOW_START_KEY = "showStartPage";
@@ -71,7 +71,13 @@ export function StartPage() {
             >
               <Icon name="open" size={20} /> {S.openModel}
             </button>
-            <button className="start-action" data-testid="start-sample" onClick={focusViewport}>
+            <button
+              className="start-action"
+              data-testid="start-sample"
+              onClick={async () => {
+                if (await openSample()) focusViewport();
+              }}
+            >
               <Icon name="view3d" size={20} /> {S.sample}
             </button>
           </section>

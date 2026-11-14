@@ -5,7 +5,7 @@ import { join } from "node:path";
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => localStorage.clear());
-  await page.goto("/");
+  await page.goto("/?sample=1");
   await expect(page.getByTestId("viewport")).toBeVisible();
   await page.getByTestId("explorer").getByRole("tab", { name: "Reports" }).click();
 });

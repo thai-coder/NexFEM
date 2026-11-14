@@ -23,6 +23,8 @@ export function CsiImportDialog({ onClose }: { onClose(): void }) {
   const [open, setOpen] = useState<Record<string, boolean>>({ error: true, warning: true, info: false });
   if (!result) return null;
   const { model, report } = result;
+  // Chỉ mở được khi là file ETABS đọc được đơn vị; .s2k và định dạng lạ chỉ xem báo cáo.
+  const canOpen = result.format === "e2k" && report.units !== null;
   const close = () => {
     clear();
     onClose();
@@ -41,7 +43,7 @@ export function CsiImportDialog({ onClose }: { onClose(): void }) {
       testId="dlg-csiImport"
       footer={
         <>
-          <div className="modal-error">{C.notEquivalent}</div>
+          <div className="modal-error">{canOpen ? C.notEquivalent : C.nothingToOpen}</div>
           <button className="btn" onClick={() => void navigator.clipboard?.writeText(textReport())} data-testid="csi-copy">
             {C.copy}
           </button>
@@ -50,6 +52,7 @@ export function CsiImportDialog({ onClose }: { onClose(): void }) {
           </button>
           <button
             className="btn primary"
+            disabled={!canOpen}
             data-testid="csi-open"
             onClick={async () => {
               if (!(await confirmDiscardAsync())) return;

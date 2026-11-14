@@ -93,3 +93,21 @@ describe("nhập dữ liệu tự tạo", () => {
     expect(decodeE2k(new Uint8Array([0x24, 0x20, 0xb0]))).toBe("$ °");
   });
 });
+
+describe("nhận diện định dạng CSI", () => {
+  it("e2k, s2k (bảng TABLE:) và định dạng lạ", async () => {
+    const { detectCsiFormat, importCsi, s2kProgram } = await import("../src/index.ts");
+    expect(detectCsiFormat(SMALL)).toBe("e2k");
+    // Dạng bảng của SAP2000 .s2k (dữ liệu tự tạo, chỉ để kiểm tra nhận diện).
+    const s2k = 'File C:\\x\\24061_OMF.s2k was saved on m/d/yy at h:mm:ss\n\nTABLE:  "PROGRAM CONTROL"\n   ProgramName=SAP2000   Version=23.1.0   ProgLevel=Ultimate   CurrUnits="KN, m, C"\n\nTABLE:  "JOINT COORDINATES"\n   Joint=1   CoordSys=GLOBAL\n';
+    expect(detectCsiFormat(s2k)).toBe("s2k");
+    expect(s2kProgram(s2k)).toEqual({ program: "SAP2000", version: "23.1.0" });
+    const r = importCsi(s2k);
+    expect(r.format).toBe("s2k");
+    expect(r.model.joints).toEqual([]);
+    expect(r.report.program).toBe("SAP2000");
+    expect(r.report.diagnostics.map((d) => d.code)).toEqual(["format_s2k_unsupported"]);
+    expect(importCsi("hello").report.diagnostics.map((d) => d.code)).toEqual(["format_unknown"]);
+    expect(importCsi(SMALL).format).toBe("e2k");
+  });
+});

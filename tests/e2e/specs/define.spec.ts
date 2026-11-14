@@ -29,7 +29,7 @@ async function openDialog(page: Page, menu: string, item: string) {
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => localStorage.clear());
-  await page.goto("/");
+  await page.goto("/?sample=1");
   await expect(page.getByTestId("viewport")).toBeVisible();
 });
 

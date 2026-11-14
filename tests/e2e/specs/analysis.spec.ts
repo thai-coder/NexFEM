@@ -11,7 +11,7 @@ const state = (page: Page) => page.evaluate(() => (window as unknown as W).__nex
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => localStorage.clear());
-  await page.goto("/");
+  await page.goto("/?sample=1");
   await expect(page.getByTestId("viewport")).toBeVisible();
 });
 
