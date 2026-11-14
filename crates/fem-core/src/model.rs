@@ -128,7 +128,14 @@ pub enum FrameShape {
         r: f64,
     },
     #[serde(rename = "box")]
-    Box { h: f64, b: f64, t: f64 },
+    Box {
+        h: f64,
+        b: f64,
+        t: f64,
+        /// Bán kính góc ngoài (m); 0 = góc vuông (hộp hàn). Góc trong có bán kính max(r − t, 0).
+        #[serde(default, skip_serializing_if = "is_zero")]
+        r: f64,
+    },
     #[serde(rename = "pipe")]
     Pipe { d: f64, t: f64 },
 }

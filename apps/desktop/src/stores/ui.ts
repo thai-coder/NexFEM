@@ -28,7 +28,8 @@ export type DialogKind =
   | "assignFrameLoad"
   | "assignShellLoad"
   | "rename"
-  | "viewOptions";
+  | "viewOptions"
+  | "report";
 
 export interface DialogState {
   kind: DialogKind;
@@ -38,6 +39,8 @@ export interface DialogState {
   tab?: string;
   /** Ô khung nhìn (hộp thoại tuỳ chọn hiển thị). */
   pane?: number;
+  /** Loại báo cáo (hộp thoại báo cáo). */
+  report?: string;
 }
 
 /** Mục menu ngữ cảnh: lệnh có sẵn, đường phân cách, hoặc mục tuỳ biến. */

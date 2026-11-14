@@ -1,4 +1,4 @@
-import type { Model } from "@nexfem/model-core";
+import { REPORT_KINDS, type Model } from "@nexfem/model-core";
 import { Icon } from "@nexfem/ui";
 import { viewTitle } from "@nexfem/viewer";
 import { useMemo, useState, type ReactNode } from "react";
@@ -21,7 +21,7 @@ interface Node {
   children?: Node[];
 }
 
-type Tab = "model" | "display" | "tables";
+type Tab = "model" | "display" | "tables" | "reports";
 
 export function ModelExplorer() {
   const T = useT();
@@ -30,9 +30,9 @@ export function ModelExplorer() {
   return (
     <div className="explorer" data-testid="explorer">
       <div className="seg-tabs" role="tablist">
-        {(["model", "display", "tables"] as const).map((id) => (
+        {(["model", "display", "tables", "reports"] as const).map((id) => (
           <button key={id} role="tab" aria-selected={tab === id} className={tab === id ? "active" : ""} onClick={() => setTab(id)}>
-            {id === "model" ? T.explorer.tabModel : id === "display" ? T.explorer.tabDisplay : T.explorer.tabTables}
+            {id === "model" ? T.explorer.tabModel : id === "display" ? T.explorer.tabDisplay : id === "tables" ? T.explorer.tabTables : T.explorer.tabReports}
           </button>
         ))}
       </div>
@@ -44,6 +44,7 @@ export function ModelExplorer() {
         {tab === "model" && <ModelTree q={q} />}
         {tab === "display" && <DisplayTree q={q} />}
         {tab === "tables" && <TablesTree q={q} />}
+        {tab === "reports" && <ReportsTree q={q} />}
       </div>
     </div>
   );
@@ -208,6 +209,24 @@ function TablesTree({ q }: { q: string }) {
     },
   ];
   return <TreeView nodes={filterTree(nodes, q.trim())} forceOpen defaultOpen={["tables"]} />;
+}
+
+function ReportsTree({ q }: { q: string }) {
+  const T = useT();
+  const nodes: Node[] = [
+    {
+      key: "reports",
+      label: T.explorer.reportList,
+      icon: "table",
+      children: REPORT_KINDS.map((k) => ({
+        key: `r-${k}`,
+        label: T.reports.kinds[k],
+        icon: "table",
+        onClick: () => useUi.getState().set({ dialog: { kind: "report", report: k } }),
+      })),
+    },
+  ];
+  return <TreeView nodes={filterTree(nodes, q.trim())} forceOpen defaultOpen={["reports"]} />;
 }
 
 function TreeView({ nodes, forceOpen, defaultOpen }: { nodes: Node[]; forceOpen: boolean; defaultOpen: string[] }) {

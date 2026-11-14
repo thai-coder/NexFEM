@@ -22,7 +22,7 @@ TCVN 7571-16:2017,I,<tên>,I,<h>,<b>,<tw>,<tf>,<r>,,,<A>,<Iy>,<Iz>,<It>
 ```
 
 - Kích thước: mm. A: cm². Iy (trục mạnh), Iz, It: cm⁴. Các cột giá trị bảng có thể để trống.
-- `shape`: `I` (cánh song song), `box`, `pipe`. Chưa hỗ trợ: chữ C/U, chữ L, chữ T, chữ I cánh vát (dòng loại này bị báo lỗi). Cần thêm hình mới vào mô hình và bộ giải trước.
+- `shape`: `I` (cánh song song), `box`, `pipe`. Với `I` cột `r` là bán kính lượn chân; với `box` cột `r` là bán kính góc ngoài (mm). Hộp không khai `r` bị so với bảng bằng ngưỡng rộng hơn (3 %) vì A, I lớn hơn bảng. Chưa hỗ trợ: chữ C/U, chữ L, chữ T, chữ I cánh vát (dòng loại này bị báo lỗi). Cần thêm hình mới vào mô hình và bộ giải trước.
 
 ## Bảng AISC lưu thành CSV
 

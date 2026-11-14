@@ -174,6 +174,20 @@ fn write_project_file(path: String, data: Vec<u8>) -> Result<(), String> {
     write_atomic(p, &data).map_err(|e| format!("{}: {e}", p.display()))
 }
 
+/// Xuất báo cáo dạng văn bản. Chỉ nhận đuôi `.csv` (lệnh ghi file dự án vẫn chỉ nhận `.nxf`/`.json`).
+#[tauri::command]
+fn write_report_file(path: String, text: String) -> Result<(), String> {
+    let p = std::path::Path::new(&path);
+    let is_csv = p
+        .extension()
+        .and_then(|e| e.to_str())
+        .is_some_and(|e| e.eq_ignore_ascii_case("csv"));
+    if !is_csv {
+        return Err(format!("chỉ xuất được file .csv (nhận: {})", p.display()));
+    }
+    write_atomic(p, text.as_bytes()).map_err(|e| format!("{}: {e}", p.display()))
+}
+
 fn write_atomic(path: &std::path::Path, data: &[u8]) -> std::io::Result<()> {
     use std::io::Write;
     let dir = path
@@ -216,7 +230,8 @@ pub fn run() {
             model_stats,
             frontend_ready,
             read_project_file,
-            write_project_file
+            write_project_file,
+            write_report_file
         ])
         .build(tauri::generate_context!())
         .expect("không khởi động được NexFEM")
@@ -239,6 +254,24 @@ mod tests {
         assert!(check_extension(std::path::Path::new("a/b.JSON")).is_ok());
         assert!(check_extension(std::path::Path::new("a/b.exe")).is_err());
         assert!(check_extension(std::path::Path::new("a/noext")).is_err());
+    }
+
+    #[test]
+    fn report_export_accepts_only_csv() {
+        let dir = std::env::temp_dir().join(format!("nexfem-report-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let ok = dir.join("bao-cao.CSV");
+        write_report_file(ok.to_string_lossy().into(), "a,b\r\n".into()).unwrap();
+        assert_eq!(std::fs::read_to_string(&ok).unwrap(), "a,b\r\n");
+        for bad in ["x.exe", "x.nxf", "x.json", "x", "x.csv.exe"] {
+            let p = dir.join(bad);
+            assert!(
+                write_report_file(p.to_string_lossy().into(), "x".into()).is_err(),
+                "{bad}"
+            );
+            assert!(!p.exists());
+        }
+        std::fs::remove_dir_all(&dir).unwrap();
     }
 
     #[test]

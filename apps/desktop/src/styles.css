@@ -1996,3 +1996,32 @@ input[aria-invalid="true"] {
 .steel-library .is-error {
   color: var(--color-danger);
 }
+
+/* ---------------------------------------------- reports */
+
+.report-scroll {
+  max-height: 60vh;
+  overflow: auto;
+  user-select: text;
+}
+.report-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: var(--font-size-sm);
+}
+.report-table th,
+.report-table td {
+  padding: 3px 8px;
+  border-bottom: 1px solid var(--color-border);
+  text-align: right;
+  white-space: nowrap;
+}
+.report-table th.left,
+.report-table td.left {
+  text-align: left;
+}
+.report-table th {
+  position: sticky;
+  top: 0;
+  background: var(--color-surface-2);
+}

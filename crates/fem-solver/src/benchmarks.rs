@@ -510,3 +510,77 @@ mod rolled_sections {
         assert!((j - (2.0 * 0.15 * 0.01f64.powi(3) + hw * 0.006f64.powi(3)) / 3.0).abs() < 1e-15);
     }
 }
+
+// Ống hộp có bán kính góc: so với tích phân đa giác độc lập (cùng các trường hợp với
+// `packages/model-core/test/box-section.test.ts`) để TypeScript và Rust giống nhau.
+#[cfg(test)]
+mod box_sections {
+    use crate::analysis::box_section;
+    use std::f64::consts::PI;
+
+    /// Đa giác hình chữ nhật bo góc; `hole` đảo chiều để trừ diện tích.
+    fn polygon(b: f64, h: f64, r: f64, hole: bool) -> Vec<(f64, f64)> {
+        let n = 4000;
+        let corners = [
+            (b / 2.0 - r, h / 2.0 - r, 0.0),
+            (-b / 2.0 + r, h / 2.0 - r, PI / 2.0),
+            (-b / 2.0 + r, -h / 2.0 + r, PI),
+            (b / 2.0 - r, -h / 2.0 + r, 3.0 * PI / 2.0),
+        ];
+        let mut pts = Vec::new();
+        for (cx, cy, a0) in corners {
+            if r <= 0.0 {
+                pts.push((cx, cy));
+            } else {
+                for i in 0..=n {
+                    let a = a0 + PI / 2.0 * f64::from(i) / f64::from(n);
+                    pts.push((cx + r * a.cos(), cy + r * a.sin()));
+                }
+            }
+        }
+        if hole {
+            pts.reverse();
+        }
+        pts
+    }
+
+    fn props(ring: &[(f64, f64)]) -> (f64, f64, f64) {
+        let (mut a, mut ixx, mut iyy) = (0.0, 0.0, 0.0);
+        for i in 0..ring.len() {
+            let (x0, y0) = ring[i];
+            let (x1, y1) = ring[(i + 1) % ring.len()];
+            let c = x0 * y1 - x1 * y0;
+            a += c / 2.0;
+            ixx += c * (y0 * y0 + y0 * y1 + y1 * y1) / 12.0;
+            iyy += c * (x0 * x0 + x0 * x1 + x1 * x1) / 12.0;
+        }
+        (a, ixx, iyy)
+    }
+
+    #[test]
+    fn rounded_boxes_match_polygon_integration() {
+        let cases = [
+            (0.2, 0.2, 0.01, 0.02),
+            (0.3, 0.15, 0.008, 0.016),
+            (0.12, 0.06, 0.004, 0.006),
+            (0.2, 0.1, 0.01, 0.006),
+        ];
+        for (h, b, t, r) in cases {
+            let o = props(&polygon(b, h, r, false));
+            let i = props(&polygon(b - 2.0 * t, h - 2.0 * t, (r - t).max(0.0), true));
+            let (a, i22, i33, j) = box_section(h, b, t, r);
+            assert!(((a - (o.0 + i.0)) / a).abs() < 1e-5, "A {h}x{b}x{t}");
+            assert!(((i33 - (o.1 + i.1)) / i33).abs() < 1e-5, "I33 {h}x{b}x{t}");
+            assert!(((i22 - (o.2 + i.2)) / i22).abs() < 1e-5, "I22 {h}x{b}x{t}");
+            assert!(j > 0.0);
+        }
+    }
+
+    #[test]
+    fn square_corners_keep_previous_formula() {
+        let (a, i22, i33, j) = box_section(0.2, 0.2, 0.01, 0.0);
+        assert!((a - (0.04 - 0.0324)).abs() < 1e-15);
+        assert!((i22 - i33).abs() < 1e-15);
+        assert!((j - 2.0 * 0.01 * 0.19f64.powi(2) * 0.19f64.powi(2) / 0.38).abs() < 1e-15);
+    }
+}

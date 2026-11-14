@@ -48,12 +48,12 @@ export function checkModel(model: Model): ModelMessage[] {
   for (const sec of model.frameSections) {
     const g = sec.geometry;
     const invalid = g.shape === "I" ? (2 * g.tf + 2 * (g.r ?? 0) >= g.h || g.tw + 2 * (g.r ?? 0) >= g.bf)
-      : g.shape === "box" ? (2 * g.t >= g.h || 2 * g.t >= g.b)
+      : g.shape === "box" ? (2 * g.t >= g.h || 2 * g.t >= g.b || (g.r ?? 0) > Math.min(g.h, g.b) / 2)
       : g.shape === "pipe" ? (2 * g.t >= g.d) : false;
     const area = g.shape === "rect" ? g.b * g.h
       : g.shape === "circle" ? Math.PI * g.d ** 2 / 4
       : g.shape === "I" ? sectionProperties(g).A
-      : g.shape === "box" ? g.b * g.h - (g.b - 2 * g.t) * (g.h - 2 * g.t)
+      : g.shape === "box" ? sectionProperties(g).A
       : Math.PI * (g.d ** 2 - (g.d - 2 * g.t) ** 2) / 4;
     const badShear = sec.shearAreas && (sec.shearAreas.a2 > area || sec.shearAreas.a3 > area);
     if (invalid || badShear) out.push({ level: "error", code: "invalid_section", objects: [sec.id], params: { name: sec.name } });
