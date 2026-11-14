@@ -41,6 +41,15 @@ it("dùng +X cho trục 2 của thanh đứng và chiếu +Z cho thanh nghiêng"
   ]);
 });
 
+it("góc xoay trục địa phương 90° đưa trục 2 của thanh đứng từ +X sang +Y", () => {
+  const rotated = { ...model, frames: model.frames.map((f) => (f.id === "v" ? { ...f, angle: 90 } : f)) };
+  const diagram = buildMomentDiagram(rotated, { v: { x: [0, 4], m3: [10, -10] } }, 0.01)!;
+  // M3 dương vẽ về −2: trước là −X, sau khi xoay là −Y.
+  expect(coordinates(momentDiagramPositions(diagram, visibleObjects(rotated, { kind: "3d" })))).toEqual([
+    10, 0, 0, 10, -0.1, 0, 10, -0.1, 0, 10, 0.1, 4, 10, 0, 4, 10, 0.1, 4,
+  ]);
+});
+
 it("vẽ M2 dương về +3 và lấy scale theo M2 tại các station ngoài đoạn cứng", () => {
   const forces = { h: { x: [0.2, 1.5, 2.8], m2: [30, 0, -20], m3: [300, 0, -200] } };
   const diagram = buildMomentDiagram(model, forces, 0.01, "m2")!;

@@ -364,8 +364,16 @@ export function importS2k(input: string | S2kFile, opts: { name?: string } = {})
       }
       if (i.some(Boolean) || j.some(Boolean)) frame.releases = { i, j };
     }
+    // Góc xoay trục địa phương: cùng quy ước CSI với NexFEM (schema Frame.angle, fem-solver local_axes).
     const ang = angles.get(name);
-    if (ang && n(ang, "Angle") !== 0) d.add("warning", "frame_angle_ignored", { angle: f(ang, "Angle")! }, at);
+    if (ang) {
+      const a = n(ang, "Angle");
+      if (s2kYes(f(ang, "AdvanceAxes"))) d.add("warning", "frame_axes_advanced_ignored", {}, at);
+      if (Number.isFinite(a) && a !== 0) {
+        frame.angle = a;
+        d.add("info", "frame_angle_imported", {}, at);
+      }
+    }
     const ins = insertion.get(name);
     if (ins && !/^10\b/.test(f(ins, "CardinalPt") ?? "10")) d.add("warning", "frame_cardinal_ignored", { point: (f(ins, "CardinalPt") ?? "").replace(/\s*\(.*\)/, "") }, at);
     const off = offsets.get(name);
@@ -532,11 +540,13 @@ export function importS2k(input: string | S2kFile, opts: { name?: string } = {})
   count("combos", comboRows.size, combos.length);
 
   // ------------------------------------------------------------------ tải
-  const DIRS: Record<string, FrameLoad["direction"]> = { GRAVITY: "gravity", X: "globalX", Y: "globalY", Z: "globalZ", "1": "localX" };
-  const loadDir = (r: S2kRecord): FrameLoad["direction"] | "local23" | null => {
+  const DIRS: Record<string, FrameLoad["direction"]> = { GRAVITY: "gravity", X: "globalX", Y: "globalY", Z: "globalZ" };
+  // Trục địa phương 1, 2, 3 của NexFEM theo quy ước CSI (mặc định và góc xoay), nên tải theo trục địa phương nhập thẳng.
+  const LOCAL: Record<string, FrameLoad["direction"]> = { "1": "localX", "2": "local2", "3": "local3" };
+  const loadDir = (r: S2kRecord): FrameLoad["direction"] | null => {
     const sys = (f(r, "CoordSys") ?? "GLOBAL").toUpperCase();
     const dir = (f(r, "Dir") ?? "").toUpperCase();
-    if (sys === "LOCAL") return dir === "1" ? "localX" : dir === "2" || dir === "3" ? "local23" : null;
+    if (sys === "LOCAL") return LOCAL[dir] ?? null;
     if (sys !== "GLOBAL") return null;
     return DIRS[dir] ?? null;
   };
@@ -551,10 +561,11 @@ export function importS2k(input: string | S2kFile, opts: { name?: string } = {})
       d.add("error", "load_target_missing", { kind: "frame" }, at);
       continue;
     }
-    if ((f(r, "Type") ?? "Force").toLowerCase() !== "force" || !dir || dir === "local23") {
-      d.add("error", dir === "local23" ? "line_load_local_axis" : "line_load_unsupported", { type: f(r, "Type") ?? "?", dir: f(r, "Dir") ?? "?" }, at);
+    if ((f(r, "Type") ?? "Force").toLowerCase() !== "force" || !dir) {
+      d.add("error", "line_load_unsupported", { type: f(r, "Type") ?? "?", dir: f(r, "Dir") ?? "?" }, at);
       continue;
     }
+    if (dir === "local2" || dir === "local3") d.add("info", "line_load_local_axis_note", {}, at);
     const a = n(r, "RelDistA");
     const b = n(r, "RelDistB");
     const wa = n(r, "FOverLA");
@@ -579,10 +590,11 @@ export function importS2k(input: string | S2kFile, opts: { name?: string } = {})
       d.add("error", "load_target_missing", { kind: "frame" }, at);
       continue;
     }
-    if ((f(r, "Type") ?? "Force").toLowerCase() !== "force" || !dir || dir === "local23" || !(rel >= 0 && rel <= 1) || !Number.isFinite(force)) {
-      d.add("error", dir === "local23" ? "line_load_local_axis" : "line_load_unsupported", { type: f(r, "Type") ?? "?", dir: f(r, "Dir") ?? "?" }, at);
+    if ((f(r, "Type") ?? "Force").toLowerCase() !== "force" || !dir || !(rel >= 0 && rel <= 1) || !Number.isFinite(force)) {
+      d.add("error", "line_load_unsupported", { type: f(r, "Type") ?? "?", dir: f(r, "Dir") ?? "?" }, at);
       continue;
     }
+    if (dir === "local2" || dir === "local3") d.add("info", "line_load_local_axis_note", {}, at);
     frameLoads.push({ id: `fl-${frameLoads.length + 1}`, frame: frame.id, pattern: pat, kind: "point", direction: dir, value: conv.force(U, force), at: rel });
   }
   count("frameLoads", distRecs.length + pointRecs.length, frameLoads.length);

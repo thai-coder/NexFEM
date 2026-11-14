@@ -71,7 +71,7 @@ describe("nhập dữ liệu tự tạo", () => {
     expect(bad.report.diagnostics.map((d) => d.code)).toEqual(expect.arrayContaining(["unknown_units", "missing_units"]));
   });
 
-  it("tải thanh theo trục địa phương 2/3 không được nhập; trục 1 và phương toàn cục được nhập", () => {
+  it("tải thanh theo trục địa phương 1, 2 và phương toàn cục đều được nhập (trục theo quy ước CSI)", () => {
     const withLoads = SMALL.replace(
       "$ END OF MODEL FILE",
       [
@@ -85,8 +85,8 @@ describe("nhập dữ liệu tự tạo", () => {
       ].join("\n"),
     );
     const r = importE2k(withLoads);
-    expect(r.model.frameLoads.map((l) => [l.direction, l.value])).toEqual([["localX", 2], ["globalX", 3]]);
-    expect(r.report.diagnostics.find((d) => d.code === "line_load_local_axis")!.count).toBe(1);
+    expect(r.model.frameLoads.map((l) => [l.direction, l.value])).toEqual([["local2", 1], ["localX", 2], ["globalX", 3]]);
+    expect(r.report.diagnostics.find((d) => d.code === "line_load_local_axis_note")).toMatchObject({ level: "info", count: 1 });
   });
 
   it("giải mã Windows-1252 khi file không phải UTF-8", () => {

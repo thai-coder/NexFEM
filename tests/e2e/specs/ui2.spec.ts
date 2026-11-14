@@ -94,6 +94,21 @@ test("sửa toạ độ và nhãn của nút trong Properties", async ({ page })
   expect((await m(page)).joints.find((x) => x.id === j.id)!.label).toBe("N-GOC");
 });
 
+test("sửa góc xoay trục địa phương của thanh trong Properties", async ({ page }) => {
+  const frame = (await m(page)).frames[0]!;
+  await page.getByTestId("console-input").fill(`select ${frame.label}`);
+  await page.getByTestId("console-input").press("Enter");
+  const props = page.getByTestId("properties");
+  await expect(props.getByTestId("frame-angle")).toHaveValue("0");
+  await props.getByTestId("frame-angle").fill("90");
+  await props.getByTestId("apply").click();
+  const angle = async () => ((await m(page)).frames.find((x) => x.id === frame.id) as { angle?: number }).angle;
+  expect(await angle()).toBe(90);
+  await props.getByTestId("frame-angle").fill("0");
+  await props.getByTestId("apply").click();
+  expect(await angle()).toBeUndefined();
+});
+
 test("chọn tiêu chuẩn khi tạo mô hình mới", async ({ page }) => {
   await page.keyboard.press("Control+n");
   await page.getByTestId("code-concrete").selectOption("EN 1992-1-1");

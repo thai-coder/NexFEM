@@ -606,6 +606,9 @@
               "i",
               "j"
             ]
+          },
+          "angle": {
+            "type": "number"
           }
         },
         "required": [

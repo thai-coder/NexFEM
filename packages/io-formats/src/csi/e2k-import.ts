@@ -457,7 +457,12 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
       if (k === "LENGTHOFFI" || k === "LENGTHOFFJ") {
         if (val !== 0) d.add("warning", "frame_length_offset_ignored", {}, at);
       } else if (k === "ANG") {
-        if (val !== 0) d.add("warning", "frame_angle_ignored", { angle: v.text }, at);
+        // Góc xoay trục địa phương: cùng quy ước CSI với NexFEM (schema Frame.angle, fem-solver local_axes).
+        if (!Number.isFinite(val)) d.add("warning", "frame_key_unsupported", { key: k }, at);
+        else if (val !== 0) {
+          frame.angle = val;
+          d.add("info", "frame_angle_imported", {}, at);
+        }
       } else if (k === "CARDINALPT") {
         if (val !== 10) d.add("warning", "frame_cardinal_ignored", { point: v.text }, at);
       } else if (k === "SPRINGPROP") d.add("error", "frame_spring_unsupported", { spring: v.text }, at);
@@ -639,9 +644,8 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
   // ------------------------------------------------------------------ tải trên thanh
   const frameLoads: FrameLoad[] = [];
   const lineLoadRecs = e2kSection(file, "FRAME OBJECT LOADS");
-  // Trục địa phương 2, 3 của NexFEM chưa được đối chiếu với quy ước ETABS (và góc xoay ANG chưa nhập),
-  // nên tải theo trục 2, 3 không được nhập. Trục 1 luôn là trục thanh i → j.
-  const DIRS: Record<string, FrameLoad["direction"]> = { GRAV: "gravity", X: "globalX", Y: "globalY", Z: "globalZ", "1": "localX" };
+  // Trục địa phương 1, 2, 3 của NexFEM theo quy ước CSI (mặc định và góc ANG), nên tải theo trục 2, 3 nhập thẳng.
+  const DIRS: Record<string, FrameLoad["direction"]> = { GRAV: "gravity", X: "globalX", Y: "globalY", Z: "globalZ", "1": "localX", "2": "local2", "3": "local3" };
   for (const r of lineLoadRecs) {
     const name = r.tokens[1]?.text ?? "";
     const stName = r.tokens[2]?.text ?? "";
@@ -656,10 +660,10 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
       continue;
     }
     if (!dir) {
-      const raw = (p.get("DIR")?.text ?? "").toUpperCase();
-      d.add("error", raw === "2" || raw === "3" ? "line_load_local_axis" : "line_load_unsupported", { type, dir: p.get("DIR")?.text ?? "?" }, at);
+      d.add("error", "line_load_unsupported", { type, dir: p.get("DIR")?.text ?? "?" }, at);
       continue;
     }
+    if (dir === "local2" || dir === "local3") d.add("info", "line_load_local_axis_note", {}, at);
     let w: number;
     if (type === "UNIFF") w = e2kNumber(p.get("FVAL")?.text);
     else if (type === "TRAPF") {

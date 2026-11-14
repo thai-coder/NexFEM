@@ -159,10 +159,15 @@ describe("file mẫu ETABS 23.2.0: nhập vào NexFEM", () => {
     expect(total("combo_item_missing")).toBe(0);
   });
 
-  it("báo rõ các thứ chưa hỗ trợ: lò xo, góc xoay trục, điểm chèn, không có gối", () => {
+  it("báo rõ các thứ chưa hỗ trợ: lò xo, điểm chèn, không có gối; góc xoay trục ANG được nhập", () => {
     expect(total("frame_spring_unsupported")).toBe(24);
     expect(total("area_spring_unsupported")).toBe(21);
-    expect(total("frame_angle_ignored")).toBe(34);
+    expect(total("frame_angle_ignored")).toBe(0);
+    expect(total("frame_angle_imported")).toBe(34);
+    // 34 cột xoay 90° (ANG 90): trục khoẻ quay sang phương kia.
+    const rotated = model.frames.filter((f) => f.angle !== undefined);
+    expect(rotated.length).toBe(34);
+    expect(rotated.every((f) => f.kind === "column" && f.angle === 90)).toBe(true);
     expect(total("frame_cardinal_ignored")).toBe(60);
     expect(total("no_supports_imported")).toBe(1);
     expect(report.diagnostics[0]!.level).toBe("error");

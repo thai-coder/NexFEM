@@ -120,6 +120,11 @@ export const FrameSchema = z.object({
     .optional(),
   /** Vùng cứng đầu thanh dọc trục i/j, đo từ tim nút (m). */
   offsets: z.object({ i: Num.min(0), j: Num.min(0) }).optional(),
+  /**
+   * Góc xoay trục địa phương 2, 3 quanh trục 1 (độ), quy ước như ETABS/SAP2000: dương ngược chiều kim đồng hồ
+   * khi nhìn từ đầu +1 về gốc, trục 2 quay về phía trục 3. Bỏ trống = 0 (trục mặc định, xem fem-solver element.rs).
+   */
+  angle: Num.optional(),
 });
 
 export const ShellSchema = z.object({

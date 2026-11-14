@@ -213,6 +213,9 @@ pub struct Frame {
     /// Rigid end zones từ tim nút dọc trục thanh (m).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub offsets: Option<FrameOffsets>,
+    /// Góc xoay trục địa phương 2, 3 quanh trục 1 (độ), quy ước ETABS/SAP2000.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub angle: Option<f64>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

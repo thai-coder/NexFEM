@@ -12,6 +12,6 @@
   - Documentation: `docs/csi-import.md`.
 - **Local tests:** typecheck; io-formats (43), desktop i18n; Playwright e2k-import (8 tests, 5 of them new for SAP2000 and the submenu).
 - **First action when resuming:** read "Next steps" in `docs/csi-import.md`.
-  - First priority: frame local-axis angle. The two columns of `24061_OMF.s2k` are rotated 90°, and ETABS frames use `ANG`.
+  - Frame local-axis angle is done (schema `Frame.angle`, solver, viewer, Properties, both importers).
   - Next: joint loads (schema and solver, coordinate with Codex).
 - **M1 completion condition:** the user imports other ETABS/SAP2000 files and confirms the mapping assumptions (DZ, PINNED, partial fixity, None area).

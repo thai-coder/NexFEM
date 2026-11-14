@@ -27,7 +27,23 @@ pub fn scale(a: V3, s: f64) -> V3 {
 /// Trục cục bộ (các hàng là e1, e2, e3).
 /// e1 dọc thanh i→j. Thanh không thẳng đứng: e2 hướng lên trong mặt phẳng đứng chứa thanh.
 /// Thanh thẳng đứng: e2 = X tổng thể. e3 = e1 × e2.
-pub fn local_axes(a: V3, b: V3) -> [V3; 3] {
+/// Trùng quy ước mặc định của ETABS/SAP2000. `angle_deg` xoay e2, e3 quanh e1 như CSI:
+/// e2' = cos·e2 + sin·e3, e3' = −sin·e2 + cos·e3 (dương ngược chiều kim đồng hồ nhìn từ đầu +1).
+pub fn local_axes(a: V3, b: V3, angle_deg: f64) -> [V3; 3] {
+    let [e1, e2, e3] = default_axes(a, b);
+    if angle_deg == 0.0 {
+        return [e1, e2, e3];
+    }
+    let (s, c) = angle_deg.to_radians().sin_cos();
+    let r2 = [
+        c * e2[0] + s * e3[0],
+        c * e2[1] + s * e3[1],
+        c * e2[2] + s * e3[2],
+    ];
+    [e1, r2, cross(e1, r2)]
+}
+
+fn default_axes(a: V3, b: V3) -> [V3; 3] {
     let d = sub(b, a);
     let l = norm(d);
     let e1 = scale(d, 1.0 / l);

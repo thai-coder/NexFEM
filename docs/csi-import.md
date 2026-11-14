@@ -59,12 +59,19 @@ Cột "File mẫu" cho biết cú pháp đã có trong file ETABS 23.2.0 thật 
 | `LOADCASE` Linear Static (LOADPAT/SF), Modal | trường hợp tải | có |
 | `COMBO` Linear Add / Envelope / SRSS / Absolute Add, LOADCASE và LOADCOMBO | tổ hợp (kể cả lồng nhau) | Linear Add |
 | `LINELOAD` UNIFF; TRAPF, phương GRAV, X, Y, Z, 1 | tải đều; hình thang đổi thành tải đều giữ hợp lực (cảnh báo) | GRAV |
-| `LINELOAD` phương 2, 3 (trục địa phương) | **không nhập** (lỗi): quy ước trục địa phương chưa đối chiếu với ETABS | chưa |
+| `LINELOAD` phương 2, 3 (trục địa phương) | tải theo trục 2, 3 của NexFEM (cùng quy ước CSI, ghi chú: chưa có file thật có loại tải này) | chưa |
+| `LINEASSIGN` ANG | góc xoay trục địa phương `Frame.angle` | 34 cột ANG 90 |
 | `AREALOAD` UNIFF GRAV/Z | tải sàn | GRAV |
 
-**Không nhập, có báo cáo:** tải tập trung tại nút (NexFEM chưa có), lò xo dọc thanh và lò xo nền dưới sàn, góc xoay trục địa phương `ANG`, điểm chèn `CARDINALPT`, đoạn lệch đầu thanh khác 0, liên kết nửa cứng `PARFIXM*`, giới hạn kéo/nén, sàn cứng, P-Delta, trường hợp tải khác Linear Static/Modal, Range Add.
+**Không nhập, có báo cáo:** tải tập trung tại nút (NexFEM chưa có), lò xo dọc thanh và lò xo nền dưới sàn, điểm chèn `CARDINALPT`, đoạn lệch đầu thanh khác 0, liên kết nửa cứng `PARFIXM*`, giới hạn kéo/nén, sàn cứng, P-Delta, trường hợp tải khác Linear Static/Modal, Range Add.
 
 **Bỏ qua (ghi chú):** chia lưới, trạm xuất kết quả, thiết kế, nhóm, nhật ký, thông tin dự án, cốt thép, cáp, liên kết, panel zone, hàm phổ/lịch sử, nguồn khối lượng.
+
+## Trục địa phương của thanh
+
+NexFEM dùng đúng quy ước mặc định của ETABS/SAP2000. Trục 1 đi từ đầu i đến đầu j. Thanh không thẳng đứng có trục 2 hướng lên, trong mặt phẳng đứng chứa thanh. Thanh thẳng đứng có trục 2 = +X tổng thể. Trục 3 = 1 × 2.
+
+`Frame.angle` (độ) xoay trục 2, 3 quanh trục 1: e2' = cos·e2 + sin·e3, dương ngược chiều kim đồng hồ khi nhìn từ đầu +1. Bộ giải (`crates/fem-solver/src/element.rs::local_axes`), biểu đồ mô men (`packages/viewer/src/moment.ts`) và cả hai bộ nhập dùng chung quy ước này. Sửa góc trong bảng Properties của thanh. Test: `local_axis_angle_turns_the_strong_axis_like_csi` kiểm tra cột công xôn tải theo Y ở góc 0°, 90° và 30°, so với lời giải giải tích theo I22 và I33.
 
 ## Giả định ánh xạ (cần kiểm chứng thêm)
 
@@ -88,7 +95,7 @@ Cột "File mẫu" cho biết cú pháp đã có trong file ETABS 23.2.0 thật 
 | Tải tập trung tại nút | 31 | 0 | NexFEM chưa có |
 | Trường hợp tải / tổ hợp | 12 / 87 | 12 / 87 | |
 
-Mô hình nhập **không có gối**, vì file dựa vào lò xo nền. Phải gán gối trước khi chạy F5. Kết quả phân tích **chưa so được với ETABS**, và sẽ khác ETABS vì: thiếu giằng, thiếu tải tập trung (gió, động đất theo phương ngang), thiếu lò xo, cột HSS nhồi bê tông tính như ống rỗng, góc xoay trục bị bỏ.
+Mô hình nhập **không có gối**, vì file dựa vào lò xo nền. Phải gán gối trước khi chạy F5. Kết quả phân tích **chưa so được với ETABS**, và sẽ khác ETABS vì: thiếu giằng, thiếu tải tập trung (gió, động đất theo phương ngang), thiếu lò xo, cột HSS nhồi bê tông tính như ống rỗng.
 
 Mô hình này đặt hầu hết đối tượng bằng DZ dưới một tầng duy nhất (Story1, cao 12 in), nên mặt bằng của tầng chỉ thấy những gì nằm đúng cao độ tầng. Xem bằng khung nhìn 3D hoặc mặt đứng.
 
@@ -110,17 +117,18 @@ File thật trong repo: `tests/fixtures/csi/sap2000/` (xem README: nguồn, SHA-
 | `JOINT RESTRAINT ASSIGNMENTS` | gối | có |
 | `CONNECTIVITY - FRAME` + `FRAME SECTION ASSIGNMENTS` | thanh; loại suy từ phương (đứng → cột, ngang → dầm, xiên → giằng) | có |
 | `FRAME RELEASE ASSIGNMENTS 1` | nhả liên kết | có |
+| `FRAME LOCAL AXES ASSIGNMENTS 1` Angle | góc xoay trục địa phương `Frame.angle`; trục nâng cao (AdvanceAxes) chưa hỗ trợ (cảnh báo) | 2 cột Angle 90 |
 | `FRAME RELEASE ASSIGNMENTS 2 - PARTIAL FIXITY` | ≥ 1000 × 4EI/L: coi như không nhả; ≤ 0,001 × 4EI/L: khớp; ở giữa: **lỗi**, nhập thành nhả | M3 rất cứng |
 | `CONNECTIVITY - AREA` + `AREA SECTION ASSIGNMENTS` | sàn (pháp tuyến gần ngang → vách) | có |
 | Mặt tiết diện `None` | sàn không trọng lượng; tải chia về thanh/nút biên (ghi chú) | có |
 | `LOAD PATTERN DEFINITIONS`, `LOAD CASE DEFINITIONS` (LinStatic, LinModal), `CASE - STATIC 1` | mẫu tải, trường hợp tải | có |
 | `COMBINATION DEFINITIONS` (Linear Add, Envelope, SRSS, Absolute Add; lồng nhau) | tổ hợp | có |
-| `FRAME LOADS - DISTRIBUTED` (Force; Gravity, X, Y, Z, 1) | tải đều; hình thang đổi thành tải đều giữ hợp lực (cảnh báo) | Gravity |
+| `FRAME LOADS - DISTRIBUTED` (Force; Gravity, X, Y, Z; Local 1, 2, 3) | tải đều; hình thang đổi thành tải đều giữ hợp lực (cảnh báo) | Gravity |
 | `FRAME LOADS - POINT` | tải tập trung trên thanh tại `RelDist` | Gravity |
 | `AREA LOADS - UNIFORM` (Gravity, Z, Local 3) | tải sàn | Gravity, Local 3 |
 | `JOINT LOADS - FORCE` | **không nhập** (lỗi): NexFEM chưa có tải nút | có |
 
-**Cảnh báo (nhập gần đúng):** góc xoay trục địa phương (`FRAME LOCAL AXES`), điểm chèn khác 10 (trọng tâm), đoạn cứng đầu thanh (RigidFactor > 0), hệ số sửa đặc trưng thanh/tiết diện khác 1, thanh cong (nhập thành thẳng). Tải thanh theo trục địa phương 2/3 chưa nhập (lỗi).
+**Cảnh báo (nhập gần đúng):** điểm chèn khác 10 (trọng tâm), đoạn cứng đầu thanh (RigidFactor > 0), hệ số sửa đặc trưng thanh/tiết diện khác 1, thanh cong (nhập thành thẳng), trục địa phương nâng cao.
 
 **Đặc trưng tiết diện được đối chiếu với giá trị SAP2000 ghi trong file** (A, I33, I22, TorsConst lấy từ bảng AISC): với 273 tiết diện W của file OMF, NexFEM lệch lớn nhất A 0,73 %, I 1,44 %, J 1,14 %. Báo cáo chỉ cảnh báo tiết diện **có thanh dùng** lệch quá A, I 1 % hoặc J 5 %; tiết diện chỉ nằm trong thư viện được tóm tắt ở một ghi chú.
 
@@ -135,9 +143,9 @@ File thật trong repo: `tests/fixtures/csi/sap2000/` (xem README: nguồn, SHA-
 | Mẫu tải / trường hợp / tổ hợp | 53 / 12 / 87 | 5 / 6 / 18 |
 | Tải thanh / tải sàn | 14 / 0 | 0 / 16 |
 | Không nhập được | 2 tải nút (WY, EY) | không có |
-| Cảnh báo | góc xoay 90° của 2 cột, liên kết nửa cứng M3 rất cứng (coi như ngàm), điểm chèn 8 của dầm | suy bán kính lượn W8X24 |
+| Cảnh báo | liên kết nửa cứng M3 rất cứng (coi như ngàm), điểm chèn 8 của dầm | suy bán kính lượn W8X24 |
 
-File OMF là khung phẳng YZ, hai cột xoay 90°. Khi chưa có góc xoay, cột chịu uốn trong mặt phẳng khung theo trục yếu, nên kết quả **sẽ khác SAP2000** cho tới khi NexFEM hỗ trợ góc xoay trục địa phương. Tải gió và động đất WY, EY của file này là tải nút, nên cũng chưa nhập được.
+File OMF là khung phẳng YZ, hai cột xoay 90°: nhờ góc xoay, trục 2 của cột nằm trong mặt phẳng khung và cột uốn trong mặt phẳng quanh trục khoẻ I33, như SAP2000. Tải gió và động đất WY, EY của file này là tải nút, nên chưa nhập được.
 
 ## Kiểm thử
 
@@ -149,8 +157,7 @@ File OMF là khung phẳng YZ, hai cột xoay 90°. Khi chưa có góc xoay, c�
 
 ## Việc tiếp theo
 
-1. Góc xoay trục địa phương của thanh (cả `.e2k` và `.s2k`); sau đó nhập được tải thanh theo trục địa phương 2, 3.
-2. Tải tập trung tại nút (cần thêm vào schema và bộ giải; phối hợp với Codex).
-3. Tiết diện General (A, I, J nhập trực tiếp) và chữ L.
-4. Lò xo nút / lò xo nền (bộ giải hiện chỉ có gối cứng).
-5. Đối chiếu kết quả (M2) khi có bảng chuyển vị, phản lực, nội lực xuất từ ETABS/SAP2000.
+1. Tải tập trung tại nút (cần thêm vào schema và bộ giải; phối hợp với Codex).
+2. Tiết diện General (A, I, J nhập trực tiếp) và chữ L.
+3. Lò xo nút / lò xo nền (bộ giải hiện chỉ có gối cứng).
+4. Đối chiếu kết quả (M2) khi có bảng chuyển vị, phản lực, nội lực xuất từ ETABS/SAP2000.

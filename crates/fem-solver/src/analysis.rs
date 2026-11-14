@@ -572,7 +572,7 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
         self_weight.push(mat.gamma * area);
         elems.push(Elem {
             id: f.id.clone(),
-            ax: local_axes(a, b),
+            ax: local_axes(a, b, f.angle.unwrap_or(0.0)),
             l,
             k_local,
             released,

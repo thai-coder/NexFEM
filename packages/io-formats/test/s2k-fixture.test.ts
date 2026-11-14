@@ -84,7 +84,10 @@ describe("24061_OMF.s2k (SAP2000 23.1.0, khung phẳng YZ, lb-ft)", () => {
     expect([fr("3").kind, sec(fr("3"))]).toEqual(["beam", "W12X336"]);
     expect(fr("3").releases).toBeUndefined();
     expect(diag(r, "partial_fixity_as_fixed")?.objects).toEqual(["3 (M3I)", "3 (M3J)"]);
-    expect(diag(r, "frame_angle_ignored")?.objects).toEqual(["1", "2"]);
+    // Hai cột xoay 90°: trục 2 nằm trong mặt phẳng khung YZ, cột uốn trong mặt phẳng quanh trục khoẻ.
+    expect([fr("1").angle, fr("2").angle, fr("3").angle]).toEqual([90, 90, undefined]);
+    expect(diag(r, "frame_angle_imported")?.objects).toEqual(["1", "2"]);
+    expect(diag(r, "frame_angle_ignored")).toBeUndefined();
     expect(diag(r, "frame_cardinal_ignored")?.params).toEqual({ point: "8" });
   });
 

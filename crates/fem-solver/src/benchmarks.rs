@@ -70,6 +70,62 @@ fn cantilever_point_load() {
 }
 
 #[test]
+fn local_axis_angle_turns_the_strong_axis_like_csi() {
+    // Cột công xôn thẳng đứng, tải đầu cột theo Y. Trục mặc định: e2 = X, e3 = Y, tải theo e3 → uốn quanh trục yếu I22.
+    // Góc 90° (quy ước ETABS/SAP2000): e2' = e3 = Y → tải theo e2' → uốn quanh trục khoẻ I33.
+    let (l, p): (f64, f64) = (3.0, 10.0);
+    let i22 = H * B.powi(3) / 12.0;
+    let tip = |angle: Option<f64>| {
+        let mut frame =
+            json!({"id":"f","label":"C1","kind":"column","i":"a","j":"b","section":"s"});
+        if let Some(a) = angle {
+            frame["angle"] = json!(a);
+        }
+        let m = model(
+            json!([{"id":"a","label":"1","x":0,"y":0,"z":0,"restraint":FIX},{"id":"b","label":"2","x":0,"y":0,"z":l}]),
+            json!([frame]),
+            json!([{"id":"l","frame":"f","pattern":"p","kind":"point","direction":"globalY","value":p,"at":1.0}]),
+        );
+        let r = run(&m);
+        let c = &r.cases[0];
+        (
+            c.displacements["b"],
+            c.frames["f"].m2[0],
+            c.frames["f"].m3[0],
+        )
+    };
+    let (d0, m2_0, m3_0) = tip(None);
+    assert!(
+        close(d0[1], p * l.powi(3) / (3.0 * E * i22), 1e-9),
+        "uy = {}",
+        d0[1]
+    );
+    assert!(close(m2_0.abs(), p * l, 1e-9) && m3_0.abs() < 1e-9);
+    let (d90, m2_90, m3_90) = tip(Some(90.0));
+    assert!(
+        close(d90[1], p * l.powi(3) / (3.0 * E * I33), 1e-9),
+        "uy = {}",
+        d90[1]
+    );
+    assert!(close(m3_90.abs(), p * l, 1e-9) && m2_90.abs() < 1e-9);
+    assert!(d90[0].abs() < 1e-15);
+    // Góc 30°: độ mềm theo Y là tổ hợp hai trục; tải tạo cả chuyển vị X.
+    let (d30, ..) = tip(Some(30.0));
+    let (s, c) = 30f64.to_radians().sin_cos();
+    let f = p * l.powi(3) / (3.0 * E);
+    assert!(
+        close(d30[1], f * (c * c / i22 + s * s / I33), 1e-9),
+        "uy = {}",
+        d30[1]
+    );
+    assert!(
+        close(d30[0], f * s * c * (1.0 / I33 - 1.0 / i22), 1e-9),
+        "ux = {}",
+        d30[0]
+    );
+}
+
+#[test]
 fn simply_supported_udl() {
     let (l, w): (f64, f64) = (6.0, 12.0);
     let m = model(

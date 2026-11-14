@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 
 const FIXTURE = fileURLToPath(new URL("../../fixtures/csi/etabs/23217_SMFs 3D model_updated v4.e2k", import.meta.url));
 const SAP = (name: string) => fileURLToPath(new URL(`../../fixtures/csi/sap2000/${name}`, import.meta.url));
-type M = { name: string; frames: { kind: string }[]; joints: unknown[]; shells: unknown[]; combos: unknown[] };
+type M = { name: string; frames: { kind: string; angle?: number }[]; joints: unknown[]; shells: unknown[]; combos: unknown[] };
 const model = (page: Page) => page.evaluate(() => (window as unknown as { __nexfem: { model: { getState(): { model: unknown } } } }).__nexfem.model.getState().model as M);
 
 /** File → Nhập file → mục của chương trình (menu con, mỗi định dạng một mục riêng). */
@@ -34,7 +34,8 @@ test("nhập file ETABS thật: báo cáo số lượng và phần không nhập
   await expect(errors).toContainText("Lò xo nền dưới sàn");
   await expect(errors).toContainText("Steel Angle");
   await expect(errors).toContainText("không có gối");
-  await expect(page.getByTestId("csi-warning")).toContainText("Góc xoay trục địa phương 90°");
+  await expect(page.getByTestId("csi-warning")).not.toContainText("Góc xoay");
+  await expect(page.getByTestId("csi-info")).toContainText("Góc xoay trục địa phương của thanh được nhập");
   // Chưa mở: mô hình hiện tại không đổi.
   expect((await model(page)).name).toBe("Toa_nha_A");
 });
@@ -76,11 +77,12 @@ test("nhập file SAP2000 thật (.s2k): báo cáo rồi mở mô hình", async 
   await expect(page.getByTestId("csi-source")).toContainText("SAP2000 23.1.0");
   await expect(page.getByTestId("csi-source")).toContainText("LB, FT");
   await expect(page.getByTestId("csi-error")).toContainText("Tải tập trung tại nút (mẫu WY)");
-  await expect(page.getByTestId("csi-warning")).toContainText("Góc xoay trục địa phương 90°");
+  await expect(page.getByTestId("csi-info")).toContainText("Góc xoay trục địa phương của thanh được nhập");
   await page.getByTestId("csi-open").click();
   const m = await model(page);
   expect(m.name).toBe("24061_OMF");
   expect(m.frames.map((f) => f.kind)).toEqual(["column", "column", "beam"]);
+  expect(m.frames.map((f) => f.angle)).toEqual([90, 90, undefined]);
   expect(m.combos.length).toBe(87);
   await expect(page.getByTestId("bottom")).toContainText("Đã nhập 24061_OMF.s2k");
 });

@@ -43,6 +43,12 @@ export function buildMomentDiagram(
     const axis2 = Math.abs(axis1.z) > 1 - 1e-6
       ? new Vector3(1, 0, 0)
       : new Vector3(0, 0, 1).addScaledVector(axis1, -axis1.z).normalize();
+    // Góc xoay trục địa phương (độ): e2' = cos·e2 + sin·e3, như local_axes của fem-solver.
+    if (frame.angle) {
+      const a = (frame.angle * Math.PI) / 180;
+      const axis3 = new Vector3().crossVectors(axis1, axis2);
+      axis2.multiplyScalar(Math.cos(a)).addScaledVector(axis3, Math.sin(a));
+    }
     // Phía chịu kéo: M2 dương về +3 (e1 × e2), M3 dương về −2.
     const direction = component === "m2" ? new Vector3().crossVectors(axis1, axis2) : axis2.negate();
     members.set(frame.id, { origin, axis1, direction, x: result.x, values });

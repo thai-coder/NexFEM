@@ -161,10 +161,12 @@ function FrameProps({ frame, model, locked }: { frame: Frame; model: Model; lock
   const execute = useModel((s) => s.execute);
   const [label, setLabel] = useState(frame.label);
   const [section, setSection] = useState(frame.section);
+  const [angle, setAngle] = useState(String(frame.angle ?? 0));
   useEffect(() => {
     setLabel(frame.label);
     setSection(frame.section);
-  }, [frame.label, frame.section]);
+    setAngle(String(frame.angle ?? 0));
+  }, [frame.label, frame.section, frame.angle]);
   const joints = jointMap(model);
   const a = joints.get(frame.i);
   const b = joints.get(frame.j);
@@ -172,7 +174,9 @@ function FrameProps({ frame, model, locked }: { frame: Frame; model: Model; lock
   const mat = model.materials.find((m) => m.id === sec?.material);
   const story = model.stories.find((s) => s.id === frame.story);
   const loads = model.frameLoads.filter((l) => l.frame === frame.id).length;
-  const dirty = label !== frame.label || section !== frame.section;
+  const angleValue = Number(angle);
+  const angleOk = angle.trim() !== "" && Number.isFinite(angleValue);
+  const dirty = label !== frame.label || section !== frame.section || (angleOk && angleValue !== (frame.angle ?? 0));
   const coord = (j: Joint | undefined) => (j ? `(${[j.x, j.y, j.z].map((v) => toDisplay(v, "length", model.units).toFixed(3)).join(", ")})` : "?");
 
   return (
@@ -209,6 +213,9 @@ function FrameProps({ frame, model, locked }: { frame: Frame; model: Model; lock
       </Section>
       <Section title={T.props.assigns}>
         <Row label={T.props.releases}>{frame.releases ? "✓" : T.props.none}</Row>
+        <Row label={T.props.angle}>
+          <input className="num" inputMode="decimal" value={angle} disabled={locked} onChange={(e) => setAngle(e.target.value)} aria-label={T.props.angle} aria-invalid={!angleOk} data-testid="frame-angle" />
+        </Row>
         <Row label={T.props.loads}>{loads ? T.fmt(T.props.loadCount, { n: loads }) : T.props.none}</Row>
       </Section>
       <Section title={T.props.results}>
@@ -220,8 +227,10 @@ function FrameProps({ frame, model, locked }: { frame: Frame; model: Model; lock
         onRevert={() => {
           setLabel(frame.label);
           setSection(frame.section);
+          setAngle(String(frame.angle ?? 0));
         }}
         onApply={() => {
+          if (angleOk && angleValue !== (frame.angle ?? 0)) execute("object.update", { collection: "frames", id: frame.id, patch: { angle: angleValue === 0 ? undefined : angleValue } });
           if (section !== frame.section) execute("frame.assignSection", { frames: [frame.id], section });
           if (label !== frame.label) execute("object.update", { collection: "frames", id: frame.id, patch: { label } });
         }}
