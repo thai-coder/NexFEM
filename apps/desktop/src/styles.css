@@ -2025,3 +2025,45 @@ input[aria-invalid="true"] {
   top: 0;
   background: var(--color-surface-2);
 }
+
+/* ---------------------------------------------- CSI import report */
+
+.csi-import {
+  display: grid;
+  grid-template-columns: minmax(220px, 280px) 1fr;
+  gap: 14px;
+  max-height: 62vh;
+}
+.csi-counts tr.short td {
+  color: var(--color-danger);
+}
+.csi-diags {
+  overflow: auto;
+  user-select: text;
+}
+.csi-level summary {
+  cursor: pointer;
+  font-weight: 600;
+  padding: 4px 0;
+}
+.csi-level.error summary {
+  color: var(--color-danger);
+}
+.csi-level ul {
+  margin: 0 0 8px;
+  padding-left: 18px;
+}
+.csi-level li {
+  margin: 3px 0;
+}
+.csi-count {
+  display: inline-block;
+  min-width: 42px;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.csi-objects {
+  color: var(--color-text-muted);
+  font-size: 11px;
+  margin-left: 46px;
+}

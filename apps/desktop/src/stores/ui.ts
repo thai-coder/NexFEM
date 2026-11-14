@@ -29,7 +29,8 @@ export type DialogKind =
   | "assignShellLoad"
   | "rename"
   | "viewOptions"
-  | "report";
+  | "report"
+  | "csiImport";
 
 export interface DialogState {
   kind: DialogKind;

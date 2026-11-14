@@ -17,6 +17,9 @@ importers:
 
   apps/desktop:
     dependencies:
+      '@nexfem/io-formats':
+        specifier: workspace:*
+        version: link:../../packages/io-formats
       '@nexfem/model-core':
         specifier: workspace:*
         version: link:../../packages/model-core
@@ -66,6 +69,22 @@ importers:
       vite:
         specifier: 8.3.6
         version: 8.3.6(@types/node@26.6.6)
+      vitest:
+        specifier: 5.1.0
+        version: 5.1.0(@types/node@26.6.6)(vite@8.3.6(@types/node@26.6.6))
+
+  packages/io-formats:
+    dependencies:
+      '@nexfem/model-core':
+        specifier: workspace:*
+        version: link:../model-core
+    devDependencies:
+      '@types/node':
+        specifier: 26.6.6
+        version: 26.6.6
+      typescript:
+        specifier: 7.0.2
+        version: 7.0.2
       vitest:
         specifier: 5.1.0
         version: 5.1.0(@types/node@26.6.6)(vite@8.3.6(@types/node@26.6.6))
