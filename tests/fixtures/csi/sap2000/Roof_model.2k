@@ -1,0 +1,1322 @@
+File G:\@CORE Projects\@2025\25014\02-Structural Engineering\03-ENG-Calculations\01-Models\Sap2000\Roof model.$2k was saved on m/d/yy at h:mm:ss
+ 
+TABLE:  "ACTIVE DEGREES OF FREEDOM"
+   UX=Yes   UY=Yes   UZ=Yes   RX=Yes   RY=Yes   RZ=Yes
+ 
+TABLE:  "ANALYSIS OPTIONS"
+   Solver=Advanced   SolverProc=Auto   Force32Bit=No   StiffCase=None   GeomMod=None   HingeOpt="In Elements"   NumAThreads=0   MaxFileSize=0   NumDThreads=0   NumRThreads=0   UseMMFiles="Program Determined"   AllowDiff=No
+ 
+TABLE:  "AREA AUTO MESH ASSIGNMENTS"
+   Area=1   MeshType="Cookie Cut Lines"   MeshGroup=ALL   LocalEdge=No   LocalFace=No   SuppEdge=No   SuppFace=No   SubMesh=No
+   Area=2   MeshType="Cookie Cut Lines"   MeshGroup=ALL   LocalEdge=No   LocalFace=No   SuppEdge=No   SuppFace=No   SubMesh=No
+   Area=3   MeshType="Cookie Cut Lines"   MeshGroup=ALL   LocalEdge=No   LocalFace=No   SuppEdge=No   SuppFace=No   SubMesh=No
+   Area=4   MeshType="Cookie Cut Lines"   MeshGroup=ALL   LocalEdge=No   LocalFace=No   SuppEdge=No   SuppFace=No   SubMesh=No
+ 
+TABLE:  "AREA EDGE CONSTRAINT ASSIGNMENTS"
+   Area=1   Constrained=Yes
+   Area=2   Constrained=Yes
+   Area=3   Constrained=Yes
+   Area=4   Constrained=Yes
+ 
+TABLE:  "AREA LOADS - UNIFORM"
+   Area=1   LoadPat=Lr   CoordSys=GLOBAL   Dir=Gravity   UnifLoad=0.02
+   Area=1   LoadPat=Wd   CoordSys=Local   Dir=3   UnifLoad=-0.016
+   Area=1   LoadPat=SDL   CoordSys=GLOBAL   Dir=Gravity   UnifLoad=0.0165
+   Area=1   LoadPat=Wu   CoordSys=Local   Dir=3   UnifLoad=0.016
+   Area=2   LoadPat=Lr   CoordSys=GLOBAL   Dir=Gravity   UnifLoad=0.02
+   Area=2   LoadPat=Wd   CoordSys=Local   Dir=3   UnifLoad=-0.016
+   Area=2   LoadPat=SDL   CoordSys=GLOBAL   Dir=Gravity   UnifLoad=0.0165
+   Area=2   LoadPat=Wu   CoordSys=Local   Dir=3   UnifLoad=0.016
+   Area=3   LoadPat=Lr   CoordSys=GLOBAL   Dir=Gravity   UnifLoad=0.02
+   Area=3   LoadPat=Wd   CoordSys=Local   Dir=3   UnifLoad=-0.016
+   Area=3   LoadPat=SDL   CoordSys=GLOBAL   Dir=Gravity   UnifLoad=0.0165
+   Area=3   LoadPat=Wu   CoordSys=Local   Dir=3   UnifLoad=0.016
+   Area=4   LoadPat=Lr   CoordSys=GLOBAL   Dir=Gravity   UnifLoad=0.02
+   Area=4   LoadPat=Wd   CoordSys=Local   Dir=3   UnifLoad=-0.016
+   Area=4   LoadPat=SDL   CoordSys=GLOBAL   Dir=Gravity   UnifLoad=0.0165
+   Area=4   LoadPat=Wu   CoordSys=Local   Dir=3   UnifLoad=0.016
+ 
+TABLE:  "AREA SECTION ASSIGNMENTS"
+   Area=1   Section=None   MatProp=Default
+   Area=2   Section=None   MatProp=Default
+   Area=3   Section=None   MatProp=Default
+   Area=4   Section=None   MatProp=Default
+ 
+TABLE:  "AREA SECTION PROPERTIES"
+   Section="Roof shell"   Material=A992Fy50   MatAngle=0   AreaType=Shell   Type=Shell-Thin   DrillDOF=Yes   Thickness=0.0833333333333333   BendThick=0.0833333333333333   Color=Yellow   F11Mod=1   F22Mod=1   F12Mod=1   M11Mod=1   M22Mod=1 _
+        M12Mod=1   V13Mod=1   V23Mod=1   MMod=1   WMod=0.0001   GUID=2fe555d4-775e-4ccc-81b8-89c01e04e1b2   Notes="Added 3/13/2025 5:09:23 PM"
+ 
+TABLE:  "AREA SECTION PROPERTY DESIGN PARAMETERS"
+   Section="Roof shell"   RebarMat=None   RebarOpt=Default
+ 
+TABLE:  "AREA SECTION PROPERTY - TIME DEPENDENT"
+   Section="Roof shell"   TypeSize=Auto   AutoSFSize=1
+ 
+TABLE:  "AUTO COMBINATION OPTION DATA 01 - GENERAL"
+   DesignType=Steel   AutoGen=No
+ 
+TABLE:  "AUTO WAVE 3 - WAVE CHARACTERISTICS - GENERAL"
+   WaveChar=Default   WaveType="From Theory"   KinFactor=1   SWaterDepth=150   WaveHeight=60   WavePeriod=12   WaveTheory=Linear
+ 
+TABLE:  "CASE - MODAL 1 - GENERAL"
+   Case=MODAL   ModeType=Eigen   MaxNumModes=12   MinNumModes=1   EigenShift=0   EigenCutoff=0   EigenTol=1E-09   AutoShift=Yes
+ 
+TABLE:  "CASE - STATIC 1 - LOAD ASSIGNMENTS"
+   Case=CDL   LoadType="Load pattern"   LoadName=CDL   LoadSF=1
+   Case=SDL   LoadType="Load pattern"   LoadName=SDL   LoadSF=1
+   Case=Lr   LoadType="Load pattern"   LoadName=Lr   LoadSF=1
+   Case=Wu   LoadType="Load pattern"   LoadName=Wu   LoadSF=1
+   Case=Wd   LoadType="Load pattern"   LoadName=Wd   LoadSF=1
+ 
+TABLE:  "COMBINATION DEFINITIONS"
+   ComboName=1.4DL   ComboType="Linear Add"   AutoDesign=No   CaseName=SDL   ScaleFactor=1.4   SteelDesign=Strength   ConcDesign=None   AlumDesign=None   ColdDesign=None   GUID=55955908-b22d-4147-ac39-7b0b62629583
+   ComboName=1.4DL   CaseName=CDL   ScaleFactor=1.4
+   ComboName=1.2DL+1.6Lr   ComboType="Linear Add"   AutoDesign=No   CaseName=SDL   ScaleFactor=1.2   SteelDesign=Strength   ConcDesign=None   AlumDesign=None   ColdDesign=None   GUID=9fe0a82c-e37f-465e-9b8f-e0018855c558
+   ComboName=1.2DL+1.6Lr   CaseName=CDL   ScaleFactor=1.2
+   ComboName=1.2DL+1.6Lr   CaseName=Lr   ScaleFactor=1.6
+   ComboName=1.2DL+1.6Lr+0.5Wu   ComboType="Linear Add"   AutoDesign=No   CaseName=SDL   ScaleFactor=1.2   SteelDesign=Strength   ConcDesign=None   AlumDesign=None   ColdDesign=None   GUID=d4ad5822-cf23-4bcd-9359-73a2d040355a
+   ComboName=1.2DL+1.6Lr+0.5Wu   CaseName=CDL   ScaleFactor=1.2
+   ComboName=1.2DL+1.6Lr+0.5Wu   CaseName=Lr   ScaleFactor=1.6
+   ComboName=1.2DL+1.6Lr+0.5Wu   CaseName=Wu   ScaleFactor=0.5
+   ComboName=1.2DL+1.6Lr+0.5Wd   ComboType="Linear Add"   AutoDesign=No   CaseName=SDL   ScaleFactor=1.2   SteelDesign=Strength   ConcDesign=None   AlumDesign=None   ColdDesign=None   GUID=e160e853-acfe-46f7-8616-586de91f509f
+   ComboName=1.2DL+1.6Lr+0.5Wd   CaseName=CDL   ScaleFactor=1.2
+   ComboName=1.2DL+1.6Lr+0.5Wd   CaseName=Lr   ScaleFactor=1.6
+   ComboName=1.2DL+1.6Lr+0.5Wd   CaseName=Wd   ScaleFactor=0.5
+   ComboName=1.2DL+Wu+0.5Lr   ComboType="Linear Add"   AutoDesign=No   CaseName=SDL   ScaleFactor=1.2   SteelDesign=Strength   ConcDesign=None   AlumDesign=None   ColdDesign=None   GUID=4ff7f163-d97b-45c0-b40e-fdce8c89b439
+   ComboName=1.2DL+Wu+0.5Lr   CaseName=CDL   ScaleFactor=1.2
+   ComboName=1.2DL+Wu+0.5Lr   CaseName=Wu   ScaleFactor=1
+   ComboName=1.2DL+Wu+0.5Lr   CaseName=Lr   ScaleFactor=0.5
+   ComboName=1.2DL+Wd+0.5Lr   ComboType="Linear Add"   AutoDesign=No   CaseName=SDL   ScaleFactor=1.2   SteelDesign=Strength   ConcDesign=None   AlumDesign=None   ColdDesign=None   GUID=fc4d4e63-6445-4fe1-b887-670b47069bf0
+   ComboName=1.2DL+Wd+0.5Lr   CaseName=CDL   ScaleFactor=1.2
+   ComboName=1.2DL+Wd+0.5Lr   CaseName=Wd   ScaleFactor=1
+   ComboName=1.2DL+Wd+0.5Lr   CaseName=Lr   ScaleFactor=0.5
+   ComboName=0.9DL+Wu   ComboType="Linear Add"   AutoDesign=No   CaseName=SDL   ScaleFactor=0.9   SteelDesign=Strength   ConcDesign=None   AlumDesign=None   ColdDesign=None   GUID=565e899a-73d0-4578-8c03-c68fbbec21db
+   ComboName=0.9DL+Wu   CaseName=CDL   ScaleFactor=0.9
+   ComboName=0.9DL+Wu   CaseName=Wu   ScaleFactor=1
+   ComboName=0.9DL+Wd   ComboType="Linear Add"   AutoDesign=No   CaseName=SDL   ScaleFactor=0.9   SteelDesign=Strength   ConcDesign=None   AlumDesign=None   ColdDesign=None   GUID=a3e79f4d-6ec2-476b-9b07-2520f20493bb
+   ComboName=0.9DL+Wd   CaseName=CDL   ScaleFactor=0.9
+   ComboName=0.9DL+Wd   CaseName=Wd   ScaleFactor=1
+   ComboName=DL   ComboType="Linear Add"   AutoDesign=No   CaseName=SDL   ScaleFactor=1   SteelDesign=Deflection   ConcDesign=None   AlumDesign=None   ColdDesign=None   GUID=fc867ad8-0f0b-49d1-a73e-05c20ce9fe78
+   ComboName=DL   CaseName=CDL   ScaleFactor=1
+   ComboName=DL+Lr   ComboType="Linear Add"   AutoDesign=No   CaseName=SDL   ScaleFactor=1   SteelDesign=Deflection   ConcDesign=None   AlumDesign=None   ColdDesign=None   GUID=56bbe8bc-3479-4ad5-a5fa-97a02d30753c
+   ComboName=DL+Lr   CaseName=CDL   ScaleFactor=1
+   ComboName=DL+Lr   CaseName=Lr   ScaleFactor=1
+   ComboName=DL+0.6Wu   ComboType="Linear Add"   AutoDesign=No   CaseName=SDL   ScaleFactor=1   SteelDesign=Deflection   ConcDesign=None   AlumDesign=None   ColdDesign=None   GUID=d6562ab9-1fe2-4de9-b891-d05c5e276ddb
+   ComboName=DL+0.6Wu   CaseName=CDL   ScaleFactor=1
+   ComboName=DL+0.6Wu   CaseName=Wu   ScaleFactor=0.6
+   ComboName=DL+0.6Wd   ComboType="Linear Add"   AutoDesign=No   CaseName=SDL   ScaleFactor=1   SteelDesign=Deflection   ConcDesign=None   AlumDesign=None   ColdDesign=None   GUID=b2d7d298-0b0c-4f29-9377-40cad358ee72
+   ComboName=DL+0.6Wd   CaseName=CDL   ScaleFactor=1
+   ComboName=DL+0.6Wd   CaseName=Wd   ScaleFactor=0.6
+   ComboName=DL+0.45Wu+0.75Lr   ComboType="Linear Add"   AutoDesign=No   CaseName=SDL   ScaleFactor=1   SteelDesign=Deflection   ConcDesign=None   AlumDesign=None   ColdDesign=None   GUID=ce004d3a-095f-49d8-a2bf-94b3f5f1fb70
+   ComboName=DL+0.45Wu+0.75Lr   CaseName=CDL   ScaleFactor=1
+   ComboName=DL+0.45Wu+0.75Lr   CaseName=Wu   ScaleFactor=0.45
+   ComboName=DL+0.45Wu+0.75Lr   CaseName=Lr   ScaleFactor=0.75
+   ComboName=DL+0.45Wd+0.75Lr   ComboType="Linear Add"   AutoDesign=No   CaseName=SDL   ScaleFactor=1   SteelDesign=Deflection   ConcDesign=None   AlumDesign=None   ColdDesign=None   GUID=7af99062-91ad-4ac2-8217-5b423945d5cd
+   ComboName=DL+0.45Wd+0.75Lr   CaseName=CDL   ScaleFactor=1
+   ComboName=DL+0.45Wd+0.75Lr   CaseName=Wd   ScaleFactor=0.45
+   ComboName=DL+0.45Wd+0.75Lr   CaseName=Lr   ScaleFactor=0.75
+   ComboName=0.6DL+0.6Wu   ComboType="Linear Add"   AutoDesign=No   CaseName=SDL   ScaleFactor=0.6   SteelDesign=Deflection   ConcDesign=None   AlumDesign=None   ColdDesign=None   GUID=48c301d4-ef80-4331-8529-f80e1b642a6a
+   ComboName=0.6DL+0.6Wu   CaseName=CDL   ScaleFactor=0.6
+   ComboName=0.6DL+0.6Wu   CaseName=Wu   ScaleFactor=0.6
+   ComboName=0.6DL+0.6Wd   ComboType="Linear Add"   AutoDesign=No   CaseName=SDL   ScaleFactor=0.6   SteelDesign=Deflection   ConcDesign=None   AlumDesign=None   ColdDesign=None   GUID=097ea6af-7707-4dc7-9ad1-dbd956321e9a
+   ComboName=0.6DL+0.6Wd   CaseName=CDL   ScaleFactor=0.6
+   ComboName=0.6DL+0.6Wd   CaseName=Wd   ScaleFactor=0.6
+   ComboName="ENV LRFD"   ComboType=Envelope   AutoDesign=No   CaseName=0.9DL+Wd   ScaleFactor=1   SteelDesign=None   ConcDesign=None   AlumDesign=None   ColdDesign=None   GUID=3054473a-4e08-491f-a672-f01ed12bb364
+   ComboName="ENV LRFD"   CaseName=0.9DL+Wu   ScaleFactor=1
+   ComboName="ENV LRFD"   CaseName=1.2DL+1.6Lr   ScaleFactor=1
+   ComboName="ENV LRFD"   CaseName=1.2DL+1.6Lr+0.5Wd   ScaleFactor=1
+   ComboName="ENV LRFD"   CaseName=1.2DL+1.6Lr+0.5Wu   ScaleFactor=1
+   ComboName="ENV LRFD"   CaseName=1.2DL+Wd+0.5Lr   ScaleFactor=1
+   ComboName="ENV LRFD"   CaseName=1.2DL+Wu+0.5Lr   ScaleFactor=1
+   ComboName="ENV LRFD"   CaseName=1.4DL   ScaleFactor=1
+   ComboName="ENV ASD"   ComboType=Envelope   AutoDesign=No   CaseName=0.6DL+0.6Wd   ScaleFactor=1   SteelDesign=None   ConcDesign=None   AlumDesign=None   ColdDesign=None   GUID=82d0aa92-872b-4db2-bf0a-6171d20f5310
+   ComboName="ENV ASD"   CaseName=0.6DL+0.6Wu   ScaleFactor=1
+   ComboName="ENV ASD"   CaseName=DL   ScaleFactor=1
+   ComboName="ENV ASD"   CaseName=DL+0.45Wd+0.75Lr   ScaleFactor=1
+   ComboName="ENV ASD"   CaseName=DL+0.45Wu+0.75Lr   ScaleFactor=1
+   ComboName="ENV ASD"   CaseName=DL+0.6Wd   ScaleFactor=1
+   ComboName="ENV ASD"   CaseName=DL+0.6Wu   ScaleFactor=1
+   ComboName="ENV ASD"   CaseName=DL+Lr   ScaleFactor=1
+ 
+TABLE:  "CONNECTIVITY - AREA"
+   Area=1   Joint1=1   Joint2=4   Joint3=5   Joint4=2   GUID=ffcba899-a1fb-4f41-9e67-7a4b2921c32d
+   Area=2   Joint1=4   Joint2=6   Joint3=5   GUID=a0ac393f-90a2-4e58-9cfc-d50497fbc857
+   Area=3   Joint1=6   Joint2=3   Joint3=2   Joint4=5   GUID=9a3e8b16-7b7e-453e-a684-fdc76dd5252e
+   Area=4   Joint1=3   Joint2=1   Joint3=2   GUID=62dec1ce-af40-49b1-a5ce-6ba7f8e17872
+ 
+TABLE:  "CONNECTIVITY - FRAME"
+   Frame=1   JointI=1   JointJ=2   IsCurved=No   GUID=71c4df5c-be2c-4e99-a80c-35371717e54d
+   Frame=2   JointI=3   JointJ=2   IsCurved=No   GUID=41c65f32-1cc5-4536-9ef7-658da6c00e8d
+   Frame=3   JointI=4   JointJ=5   IsCurved=No   GUID=0783e5dd-7cad-41a3-905d-32be0c6fe607
+   Frame=4   JointI=6   JointJ=5   IsCurved=No   GUID=bdf4b5a5-efec-4cfb-825f-6b3f02eb38d7
+   Frame=5   JointI=2   JointJ=5   IsCurved=No   GUID=6d3b221a-a6e8-4f15-81aa-31b65a5506e2
+   Frame=6   JointI=7   JointJ=8   IsCurved=No   GUID=d616285b-9eea-4574-885b-966154f43ae9
+   Frame=7   JointI=7   JointJ=10   IsCurved=No   GUID=79da4a3b-e9c6-408d-83fe-2ddb9dd93577
+   Frame=8   JointI=11   JointJ=12   IsCurved=No   GUID=9a8f604f-4c6a-496c-ba7f-3b51eb1a7de4
+   Frame=9   JointI=12   JointJ=13   IsCurved=No   GUID=fc1a7a26-d806-497d-9716-1f202891aad0
+   Frame=10   JointI=13   JointJ=14   IsCurved=No   GUID=15d03308-1931-42e6-8238-1890163adc37
+   Frame=11   JointI=14   JointJ=15   IsCurved=No   GUID=8e01e1e5-5d8e-42d4-b744-ec5b7910a7a6
+   Frame=12   JointI=15   JointJ=16   IsCurved=No   GUID=cd8009d3-6d25-48d9-b362-4bc09e0fa67d
+   Frame=13   JointI=16   JointJ=11   IsCurved=No   GUID=483fcdee-c7bf-44e5-b6ab-e483d5e057f2
+ 
+TABLE:  "COORDINATE SYSTEMS"
+   Name=GLOBAL   Type=Cartesian   X=0   Y=0   Z=0   AboutZ=0   AboutY=0   AboutX=0
+ 
+TABLE:  "DATABASE DOCUMENTATION"
+ 
+TABLE:  "DATABASE FORMAT TYPES"
+   UnitsCurr=Yes   OverrideE=No
+ 
+TABLE:  "FRAME AUTO MESH ASSIGNMENTS"
+   Frame=1   AutoMesh=Yes   AtJoints=Yes   AtFrames=Yes   NumSegments=15   MaxLength=0   MaxDegrees=0
+   Frame=2   AutoMesh=Yes   AtJoints=Yes   AtFrames=Yes   NumSegments=15   MaxLength=0   MaxDegrees=0
+   Frame=3   AutoMesh=Yes   AtJoints=Yes   AtFrames=Yes   NumSegments=15   MaxLength=0   MaxDegrees=0
+   Frame=4   AutoMesh=Yes   AtJoints=Yes   AtFrames=Yes   NumSegments=15   MaxLength=0   MaxDegrees=0
+   Frame=5   AutoMesh=Yes   AtJoints=Yes   AtFrames=Yes   NumSegments=15   MaxLength=0   MaxDegrees=0
+   Frame=6   AutoMesh=Yes   AtJoints=Yes   AtFrames=No   NumSegments=0   MaxLength=0   MaxDegrees=0
+   Frame=7   AutoMesh=Yes   AtJoints=Yes   AtFrames=No   NumSegments=0   MaxLength=0   MaxDegrees=0
+   Frame=8   AutoMesh=Yes   AtJoints=Yes   AtFrames=No   NumSegments=0   MaxLength=0   MaxDegrees=0
+   Frame=9   AutoMesh=Yes   AtJoints=Yes   AtFrames=No   NumSegments=0   MaxLength=0   MaxDegrees=0
+   Frame=10   AutoMesh=Yes   AtJoints=Yes   AtFrames=No   NumSegments=0   MaxLength=0   MaxDegrees=0
+   Frame=11   AutoMesh=Yes   AtJoints=Yes   AtFrames=No   NumSegments=0   MaxLength=0   MaxDegrees=0
+   Frame=12   AutoMesh=Yes   AtJoints=Yes   AtFrames=No   NumSegments=0   MaxLength=0   MaxDegrees=0
+   Frame=13   AutoMesh=Yes   AtJoints=Yes   AtFrames=No   NumSegments=0   MaxLength=0   MaxDegrees=0
+ 
+TABLE:  "FRAME DESIGN PROCEDURES"
+   Frame=1   DesignProc="From Material"
+   Frame=2   DesignProc="From Material"
+   Frame=3   DesignProc="From Material"
+   Frame=4   DesignProc="From Material"
+   Frame=5   DesignProc="From Material"
+   Frame=6   DesignProc="From Material"
+   Frame=7   DesignProc="From Material"
+   Frame=8   DesignProc="From Material"
+   Frame=9   DesignProc="From Material"
+   Frame=10   DesignProc="From Material"
+   Frame=11   DesignProc="From Material"
+   Frame=12   DesignProc="From Material"
+   Frame=13   DesignProc="From Material"
+ 
+TABLE:  "FRAME LOAD TRANSFER OPTIONS"
+   Frame=1   Transfer=Yes
+   Frame=2   Transfer=Yes
+   Frame=3   Transfer=Yes
+   Frame=4   Transfer=Yes
+   Frame=5   Transfer=Yes
+   Frame=6   Transfer=Yes
+   Frame=7   Transfer=Yes
+   Frame=8   Transfer=Yes
+   Frame=9   Transfer=Yes
+   Frame=10   Transfer=Yes
+   Frame=11   Transfer=Yes
+   Frame=12   Transfer=Yes
+   Frame=13   Transfer=Yes
+ 
+TABLE:  "FRAME OUTPUT STATION ASSIGNMENTS"
+   Frame=1   StationType=MinNumSta   MinNumSta=3   AddAtElmInt=Yes   AddAtPtLoad=Yes
+   Frame=2   StationType=MinNumSta   MinNumSta=3   AddAtElmInt=Yes   AddAtPtLoad=Yes
+   Frame=3   StationType=MinNumSta   MinNumSta=3   AddAtElmInt=Yes   AddAtPtLoad=Yes
+   Frame=4   StationType=MinNumSta   MinNumSta=3   AddAtElmInt=Yes   AddAtPtLoad=Yes
+   Frame=5   StationType=MaxStaSpcg   MaxStaSpcg=2   AddAtElmInt=Yes   AddAtPtLoad=Yes
+   Frame=6   StationType=MinNumSta   MinNumSta=3   AddAtElmInt=Yes   AddAtPtLoad=Yes
+   Frame=7   StationType=MinNumSta   MinNumSta=3   AddAtElmInt=Yes   AddAtPtLoad=Yes
+   Frame=8   StationType=MaxStaSpcg   MaxStaSpcg=2   AddAtElmInt=Yes   AddAtPtLoad=Yes
+   Frame=9   StationType=MaxStaSpcg   MaxStaSpcg=2   AddAtElmInt=Yes   AddAtPtLoad=Yes
+   Frame=10   StationType=MaxStaSpcg   MaxStaSpcg=2   AddAtElmInt=Yes   AddAtPtLoad=Yes
+   Frame=11   StationType=MaxStaSpcg   MaxStaSpcg=2   AddAtElmInt=Yes   AddAtPtLoad=Yes
+   Frame=12   StationType=MaxStaSpcg   MaxStaSpcg=2   AddAtElmInt=Yes   AddAtPtLoad=Yes
+   Frame=13   StationType=MaxStaSpcg   MaxStaSpcg=2   AddAtElmInt=Yes   AddAtPtLoad=Yes
+ 
+TABLE:  "FRAME PROPERTY MODIFIERS"
+   Frame=1   AMod=1   AS2Mod=1   AS3Mod=1   JMod=1   I22Mod=1   I33Mod=1   MassMod=1   WeightMod=1
+   Frame=2   AMod=1   AS2Mod=1   AS3Mod=1   JMod=1   I22Mod=1   I33Mod=1   MassMod=1   WeightMod=1
+   Frame=3   AMod=1   AS2Mod=1   AS3Mod=1   JMod=1   I22Mod=1   I33Mod=1   MassMod=1   WeightMod=1
+   Frame=4   AMod=1   AS2Mod=1   AS3Mod=1   JMod=1   I22Mod=1   I33Mod=1   MassMod=1   WeightMod=1
+   Frame=5   AMod=1   AS2Mod=1   AS3Mod=1   JMod=1   I22Mod=1   I33Mod=1   MassMod=1   WeightMod=1
+   Frame=6   AMod=1   AS2Mod=1   AS3Mod=1   JMod=1   I22Mod=1   I33Mod=1   MassMod=1   WeightMod=1
+   Frame=7   AMod=1   AS2Mod=1   AS3Mod=1   JMod=1   I22Mod=1   I33Mod=1   MassMod=1   WeightMod=1
+   Frame=8   AMod=1   AS2Mod=1   AS3Mod=1   JMod=1   I22Mod=1   I33Mod=1   MassMod=1   WeightMod=1
+   Frame=9   AMod=1   AS2Mod=1   AS3Mod=1   JMod=1   I22Mod=1   I33Mod=1   MassMod=1   WeightMod=1
+   Frame=10   AMod=1   AS2Mod=1   AS3Mod=1   JMod=1   I22Mod=1   I33Mod=1   MassMod=1   WeightMod=1
+   Frame=11   AMod=1   AS2Mod=1   AS3Mod=1   JMod=1   I22Mod=1   I33Mod=1   MassMod=1   WeightMod=1
+   Frame=12   AMod=1   AS2Mod=1   AS3Mod=1   JMod=1   I22Mod=1   I33Mod=1   MassMod=1   WeightMod=1
+   Frame=13   AMod=1   AS2Mod=1   AS3Mod=1   JMod=1   I22Mod=1   I33Mod=1   MassMod=1   WeightMod=1
+ 
+TABLE:  "FRAME RELEASE ASSIGNMENTS 1 - GENERAL"
+   Frame=6   PI=No   V2I=No   V3I=No   TI=Yes   M2I=Yes   M3I=Yes   PJ=No   V2J=No   V3J=No   TJ=No   M2J=Yes   M3J=Yes
+   Frame=7   PI=No   V2I=No   V3I=No   TI=Yes   M2I=Yes   M3I=Yes   PJ=No   V2J=No   V3J=No   TJ=No   M2J=Yes   M3J=Yes
+   Frame=8   PI=No   V2I=No   V3I=No   TI=Yes   M2I=Yes   M3I=Yes   PJ=No   V2J=No   V3J=No   TJ=No   M2J=Yes   M3J=Yes
+   Frame=9   PI=No   V2I=No   V3I=No   TI=Yes   M2I=Yes   M3I=Yes   PJ=No   V2J=No   V3J=No   TJ=No   M2J=Yes   M3J=Yes
+   Frame=10   PI=No   V2I=No   V3I=No   TI=Yes   M2I=Yes   M3I=Yes   PJ=No   V2J=No   V3J=No   TJ=No   M2J=Yes   M3J=Yes
+   Frame=11   PI=No   V2I=No   V3I=No   TI=Yes   M2I=Yes   M3I=Yes   PJ=No   V2J=No   V3J=No   TJ=No   M2J=Yes   M3J=Yes
+   Frame=12   PI=No   V2I=No   V3I=No   TI=Yes   M2I=Yes   M3I=Yes   PJ=No   V2J=No   V3J=No   TJ=No   M2J=Yes   M3J=Yes
+   Frame=13   PI=No   V2I=No   V3I=No   TI=Yes   M2I=Yes   M3I=Yes   PJ=No   V2J=No   V3J=No   TJ=No   M2J=Yes   M3J=Yes
+ 
+TABLE:  "FRAME SECTION ASSIGNMENTS"
+   Frame=1   AutoSelect=N.A.   AnalSect=W12X35   MatProp=Default
+   Frame=2   AutoSelect=N.A.   AnalSect=W12X35   MatProp=Default
+   Frame=3   AutoSelect=N.A.   AnalSect=W12X35   MatProp=Default
+   Frame=4   AutoSelect=N.A.   AnalSect=W12X35   MatProp=Default
+   Frame=5   AutoSelect=N.A.   AnalSect=W12X45   MatProp=Default
+   Frame=6   AutoSelect=N.A.   AnalSect=W8X24   MatProp=Default
+   Frame=7   AutoSelect=N.A.   AnalSect=W8X24   MatProp=Default
+   Frame=8   AutoSelect=N.A.   AnalSect=W8X24   MatProp=Default
+   Frame=9   AutoSelect=N.A.   AnalSect=W8X24   MatProp=Default
+   Frame=10   AutoSelect=N.A.   AnalSect=W8X24   MatProp=Default
+   Frame=11   AutoSelect=N.A.   AnalSect=W8X24   MatProp=Default
+   Frame=12   AutoSelect=N.A.   AnalSect=W8X24   MatProp=Default
+   Frame=13   AutoSelect=N.A.   AnalSect=W8X24   MatProp=Default
+ 
+TABLE:  "FRAME SECTION PROPERTIES 01 - GENERAL"
+   SectionName=W10X100   Material=A992Fy50   Shape="I/Wide Flange"   t3=0.925   t2=0.858333333333333   tf=0.0933333333333333   tw=0.0566666666666667   t2b=0.858333333333333   tfb=0.0933333333333333   FilletRadius=0   Area=0.203472222222222 _
+        TorsConst=0.000525655864197531   I33=0.0300443672839506   I22=0.00998263888888889   I23=0   AS2=0.0524166666666667   AS3=0.133518541666667   S33Top=0.0649608217592593   S33Bot=0.0649608217592593   S22Left=0.0232605208333333 _
+        S22Right=0.0232605208333333   Z33=0.0752314814814815   Z22=0.0353009259259259   R33=0.384263333333333   R22=0.221498166666667   CGOffset3=-5.55111512312578E-17   CGOffset2=5.55111512312578E-17   EccV2=0   EccV3=0 _
+        Cw=0.00172472457990398   Color=Green   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W10X100 _
+        FileName="c:\program files\computers and structures\sap2000 25\property libraries\sections\aisc16.xml"   GUID=4303563f-3f7f-40b6-a68f-93b005d151ee   Notes="Imported 3/6/2026 9:53:36 AM from AISC16.xml"
+   SectionName=W10X112   Material=A992Fy50   Shape="I/Wide Flange"   t3=0.95   t2=0.866666666666667   tf=0.104166666666667   tw=0.0629166666666667   t2b=0.866666666666667   tfb=0.104166666666667   FilletRadius=0   Area=0.228472222222222 _
+        TorsConst=0.000728202160493827   I33=0.0345293209876543   I22=0.0113811728395062   I23=-6.93889390390723E-18   AS2=0.0597708333333333   AS3=0.150462986111111   S33Top=0.072693287037037   S33Bot=0.072693287037037 _
+        S22Left=0.0262642476851852   S22Right=0.0262642476851852   Z33=0.0850694444444444   Z22=0.0400462962962963   R33=0.388756166666667   R22=0.223191083333333   CGOffset3=-5.55111512312578E-17   CGOffset2=-5.55111512312578E-17   EccV2=0 _
+        EccV3=0   Cw=0.00201608581961591   Color=Gray8Dark   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W10X112 _
+        FileName="c:\program files\computers and structures\sap2000 25\property libraries\sections\aisc16.xml"   GUID=cc441c68-3ee5-4530-b61e-1ca7fbf1976d   Notes="Imported 3/6/2026 9:53:36 AM from AISC16.xml"
+   SectionName=W10X12   Material=A992Fy50   Shape="I/Wide Flange"   t3=0.8225   t2=0.33   tf=0.0175   tw=0.0158333333333333   t2b=0.33   tfb=0.0175   FilletRadius=0   Area=0.0245833333333333   TorsConst=2.63792438271605E-06 _
+        I33=0.00259452160493827   I22=0.000105131172839506   I23=0   AS2=0.0130229166666667   AS3=0.009625   S33Top=0.00630886574074074   S33Bot=0.00630886574074074   S22Left=0.000637158564814815   S22Right=0.000637158564814815 _
+        Z33=0.00729166666666667   Z22=0.00100694444444444   R33=0.324869   R22=0.065395125   CGOffset3=2.77555756156289E-17   CGOffset2=-1.66533453693773E-16   EccV2=0   EccV3=0   Cw=1.70463070130315E-05   Color=Gray8Dark   FromFile=Yes _
+        AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W10X12   FileName="c:\program files\computers and structures\sap2000 25\property libraries\sections\aisc16.xml" _
+        GUID=d83fe35e-6bd0-41ec-b431-557db7de9987   Notes="Imported 3/6/2026 9:53:36 AM from AISC16.xml"
+   SectionName=W10X15   Material=A992Fy50   Shape="I/Wide Flange"   t3=0.8325   t2=0.333333333333333   tf=0.0225   tw=0.0191666666666667   t2b=0.333333333333333   tfb=0.0225   FilletRadius=0   Area=0.030625   TorsConst=5.01543209876543E-06 _
+        I33=0.0033227237654321   I22=0.000139371141975309   I23=4.33680868994202E-19   AS2=0.01595625   AS3=0.0125   S33Top=0.00798251736111111   S33Bot=0.00798251736111111   S22Left=0.000836226851851852   S22Right=0.000836226851851852 _
+        Z33=0.00925925925925926   Z22=0.00133101851851852   R33=0.329389   R22=0.0674603166666667   CGOffset3=-2.77555756156289E-17   CGOffset2=-1.66533453693773E-16   EccV2=0   EccV3=0   Cw=2.28735318072702E-05   Color=Blue   FromFile=Yes _
+        AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W10X15   FileName="c:\program files\computers and structures\sap2000 25\property libraries\sections\aisc16.xml" _
+        GUID=8dcd3a3c-aee2-4230-b7b4-0bff4138efd8   Notes="Imported 3/6/2026 9:53:36 AM from AISC16.xml"
+   SectionName=W10X17   Material=A992Fy50   Shape="I/Wide Flange"   t3=0.841666666666667   t2=0.334166666666667   tf=0.0275   tw=0.02   t2b=0.334166666666667   tfb=0.0275   FilletRadius=0   Area=0.0346527777777778 _
+        TorsConst=7.52314814814815E-06   I33=0.00394965277777778   I22=0.000171682098765432   I23=0   AS2=0.0168333333333333   AS3=0.0153159722222222   S33Top=0.0093853125   S33Bot=0.0093853125   S22Left=0.00102752372685185 _
+        S22Right=0.00102752372685185   Z33=0.0108217592592593   Z22=0.00162037037037037   R33=0.33760625   R22=0.0703871666666667   CGOffset3=2.77555756156289E-17   CGOffset2=-1.11022302462516E-16   EccV2=0   EccV3=0 _
+        Cw=2.84998178155007E-05   Color=Green   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W10X17 _
+        FileName="c:\program files\computers and structures\sap2000 25\property libraries\sections\aisc16.xml"   GUID=caa60353-ae68-4086-9668-e7577a458ed1   Notes="Imported 3/6/2026 9:53:36 AM from AISC16.xml"
+   SectionName=W10X19   Material=A992Fy50   Shape="I/Wide Flange"   t3=0.85   t2=0.335   tf=0.0329166666666667   tw=0.0208333333333333   t2b=0.335   tfb=0.0329166666666667   FilletRadius=0   Area=0.0390277777777778 _
+        TorsConst=1.12364969135802E-05   I33=0.00464409722222222   I22=0.000206886574074074   I23=0   AS2=0.0177083333333333   AS3=0.0183784722222222   S33Top=0.0109272858796296   S33Bot=0.0109272858796296   S22Left=0.00123514351851852 _
+        S22Right=0.00123514351851852   Z33=0.0125   Z22=0.00193865740740741   R33=0.344956   R22=0.072808025   CGOffset3=0   CGOffset2=1.11022302462516E-16   EccV2=0   EccV3=0   Cw=3.48293895747599E-05   Color=Cyan   FromFile=Yes   AMod=1 _
+        A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W10X19   FileName="c:\program files\computers and structures\sap2000 25\property libraries\sections\aisc16.xml" _
+        GUID=aea0e1f6-41b7-49ab-9251-f81e7c27ddc5   Notes="Imported 3/6/2026 9:53:36 AM from AISC16.xml"
+   SectionName=W10X22   Material=A992Fy50   Shape="I/Wide Flange"   t3=0.85   t2=0.479166666666667   tf=0.03   tw=0.02   t2b=0.479166666666667   tfb=0.03   FilletRadius=0   Area=0.0450694444444444   TorsConst=1.15258487654321E-05 _
+        I33=0.00569058641975309   I22=0.000549768518518519   I23=-8.67361737988404E-19   AS2=0.017   AS3=0.0239583333333333   S33Top=0.0133896122685185   S33Bot=0.0133896122685185   S22Left=0.00229468576388889   S22Right=0.00229468576388889 _
+        Z33=0.0150462962962963   Z22=0.00353009259259259   R33=0.3553345   R22=0.110445666666667   CGOffset3=2.77555756156289E-17   CGOffset2=1.11022302462516E-16   EccV2=0   EccV3=0   Cw=9.20969435871056E-05   Color=Red   FromFile=Yes _
+        AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W10X22   FileName="c:\program files\computers and structures\sap2000 25\property libraries\sections\aisc16.xml" _
+        GUID=8c250983-e9a0-4047-8949-b4b4c73f6b81   Notes="Imported 3/6/2026 9:53:36 AM from AISC16.xml"
+   SectionName=W10X26   Material=A992Fy50   Shape="I/Wide Flange"   t3=0.858333333333333   t2=0.480833333333333   tf=0.0366666666666667   tw=0.0216666666666667   t2b=0.480833333333333   tfb=0.0366666666666667   FilletRadius=0 _
+        Area=0.0528472222222222   TorsConst=1.93865740740741E-05   I33=0.00694444444444444   I22=0.000679976851851852   I23=-1.73472347597681E-18   AS2=0.0185972222222222   AS3=0.0293842569444444   S33Top=0.0161812268518519 _
+        S33Bot=0.0161812268518519   S22Left=0.00282832638888889   S22Right=0.00282832638888889   Z33=0.0181134259259259   Z22=0.00434027777777778   R33=0.36249975   R22=0.113432083333333   CGOffset3=0   CGOffset2=-1.66533453693773E-16 _
+        EccV2=0   EccV3=0   Cw=0.000115539801954733   Color=Magenta   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W10X26 _
+        FileName="c:\program files\computers and structures\sap2000 25\property libraries\sections\aisc16.xml"   GUID=75182044-c8a2-4013-9973-6a4d009e26fe   Notes="Imported 3/6/2026 9:53:36 AM from AISC16.xml"
+   SectionName=W10X30   Material=A992Fy50   Shape="I/Wide Flange"   t3=0.875   t2=0.484166666666667   tf=0.0425   tw=0.025   t2b=0.484166666666667   tfb=0.0425   FilletRadius=0   Area=0.0613888888888889   TorsConst=2.99961419753086E-05 _
+        I33=0.0081983024691358   I22=0.000805362654320988   I23=0   AS2=0.021875   AS3=0.0342951388888889   S33Top=0.0187389756944444   S33Bot=0.0187389756944444   S22Left=0.00332679918981481   S22Right=0.00332679918981481 _
+        Z33=0.0211805555555556   Z22=0.00511574074074074   R33=0.365440833333333   R22=0.114538333333333   CGOffset3=-2.77555756156289E-17   CGOffset2=-5.55111512312578E-17   EccV2=0   EccV3=0   Cw=0.000138647762345679   Color=Yellow _
+        FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W10X30   FileName="c:\program files\computers and structures\sap2000 25\property libraries\sections\aisc16.xml" _
+        GUID=2e8aa4aa-6f21-49c2-8956-45fe6df9e926   Notes="Imported 3/6/2026 9:53:36 AM from AISC16.xml"
+   SectionName=W10X33   Material=A992Fy50   Shape="I/Wide Flange"   t3=0.810833333333333   t2=0.663333333333333   tf=0.03625   tw=0.0241666666666667   t2b=0.663333333333333   tfb=0.03625   FilletRadius=0   Area=0.0674305555555556 _
+        TorsConst=2.81153549382716E-05   I33=0.00824652777777778   I22=0.0017650462962963   I23=-3.46944695195361E-18   AS2=0.0195951388888889   AS3=0.0400763888888889   S33Top=0.0203408680555556   S33Bot=0.0203408680555556 _
+        S22Left=0.00532174768518519   S22Right=0.00532174768518519   Z33=0.0224537037037037   Z22=0.00810185185185185   R33=0.349709333333333   R22=0.16178925   CGOffset3=5.55111512312578E-17   CGOffset2=-1.11022302462516E-16   EccV2=0 _
+        EccV3=0   Cw=0.000264904299554184   Color=Gray8Dark   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W10X33 _
+        FileName="c:\program files\computers and structures\sap2000 25\property libraries\sections\aisc16.xml"   GUID=5e4887f1-4860-43c2-93f7-c5eff9a8688c   Notes="Imported 3/6/2026 9:53:36 AM from AISC16.xml"
+   SectionName=W10X39   Material=A992Fy50   Shape="I/Wide Flange"   t3=0.826666666666667   t2=0.665833333333333   tf=0.0441666666666667   tw=0.02625   t2b=0.665833333333333   tfb=0.0441666666666667   FilletRadius=0   Area=0.0798611111111111 _
+        TorsConst=4.70679012345679E-05   I33=0.0100790895061728   I22=0.00217013888888889   I23=8.67361737988404E-18   AS2=0.0217   AS3=0.0490127291666667   S33Top=0.0243848958333333   S33Bot=0.0243848958333333   S22Left=0.00651856481481481 _
+        S22Right=0.00651856481481481   Z33=0.0270833333333333   Z22=0.0099537037037037   R33=0.35525725   R22=0.164845083333333   CGOffset3=-1.66533453693773E-16   CGOffset2=1.66533453693773E-16   EccV2=0   EccV3=0   Cw=0.000332218792866941 _
+        Color=Blue   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W10X39   FileName="c:\program files\computers and structures\sap2000 25\property libraries\sections\aisc16.xml" _
+        GUID=73553a1d-e6ae-46cc-bc9a-009dd9d03031   Notes="Imported 3/6/2026 9:53:36 AM from AISC16.xml"
+   SectionName=W10X45   Material=A992Fy50   Shape="I/Wide Flange"   t3=0.841666666666667   t2=0.668333333333333   tf=0.0516666666666667   tw=0.0291666666666667   t2b=0.668333333333333   tfb=0.0516666666666667   FilletRadius=0 _
+        Area=0.0923611111111111   TorsConst=7.28202160493827E-05   I33=0.0119598765432099   I22=0.00257523148148148   I23=1.73472347597681E-18   AS2=0.0245486111111111   AS3=0.0575509236111111   S33Top=0.0284195081018519 _
+        S33Bot=0.0284195081018519   S22Left=0.00770642939814815   S22Right=0.00770642939814815   Z33=0.0317708333333333   Z22=0.0117476851851852   R33=0.35984775   R22=0.166979666666667   CGOffset3=-5.55111512312578E-17   CGOffset2=0 _
+        EccV2=0   EccV3=0   Cw=0.000401877572016461   Color=Green   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W10X45 _
+        FileName="c:\program files\computers and structures\sap2000 25\property libraries\sections\aisc16.xml"   GUID=8cdc7307-09e4-4cc9-9108-2041482de640   Notes="Imported 3/6/2026 9:53:36 AM from AISC16.xml"
+   SectionName=W10X49   Material=A992Fy50   Shape="I/Wide Flange"   t3=0.833333333333333   t2=0.833333333333333   tf=0.0466666666666667   tw=0.0283333333333333   t2b=0.833333333333333   tfb=0.0466666666666667   FilletRadius=0   Area=0.1 _
+        TorsConst=6.70331790123457E-05   I33=0.0131172839506173   I22=0.00450424382716049   I23=3.46944695195361E-18   AS2=0.0236111111111111   AS3=0.0648148125   S33Top=0.0314814814814815   S33Bot=0.0314814814814815 _
+        S22Left=0.0108101851851852   S22Right=0.0108101851851852   Z33=0.0349537037037037   Z22=0.0163773148148148   R33=0.362177916666667   R22=0.212232   CGOffset3=0   CGOffset2=5.55111512312578E-17   EccV2=0   EccV3=0 _
+        Cw=0.000693238811728395   Color=Cyan   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W10X49 _
+        FileName="c:\program files\computers and structures\sap2000 25\property libraries\sections\aisc16.xml"   GUID=8a03337a-3d0d-4d96-9220-9ed1e4d309b5   Notes="Imported 3/6/2026 9:53:36 AM from AISC16.xml"
+   SectionName=W10X54   Material=A992Fy50   Shape="I/Wide Flange"   t3=0.841666666666667   t2=0.833333333333333   tf=0.05125   tw=0.0308333333333333   t2b=0.833333333333333   tfb=0.05125   FilletRadius=0   Area=0.109722222222222 _
+        TorsConst=8.77700617283951E-05   I33=0.0146122685185185   I22=0.00496720679012346   I23=-3.46944695195361E-18   AS2=0.0259513888888889   AS3=0.0711805555555556   S33Top=0.0347222222222222   S33Bot=0.0347222222222222 _
+        S22Left=0.0119212962962963   S22Right=0.0119212962962963   Z33=0.0385416666666667   Z22=0.0181134259259259   R33=0.364931666666667   R22=0.21276925   CGOffset3=5.55111512312578E-17   CGOffset2=0   EccV2=0   EccV3=0 _
+        Cw=0.000776963305898491   Color=Red   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W10X54 _
+        FileName="c:\program files\computers and structures\sap2000 25\property libraries\sections\aisc16.xml"   GUID=43578e7f-ed60-4b56-926f-c55130b5db84   Notes="Imported 3/6/2026 9:53:36 AM from AISC16.xml"
+   SectionName=W10X60   Material=A992Fy50   Shape="I/Wide Flange"   t3=0.85   t2=0.841666666666667   tf=0.0566666666666667   tw=0.035   t2b=0.841666666666667   tfb=0.0566666666666667   FilletRadius=0   Area=0.122916666666667 _
+        TorsConst=0.000119598765432099   I33=0.0164448302469136   I22=0.00559413580246914   I23=6.93889390390723E-18   AS2=0.02975   AS3=0.0794907638888889   S33Top=0.0386937210648148   S33Bot=0.0386937210648148   S22Left=0.0132929976851852 _
+        S22Right=0.0132929976851852   Z33=0.0431712962962963   Z22=0.0202546296296296   R33=0.365771   R22=0.2133345   CGOffset3=-5.55111512312578E-17   CGOffset2=-1.11022302462516E-16   EccV2=0   EccV3=0   Cw=0.000884130658436214 _
+        Color=Magenta   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W10X60   FileName="c:\program files\computers and structures\sap2000 25\property libraries\sections\aisc16.xml" _
+        GUID=fc6eb668-bf9a-4d5b-96e0-33e58ef18a2a   Notes="Imported 3/6/2026 9:53:36 AM from AISC16.xml"
+   SectionName=W10X68   Material=A992Fy50   Shape="I/Wide Flange"   t3=0.866666666666667   t2=0.841666666666667   tf=0.0641666666666667   tw=0.0391666666666667   t2b=0.841666666666667   tfb=0.0641666666666667   FilletRadius=0 _
+        Area=0.138194444444444   TorsConst=0.000171682098765432   I33=0.0190007716049383   I22=0.00646219135802469   I23=-3.46944695195361E-18   AS2=0.0339444444444444   AS3=0.0900115972222222   S33Top=0.0438479340277778 _
+        S33Bot=0.0438479340277778   S22Left=0.0153557002314815   S22Right=0.0153557002314815   Z33=0.0493634259259259   Z22=0.0232060185185185   R33=0.3708005   R22=0.21624425   CGOffset3=-5.55111512312578E-17 _
+        CGOffset2=5.55111512312578E-17   EccV2=0   EccV3=0   Cw=0.00103818372770919   Color=Yellow   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W10X68 _
+        FileName="c:\program files\computers and structures\sap2000 25\property libraries\sections\aisc16.xml"   GUID=9ab01403-620c-4f12-8f7f-e73ece43840d   Notes="Imported 3/6/2026 9:53:36 AM from AISC16.xml"
+   SectionName=W10X77   Material=A992Fy50   Shape="I/Wide Flange"   t3=0.883333333333333   t2=0.85   tf=0.0725   tw=0.0441666666666667   t2b=0.85   tfb=0.0725   FilletRadius=0   Area=0.157638888888889   TorsConst=0.000246431327160494 _
+        I33=0.0219425154320988   I22=0.0074266975308642   I23=-6.93889390390723E-18   AS2=0.0390138888888889   AS3=0.102708333333333   S33Top=0.0496811689814815   S33Bot=0.0496811689814815   S22Left=0.0174745833333333 _
+        S22Right=0.0174745833333333   Z33=0.0564814814814815   Z22=0.0265625   R33=0.373088166666667   R22=0.217053166666667   CGOffset3=0   CGOffset2=-5.55111512312578E-17   EccV2=0   EccV3=0   Cw=0.00121567965534979   Color=Gray8Dark _
+        FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W10X77   FileName="c:\program files\computers and structures\sap2000 25\property libraries\sections\aisc16.xml" _
+        GUID=990f9b82-2b3e-49b9-a2a1-727a65a07de4   Notes="Imported 3/6/2026 9:53:36 AM from AISC16.xml"
+   SectionName=W10X88   Material=A992Fy50   Shape="I/Wide Flange"   t3=0.9   t2=0.858333333333333   tf=0.0825   tw=0.0504166666666667   t2b=0.858333333333333   tfb=0.0825   FilletRadius=0   Area=0.180555555555556 _
+        TorsConst=0.000363136574074074   I33=0.0257523148148148   I22=0.00863233024691358   I23=6.93889390390723E-18   AS2=0.045375   AS3=0.118020833333333   S33Top=0.0572273668981481   S33Bot=0.0572273668981481   S22Left=0.0201141666666667 _
+        S22Right=0.0201141666666667   Z33=0.0653935185185185   Z22=0.0307291666666667   R33=0.3776615   R22=0.218654583333333   CGOffset3=0   CGOffset2=-5.55111512312578E-17   EccV2=0   EccV3=0   Cw=0.00145010823902606   Color=Blue _
+        FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W10X88   FileName="c:\program files\computers and structures\sap2000 25\property libraries\sections\aisc16.xml" _
+        GUID=a1877731-df0b-4dd2-af18-a31faa987ecf   Notes="Imported 3/6/2026 9:53:36 AM from AISC16.xml"
+   SectionName=W12X106   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.075   t2=1.01666666666667   tf=0.0825   tw=0.0508333333333333   t2b=1.01666666666667   tfb=0.0825   FilletRadius=0.05   Area=0.216666666666667 _
+        TorsConst=0.000440297067901235   I33=0.044994212962963   I22=0.0145158179012346   I23=2.08166817117217E-17   AS2=0.0546458333333333   AS3=0.139791666666667   S33Top=0.0837101851851852   S33Bot=0.0837101851851852 _
+        S22Left=0.0285557060185185   S22Right=0.0285557060185185   Z33=0.0949074074074074   Z22=0.0434606481481481   R33=0.455703416666667   R22=0.258836   CGOffset3=-1.11022302462516E-16   CGOffset2=2.22044604925031E-16   EccV2=0   EccV3=0 _
+        Cw=0.00355827485459165   Color=Yellow   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W12X106 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=e0273634-b705-4500-95e8-12c329a7bd7e   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W12X120   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.09166666666667   t2=1.025   tf=0.0925   tw=0.0591666666666667   t2b=1.025   tfb=0.0925   FilletRadius=0.0491666666666667   Area=0.244444444444444 _
+        TorsConst=0.000622106481481482   I33=0.0516010802469136   I22=0.0166377314814815   I23=-2.77555756156289E-17   AS2=0.0645902777777778   AS3=0.158020833333333   S33Top=0.0945363425925926   S33Bot=0.0945363425925926 _
+        S22Left=0.0324638657407407   S22Right=0.0324638657407407   Z33=0.107638888888889   Z22=0.0494212962962963   R33=0.459451083333333   R22=0.26088975   CGOffset3=0   CGOffset2=0   EccV2=0   EccV3=0   Cw=0.00414360130623938 _
+        Color=Gray8Dark   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W12X120   FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml" _
+        GUID=fdef9ed3-b2e9-40ff-88f6-9448a730bd0c   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W12X136   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.11666666666667   t2=1.03333333333333   tf=0.104166666666667   tw=0.0658333333333333   t2b=1.03333333333333   tfb=0.104166666666667   FilletRadius=0.05 _
+        Area=0.277083333333333   TorsConst=0.000892168209876543   I33=0.0597993827160494   I22=0.0191936728395062   I23=2.77555756156289E-17   AS2=0.0735138888888889   AS3=0.179398125   S33Top=0.107103356481481   S33Bot=0.107103356481481 _
+        S22Left=0.0371490451388889   S22Right=0.0371490451388889   Z33=0.123842592592593   Z22=0.056712962962963   R33=0.464561416666667   R22=0.263192666666667   CGOffset3=1.11022302462516E-16   CGOffset2=3.33066907387547E-16   EccV2=0 _
+        EccV3=0   Cw=0.00490940551757813   Color=Blue   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W12X136 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=06339311-81f2-40b9-a731-cee491c4f40f   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W12X14   Material=A992Fy50   Shape="I/Wide Flange"   t3=0.991666666666667   t2=0.330833333333333   tf=0.01875   tw=0.0166666666666667   t2b=0.330833333333333   tfb=0.01875   FilletRadius=0.025   Area=0.0288888888888889 _
+        TorsConst=3.39506172839506E-06   I33=0.00427276234567901   I22=0.000113811728395062   I23=1.30104260698261E-18   AS2=0.0165277777777778   AS3=0.0103385416666667   S33Top=0.00861733796296296   S33Bot=0.00861733796296296 _
+        S22Left=0.000688030671296296   S22Right=0.000688030671296296   Z33=0.0100694444444444   Z22=0.00109953703703704   R33=0.384582   R22=0.062766525   CGOffset3=-5.55111512312578E-17   CGOffset2=3.88578058618805E-16   EccV2=0   EccV3=0 _
+        Cw=2.67774427139161E-05   Color=Cyan   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W12X14 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=6e42ec7c-dbb2-4a74-b5d0-07474ff3eba4   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W12X152   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.14166666666667   t2=1.04166666666667   tf=0.116666666666667   tw=0.0725   t2b=1.04166666666667   tfb=0.116666666666667   FilletRadius=0.05   Area=0.310416666666667 _
+        TorsConst=0.00124421296296296   I33=0.0689621913580247   I22=0.0218942901234568   I23=2.77555756156289E-17   AS2=0.0827708333333333   AS3=0.202546319444444   S33Top=0.120809664351852   S33Bot=0.120809664351852 _
+        S22Left=0.042037037037037   S22Right=0.042037037037037   Z33=0.140625   Z22=0.0642361111111111   R33=0.471338583333333   R22=0.2655785   CGOffset3=0   CGOffset2=3.33066907387547E-16   EccV2=0   EccV3=0   Cw=0.00577257493886437 _
+        Color=Green   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W12X152   FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml" _
+        GUID=a6817657-55cc-4367-a402-f305c4a7fc64   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W12X16   Material=A992Fy50   Shape="I/Wide Flange"   t3=1   t2=0.3325   tf=0.0220833333333333   tw=0.0183333333333333   t2b=0.3325   tfb=0.0220833333333333   FilletRadius=0.025   Area=0.0327083333333333 _
+        TorsConst=4.96720679012346E-06   I33=0.00496720679012346   I22=0.00013599537037037   I23=0   AS2=0.0183333333333333   AS3=0.0122378472222222   S33Top=0.00993441550925926   S33Bot=0.00993441550925926   S22Left=0.000818017361111111 _
+        S22Right=0.000818017361111111   Z33=0.0116319444444444   Z22=0.00130787037037037   R33=0.389696916666667   R22=0.0644811583333333   CGOffset3=-2.77555756156289E-17   CGOffset2=1.11022302462516E-16   EccV2=0   EccV3=0 _
+        Cw=3.2346852700516E-05   Color=Red   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W12X16 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=329eb976-fe31-427f-81ec-44b0324a985d   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W12X170   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.16666666666667   t2=1.05   tf=0.13   tw=0.08   t2b=1.05   tfb=0.13   FilletRadius=0.05   Area=0.347222222222222   TorsConst=0.00171682098765432 _
+        I33=0.0795717592592593   I22=0.0249324845679012   I23=4.16333634234434E-17   AS2=0.0933333333333333   AS3=0.2275   S33Top=0.136408738425926   S33Bot=0.136408738425926   S22Left=0.0474904456018519   S22Right=0.0474904456018519 _
+        Z33=0.159143518518519   Z22=0.0729166666666667   R33=0.478713583333333   R22=0.267965583333333   CGOffset3=-2.22044604925031E-16   CGOffset2=1.11022302462516E-16   EccV2=0   EccV3=0   Cw=0.006738733421875   Color=Cyan   FromFile=Yes _
+        AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W12X170   FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml" _
+        GUID=54081742-1a2f-4d0f-9ac6-906447517956   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W12X19   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.01666666666667   t2=0.334166666666667   tf=0.0291666666666667   tw=0.0195833333333333   t2b=0.334166666666667   tfb=0.0291666666666667   FilletRadius=0.025 _
+        Area=0.0386805555555556   TorsConst=8.68055555555556E-06   I33=0.00626929012345679   I22=0.000181327160493827   I23=8.67361737988404E-19   AS2=0.0199097222222222   AS3=0.0162442152777778   S33Top=0.0123330324074074 _
+        S33Bot=0.0123330324074074   S22Left=0.00108525   S22Right=0.00108525   Z33=0.0142939814814815   Z22=0.00172453703703704   R33=0.402589833333333   R22=0.0684676   CGOffset3=2.77555756156289E-17   CGOffset2=1.11022302462516E-16 _
+        EccV2=0   EccV3=0   Cw=4.42220778616289E-05   Color=Magenta   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W12X19 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=a0f24779-c771-408f-8ac2-b14f2f7ea16f   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W12X190   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.2   t2=1.05833333333333   tf=0.145   tw=0.0883333333333333   t2b=1.05833333333333   tfb=0.145   FilletRadius=0.0491666666666667   Area=0.388888888888889 _
+        TorsConst=0.00235339506172839   I33=0.0911458333333333   I22=0.0284047067901235   I23=9.71445146547012E-17   AS2=0.106   AS3=0.255763888888889   S33Top=0.151909722222222   S33Bot=0.151909722222222   S22Left=0.0536781886574074 _
+        S22Right=0.0536781886574074   Z33=0.179976851851852   Z22=0.0827546296296296   R33=0.484122916666667   R22=0.270260333333333   CGOffset3=-2.22044604925031E-16   CGOffset2=3.33066907387547E-16   EccV2=0   EccV3=0 _
+        Cw=0.00797129908958755   Color=Red   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W12X190 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=fb5597b7-488b-457c-85f5-6ce1d47b847b   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W12X210   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.225   t2=1.06666666666667   tf=0.158333333333333   tw=0.0983333333333333   t2b=1.06666666666667   tfb=0.158333333333333   FilletRadius=0.05   Area=0.429166666666667 _
+        TorsConst=0.0031201774691358   I33=0.103202160493827   I22=0.0320216049382716   I23=2.77555756156289E-17   AS2=0.120458333333333   AS3=0.281481458333333   S33Top=0.168493344907407   S33Bot=0.168493344907407 _
+        S22Left=0.0600405092592593   S22Right=0.0600405092592593   Z33=0.201388888888889   Z22=0.0920138888888889   R33=0.4903785   R22=0.273154583333333   CGOffset3=-1.11022302462516E-16   CGOffset2=2.22044604925031E-16   EccV2=0   EccV3=0 _
+        Cw=0.00910971376314586   Color=Magenta   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W12X210 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=1301e23e-3a9e-4d9e-94d0-114ead083720   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W12X22   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.025   t2=0.335833333333333   tf=0.0354166666666667   tw=0.0216666666666667   t2b=0.335833333333333   tfb=0.0354166666666667   FilletRadius=0.025   Area=0.045 _
+        TorsConst=1.41300154320988E-05   I33=0.00752314814814815   I22=0.000224729938271605   I23=0   AS2=0.0222083333333333   AS3=0.0198234930555556   S33Top=0.0146793113425926   S33Bot=0.0146793113425926   S22Left=0.00133834201388889 _
+        S22Right=0.00133834201388889   Z33=0.0169560185185185   Z22=0.00211805555555556   R33=0.408877833333333   R22=0.0706682333333333   CGOffset3=-2.77555756156289E-17   CGOffset2=0   EccV2=0   EccV3=0   Cw=5.47359407927874E-05 _
+        Color=Yellow   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W12X22   FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml" _
+        GUID=46634e39-eed4-4c12-b2e3-1b03e41e3371   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W12X230   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.25833333333333   t2=1.075   tf=0.1725   tw=0.1075   t2b=1.075   tfb=0.1725   FilletRadius=0.05   Area=0.470138888888889   TorsConst=0.00404128086419753 _
+        I33=0.11670524691358   I22=0.0357831790123457   I23=0   AS2=0.135270833333333   AS3=0.3090625   S33Top=0.185491782407407   S33Bot=0.185491782407407   S22Left=0.0665733796296296   S22Right=0.0665733796296296   Z33=0.22337962962963 _
+        Z22=0.102430555555556   R33=0.498232583333333   R22=0.275883916666667   CGOffset3=1.11022302462516E-16   CGOffset2=-2.22044604925031E-16   EccV2=0   EccV3=0   Cw=0.0105276051966315   Color=Yellow   FromFile=Yes   AMod=1   A2Mod=1 _
+        A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W12X230   FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=111830f3-9ead-40a3-a82e-bb83a416eed5   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W12X252   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.28333333333333   t2=1.08333333333333   tf=0.1875   tw=0.116666666666667   t2b=1.08333333333333   tfb=0.1875   FilletRadius=0.05   Area=0.514583333333333 _
+        TorsConst=0.00520833333333333   I33=0.131172839506173   I22=0.0399305555555556   I23=2.77555756156289E-17   AS2=0.149722222222222   AS3=0.338541666666667   S33Top=0.204425231481481   S33Bot=0.204425231481481 _
+        S22Left=0.0737179398148148   S22Right=0.0737179398148148   Z33=0.247685185185185   Z22=0.113425925925926   R33=0.504886916666667   R22=0.278563916666667   CGOffset3=0   CGOffset2=1.11022302462516E-16   EccV2=0   EccV3=0 _
+        Cw=0.0119279377156324   Color=Gray8Dark   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W12X252 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=3303ac7f-03c8-4e60-9326-55401ad08b3a   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W12X26   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.01666666666667   t2=0.540833333333333   tf=0.0316666666666667   tw=0.0191666666666667   t2b=0.540833333333333   tfb=0.0316666666666667   FilletRadius=0.025 _
+        Area=0.053125   TorsConst=1.44675925925926E-05   I33=0.00983796296296296   I22=0.000834297839506173   I23=8.67361737988404E-19   AS2=0.0194861111111111   AS3=0.0285439791666667   S33Top=0.0193533680555556   S33Bot=0.0193533680555556 _
+        S22Left=0.00308523090277778   S22Right=0.00308523090277778   Z33=0.0215277777777778   Z22=0.00472800925925926   R33=0.4303315   R22=0.125317333333333   CGOffset3=5.55111512312578E-17   CGOffset2=-3.33066907387547E-16   EccV2=0 _
+        EccV3=0   Cw=0.000202513473215442   Color=Gray8Dark   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W12X26 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=58dc1dad-ec1c-4f9b-a8f3-1d3bc4813ce9   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W12X279   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.325   t2=1.09166666666667   tf=0.205833333333333   tw=0.1275   t2b=1.09166666666667   tfb=0.205833333333333   FilletRadius=0.05   Area=0.56875 _
+        TorsConst=0.00689621913580247   I33=0.149980709876543   I22=0.0451871141975309   I23=1.38777878078145E-16   AS2=0.1689375   AS3=0.374502291666667   S33Top=0.22638599537037   S33Bot=0.22638599537037   S22Left=0.0827855324074074 _
+        S22Right=0.0827855324074074   Z33=0.278356481481481   Z22=0.127314814814815   R33=0.513519583333333   R22=0.2818685   CGOffset3=-3.33066907387547E-16   CGOffset2=2.22044604925031E-16   EccV2=0   EccV3=0   Cw=0.0139753968005546 _
+        Color=Blue   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W12X279   FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml" _
+        GUID=1575926b-31ac-4cf4-bdb6-99fcc2127c06   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W12X30   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.025   t2=0.543333333333333   tf=0.0366666666666667   tw=0.0216666666666667   t2b=0.543333333333333   tfb=0.0366666666666667   FilletRadius=0.025 _
+        Area=0.0610416666666667   TorsConst=2.20389660493827E-05   I33=0.0114776234567901   I22=0.000978973765432099   I23=0   AS2=0.0222083333333333   AS3=0.0332037013888889   S33Top=0.0223953645833333   S33Bot=0.0223953645833333 _
+        S22Left=0.00360358449074074   S22Right=0.00360358449074074   Z33=0.0249421296296296   Z22=0.00553240740740741   R33=0.4336235   R22=0.126640416666667   CGOffset3=5.55111512312578E-17   CGOffset2=-2.22044604925031E-16   EccV2=0 _
+        EccV3=0   Cw=0.000239368017973151   Color=Blue   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W12X30 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=7c5df8ad-4ce4-4289-9d9d-4bc3765df0ab   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W12X305   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.35833333333333   t2=1.1   tf=0.225833333333333   tw=0.135833333333333   t2b=1.1   tfb=0.225833333333333   FilletRadius=0.0491666666666666   Area=0.621527777777778 _
+        TorsConst=0.00892168209876543   I33=0.171199845679012   I22=0.0506365740740741   I23=8.32667268468867E-17   AS2=0.184506944444444   AS3=0.414027777777778   S33Top=0.2520734375   S33Bot=0.2520734375   S22Left=0.0920664930555556 _
+        S22Right=0.0920664930555556   Z33=0.310763888888889   Z22=0.141203703703704   R33=0.524833333333333   R22=0.2854315   CGOffset3=1.11022302462516E-16   CGOffset2=1.11022302462516E-16   EccV2=0   EccV3=0   Cw=0.0160631709003906 _
+        Color=Green   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W12X305   FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml" _
+        GUID=94d4dfff-bc32-4815-9257-f10f5519f2fd   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W12X336   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.4   t2=1.11666666666667   tf=0.246666666666667   tw=0.148333333333333   t2b=1.11666666666667   tfb=0.246666666666667   FilletRadius=0.0491666666666667 _
+        Area=0.686805555555556   TorsConst=0.01171875   I33=0.19579475308642   I22=0.0573881172839506   I23=0   AS2=0.207666666666667   AS3=0.459074097222222   S33Top=0.279706770833333   S33Bot=0.279706770833333   S22Left=0.102784664351852 _
+        S22Right=0.102784664351852   Z33=0.348958333333333   Z22=0.158564814814815   R33=0.533929166666667   R22=0.289064083333333   CGOffset3=-2.22044604925031E-16   CGOffset2=-1.11022302462516E-16   EccV2=0   EccV3=0 _
+        Cw=0.0190361697301669   Color=Cyan   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W12X336 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=994b3a77-764a-464b-8bc0-4d8054f79814   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W12X35   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.04166666666667   t2=0.546666666666667   tf=0.0433333333333333   tw=0.025   t2b=0.546666666666667   tfb=0.0433333333333333   FilletRadius=0.025 _
+        Area=0.0715277777777778   TorsConst=3.57349537037037E-05   I33=0.013744212962963   I22=0.0011815200617284   I23=-1.73472347597681E-18   AS2=0.0260416666666667   AS3=0.0394814791666667   S33Top=0.0263888888888889 _
+        S33Bot=0.0263888888888889   S22Left=0.00432263425925926   S22Right=0.00432263425925926   Z33=0.0296296296296296   Z22=0.00665509259259259   R33=0.438351583333333   R22=0.128523666666667   CGOffset3=5.55111512312578E-17 _
+        CGOffset2=-1.11022302462516E-16   EccV2=0   EccV3=0   Cw=0.000293988119225423   Color=Green   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W12X35 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=bbea8e41-b875-4533-82f9-fe8496e77f8c   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W12X40   Material=A992Fy50   Shape="I/Wide Flange"   t3=0.991666666666667   t2=0.6675   tf=0.0429166666666667   tw=0.0245833333333333   t2b=0.6675   tfb=0.0429166666666667   FilletRadius=0.0420833333333333   Area=0.08125 _
+        TorsConst=4.36921296296296E-05   I33=0.0148051697530864   I22=0.00212673611111111   I23=5.20417042793042E-18   AS2=0.0243784722222222   AS3=0.0477447916666667   S33Top=0.0298591666666667   S33Bot=0.0298591666666667 _
+        S22Left=0.00637224537037037   S22Right=0.00637224537037037   Z33=0.0329861111111111   Z22=0.00972222222222222   R33=0.426869416666667   R22=0.161787583333333   CGOffset3=-5.55111512312578E-17   CGOffset2=2.22044604925031E-16 _
+        EccV2=0   EccV3=0   Cw=0.000478709591541675   Color=Cyan   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W12X40 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=82a6a8d0-b9de-48f1-b7b0-7b3edd06c204   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W12X45   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.00833333333333   t2=0.670833333333333   tf=0.0479166666666667   tw=0.0279166666666667   t2b=0.670833333333333   tfb=0.0479166666666667 _
+        FilletRadius=0.0420833333333333   Area=0.0909722222222222   TorsConst=6.07638888888889E-05   I33=0.0167824074074074   I22=0.00241126543209877   I23=-3.46944695195361E-18   AS2=0.0281493055555556   AS3=0.0535734930555556 _
+        S33Top=0.0332874189814815   S33Bot=0.0332874189814815   S22Left=0.00718886574074074   S22Right=0.00718886574074074   Z33=0.0371527777777778   Z22=0.0109953703703704   R33=0.429509416666667   R22=0.162805166666667 _
+        CGOffset3=-1.11022302462516E-16   CGOffset2=-1.11022302462516E-16   EccV2=0   EccV3=0   Cw=0.00055595371409816   Color=Red   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1 _
+        SectInFile=W12X45   FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=99f71bcb-c59a-498c-8e31-4b683cadc4cd   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W12X50   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.01666666666667   t2=0.673333333333333   tf=0.0533333333333333   tw=0.0308333333333333   t2b=0.673333333333333   tfb=0.0533333333333333 _
+        FilletRadius=0.0416666666666667   Area=0.101388888888889   TorsConst=8.24652777777778E-05   I33=0.0188560956790123   I22=0.00271508487654321   I23=-1.73472347597681E-17   AS2=0.0313472222222222   AS3=0.0598518541666667 _
+        S33Top=0.0370939583333333   S33Bot=0.0370939583333333   S22Left=0.00806460648148148   S22Right=0.00806460648148148   Z33=0.0416087962962963   Z22=0.0123263888888889   R33=0.431251583333333   R22=0.163642666666667 _
+        CGOffset3=1.66533453693773E-16   CGOffset2=-3.33066907387547E-16   EccV2=0   EccV3=0   Cw=0.000629551128091449   Color=Magenta   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1 _
+        SectInFile=W12X50   FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=e5d274ef-64b0-455a-a1ea-13c5a744907f   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W12X53   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.00833333333333   t2=0.833333333333333   tf=0.0479166666666667   tw=0.02875   t2b=0.833333333333333   tfb=0.0479166666666667   FilletRadius=0.0504166666666667 _
+        Area=0.108333333333333   TorsConst=7.6195987654321E-05   I33=0.0204957561728395   I22=0.00461998456790123   I23=1.04083408558608E-17   AS2=0.0289895833333333   AS3=0.0665509236111111   S33Top=0.0406527372685185 _
+        S33Bot=0.0406527372685185   S22Left=0.011087962962963   S22Right=0.011087962962963   Z33=0.0450810185185185   Z22=0.0168402777777778   R33=0.434961583333333   R22=0.206509083333333   CGOffset3=-2.22044604925031E-16 _
+        CGOffset2=-1.11022302462516E-16   EccV2=0   EccV3=0   Cw=0.00106573933382039   Color=Yellow   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W12X53 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=fdff484f-21dd-4e89-8c01-f1dbe2845d61   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W12X58   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.01666666666667   t2=0.833333333333333   tf=0.0533333333333333   tw=0.03   t2b=0.833333333333333   tfb=0.0533333333333333   FilletRadius=0.05   Area=0.118055555555556 _
+        TorsConst=0.000101273148148148   I33=0.0229070216049383   I22=0.00516010802469136   I23=-6.93889390390723E-18   AS2=0.0305   AS3=0.0740740972222222   S33Top=0.0450629918981481   S33Bot=0.0450629918981481   S22Left=0.0123842592592593 _
+        S22Right=0.0123842592592593   Z33=0.05   Z22=0.0188078703703704   R33=0.440495166666667   R22=0.209067333333333   CGOffset3=5.55111512312578E-17   CGOffset2=0   EccV2=0   EccV3=0   Cw=0.00119342992684042   Color=Gray8Dark _
+        FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W12X58   FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml" _
+        GUID=7342fbc9-2f5c-47c5-93aa-481a32c4e7a2   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W12X65   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.00833333333333   t2=1   tf=0.0504166666666667   tw=0.0325   t2b=1   tfb=0.0504166666666667   FilletRadius=0.0495833333333333   Area=0.132638888888889 _
+        TorsConst=0.000105131172839506   I33=0.0257040895061728   I22=0.0083912037037037   I23=0   AS2=0.0327708333333333   AS3=0.0840277777777778   S33Top=0.0509833159722222   S33Bot=0.0509833159722222   S22Left=0.0167824074074074 _
+        S22Right=0.0167824074074074   Z33=0.0560185185185185   Z22=0.0255208333333333   R33=0.440215833333333   R22=0.251522416666667   CGOffset3=0   CGOffset2=-2.22044604925031E-16   EccV2=0   EccV3=0   Cw=0.00192760633981964   Color=Blue _
+        FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W12X65   FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml" _
+        GUID=d794c457-455c-4eb7-825b-1057aded1978   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W12X72   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.025   t2=1   tf=0.0558333333333333   tw=0.0358333333333333   t2b=1   tfb=0.0558333333333333   FilletRadius=0.05   Area=0.146527777777778 _
+        TorsConst=0.000141300154320988   I33=0.0287905092592593   I22=0.00940393518518519   I23=1.38777878078145E-17   AS2=0.0367291666666667   AS3=0.0930555555555556   S33Top=0.0561766030092593   S33Bot=0.0561766030092593 _
+        S22Left=0.0188078703703704   S22Right=0.0188078703703704   Z33=0.0625   Z22=0.0284722222222222   R33=0.44326625   R22=0.25333475   CGOffset3=-1.11022302462516E-16   CGOffset2=-1.11022302462516E-16   EccV2=0   EccV3=0 _
+        Cw=0.00218513992573303   Color=Green   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W12X72 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=f9b9cd86-9121-4ae6-ad4a-fd5f266d2b40   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W12X79   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.03333333333333   t2=1.00833333333333   tf=0.06125   tw=0.0391666666666667   t2b=1.00833333333333   tfb=0.06125   FilletRadius=0.0495833333333333 _
+        Area=0.161111111111111   TorsConst=0.000185185185185185   I33=0.0319251543209877   I22=0.0104166666666667   I23=-6.93889390390723E-18   AS2=0.0404722222222222   AS3=0.102934027777778   S33Top=0.061790625   S33Bot=0.061790625 _
+        S22Left=0.0206611574074074   S22Right=0.0206611574074074   Z33=0.0688657407407407   Z22=0.0314236111111111   R33=0.445147333333333   R22=0.254273833333333   CGOffset3=0   CGOffset2=0   EccV2=0   EccV3=0   Cw=0.00247237428739321 _
+        Color=Cyan   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W12X79   FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml" _
+        GUID=e3245a2d-2f60-4882-9e48-2bfce41b4470   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W12X87   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.04166666666667   t2=1.00833333333333   tf=0.0675   tw=0.0429166666666667   t2b=1.00833333333333   tfb=0.0675   FilletRadius=0.05   Area=0.177777777777778 _
+        TorsConst=0.000245949074074074   I33=0.0356867283950617   I22=0.011622299382716   I23=2.08166817117217E-17   AS2=0.0447048611111111   AS3=0.1134375   S33Top=0.0685185185185185   S33Bot=0.0685185185185185   S22Left=0.023052494212963 _
+        S22Right=0.023052494212963   Z33=0.0763888888888889   Z22=0.0349537037037037   R33=0.44803775   R22=0.255686166666667   CGOffset3=0   CGOffset2=0   EccV2=0   EccV3=0   Cw=0.00273634866414501   Color=Red   FromFile=Yes   AMod=1 _
+        A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W12X87   FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml" _
+        GUID=9d6a8193-c1d6-4278-a734-011a2c2107f8   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W12X96   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.05833333333333   t2=1.01666666666667   tf=0.075   tw=0.0458333333333333   t2b=1.01666666666667   tfb=0.075   FilletRadius=0.05   Area=0.195833333333333 _
+        TorsConst=0.000330343364197531   I33=0.0401716820987654   I22=0.0130208333333333   I23=1.38777878078145E-17   AS2=0.0485069444444444   AS3=0.127083333333333   S33Top=0.0759149884259259   S33Bot=0.0759149884259259 _
+        S22Left=0.0256147511574074   S22Right=0.0256147511574074   Z33=0.0850694444444444   Z22=0.0390625   R33=0.452915   R22=0.257855333333333   CGOffset3=0   CGOffset2=0   EccV2=0   EccV3=0   Cw=0.00317531853218236   Color=Magenta _
+        FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W12X96   FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml" _
+        GUID=20129b35-9b8a-4306-b431-c528550a2bda   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W14X109   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.19166666666667   t2=1.21666666666667   tf=0.0716666666666667   tw=0.04375   t2b=1.21666666666667   tfb=0.0716666666666667   FilletRadius=0.05   Area=0.222222222222222 _
+        TorsConst=0.000343364197530864   I33=0.0597993827160494   I22=0.021556712962963   I23=-1.38777878078145E-17   AS2=0.0521354166666667   AS3=0.145324097222222   S33Top=0.100362615740741   S33Bot=0.100362615740741 _
+        S22Left=0.0354356944444444   S22Right=0.0354356944444444   Z33=0.111111111111111   Z22=0.0536458333333333   R33=0.518745833333333   R22=0.311456583333333   CGOffset3=0   CGOffset2=1.11022302462516E-16   EccV2=0   EccV3=0 _
+        Cw=0.00674616311934156   Color=Red   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W14X109 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=8a408fe7-fb06-415e-8908-d77a1d805672   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W14X120   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.20833333333333   t2=1.225   tf=0.0783333333333333   tw=0.0491666666666667   t2b=1.225   tfb=0.0783333333333333   FilletRadius=0.05   Area=0.245138888888889 _
+        TorsConst=0.000451871141975309   I33=0.0665509259259259   I22=0.0238715277777778   I23=-4.16333634234434E-17   AS2=0.0594097222222222   AS3=0.159930555555556   S33Top=0.110153240740741   S33Bot=0.110153240740741 _
+        S22Left=0.0389739236111111   S22Right=0.0389739236111111   Z33=0.122685185185185   Z22=0.0590277777777778   R33=0.521039833333333   R22=0.312057083333333   CGOffset3=-1.11022302462516E-16   CGOffset2=0   EccV2=0   EccV3=0 _
+        Cw=0.00766126560405815   Color=Magenta   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W14X120 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=1ca4845f-45ab-48d9-a45d-c716b2431fa4   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W14X132   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.225   t2=1.225   tf=0.0858333333333333   tw=0.05375   t2b=1.225   tfb=0.0858333333333333   FilletRadius=0.05   Area=0.269444444444444   TorsConst=0.000593171296296296 _
+        I33=0.0737847222222222   I22=0.0264274691358025   I23=-2.77555756156289E-17   AS2=0.06584375   AS3=0.175243055555556   S33Top=0.120464872685185   S33Bot=0.120464872685185   S22Left=0.0431468865740741   S22Right=0.0431468865740741 _
+        Z33=0.135416666666667   Z22=0.0653935185185185   R33=0.523297416666667   R22=0.313179416666667   CGOffset3=1.11022302462516E-16   CGOffset2=3.33066907387547E-16   EccV2=0   EccV3=0   Cw=0.00853154213708307   Color=Yellow _
+        FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W14X132   FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml" _
+        GUID=766994af-00e9-41f4-a0bc-b3195a9e3ae3   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W14X145   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.23333333333333   t2=1.29166666666667   tf=0.0908333333333333   tw=0.0566666666666667   t2b=1.29166666666667   tfb=0.0908333333333333   FilletRadius=0.05 _
+        Area=0.296527777777778   TorsConst=0.000733024691358025   I33=0.0824652777777778   I22=0.0326485339506173   I23=0   AS2=0.0698888888888889   AS3=0.195543958333333   S33Top=0.133727488425926   S33Bot=0.133727488425926 _
+        S22Left=0.0505525694444444   S22Right=0.0505525694444444   Z33=0.150462962962963   Z22=0.0769675925925926   R33=0.52735475   R22=0.331817416666667   CGOffset3=-1.11022302462516E-16   CGOffset2=-1.11022302462516E-16   EccV2=0 _
+        EccV3=0   Cw=0.0106462775482523   Color=Gray8Dark   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W14X145 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=5b7d9d38-b565-4791-adb8-b7e646cc6d52   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W14X159   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.25   t2=1.3   tf=0.0991666666666667   tw=0.0620833333333333   t2b=1.3   tfb=0.0991666666666667   FilletRadius=0.05   Area=0.324305555555556 _
+        TorsConst=0.000950038580246914   I33=0.0916280864197531   I22=0.0360725308641975   I23=-2.77555756156289E-17   AS2=0.0776041666666667   AS3=0.214861111111111   S33Top=0.146604918981481   S33Bot=0.146604918981481 _
+        S22Left=0.0554961979166667   S22Right=0.0554961979166667   Z33=0.166087962962963   Z22=0.0844907407407407   R33=0.531541416666667   R22=0.33351175   CGOffset3=2.22044604925031E-16   CGOffset2=-3.33066907387547E-16   EccV2=0 _
+        EccV3=0   Cw=0.0120229044493393   Color=Blue   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W14X159 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=fa2db03f-960a-4315-abbc-97e248f2d627   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W14X176   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.26666666666667   t2=1.30833333333333   tf=0.109166666666667   tw=0.0691666666666667   t2b=1.30833333333333   tfb=0.109166666666667   FilletRadius=0.05 _
+        Area=0.359722222222222   TorsConst=0.00127797067901235   I33=0.103202160493827   I22=0.0404128086419753   I23=5.55111512312578E-17   AS2=0.0876111111111111   AS3=0.238043958333333   S33Top=0.162950752314815 _
+        S33Bot=0.162950752314815   S22Left=0.0617775462962963   S22Right=0.0617775462962963   Z33=0.185185185185185   Z22=0.0943287037037037   R33=0.535624916666667   R22=0.335178333333333   CGOffset3=-2.22044604925031E-16   CGOffset2=0 _
+        EccV2=0   EccV3=0   Cw=0.0136482203755605   Color=Green   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W14X176 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=7fc88f54-952e-4243-8d1b-595eba7ce62e   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W14X193   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.29166666666667   t2=1.30833333333333   tf=0.12   tw=0.0741666666666667   t2b=1.30833333333333   tfb=0.12   FilletRadius=0.05   Area=0.394444444444444 _
+        TorsConst=0.00167824074074074   I33=0.115740740740741   I22=0.044897762345679   I23=2.77555756156289E-17   AS2=0.0957986111111111   AS3=0.261666666666667   S33Top=0.179211458333333   S33Bot=0.179211458333333 _
+        S22Left=0.0686335069444444   S22Right=0.0686335069444444   Z33=0.205439814814815   Z22=0.104166666666667   R33=0.54168925   R22=0.337380083333333   CGOffset3=1.11022302462516E-16   CGOffset2=0   EccV2=0   EccV3=0 _
+        Cw=0.0153721060766863   Color=Cyan   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W14X193 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=a96a8be0-56a7-445b-a7c8-28abe1c53bb9   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W14X211   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.30833333333333   t2=1.31666666666667   tf=0.13   tw=0.0816666666666667   t2b=1.31666666666667   tfb=0.13   FilletRadius=0.05   Area=0.430555555555556 _
+        TorsConst=0.0021508487654321   I33=0.128279320987654   I22=0.0496720679012346   I23=2.77555756156289E-17   AS2=0.106847222222222   AS3=0.285277777777778   S33Top=0.196095775462963   S33Bot=0.196095775462963 _
+        S22Left=0.0754512152777778   S22Right=0.0754512152777778   Z33=0.225694444444444   Z22=0.114583333333333   R33=0.545838   R22=0.33965775   CGOffset3=1.11022302462516E-16   CGOffset2=1.11022302462516E-16   EccV2=0   EccV3=0 _
+        Cw=0.0171670613878333   Color=Red   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W14X211 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=d48c2bbb-2428-406e-b1ac-6672897bf430   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W14X22   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.14166666666667   t2=0.416666666666667   tf=0.0279166666666667   tw=0.0191666666666667   t2b=0.416666666666667   tfb=0.0279166666666667 _
+        FilletRadius=0.0333333333333333   Area=0.0450694444444444   TorsConst=1.00308641975309E-05   I33=0.00959683641975309   I22=0.000337577160493827   I23=-2.60208521396521E-18   AS2=0.0218819444444444   AS3=0.0193865763888889 _
+        S33Top=0.0168119791666667   S33Bot=0.0168119791666667   S22Left=0.00162037037037037   S22Right=0.00162037037037037   Z33=0.019212962962963   Z22=0.00254050925925926   R33=0.461448166666667   R22=0.0865456666666667 _
+        CGOffset3=5.55111512312578E-17   CGOffset2=-5.55111512312578E-16   EccV2=0   EccV3=0   Cw=0.000104374408721924   Color=Red   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1 _
+        SectInFile=W14X22   FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=e1427c9e-6c23-45aa-8bb9-786378222f7d   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W14X233   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.33333333333333   t2=1.325   tf=0.143333333333333   tw=0.0891666666666667   t2b=1.325   tfb=0.143333333333333   FilletRadius=0.05   Area=0.475694444444444 _
+        TorsConst=0.00286940586419753   I33=0.145158179012346   I22=0.0554591049382716   I23=1.38777878078145E-16   AS2=0.118888888888889   AS3=0.316527777777778   S33Top=0.217737268518519   S33Bot=0.217737268518519 _
+        S22Left=0.0837118634259259   S22Right=0.0837118634259259   Z33=0.252314814814815   Z22=0.127893518518519   R33=0.552403916666667   R22=0.34144625   CGOffset3=-1.11022302462516E-16   CGOffset2=2.22044604925031E-16   EccV2=0   EccV3=0 _
+        Cw=0.019673313687283   Color=Magenta   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W14X233 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=32882ad6-ae58-4863-8c34-869efa543e5f   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W14X257   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.36666666666667   t2=1.33333333333333   tf=0.1575   tw=0.0983333333333333   t2b=1.33333333333333   tfb=0.1575   FilletRadius=0.05   Area=0.525 _
+        TorsConst=0.00381462191358025   I33=0.163966049382716   I22=0.0622106481481481   I23=0   AS2=0.134388888888889   AS3=0.35   S33Top=0.239950347222222   S33Bot=0.239950347222222   S22Left=0.0933159722222222 _
+        S22Right=0.0933159722222222   Z33=0.281828703703704   Z22=0.142361111111111   R33=0.558852666666667   R22=0.344233166666667   CGOffset3=1.11022302462516E-16   CGOffset2=1.11022302462516E-16   EccV2=0   EccV3=0 _
+        Cw=0.0227435293209876   Color=Yellow   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W14X257 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=037269af-da76-4b43-b589-d45a8d9e3a08   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W14X26   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.15833333333333   t2=0.419166666666667   tf=0.035   tw=0.02125   t2b=0.419166666666667   tfb=0.035   FilletRadius=0.0333333333333333   Area=0.0534027777777778 _
+        TorsConst=1.72646604938272E-05   I33=0.011815200617284   I22=0.0004296875   I23=-1.73472347597681E-18   AS2=0.0246145833333333   AS3=0.0244513888888889   S33Top=0.0204003472222222   S33Bot=0.0204003472222222 _
+        S22Left=0.00205019849537037   S22Right=0.00205019849537037   Z33=0.0232638888888889   Z22=0.00320601851851852   R33=0.470368916666667   R22=0.0897004166666667   CGOffset3=8.32667268468867E-17   CGOffset2=-3.33066907387547E-16 _
+        EccV2=0   EccV3=0   Cw=0.000135529648497837   Color=Magenta   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W14X26 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=0e6eeb66-a20e-4061-995d-17104b75addb   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W14X283   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.39166666666667   t2=1.34166666666667   tf=0.1725   tw=0.1075   t2b=1.34166666666667   tfb=0.1725   FilletRadius=0.05   Area=0.578472222222222 _
+        TorsConst=0.00501543209876543   I33=0.185185185185185   I22=0.0694444444444444   I23=5.55111512312578E-17   AS2=0.149604166666667   AS3=0.385729166666667   S33Top=0.266134375   S33Bot=0.266134375   S22Left=0.103519675925926 _
+        S22Right=0.103519675925926   Z33=0.313657407407407   Z22=0.158564814814815   R33=0.565798583333333   R22=0.346479416666667   CGOffset3=-1.11022302462516E-16   CGOffset2=-2.22044604925031E-16   EccV2=0   EccV3=0 _
+        Cw=0.0258010813339732   Color=Gray8Dark   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W14X283 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=2423ad4e-15ed-4187-8c45-bcd8b6aa6a33   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W14X30   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.15   t2=0.560833333333333   tf=0.0320833333333333   tw=0.0225   t2b=0.560833333333333   tfb=0.0320833333333333   FilletRadius=0.0333333333333333 _
+        Area=0.0614583333333333   TorsConst=1.83256172839506E-05   I33=0.0140335648148148   I22=0.000945216049382716   I23=5.20417042793042E-18   AS2=0.025875   AS3=0.0299890069444444   S33Top=0.0244061979166667   S33Bot=0.0244061979166667 _
+        S22Left=0.00337075578703704   S22Right=0.00337075578703704   Z33=0.0273726851851852   Z22=0.0052025462962963   R33=0.47785225   R22=0.12401525   CGOffset3=-5.55111512312578E-17   CGOffset2=-3.33066907387547E-16   EccV2=0   EccV3=0 _
+        Cw=0.000294705715224211   Color=Yellow   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W14X30 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=e45e070f-3da7-4466-b5b7-c1f8cc611199   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W14X311   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.425   t2=1.35   tf=0.188333333333333   tw=0.1175   t2b=1.35   tfb=0.188333333333333   FilletRadius=0.05   Area=0.634722222222222   TorsConst=0.00655864197530864 _
+        I33=0.208815586419753   I22=0.0776427469135803   I23=0   AS2=0.1674375   AS3=0.42375   S33Top=0.293074479166667   S33Bot=0.293074479166667   S22Left=0.115026273148148   S22Right=0.115026273148148   Z33=0.348958333333333 _
+        Z22=0.175925925925926   R33=0.573574166666667   R22=0.34975075   CGOffset3=-1.11022302462516E-16   CGOffset2=1.11022302462516E-16   EccV2=0   EccV3=0   Cw=0.0295272204609375   Color=Blue   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1 _
+        JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W14X311   FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=b139b22b-60f0-48e7-b636-c41362f53167   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W14X34   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.16666666666667   t2=0.5625   tf=0.0379166666666667   tw=0.02375   t2b=0.5625   tfb=0.0379166666666667   FilletRadius=0.0333333333333333   Area=0.0694444444444444 _
+        TorsConst=2.74402006172839E-05   I33=0.0163966049382716   I22=0.00112364969135802   I23=-6.93889390390723E-18   AS2=0.0277083333333333   AS3=0.035546875   S33Top=0.0281084664351852   S33Bot=0.0281084664351852 _
+        S22Left=0.00399519907407407   S22Right=0.00399519907407407   Z33=0.0315972222222222   Z22=0.00613425925925926   R33=0.485912666666667   R22=0.127202833333333   CGOffset3=1.66533453693773E-16   CGOffset2=-4.44089209850063E-16 _
+        EccV2=0   EccV3=0   Cw=0.0003582465493083   Color=Gray8Dark   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W14X34 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=063a33ee-c77b-4a55-bc6a-32045f012656   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W14X342   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.45833333333333   t2=1.36666666666667   tf=0.205833333333333   tw=0.128333333333333   t2b=1.36666666666667   tfb=0.205833333333333   FilletRadius=0.05 _
+        Area=0.701388888888889   TorsConst=0.0085841049382716   I33=0.236304012345679   I22=0.0872878086419753   I23=-5.55111512312578E-17   AS2=0.187152777777778   AS3=0.468842638888889   S33Top=0.324074074074074   S33Bot=0.324074074074074 _
+        S22Left=0.127738252314815   S22Right=0.127738252314815   Z33=0.388888888888889   Z22=0.195601851851852   R33=0.580438416666667   R22=0.352774583333333   CGOffset3=1.11022302462516E-16   CGOffset2=-3.33066907387547E-16   EccV2=0 _
+        EccV3=0   Cw=0.0343437520936776   Color=Green   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W14X342 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=925bb4e4-9118-437f-98c0-0d5b0486eb57   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W14X370   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.49166666666667   t2=1.375   tf=0.221666666666667   tw=0.138333333333333   t2b=1.375   tfb=0.221666666666667   FilletRadius=0.05   Area=0.756944444444444 _
+        TorsConst=0.0107060185185185   I33=0.262345679012346   I22=0.0959683641975309   I23=1.66533453693773E-16   AS2=0.206347222222222   AS3=0.507986111111111   S33Top=0.35174837962963   S33Bot=0.35174837962963   S22Left=0.139590335648148 _
+        S22Right=0.139590335648148   Z33=0.425925925925926   Z22=0.21412037037037   R33=0.588714833333333   R22=0.35606725   CGOffset3=-2.22044604925031E-16   CGOffset2=1.11022302462516E-16   EccV2=0   EccV3=0   Cw=0.0387261822781033 _
+        Color=Cyan   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W14X370   FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml" _
+        GUID=66864e2c-92b3-472b-af5b-fc7e952104ea   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W14X38   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.175   t2=0.564166666666667   tf=0.0429166666666667   tw=0.0258333333333333   t2b=0.564166666666667   tfb=0.0429166666666667   FilletRadius=0.0333333333333333 _
+        Area=0.0777777777777778   TorsConst=3.84837962962963E-05   I33=0.0185667438271605   I22=0.00128761574074074   I23=-5.20417042793042E-18   AS2=0.0303541666666667   AS3=0.0403535902777778   S33Top=0.03160296875   S33Bot=0.03160296875 _
+        S22Left=0.00456466435185185   S22Right=0.00456466435185185   Z33=0.0355902777777778   Z22=0.00700231481481481   R33=0.488585   R22=0.1286665   CGOffset3=5.55111512312578E-17   CGOffset2=1.11022302462516E-16   EccV2=0   EccV3=0 _
+        Cw=0.000411522705954499   Color=Blue   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W14X38 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=6d1a9c60-9a63-4f55-86bd-12761d9c4904   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W14X398   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.525   t2=1.38333333333333   tf=0.2375   tw=0.1475   t2b=1.38333333333333   tfb=0.2375   FilletRadius=0.0491666666666667   Area=0.8125   TorsConst=0.0131655092592593 _
+        I33=0.289351851851852   I22=0.104648919753086   I23=-5.55111512312578E-17   AS2=0.2249375   AS3=0.547569444444444   S33Top=0.379477835648148   S33Bot=0.379477835648148   S22Left=0.151299652777778   S22Right=0.151299652777778 _
+        Z33=0.463541666666667   Z22=0.232638888888889   R33=0.596762416666667   R22=0.358885333333333   CGOffset3=1.11022302462516E-16   CGOffset2=-1.11022302462516E-16   EccV2=0   EccV3=0   Cw=0.043423754798795   Color=Red   FromFile=Yes _
+        AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W14X398   FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml" _
+        GUID=84290d85-fc3b-42d0-ae20-5c945d47fb64   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W14X426   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.55833333333333   t2=1.39166666666667   tf=0.253333333333333   tw=0.156666666666667   t2b=1.39166666666667   tfb=0.253333333333333   FilletRadius=0.0491666666666666 _
+        Area=0.868055555555556   TorsConst=0.0159625771604938   I33=0.318287037037037   I22=0.113811728395062   I23=-3.33066907387547E-16   AS2=0.244138888888889   AS3=0.587592569444444   S33Top=0.408496701388889   S33Bot=0.408496701388889 _
+        S22Left=0.163561747685185   S22Right=0.163561747685185   Z33=0.502893518518518   Z22=0.251157407407407   R33=0.605530083333333   R22=0.362092666666667   CGOffset3=3.33066907387547E-16   CGOffset2=-2.22044604925031E-16   EccV2=0 _
+        EccV3=0   Cw=0.0484515633313802   Color=Magenta   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W14X426 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=16a00815-3682-4474-bcf6-e7a0370ab084   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W14X43   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.14166666666667   t2=0.666666666666667   tf=0.0441666666666667   tw=0.0254166666666667   t2b=0.666666666666667   tfb=0.0441666666666667 _
+        FilletRadius=0.0491666666666667   Area=0.0875   TorsConst=5.06365740740741E-05   I33=0.0206404320987654   I22=0.00217978395061728   I23=-3.46944695195361E-18   AS2=0.0290173611111111   AS3=0.0490740763888889 _
+        S33Top=0.0361584201388889   S33Bot=0.0361584201388889   S22Left=0.00653935185185185   S22Right=0.00653935185185185   Z33=0.0402777777777778   Z22=0.0100115740740741   R33=0.48568575   R22=0.15783475   CGOffset3=1.66533453693773E-16 _
+        CGOffset2=-1.11022302462516E-16   EccV2=0   EccV3=0   Cw=0.000656778099279835   Color=Green   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W14X43 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=a0e3d24e-694d-4735-a296-081c3b647636   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W14X455   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.58333333333333   t2=1.4   tf=0.2675   tw=0.168333333333333   t2b=1.4   tfb=0.2675   FilletRadius=0.05   Area=0.930555555555556   TorsConst=0.0190489969135802 _
+        I33=0.346739969135802   I22=0.123456790123457   I23=-3.33066907387547E-16   AS2=0.266527777777778   AS3=0.624166666666667   S33Top=0.437987326388889   S33Bot=0.437987326388889   S22Left=0.176366840277778   S22Right=0.176366840277778 _
+        Z33=0.541666666666667   Z22=0.270833333333333   R33=0.610422916666667   R22=0.364238916666667   CGOffset3=0   CGOffset2=-3.33066907387547E-16   EccV2=0   EccV3=0   Cw=0.0529539571417824   Color=Yellow   FromFile=Yes   AMod=1 _
+        A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W14X455   FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml" _
+        GUID=f3efdbb1-cca7-465b-a124-8f4594932bd6   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W14X48   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.15   t2=0.669166666666667   tf=0.0495833333333333   tw=0.0283333333333333   t2b=0.669166666666667   tfb=0.0495833333333333   FilletRadius=0.0495833333333333 _
+        Area=0.0979166666666667   TorsConst=6.99266975308642E-05   I33=0.023341049382716   I22=0.00247878086419753   I23=0   AS2=0.0325833333333333   AS3=0.0552991875   S33Top=0.040593130787037   S33Bot=0.040593130787037 _
+        S22Left=0.00740855902777778   S22Right=0.00740855902777778   Z33=0.0453703703703704   Z22=0.0113425925925926   R33=0.488238333333333   R22=0.1591075   CGOffset3=-5.55111512312578E-17   CGOffset2=-2.22044604925031E-16   EccV2=0 _
+        EccV3=0   Cw=0.000749620914058145   Color=Cyan   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W14X48 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=8307880f-1cf1-40fa-9a3f-17a4e992bcae   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W14X500   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.63333333333333   t2=1.41666666666667   tf=0.291666666666667   tw=0.1825   t2b=1.41666666666667   tfb=0.291666666666667   FilletRadius=0.0499999999999999 _
+        Area=1.02083333333333   TorsConst=0.0247878086419753   I33=0.395929783950617   I22=0.138888888888889   I23=-1.11022302462516E-16   AS2=0.298083333333333   AS3=0.688657361111111   S33Top=0.484811979166667   S33Bot=0.484811979166667 _
+        S22Left=0.196078414351852   S22Right=0.196078414351852   Z33=0.607638888888889   Z22=0.302083333333333   R33=0.62277575   R22=0.368855583333333   CGOffset3=2.22044604925031E-16   CGOffset2=1.11022302462516E-16   EccV2=0   EccV3=0 _
+        Cw=0.062196771580714   Color=Gray8Dark   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W14X500 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=7958c457-9624-47b9-99d0-5d7cc304637e   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W14X53   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.15833333333333   t2=0.671666666666667   tf=0.055   tw=0.0308333333333333   t2b=0.671666666666667   tfb=0.055   FilletRadius=0.0491666666666667   Area=0.108333333333333 _
+        TorsConst=9.35570987654321E-05   I33=0.0260898919753086   I22=0.00278260030864198   I23=3.46944695195361E-18   AS2=0.0357152777777778   AS3=0.0615694444444444   S33Top=0.0450472974537037   S33Bot=0.0450472974537037 _
+        S22Left=0.00828565972222222   S22Right=0.00828565972222222   Z33=0.0504050925925926   Z22=0.0127314814814815   R33=0.490744083333333   R22=0.160267083333333   CGOffset3=0   CGOffset2=-2.22044604925031E-16   EccV2=0   EccV3=0 _
+        Cw=0.000845330060725491   Color=Red   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W14X53 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=1ddf070f-8f68-4366-bb71-3f0807cea74e   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W14X550   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.68333333333333   t2=1.43333333333333   tf=0.318333333333333   tw=0.198333333333333   t2b=1.43333333333333   tfb=0.318333333333333   FilletRadius=0.05   Area=1.125 _
+        TorsConst=0.0322627314814815   I33=0.454764660493827   I22=0.15673225308642   I23=-1.11022302462516E-16   AS2=0.333861111111111   AS3=0.760463194444444   S33Top=0.540314409722222   S33Bot=0.540314409722222 _
+        S22Left=0.218696180555556   S22Right=0.218696180555556   Z33=0.68287037037037   Z22=0.337384259259259   R33=0.635795   R22=0.373252666666667   CGOffset3=1.11022302462516E-16   CGOffset2=-2.22044604925031E-16   EccV2=0   EccV3=0 _
+        Cw=0.0727742570584491   Color=Blue   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W14X550 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=533bb286-9efc-44ff-9fdf-567a5068546b   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W14X605   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.74166666666667   t2=1.45   tf=0.346666666666667   tw=0.216666666666667   t2b=1.45   tfb=0.346666666666667   FilletRadius=0.05   Area=1.23611111111111 _
+        TorsConst=0.0419077932098765   I33=0.520833333333333   I22=0.177469135802469   I23=3.33066907387547E-16   AS2=0.377361111111111   AS3=0.837777777777778   S33Top=0.598086226851852   S33Bot=0.598086226851852 _
+        S22Left=0.244785011574074   S22Right=0.244785011574074   Z33=0.763888888888889   Z22=0.377314814814815   R33=0.6491135   R22=0.378907083333333   CGOffset3=-2.22044604925031E-16   CGOffset2=-1.11022302462516E-16   EccV2=0   EccV3=0 _
+        Cw=0.08569456228125   Color=Green   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W14X605 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=a4aa7e61-c0f7-47eb-86b8-0420defd80cb   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W14X61   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.15833333333333   t2=0.833333333333333   tf=0.05375   tw=0.03125   t2b=0.833333333333333   tfb=0.05375   FilletRadius=0.0495833333333333   Area=0.124305555555556 _
+        TorsConst=0.000105613425925926   I33=0.0308641975308642   I22=0.00516010802469136   I23=1.73472347597681E-17   AS2=0.0361979166666667   AS3=0.0746527777777778   S33Top=0.0532907002314815   S33Bot=0.0532907002314815 _
+        S22Left=0.0123842592592593   S22Right=0.0123842592592593   Z33=0.0590277777777778   Z22=0.0189814814814815   R33=0.498290083333333   R22=0.203743666666667   CGOffset3=0   CGOffset2=0   EccV2=0   EccV3=0   Cw=0.00158132253785519 _
+        Color=Magenta   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W14X61   FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml" _
+        GUID=676146eb-a9dc-481b-8bc1-7fc77adb2616   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W14X665   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.8   t2=1.475   tf=0.376666666666667   tw=0.235833333333333   t2b=1.475   tfb=0.376666666666667   FilletRadius=0.05   Area=1.36111111111111 _
+        TorsConst=0.0540123456790123   I33=0.597993827160494   I22=0.201099537037037   I23=0   AS2=0.4245   AS3=0.925972222222222   S33Top=0.6644375   S33Bot=0.6644375   S22Left=0.272677314814815   S22Right=0.272677314814815 _
+        Z33=0.856481481481482   Z22=0.422453703703704   R33=0.662829083333333   R22=0.384378166666667   CGOffset3=-1.11022302462516E-16   CGOffset2=0   EccV2=0   EccV3=0   Cw=0.102031729578583   Color=Cyan   FromFile=Yes   AMod=1   A2Mod=1 _
+        A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W14X665   FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=27e291bb-a799-4ae6-a8b3-486fd3ff1bdb   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W14X68   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.16666666666667   t2=0.833333333333333   tf=0.06   tw=0.0345833333333333   t2b=0.833333333333333   tfb=0.06   FilletRadius=0.0491666666666667   Area=0.138888888888889 _
+        TorsConst=0.000145158179012346   I33=0.0348186728395062   I22=0.00583526234567901   I23=1.38777878078145E-17   AS2=0.0403472222222222   AS3=0.0833333333333333   S33Top=0.0596891782407407   S33Bot=0.0596891782407407 _
+        S22Left=0.0140046296296296   S22Right=0.0140046296296296   Z33=0.0665509259259259   Z22=0.0213541666666667   R33=0.500693916666667   R22=0.204972916666667   CGOffset3=-5.55111512312578E-17   CGOffset2=1.11022302462516E-16   EccV2=0 _
+        EccV3=0   Cw=0.0017718621399177   Color=Yellow   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W14X68 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=388a7d7f-7cb8-4bef-80ca-f2d51507c80d   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W14X730   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.86666666666667   t2=1.49166666666667   tf=0.409166666666667   tw=0.255833333333333   t2b=1.49166666666667   tfb=0.409166666666667   FilletRadius=0.05 _
+        Area=1.49305555555556   TorsConst=0.0699266975308642   I33=0.689621913580247   I22=0.227623456790123   I23=-4.44089209850063E-16   AS2=0.477555555555556   AS3=1.01723402777778   S33Top=0.738880787037037   S33Bot=0.738880787037037 _
+        S22Left=0.305193460648148   S22Right=0.305193460648148   Z33=0.960648148148148   Z22=0.472222222222222   R33=0.679622166666667   R22=0.390454583333333   CGOffset3=2.22044604925031E-16   CGOffset2=-2.22044604925031E-16   EccV2=0 _
+        EccV3=0   Cw=0.12020471027505   Color=Red   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W14X730 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=98b187ae-d113-41f9-a076-749f00d1c7db   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W14X74   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.18333333333333   t2=0.841666666666667   tf=0.0654166666666667   tw=0.0375   t2b=0.841666666666667   tfb=0.0654166666666667   FilletRadius=0.0495833333333333 _
+        Area=0.151388888888889   TorsConst=0.000186631944444444   I33=0.0383391203703704   I22=0.00646219135802469   I23=1.38777878078145E-17   AS2=0.044375   AS3=0.0917650694444444   S33Top=0.0647984953703704   S33Bot=0.0647984953703704 _
+        S22Left=0.0153557002314815   S22Right=0.0153557002314815   Z33=0.0729166666666667   Z22=0.0234375   R33=0.50323875   R22=0.206606   CGOffset3=0   CGOffset2=1.11022302462516E-16   EccV2=0   EccV3=0   Cw=0.00203103035434444 _
+        Color=Gray8Dark   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W14X74   FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml" _
+        GUID=ccc7d1f0-113a-4002-a9e0-ee2914390038   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W14X808   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.9   t2=1.55   tf=0.426666666666667   tw=0.311666666666667   t2b=1.55   tfb=0.426666666666667   FilletRadius=0.0491666666666666   Area=1.65277777777778 _
+        TorsConst=0.0887345679012346   I33=0.766782407407407   I22=0.267650462962963   I23=4.44089209850063E-16   AS2=0.592166666666667   AS3=1.10222222222222   S33Top=0.807139467592593   S33Bot=0.807139467592593   S22Left=0.345355439814815 _
+        S22Right=0.345355439814815   Z33=1.05902777777778   Z22=0.538194444444444   R33=0.681128166666667   R22=0.402417416666667   CGOffset3=-1.11022302462516E-16   CGOffset2=2.22044604925031E-16   EccV2=0   EccV3=0   Cw=0.143705899358025 _
+        Color=Magenta   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W14X808   FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml" _
+        GUID=d2c9329f-e714-4d18-bc05-aea2b77c62ea   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W14X82   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.19166666666667   t2=0.841666666666667   tf=0.07125   tw=0.0425   t2b=0.841666666666667   tfb=0.07125   FilletRadius=0.0495833333333333   Area=0.166666666666667 _
+        TorsConst=0.000244502314814815   I33=0.0424864969135802   I22=0.00713734567901235   I23=1.38777878078145E-17   AS2=0.0506458333333333   AS3=0.0999479166666667   S33Top=0.0713060185185185   S33Bot=0.0713060185185185 _
+        S22Left=0.0169600289351852   S22Right=0.0169600289351852   Z33=0.0804398148148148   Z22=0.0259259259259259   R33=0.504895   R22=0.20693975   CGOffset3=-5.55111512312578E-17   CGOffset2=3.33066907387547E-16   EccV2=0   EccV3=0 _
+        Cw=0.00222204643945575   Color=Blue   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W14X82 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=f76b86c6-0d7b-40a5-a772-df7d45418985   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W14X873   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.96666666666667   t2=1.56666666666667   tf=0.459166666666667   tw=0.328333333333333   t2b=1.56666666666667   tfb=0.459166666666667   FilletRadius=0.0491666666666666 _
+        Area=1.78472222222222   TorsConst=0.109471450617284   I33=0.872878086419753   I22=0.297550154320988   I23=8.88178419700125E-16   AS2=0.645722222222222   AS3=1.19893541666667   S33Top=0.887672453703704   S33Bot=0.887672453703704 _
+        S22Left=0.379851273148148   S22Right=0.379851273148148   Z33=1.17476851851852   Z22=0.590277777777778   R33=0.699345   R22=0.4083145   CGOffset3=-3.33066907387547E-16   CGOffset2=2.22044604925031E-16   EccV2=0   EccV3=0 _
+        Cw=0.167187407094401   Color=Yellow   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W14X873 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=9595dde9-4bab-4201-9389-7e47e4057e3c   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W14X90   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.16666666666667   t2=1.20833333333333   tf=0.0591666666666667   tw=0.0366666666666667   t2b=1.20833333333333   tfb=0.0591666666666667   FilletRadius=0.05 _
+        Area=0.184027777777778   TorsConst=0.00019579475308642   I33=0.0481770833333333   I22=0.0174575617283951   I23=-1.38777878078145E-17   AS2=0.0427777777777778   AS3=0.119155069444444   S33Top=0.0825892939814815 _
+        S33Bot=0.0825892939814815   S22Left=0.0288952719907407   S22Right=0.0288952719907407   Z33=0.0908564814814815   Z22=0.04375   R33=0.511656583333333   R22=0.307999583333333   CGOffset3=0   CGOffset2=-4.44089209850063E-16   EccV2=0 _
+        EccV3=0   Cw=0.00533474419253942   Color=Green   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W14X90 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=ef4cc317-6218-4594-898c-8e283aa9cad5   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W14X99   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.18333333333333   t2=1.21666666666667   tf=0.065   tw=0.0404166666666667   t2b=1.21666666666667   tfb=0.065   FilletRadius=0.05   Area=0.202083333333333 _
+        TorsConst=0.000258969907407407   I33=0.0535300925925926   I22=0.0193865740740741   I23=0   AS2=0.0478263888888889   AS3=0.131805555555556   S33Top=0.0904733796296296   S33Bot=0.0904733796296296   S22Left=0.0318683391203704 _
+        S22Right=0.0318683391203704   Z33=0.100115740740741   Z22=0.0483796296296296   R33=0.514675833333333   R22=0.309731416666667   CGOffset3=0   CGOffset2=-1.11022302462516E-16   EccV2=0   EccV3=0   Cw=0.00610041645303123   Color=Cyan _
+        FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W14X99   FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml" _
+        GUID=648fe02a-46bd-467a-bbb6-ada6f826ada5   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W16X100   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.41666666666667   t2=0.866666666666667   tf=0.0820833333333333   tw=0.04875   t2b=0.866666666666667   tfb=0.0820833333333333   FilletRadius=0.03375 _
+        Area=0.204166666666667   TorsConst=0.000372781635802469   I33=0.0718557098765432   I22=0.00896990740740741   I23=0   AS2=0.0690625   AS3=0.118564791666667   S33Top=0.101443344907407   S33Bot=0.101443344907407 _
+        S22Left=0.0206997858796296   S22Right=0.0206997858796296   Z33=0.114583333333333   Z22=0.0317708333333333   R33=0.593250666666667   R22=0.209605   CGOffset3=0   CGOffset2=-2.22044604925031E-16   EccV2=0   EccV3=0 _
+        Cw=0.00396544030428473   Color=Cyan   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W16X100 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=a58cf7b7-2448-4ba2-8f14-0a0efebabce7   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W16X26   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.30833333333333   t2=0.458333333333333   tf=0.02875   tw=0.0208333333333333   t2b=0.458333333333333   tfb=0.02875   FilletRadius=0.0335   Area=0.0533333333333333 _
+        TorsConst=1.26350308641975E-05   I33=0.0145158179012346   I22=0.000462480709876543   I23=-5.20417042793042E-18   AS2=0.0272569444444444   AS3=0.0219618055555556   S33Top=0.0221897858796296   S33Bot=0.0221897858796296 _
+        S22Left=0.00201809780092593   S22Right=0.00201809780092593   Z33=0.0255787037037037   Z22=0.0031712962962963   R33=0.521700666666667   R22=0.093121   CGOffset3=5.55111512312578E-17   CGOffset2=0   EccV2=0   EccV3=0 _
+        Cw=0.000188846129045238   Color=Gray8Dark   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W16X26 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=5f51b81d-379b-4ff8-9c4f-609160057a8d   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W16X31   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.325   t2=0.460833333333333   tf=0.0366666666666667   tw=0.0229166666666667   t2b=0.460833333333333   tfb=0.0366666666666667   FilletRadius=0.0335 _
+        Area=0.0634027777777778   TorsConst=2.22318672839506E-05   I33=0.0180844907407407   I22=0.000597993827160494   I23=0   AS2=0.0303645833333333   AS3=0.0281620347222222   S33Top=0.02729734375   S33Bot=0.02729734375 _
+        S22Left=0.00259527141203704   S22Right=0.00259527141203704   Z33=0.03125   Z22=0.00406828703703704   R33=0.534071   R22=0.09711675   CGOffset3=-8.32667268468867E-17   CGOffset2=-2.22044604925031E-16   EccV2=0   EccV3=0 _
+        Cw=0.00024816945763513   Color=Blue   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W16X31 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=1ab219a0-1ba9-4327-963b-2e6684047db1   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W16X36   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.325   t2=0.5825   tf=0.0358333333333333   tw=0.0245833333333333   t2b=0.5825   tfb=0.0358333333333333   FilletRadius=0.0335   Area=0.0736111111111111 _
+        TorsConst=2.62827932098765E-05   I33=0.0216049382716049   I22=0.0011815200617284   I23=8.67361737988404E-18   AS2=0.0325729166666667   AS3=0.0347881944444444   S33Top=0.0326112268518519   S33Bot=0.0326112268518519 _
+        S22Left=0.00405672164351852   S22Right=0.00405672164351852   Z33=0.037037037037037   Z22=0.00625   R33=0.541757333333333   R22=0.126691916666667   CGOffset3=-5.55111512312578E-17   CGOffset2=3.33066907387547E-16   EccV2=0   EccV3=0 _
+        Cw=0.000490435492453726   Color=Green   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W16X36 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=1f92fc3d-adb7-4e5a-a9b2-fcd3f784533d   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W16X40   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.33333333333333   t2=0.583333333333333   tf=0.0420833333333333   tw=0.0254166666666667   t2b=0.583333333333333   tfb=0.0420833333333333   FilletRadius=0.0335 _
+        Area=0.0819444444444444   TorsConst=3.82908950617284E-05   I33=0.0249807098765432   I22=0.00139371141975309   I23=-6.93889390390723E-18   AS2=0.0338888888888889   AS3=0.0409143541666667   S33Top=0.0374710648148148 _
+        S33Bot=0.0374710648148148   S22Left=0.00477843923611111   S22Right=0.00477843923611111   Z33=0.0422453703703704   Z22=0.00734953703703704   R33=0.552131583333333   R22=0.13041475   CGOffset3=1.11022302462516E-16 _
+        CGOffset2=-3.33066907387547E-16   EccV2=0   EccV3=0   Cw=0.000580323211089083   Color=Cyan   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W16X40 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=a3aef852-1caa-4d70-821a-e6350417d60b   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W16X45   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.34166666666667   t2=0.586666666666667   tf=0.0470833333333333   tw=0.02875   t2b=0.586666666666667   tfb=0.0470833333333333   FilletRadius=0.0335 _
+        Area=0.0923611111111111   TorsConst=5.35300925925926E-05   I33=0.0282600308641975   I22=0.00158179012345679   I23=3.46944695195361E-18   AS2=0.0385729166666667   AS3=0.0460370347222222   S33Top=0.0421267534722222 _
+        S33Bot=0.0421267534722222   S22Left=0.00539246643518519   S22Right=0.00539246643518519   Z33=0.0476273148148148   Z22=0.0083912037037037   R33=0.5531485   R22=0.130866916666667   CGOffset3=-5.55111512312578E-17 _
+        CGOffset2=3.33066907387547E-16   EccV2=0   EccV3=0   Cw=0.000663880973912666   Color=Red   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W16X45 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=2f2613f7-67fd-4471-af4a-6dbef5b1b868   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W16X50   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.35833333333333   t2=0.589166666666667   tf=0.0525   tw=0.0316666666666667   t2b=0.589166666666667   tfb=0.0525   FilletRadius=0.0333333333333333 _
+        Area=0.102083333333333   TorsConst=7.33024691358025E-05   I33=0.0317804783950617   I22=0.00179398148148148   I23=-3.46944695195361E-18   AS2=0.0430138888888889   AS3=0.0515520833333333   S33Top=0.0467933449074074 _
+        S33Bot=0.0467933449074074   S22Left=0.00608989583333333   S22Right=0.00608989583333333   Z33=0.0532407407407407   Z22=0.00943287037037037   R33=0.557959666666667   R22=0.132565833333333   CGOffset3=5.55111512312578E-17 _
+        CGOffset2=-2.22044604925031E-16   EccV2=0   EccV3=0   Cw=0.000762848094550966   Color=Magenta   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W16X50 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=7b6640d2-a550-4e9f-ab54-88c6a86f7643   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W16X57   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.36666666666667   t2=0.593333333333333   tf=0.0595833333333333   tw=0.0358333333333333   t2b=0.593333333333333   tfb=0.0595833333333333   FilletRadius=0.03375 _
+        Area=0.116666666666667   TorsConst=0.000107060185185185   I33=0.0365547839506173   I22=0.00207851080246914   I23=-6.93889390390723E-18   AS2=0.0489722222222222   AS3=0.0589212986111111   S33Top=0.0534948090277778 _
+        S33Bot=0.0534948090277778   S22Left=0.00700621527777778   S22Right=0.00700621527777778   Z33=0.0607638888888889   Z22=0.0109375   R33=0.559756   R22=0.133475833333333   CGOffset3=0   CGOffset2=-2.22044604925031E-16   EccV2=0 _
+        EccV3=0   Cw=0.000885964562083854   Color=Yellow   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W16X57 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=4868617a-3d09-430c-89c4-8b10d3f3307e   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W16X67   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.35833333333333   t2=0.85   tf=0.0554166666666667   tw=0.0329166666666667   t2b=0.85   tfb=0.0554166666666667   FilletRadius=0.03375   Area=0.136111111111111 _
+        TorsConst=0.000115258487654321   I33=0.0460069444444444   I22=0.00573881172839506   I23=0   AS2=0.0447118055555556   AS3=0.0785069444444444   S33Top=0.0677402777777778   S33Bot=0.0677402777777778   S22Left=0.0135030844907407 _
+        S22Right=0.0135030844907407   Z33=0.0752314814814815   Z22=0.0205439814814815   R33=0.581386416666667   R22=0.205335583333333   CGOffset3=0   CGOffset2=-2.22044604925031E-16   EccV2=0   EccV3=0   Cw=0.00240723901606091 _
+        Color=Gray8Dark   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W16X67   FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml" _
+        GUID=2efb9755-71ac-4341-833d-175966fb8392   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W16X77   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.375   t2=0.858333333333333   tf=0.0633333333333333   tw=0.0379166666666667   t2b=0.858333333333333   tfb=0.0633333333333333   FilletRadius=0.0333333333333333 _
+        Area=0.156944444444444   TorsConst=0.000172164351851852   I33=0.0535300925925926   I22=0.00665509259259259   I23=2.08166817117217E-17   AS2=0.0521354166666667   AS3=0.090601875   S33Top=0.0778619791666667   S33Bot=0.0778619791666667 _
+        S22Left=0.0155070138888889   S22Right=0.0155070138888889   Z33=0.0868055555555556   Z22=0.0237847222222222   R33=0.58401775   R22=0.205922583333333   CGOffset3=-1.11022302462516E-16   CGOffset2=-2.22044604925031E-16   EccV2=0 _
+        EccV3=0   Cw=0.00287101858906969   Color=Blue   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W16X77 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=6609024b-3a11-4503-b186-d12db9b0bf4d   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W16X89   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.4   t2=0.866666666666667   tf=0.0729166666666667   tw=0.04375   t2b=0.866666666666667   tfb=0.0729166666666667   FilletRadius=0.03375   Area=0.181944444444444 _
+        TorsConst=0.000262827932098765   I33=0.0626929012345679   I22=0.00786072530864198   I23=6.93889390390723E-18   AS2=0.06125   AS3=0.105324097222222   S33Top=0.0895612847222222   S33Bot=0.0895612847222222   S22Left=0.0181401388888889 _
+        S22Right=0.0181401388888889   Z33=0.101273148148148   Z22=0.0278356481481481   R33=0.58700225   R22=0.207855666666667   CGOffset3=-5.55111512312578E-17   CGOffset2=0   EccV2=0   EccV3=0   Cw=0.00348311837962517   Color=Green _
+        FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W16X89   FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml" _
+        GUID=531d72b9-bc11-4f10-9d28-e88fb9e0acad   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W18X106   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.55833333333333   t2=0.933333333333333   tf=0.0783333333333333   tw=0.0491666666666667   t2b=0.933333333333333   tfb=0.0783333333333333 _
+        FilletRadius=0.0333333333333334   Area=0.215972222222222   TorsConst=0.000360725308641975   I33=0.0921103395061728   I22=0.0106095679012346   I23=-2.77555756156289E-17   AS2=0.0766180555555556   AS3=0.121851875 _
+        S33Top=0.118216493055556   S33Bot=0.118216493055556   S22Left=0.0227347858796296   S22Right=0.0227347858796296   Z33=0.133101851851852   Z22=0.0350115740740741   R33=0.65306325   R22=0.221640916666667 _
+        CGOffset3=1.11022302462516E-16   CGOffset2=-2.22044604925031E-16   EccV2=0   EccV3=0   Cw=0.00581258245267489   Color=Blue   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1 _
+        SectInFile=W18X106   FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=92a56109-700a-4de6-8c1c-a6c126e1490d   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W18X119   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.58333333333333   t2=0.941666666666667   tf=0.0883333333333333   tw=0.0545833333333333   t2b=0.941666666666667   tfb=0.0883333333333333 _
+        FilletRadius=0.0333333333333333   Area=0.24375   TorsConst=0.000511188271604938   I33=0.105613425925926   I22=0.0122010030864198   I23=1.38777878078145E-17   AS2=0.0864236111111111   AS3=0.138634236111111   S33Top=0.133406423611111 _
+        S33Bot=0.133406423611111   S22Left=0.0259136342592593   S22Right=0.0259136342592593   Z33=0.15162037037037   Z22=0.0399884259259259   R33=0.6582445   R22=0.223730666666667   CGOffset3=-5.55111512312578E-17   CGOffset2=0   EccV2=0 _
+        EccV3=0   Cw=0.00686890255166237   Color=Green   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W18X119 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=b68f7ef5-a840-4fb7-9ca9-a46d2d0f0bee   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W18X130   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.60833333333333   t2=0.933333333333333   tf=0.1   tw=0.0558333333333333   t2b=0.933333333333333   tfb=0.1   FilletRadius=0.0333333333333333   Area=0.265972222222222 _
+        TorsConst=0.000699266975308642   I33=0.118634259259259   I22=0.0134066358024691   I23=6.93889390390723E-17   AS2=0.0897986111111111   AS3=0.155555555555556   S33Top=0.147524479166667   S33Bot=0.147524479166667 _
+        S22Left=0.0287285069444444   S22Right=0.0287285069444444   Z33=0.167824074074074   Z22=0.0443865740740741   R33=0.66786225   R22=0.224513166666667   CGOffset3=-5.55111512312578E-17   CGOffset2=5.55111512312578E-16   EccV2=0 _
+        EccV3=0   Cw=0.0077071488340192   Color=Cyan   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W18X130 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=eb1c75f1-9448-4994-8f11-dcddfb42c501   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W18X143   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.625   t2=0.933333333333333   tf=0.11   tw=0.0608333333333333   t2b=0.933333333333333   tfb=0.11   FilletRadius=0.0333333333333333   Area=0.291666666666667 _
+        TorsConst=0.000925925925925926   I33=0.132619598765432   I22=0.0149980709876543   I23=5.55111512312578E-17   AS2=0.0988541666666667   AS3=0.171111111111111   S33Top=0.163224131944444   S33Bot=0.163224131944444 _
+        S22Left=0.0321387268518519   S22Right=0.0321387268518519   Z33=0.186342592592593   Z22=0.0494212962962963   R33=0.674311333333333   R22=0.226764083333333   CGOffset3=-5.55111512312578E-17   CGOffset2=3.33066907387547E-16   EccV2=0 _
+        EccV3=0   Cw=0.00855297177777777   Color=Red   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W18X143 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=42f1955f-380e-49db-9f9d-ee3c5555ade2   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W18X158   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.64166666666667   t2=0.941666666666667   tf=0.12   tw=0.0675   t2b=0.941666666666667   tfb=0.12   FilletRadius=0.0333333333333334   Area=0.321527777777778 _
+        TorsConst=0.00121527777777778   I33=0.147569444444444   I22=0.0167341820987654   I23=-4.16333634234434E-17   AS2=0.1108125   AS3=0.188333333333333   S33Top=0.179780034722222   S33Bot=0.179780034722222   S22Left=0.0355416261574074 _
+        S22Right=0.0355416261574074   Z33=0.206018518518519   Z22=0.0548611111111111   R33=0.677468333333333   R22=0.228135583333333   CGOffset3=0   CGOffset2=0   EccV2=0   EccV3=0   Cw=0.00966719882806874   Color=Magenta   FromFile=Yes _
+        AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W18X158   FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml" _
+        GUID=d95e04b8-b92e-4936-acc9-34333795c472   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W18X175   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.66666666666667   t2=0.95   tf=0.1325   tw=0.0741666666666667   t2b=0.95   tfb=0.1325   FilletRadius=0.0333333333333333   Area=0.356944444444444 _
+        TorsConst=0.00163001543209877   I33=0.166377314814815   I22=0.0188560956790123   I23=-1.11022302462516E-16   AS2=0.123611111111111   AS3=0.209791666666667   S33Top=0.199652777777778   S33Bot=0.199652777777778 _
+        S22Left=0.0396970486111111   S22Right=0.0396970486111111   Z33=0.230324074074074   Z22=0.0613425925925926   R33=0.6827265   R22=0.22984   CGOffset3=3.33066907387547E-16   CGOffset2=0   EccV2=0   EccV3=0   Cw=0.0111409067028989 _
+        Color=Yellow   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W18X175   FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml" _
+        GUID=1ccb90e3-c98d-4aeb-b8a4-e397981604f8   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W18X192   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.7   t2=0.958333333333333   tf=0.145833333333333   tw=0.08   t2b=0.958333333333333   tfb=0.145833333333333   FilletRadius=0.0333333333333333   Area=0.390277777777778 _
+        TorsConst=0.0021556712962963   I33=0.186631944444444   I22=0.0212191358024691   I23=-1.11022302462516E-16   AS2=0.136   AS3=0.232928263888889   S33Top=0.219567013888889   S33Bot=0.219567013888889   S22Left=0.0442834143518518 _
+        S22Right=0.0442834143518518   Z33=0.255787037037037   Z22=0.0688657407407407   R33=0.691522083333333   R22=0.23317225   CGOffset3=1.11022302462516E-16   CGOffset2=-4.44089209850063E-16   EccV2=0   EccV3=0   Cw=0.0129178585295379 _
+        Color=Gray8Dark   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W18X192   FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml" _
+        GUID=4b69556e-ed35-4310-ae76-88a68419515f   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W18X211   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.725   t2=0.966666666666667   tf=0.159166666666667   tw=0.0883333333333333   t2b=0.966666666666667   tfb=0.159166666666667   FilletRadius=0.0333333333333334 _
+        Area=0.432638888888889   TorsConst=0.00282600308641975   I33=0.208815586419753   I22=0.0237750771604938   I23=8.32667268468867E-17   AS2=0.152375   AS3=0.256435208333333   S33Top=0.242105034722222   S33Bot=0.242105034722222 _
+        S22Left=0.0491898148148148   S22Right=0.0491898148148148   Z33=0.283564814814815   Z22=0.0763888888888889   R33=0.694734166666667   R22=0.234421916666667   CGOffset3=-2.22044604925031E-16   CGOffset2=3.33066907387547E-16   EccV2=0 _
+        EccV3=0   Cw=0.0146879835387901   Color=Blue   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W18X211 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=a6442b7b-04e1-4676-80af-8bdd0018f755   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W18X234   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.75833333333333   t2=0.975   tf=0.175833333333333   tw=0.0966666666666667   t2b=0.975   tfb=0.175833333333333   FilletRadius=0.0333333333333333 _
+        Area=0.476388888888889   TorsConst=0.00379533179012346   I33=0.236304012345679   I22=0.0269097222222222   I23=-2.77555756156289E-17   AS2=0.169972222222222   AS3=0.285729166666667   S33Top=0.268781828703704 _
+        S33Bot=0.268781828703704   S22Left=0.0551994328703704   S22Right=0.0551994328703704   Z33=0.317708333333333   Z22=0.0862268518518518   R33=0.70429525   R22=0.237669666666667   CGOffset3=1.66533453693773E-16 _
+        CGOffset2=1.11022302462516E-16   EccV2=0   EccV3=0   Cw=0.0170055722958069   Color=Green   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W18X234 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=e51e31f2-69bc-4371-a344-166cde43b9c7   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W18X258   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.79166666666667   t2=0.983333333333333   tf=0.191666666666667   tw=0.106666666666667   t2b=0.983333333333333   tfb=0.191666666666667   FilletRadius=0.0333333333333334 _
+        Area=0.527777777777778   TorsConst=0.00496720679012346   I33=0.265721450617284   I22=0.0302854938271605   I23=5.55111512312578E-17   AS2=0.191111111111111   AS3=0.314120347222222   S33Top=0.296619328703704   S33Bot=0.296619328703704 _
+        S22Left=0.0615976273148148   S22Right=0.0615976273148148   Z33=0.353587962962963   Z22=0.0960648148148148   R33=0.70955775   R22=0.239547583333333   CGOffset3=0   CGOffset2=4.44089209850063E-16   EccV2=0   EccV3=0 _
+        Cw=0.0194391646090535   Color=Cyan   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W18X258 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=5e36c82e-dc61-4c2a-a761-9259907dc998   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W18X283   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.825   t2=0.991666666666667   tf=0.208333333333333   tw=0.116666666666667   t2b=0.991666666666667   tfb=0.208333333333333   FilletRadius=0.0416666666666667 _
+        Area=0.578472222222222   TorsConst=0.00646219135802469   I33=0.297550154320988   I22=0.0339506172839506   I23=1.66533453693773E-16   AS2=0.212916666666667   AS3=0.344328680555556   S33Top=0.326082349537037   S33Bot=0.326082349537037 _
+        S22Left=0.0684718171296296   S22Right=0.0684718171296296   Z33=0.391203703703704   Z22=0.107060185185185   R33=0.717197583333333   R22=0.2422605   CGOffset3=-5.55111512312578E-17   CGOffset2=3.33066907387547E-16   EccV2=0   EccV3=0 _
+        Cw=0.0221251199925496   Color=Red   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W18X283 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=55d75600-2098-41eb-911a-4a2d9cdc049a   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W18X311   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.85833333333333   t2=1   tf=0.228333333333333   tw=0.126666666666667   t2b=1   tfb=0.228333333333333   FilletRadius=0.0416666666666667   Area=0.636111111111111 _
+        TorsConst=0.00848765432098765   I33=0.336130401234568   I22=0.0383391203703704   I23=0   AS2=0.235388888888889   AS3=0.380555555555556   S33Top=0.3617546875   S33Bot=0.3617546875   S22Left=0.0766782407407407 _
+        S22Right=0.0766782407407407   Z33=0.436342592592593   Z22=0.119791666666667   R33=0.726921333333333   R22=0.24550175   CGOffset3=0   CGOffset2=-1.11022302462516E-16   EccV2=0   EccV3=0   Cw=0.0252774513888889   Color=Green _
+        FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W18X311   FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml" _
+        GUID=28f95a50-a8ed-4736-92bb-a4f14230104b   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W18X35   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.475   t2=0.5   tf=0.0354166666666667   tw=0.025   t2b=0.5   tfb=0.0354166666666667   FilletRadius=0.0335   Area=0.0715277777777778   TorsConst=2.44020061728395E-05 _
+        I33=0.0245949074074074   I22=0.000737847222222222   I23=1.73472347597681E-18   AS2=0.036875   AS3=0.0295138888888889   S33Top=0.0333490277777778   S33Bot=0.0333490277777778   S22Left=0.00295138888888889 _
+        S22Right=0.00295138888888889   Z33=0.0384837962962963   Z22=0.00466435185185185   R33=0.586388166666667   R22=0.101565416666667   CGOffset3=0   CGOffset2=1.11022302462516E-16   EccV2=0   EccV3=0   Cw=0.000382278677857952   Color=Red _
+        FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W18X35   FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml" _
+        GUID=42062c7a-9a13-43d2-8cfc-4d4f8352d66a   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W18X40   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.49166666666667   t2=0.501666666666667   tf=0.04375   tw=0.02625   t2b=0.501666666666667   tfb=0.04375   FilletRadius=0.0335   Area=0.0819444444444444 _
+        TorsConst=3.90625E-05   I33=0.0295138888888889   I22=0.000921103395061728   I23=1.73472347597681E-18   AS2=0.03915625   AS3=0.0365798611111111   S33Top=0.0395716956018519   S33Bot=0.0395716956018519   S22Left=0.00367217303240741 _
+        S22Right=0.00367217303240741   Z33=0.0453703703703704   Z22=0.00578703703703704   R33=0.600141166666667   R22=0.106021583333333   CGOffset3=5.55111512312578E-17   CGOffset2=0   EccV2=0   EccV3=0   Cw=0.000482502630878312 _
+        Color=Magenta   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W18X40   FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml" _
+        GUID=689b40f2-68ec-4254-881b-fc666353278b   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W18X46   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.50833333333333   t2=0.505   tf=0.0504166666666667   tw=0.03   t2b=0.505   tfb=0.0504166666666667   FilletRadius=0.03375   Area=0.09375   TorsConst=5.88348765432099E-05 _
+        I33=0.0343364197530864   I22=0.00108506944444444   I23=1.73472347597681E-17   AS2=0.04525   AS3=0.0424340277777778   S33Top=0.0455289525462963   S33Bot=0.0455289525462963   S22Left=0.00429730497685185   S22Right=0.00429730497685185 _
+        Z33=0.0524884259259259   Z22=0.00677083333333333   R33=0.605190166666667   R22=0.107582833333333   CGOffset3=-5.55111512312578E-17   CGOffset2=7.7715611723761E-16   EccV2=0   EccV3=0   Cw=0.00057504578276059   Color=Yellow _
+        FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W18X46   FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml" _
+        GUID=27ab7d6e-87ed-44f7-a76a-f8f5bcf15030   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W18X50   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.5   t2=0.625   tf=0.0475   tw=0.0295833333333333   t2b=0.625   tfb=0.0475   FilletRadius=0.0335   Area=0.102083333333333   TorsConst=5.97993827160494E-05 _
+        I33=0.0385802469135802   I22=0.00193383487654321   I23=0   AS2=0.044375   AS3=0.0494791666666667   S33Top=0.0514403298611111   S33Bot=0.0514403298611111   S22Left=0.00618826967592593   S22Right=0.00618826967592593 _
+        Z33=0.0584490740740741   Z22=0.00960648148148148   R33=0.61475925   R22=0.137636083333333   CGOffset3=-5.55111512312578E-17   CGOffset2=4.44089209850063E-16   EccV2=0   EccV3=0   Cw=0.00101942364374797   Color=Gray8Dark _
+        FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W18X50   FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml" _
+        GUID=5f623247-b956-4c29-9a1a-14ca0686fdf4   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W18X55   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.50833333333333   t2=0.6275   tf=0.0525   tw=0.0325   t2b=0.6275   tfb=0.0525   FilletRadius=0.0333333333333333   Area=0.1125   TorsConst=8.0054012345679E-05 _
+        I33=0.042920524691358   I22=0.00216531635802469   I23=-1.73472347597681E-17   AS2=0.0490208333333333   AS3=0.05490625   S33Top=0.0569111921296296   S33Bot=0.0569111921296296   S22Left=0.00690140625   S22Right=0.00690140625 _
+        Z33=0.0648148148148148   Z22=0.0107060185185185   R33=0.617669583333333   R22=0.1387345   CGOffset3=1.11022302462516E-16   CGOffset2=-2.22044604925031E-16   EccV2=0   EccV3=0   Cw=0.00114554609713682   Color=Blue   FromFile=Yes _
+        AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W18X55   FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml" _
+        GUID=93381c96-dbd4-4303-ba43-c1af8c8655d1   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W18X60   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.51666666666667   t2=0.63   tf=0.0579166666666667   tw=0.0345833333333333   t2b=0.63   tfb=0.0579166666666667   FilletRadius=0.03375   Area=0.122222222222222 _
+        TorsConst=0.000104648919753086   I33=0.0474537037037037   I22=0.00241608796296296   I23=-3.46944695195361E-18   AS2=0.0524513888888889   AS3=0.0608125   S33Top=0.0625763310185185   S33Bot=0.0625763310185185 _
+        S22Left=0.00767012152777778   S22Right=0.00767012152777778   Z33=0.0711805555555556   Z22=0.0119212962962963   R33=0.623103166666667   R22=0.140598666666667   CGOffset3=0   CGOffset2=-1.11022302462516E-16   EccV2=0   EccV3=0 _
+        Cw=0.00128403157472974   Color=Green   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W18X60 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=988a8f75-1034-440d-838a-664618886f7f   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W18X65   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.53333333333333   t2=0.6325   tf=0.0625   tw=0.0375   t2b=0.6325   tfb=0.0625   FilletRadius=0.0333333333333333   Area=0.132638888888889 _
+        TorsConst=0.000131655092592593   I33=0.0516010802469136   I22=0.00264274691358025   I23=-1.38777878078145E-17   AS2=0.0575   AS3=0.0658854166666667   S33Top=0.067305787037037   S33Bot=0.067305787037037   S22Left=0.00835651041666667 _
+        S22Right=0.00835651041666667   Z33=0.0769675925925926   Z22=0.0130208333333333   R33=0.623726166666667   R22=0.14115375   CGOffset3=0   CGOffset2=1.11022302462516E-16   EccV2=0   EccV3=0   Cw=0.00142553305639549   Color=Cyan _
+        FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W18X65   FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml" _
+        GUID=05d24178-12e4-4345-910f-f1b393a8b03d   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W18X71   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.54166666666667   t2=0.636666666666667   tf=0.0675   tw=0.04125   t2b=0.636666666666667   tfb=0.0675   FilletRadius=0.0333333333333333   Area=0.145138888888889 _
+        TorsConst=0.000168306327160494   I33=0.0564236111111111   I22=0.00290798611111111   I23=1.38777878078145E-17   AS2=0.06359375   AS3=0.071625   S33Top=0.0731982060185185   S33Bot=0.0731982060185185   S22Left=0.00913503472222222 _
+        S22Right=0.00913503472222222   Z33=0.0844907407407407   Z22=0.0142939814814815   R33=0.623503   R22=0.141548166666667   CGOffset3=-5.55111512312578E-17   CGOffset2=2.22044604925031E-16   EccV2=0   EccV3=0   Cw=0.00157732810767007 _
+        Color=Red   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W18X71   FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml" _
+        GUID=5bf077c9-5977-4ff1-bf1f-d27232f9fecc   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W18X76   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.51666666666667   t2=0.916666666666667   tf=0.0566666666666667   tw=0.0354166666666667   t2b=0.916666666666667   tfb=0.0566666666666667 _
+        FilletRadius=0.0333333333333333   Area=0.154861111111111   TorsConst=0.00013647762345679   I33=0.0641396604938272   I22=0.00733024691358025   I23=1.38777878078145E-17   AS2=0.0537152777777778   AS3=0.0865740972222222 _
+        S33Top=0.0845797453703704   S33Bot=0.0845797453703704   S22Left=0.0159932638888889   S22Right=0.0159932638888889   Z33=0.0943287037037037   Z22=0.0244212962962963   R33=0.643564583333333   R22=0.217564583333333   CGOffset3=0 _
+        CGOffset2=0   EccV2=0   EccV3=0   Cw=0.00387664875900206   Color=Magenta   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W18X76 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=acfc3e5b-1498-40c8-974c-96098f94083e   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W18X86   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.53333333333333   t2=0.925   tf=0.0641666666666667   tw=0.04   t2b=0.925   tfb=0.0641666666666667   FilletRadius=0.0333333333333333   Area=0.175694444444444 _
+        TorsConst=0.000197723765432099   I33=0.0737847222222222   I22=0.00843942901234568   I23=-1.38777878078145E-17   AS2=0.0613333333333333   AS3=0.0989236111111111   S33Top=0.0962409722222222   S33Bot=0.0962409722222222 _
+        S22Left=0.0182474131944444   S22Right=0.0182474131944444   Z33=0.107638888888889   Z22=0.0280092592592593   R33=0.648043583333333   R22=0.219168166666667   CGOffset3=1.66533453693773E-16   CGOffset2=2.22044604925031E-16   EccV2=0 _
+        EccV3=0   Cw=0.00456736340764891   Color=Yellow   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W18X86 _
+        FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml"   GUID=74e07ce1-2357-433d-bbe3-744e33018f1d   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W18X97   Material=A992Fy50   Shape="I/Wide Flange"   t3=1.55   t2=0.925   tf=0.0725   tw=0.0445833333333333   t2b=0.925   tfb=0.0725   FilletRadius=0.0333333333333333   Area=0.197916666666667   TorsConst=0.000282600308641975 _
+        I33=0.0843942901234568   I22=0.00969328703703704   I23=2.77555756156289E-17   AS2=0.0691041666666667   AS3=0.111770833333333   S33Top=0.108895833333333   S33Bot=0.108895833333333   S22Left=0.0209584548611111 _
+        S22Right=0.0209584548611111   Z33=0.122106481481481   Z22=0.0320023148148148   R33=0.65300325   R22=0.221306583333333   CGOffset3=5.55111512312578E-17   CGOffset2=1.11022302462516E-16   EccV2=0   EccV3=0   Cw=0.00521923608700561 _
+        Color=Gray8Dark   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W18X97   FileName="c:\program files\computers and structures\sap2000 23\property libraries\sections\aisc15.xml" _
+        GUID=0e29f6e4-6921-484a-b115-fac8f3fc0996   Notes="Imported 3/13/2025 5:08:06 PM from AISC15.xml"
+   SectionName=W8X10   Material=A992Fy50   Shape="I/Wide Flange"   t3=0.6575   t2=0.328333333333333   tf=0.0170833333333333   tw=0.0141666666666667   t2b=0.328333333333333   tfb=0.0170833333333333   FilletRadius=0   Area=0.0205555555555556 _
+        TorsConst=2.05439814814815E-06   I33=0.00148533950617284   I22=0.000100790895061728   I23=2.16840434497101E-19   AS2=0.00931458333333333   AS3=0.00934838194444444   S33Top=0.00451814293981481   S33Bot=0.00451814293981481 _
+        S22Left=0.000613954861111111   S22Right=0.000613954861111111   Z33=0.00513310185185185   Z22=0.000960648148148148   R33=0.26881175   R22=0.0700238583333333   CGOffset3=0   CGOffset2=5.55111512312578E-17   EccV2=0   EccV3=0 _
+        Cw=1.03483474794239E-05   Color=Blue   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W8X10 _
+        FileName="c:\program files\computers and structures\sap2000 25\property libraries\sections\aisc16.xml"   GUID=3ac0b211-a41f-4bfb-87ed-64391e2ff74a   Notes="Imported 3/6/2026 9:53:36 AM from AISC16.xml"
+   SectionName=W8X13   Material=A992Fy50   Shape="I/Wide Flange"   t3=0.665833333333333   t2=0.333333333333333   tf=0.02125   tw=0.0191666666666667   t2b=0.333333333333333   tfb=0.02125   FilletRadius=0   Area=0.0266666666666667 _
+        TorsConst=4.20042438271605E-06   I33=0.00190972222222222   I22=0.000131655092592593   I23=-4.33680868994202E-19   AS2=0.0127618055555556   AS3=0.0118055555555556   S33Top=0.00573633738425926   S33Bot=0.00573633738425926 _
+        S22Left=0.000789930555555556   S22Right=0.000789930555555556   Z33=0.00659722222222222   Z22=0.00124421296296296   R33=0.267609   R22=0.0702642583333333   CGOffset3=2.77555756156289E-17   CGOffset2=-5.55111512312578E-17   EccV2=0 _
+        EccV3=0   Cw=1.36638374485597E-05   Color=Green   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W8X13 _
+        FileName="c:\program files\computers and structures\sap2000 25\property libraries\sections\aisc16.xml"   GUID=9228e690-7c1f-4054-9438-f1f4c147df03   Notes="Imported 3/6/2026 9:53:36 AM from AISC16.xml"
+   SectionName=W8X15   Material=A992Fy50   Shape="I/Wide Flange"   t3=0.675833333333333   t2=0.335   tf=0.02625   tw=0.0204166666666667   t2b=0.335   tfb=0.02625   FilletRadius=0   Area=0.0308333333333333   TorsConst=6.60686728395062E-06 _
+        I33=0.00231481481481481   I22=0.000164448302469136   I23=4.33680868994202E-19   AS2=0.0137982638888889   AS3=0.01465625   S33Top=0.00685025462962963   S33Bot=0.00685025462962963   S22Left=0.000981780671296296 _
+        S22Right=0.000981780671296296   Z33=0.00787037037037037   Z22=0.00154513888888889   R33=0.273998333333333   R22=0.0730305333333333   CGOffset3=-2.77555756156289E-17   CGOffset2=-5.55111512312578E-17   EccV2=0   EccV3=0 _
+        Cw=1.73477151920439E-05   Color=Cyan   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W8X15 _
+        FileName="c:\program files\computers and structures\sap2000 25\property libraries\sections\aisc16.xml"   GUID=e1e66641-6cd5-4726-98a4-2ffe792c3d8a   Notes="Imported 3/6/2026 9:53:36 AM from AISC16.xml"
+   SectionName=W8X18   Material=A992Fy50   Shape="I/Wide Flange"   t3=0.678333333333333   t2=0.4375   tf=0.0275   tw=0.0191666666666667   t2b=0.4375   tfb=0.0275   FilletRadius=0   Area=0.0365277777777778   TorsConst=8.29475308641975E-06 _
+        I33=0.00298514660493827   I22=0.000384355709876543   I23=8.67361737988404E-19   AS2=0.0130013888888889   AS3=0.0200520833333333   S33Top=0.00880141782407407   S33Bot=0.00880141782407407   S22Left=0.00175705497685185 _
+        S22Right=0.00175705497685185   Z33=0.00983796296296296   Z22=0.00269675925925926   R33=0.28587175   R22=0.102578166666667   CGOffset3=-5.55111512312578E-17   CGOffset2=0   EccV2=0   EccV3=0   Cw=4.08575531550069E-05   Color=Red _
+        FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W8X18   FileName="c:\program files\computers and structures\sap2000 25\property libraries\sections\aisc16.xml" _
+        GUID=684a95a0-319c-4960-9f2e-98df161deee2   Notes="Imported 3/6/2026 9:53:36 AM from AISC16.xml"
+   SectionName=W8X21   Material=A992Fy50   Shape="I/Wide Flange"   t3=0.69   t2=0.439166666666667   tf=0.0333333333333333   tw=0.0208333333333333   t2b=0.439166666666667   tfb=0.0333333333333333   FilletRadius=0   Area=0.0427777777777778 _
+        TorsConst=1.3599537037037E-05   I33=0.00363136574074074   I22=0.000471161265432099   I23=-4.33680868994202E-19   AS2=0.014375   AS3=0.0243981458333333   S33Top=0.0105257002314815   S33Bot=0.0105257002314815 _
+        S22Left=0.00214570601851852   S22Right=0.00214570601851852   Z33=0.0118055555555556   Z22=0.00329282407407407   R33=0.29135725   R22=0.104948333333333   CGOffset3=0   CGOffset2=0   EccV2=0   EccV3=0   Cw=5.09044924554184E-05 _
+        Color=Magenta   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W8X21   FileName="c:\program files\computers and structures\sap2000 25\property libraries\sections\aisc16.xml" _
+        GUID=9e10f265-cfa7-46b1-b620-361406d28806   Notes="Imported 3/6/2026 9:53:36 AM from AISC16.xml"
+   SectionName=W8X24   Material=A992Fy50   Shape="I/Wide Flange"   t3=0.660833333333333   t2=0.541666666666667   tf=0.0333333333333333   tw=0.0204166666666667   t2b=0.541666666666667   tfb=0.0333333333333333   FilletRadius=0 _
+        Area=0.0491666666666667   TorsConst=1.66859567901235E-05   I33=0.00398823302469136   I22=0.000882523148148148   I23=0   AS2=0.0134920138888889   AS3=0.0300925902777778   S33Top=0.0120703125   S33Bot=0.0120703125 _
+        S22Left=0.003258546875   S22Right=0.003258546875   Z33=0.0133680555555556   Z22=0.00495949074074074   R33=0.28480975   R22=0.133976166666667   CGOffset3=0   CGOffset2=-1.11022302462516E-16   EccV2=0   EccV3=0 _
+        Cw=8.67385759602195E-05   Color=Yellow   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W8X24 _
+        FileName="c:\program files\computers and structures\sap2000 25\property libraries\sections\aisc16.xml"   GUID=295b5322-dad4-4bfb-b581-5606b9df2ab0   Notes="Imported 3/6/2026 9:53:36 AM from AISC16.xml"
+   SectionName=W8X28   Material=A992Fy50   Shape="I/Wide Flange"   t3=0.671666666666667   t2=0.545   tf=0.03875   tw=0.02375   t2b=0.545   tfb=0.03875   FilletRadius=0   Area=0.0572916666666667   TorsConst=2.58969907407407E-05 _
+        I33=0.00472608024691358   I22=0.00104648919753086   I23=-8.67361737988404E-19   AS2=0.0159520833333333   AS3=0.0351979166666667   S33Top=0.0140726967592593   S33Bot=0.0140726967592593   S22Left=0.0038403275462963 _
+        S22Right=0.0038403275462963   Z33=0.0157407407407407   Z22=0.00584490740740741   R33=0.2872135   R22=0.13515175   CGOffset3=5.55111512312578E-17   CGOffset2=-1.66533453693773E-16   EccV2=0   EccV3=0   Cw=0.00010448816872428 _
+        Color=Gray8Dark   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W8X28   FileName="c:\program files\computers and structures\sap2000 25\property libraries\sections\aisc16.xml" _
+        GUID=12168e4a-c37c-48f8-a65b-bc97bf8bf8dc   Notes="Imported 3/6/2026 9:53:36 AM from AISC16.xml"
+   SectionName=W8X31   Material=A992Fy50   Shape="I/Wide Flange"   t3=0.666666666666667   t2=0.666666666666667   tf=0.03625   tw=0.02375   t2b=0.666666666666667   tfb=0.03625   FilletRadius=0   Area=0.0634027777777778 _
+        TorsConst=2.58487654320988E-05   I33=0.00530478395061728   I22=0.00178915895061728   I23=8.67361737988404E-19   AS2=0.0158333333333333   AS3=0.0402777777777778   S33Top=0.0159143518518519   S33Bot=0.0159143518518519 _
+        S22Left=0.00536747685185185   S22Right=0.00536747685185185   Z33=0.0175925925925926   Z22=0.00815972222222222   R33=0.28925425   R22=0.167984916666667   CGOffset3=0   CGOffset2=0   EccV2=0   EccV3=0   Cw=0.000177495927640604 _
+        Color=Blue   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W8X31   FileName="c:\program files\computers and structures\sap2000 25\property libraries\sections\aisc16.xml" _
+        GUID=dba76c35-a929-4874-8af0-bd26254958c0   Notes="Imported 3/6/2026 9:53:36 AM from AISC16.xml"
+   SectionName=W8X35   Material=A992Fy50   Shape="I/Wide Flange"   t3=0.676666666666667   t2=0.668333333333333   tf=0.04125   tw=0.0258333333333333   t2b=0.668333333333333   tfb=0.04125   FilletRadius=0   Area=0.0715277777777778 _
+        TorsConst=3.7085262345679E-05   I33=0.00612461419753086   I22=0.00205439814814815   I23=1.73472347597681E-18   AS2=0.0174805555555556   AS3=0.0459479166666667   S33Top=0.0181023090277778   S33Bot=0.0181023090277778 _
+        S22Left=0.00614782407407407   S22Right=0.00614782407407407   Z33=0.0200810185185185   Z22=0.00931712962962963   R33=0.292618666666667   R22=0.16947475   CGOffset3=0   CGOffset2=5.55111512312578E-17   EccV2=0   EccV3=0 _
+        Cw=0.000207301847565158   Color=Green   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W8X35 _
+        FileName="c:\program files\computers and structures\sap2000 25\property libraries\sections\aisc16.xml"   GUID=15b8b0d2-39ac-4954-8098-26014811fa74   Notes="Imported 3/6/2026 9:53:36 AM from AISC16.xml"
+   SectionName=W8X40   Material=A992Fy50   Shape="I/Wide Flange"   t3=0.6875   t2=0.6725   tf=0.0466666666666667   tw=0.03   t2b=0.6725   tfb=0.0466666666666667   FilletRadius=0   Area=0.08125   TorsConst=5.40123456790123E-05 _
+        I33=0.0070408950617284   I22=0.00236786265432099   I23=-1.73472347597681E-18   AS2=0.020625   AS3=0.0523055555555556   S33Top=0.0204826041666667   S33Bot=0.0204826041666667   S22Left=0.00704197337962963 _
+        S22Right=0.00704197337962963   Z33=0.0230324074074074   Z22=0.0107060185185185   R33=0.294375916666667   R22=0.170713   CGOffset3=0   CGOffset2=-1.66533453693773E-16   EccV2=0   EccV3=0   Cw=0.000243135931069959   Color=Cyan _
+        FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W8X40   FileName="c:\program files\computers and structures\sap2000 25\property libraries\sections\aisc16.xml" _
+        GUID=5a591d57-6bcb-4660-b7f8-06e2797a9af6   Notes="Imported 3/6/2026 9:53:36 AM from AISC16.xml"
+   SectionName=W8X48   Material=A992Fy50   Shape="I/Wide Flange"   t3=0.708333333333333   t2=0.675833333333333   tf=0.0570833333333333   tw=0.0333333333333333   t2b=0.675833333333333   tfb=0.0570833333333333   FilletRadius=0 _
+        Area=0.0979166666666667   TorsConst=9.45216049382716E-05   I33=0.00887345679012346   I22=0.0029369212962963   I23=3.46944695195361E-18   AS2=0.0236111111111111   AS3=0.0642980347222222   S33Top=0.0250544675925926 _
+        S33Bot=0.0250544675925926   S22Left=0.00869126157407407   S22Right=0.00869126157407407   Z33=0.0283564814814815   Z22=0.0132523148148148   R33=0.30103575   R22=0.173188   CGOffset3=5.55111512312578E-17 _
+        CGOffset2=1.11022302462516E-16   EccV2=0   EccV3=0   Cw=0.000311790016289438   Color=Red   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W8X48 _
+        FileName="c:\program files\computers and structures\sap2000 25\property libraries\sections\aisc16.xml"   GUID=cb27efd1-0fae-4874-ad60-751c10f62c23   Notes="Imported 3/6/2026 9:53:36 AM from AISC16.xml"
+   SectionName=W8X58   Material=A992Fy50   Shape="I/Wide Flange"   t3=0.729166666666667   t2=0.685   tf=0.0675   tw=0.0425   t2b=0.685   tfb=0.0675   FilletRadius=0   Area=0.11875   TorsConst=0.000160590277777778   I33=0.0109953703703704 _
+        I22=0.00362172067901235   I23=-1.73472347597681E-18   AS2=0.0309895833333333   AS3=0.0770625   S33Top=0.0301587268518519   S33Bot=0.0301587268518519   S22Left=0.010574369212963   S22Right=0.010574369212963   Z33=0.0346064814814815 _
+        Z22=0.0161458333333333   R33=0.304290333333333   R22=0.17463875   CGOffset3=0   CGOffset2=-5.55111512312578E-17   EccV2=0   EccV3=0   Cw=0.000395179612482853   Color=Magenta   FromFile=Yes   AMod=1   A2Mod=1   A3Mod=1   JMod=1 _
+        I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W8X58   FileName="c:\program files\computers and structures\sap2000 25\property libraries\sections\aisc16.xml"   GUID=d78e5e3b-0c79-484d-a8bd-c68e000adb73   Notes="Imported 3/6/2026 9:53:36 AM from AISC16.xml"
+   SectionName=W8X67   Material=A992Fy50   Shape="I/Wide Flange"   t3=0.75   t2=0.69   tf=0.0779166666666667   tw=0.0475   t2b=0.69   tfb=0.0779166666666667   FilletRadius=0   Area=0.136805555555556   TorsConst=0.000243537808641975 _
+        I33=0.0131172839506173   I22=0.00427276234567901   I23=-3.46944695195361E-18   AS2=0.035625   AS3=0.0896041666666667   S33Top=0.0349794212962963   S33Bot=0.0349794212962963   S22Left=0.0123848206018519   S22Right=0.0123848206018519 _
+        Z33=0.0405671296296296   Z22=0.0189236111111111   R33=0.30964925   R22=0.176726833333333   CGOffset3=0   CGOffset2=-1.11022302462516E-16   EccV2=0   EccV3=0   Cw=0.000482253086419753   Color=Yellow   FromFile=Yes   AMod=1   A2Mod=1 _
+        A3Mod=1   JMod=1   I2Mod=1   I3Mod=1   MMod=1   WMod=1   SectInFile=W8X67   FileName="c:\program files\computers and structures\sap2000 25\property libraries\sections\aisc16.xml"   GUID=9ef42d64-338b-4926-96fe-a13761d85401   Notes="Imported 3/6/2026 9:53:36 AM from AISC16.xml"
+ 
+TABLE:  "FRAME SECTION PROPERTIES 13 - TIME DEPENDENT"
+   SectionName=W10X100   TypeSize=Auto   AutoSFSize=0
+   SectionName=W10X112   TypeSize=Auto   AutoSFSize=0
+   SectionName=W10X12   TypeSize=Auto   AutoSFSize=0
+   SectionName=W10X15   TypeSize=Auto   AutoSFSize=0
+   SectionName=W10X17   TypeSize=Auto   AutoSFSize=0
+   SectionName=W10X19   TypeSize=Auto   AutoSFSize=0
+   SectionName=W10X22   TypeSize=Auto   AutoSFSize=0
+   SectionName=W10X26   TypeSize=Auto   AutoSFSize=0
+   SectionName=W10X30   TypeSize=Auto   AutoSFSize=0
+   SectionName=W10X33   TypeSize=Auto   AutoSFSize=0
+   SectionName=W10X39   TypeSize=Auto   AutoSFSize=0
+   SectionName=W10X45   TypeSize=Auto   AutoSFSize=0
+   SectionName=W10X49   TypeSize=Auto   AutoSFSize=0
+   SectionName=W10X54   TypeSize=Auto   AutoSFSize=0
+   SectionName=W10X60   TypeSize=Auto   AutoSFSize=0
+   SectionName=W10X68   TypeSize=Auto   AutoSFSize=0
+   SectionName=W10X77   TypeSize=Auto   AutoSFSize=0
+   SectionName=W10X88   TypeSize=Auto   AutoSFSize=0
+   SectionName=W12X106   TypeSize=Auto   AutoSFSize=0
+   SectionName=W12X120   TypeSize=Auto   AutoSFSize=0
+   SectionName=W12X136   TypeSize=Auto   AutoSFSize=0
+   SectionName=W12X14   TypeSize=Auto   AutoSFSize=0
+   SectionName=W12X152   TypeSize=Auto   AutoSFSize=0
+   SectionName=W12X16   TypeSize=Auto   AutoSFSize=0
+   SectionName=W12X170   TypeSize=Auto   AutoSFSize=0
+   SectionName=W12X19   TypeSize=Auto   AutoSFSize=0
+   SectionName=W12X190   TypeSize=Auto   AutoSFSize=0
+   SectionName=W12X210   TypeSize=Auto   AutoSFSize=0
+   SectionName=W12X22   TypeSize=Auto   AutoSFSize=0
+   SectionName=W12X230   TypeSize=Auto   AutoSFSize=0
+   SectionName=W12X252   TypeSize=Auto   AutoSFSize=0
+   SectionName=W12X26   TypeSize=Auto   AutoSFSize=0
+   SectionName=W12X279   TypeSize=Auto   AutoSFSize=0
+   SectionName=W12X30   TypeSize=Auto   AutoSFSize=0
+   SectionName=W12X305   TypeSize=Auto   AutoSFSize=0
+   SectionName=W12X336   TypeSize=Auto   AutoSFSize=0
+   SectionName=W12X35   TypeSize=Auto   AutoSFSize=0
+   SectionName=W12X40   TypeSize=Auto   AutoSFSize=0
+   SectionName=W12X45   TypeSize=Auto   AutoSFSize=0
+   SectionName=W12X50   TypeSize=Auto   AutoSFSize=0
+   SectionName=W12X53   TypeSize=Auto   AutoSFSize=0
+   SectionName=W12X58   TypeSize=Auto   AutoSFSize=0
+   SectionName=W12X65   TypeSize=Auto   AutoSFSize=0
+   SectionName=W12X72   TypeSize=Auto   AutoSFSize=0
+   SectionName=W12X79   TypeSize=Auto   AutoSFSize=0
+   SectionName=W12X87   TypeSize=Auto   AutoSFSize=0
+   SectionName=W12X96   TypeSize=Auto   AutoSFSize=0
+   SectionName=W14X109   TypeSize=Auto   AutoSFSize=0
+   SectionName=W14X120   TypeSize=Auto   AutoSFSize=0
+   SectionName=W14X132   TypeSize=Auto   AutoSFSize=0
+   SectionName=W14X145   TypeSize=Auto   AutoSFSize=0
+   SectionName=W14X159   TypeSize=Auto   AutoSFSize=0
+   SectionName=W14X176   TypeSize=Auto   AutoSFSize=0
+   SectionName=W14X193   TypeSize=Auto   AutoSFSize=0
+   SectionName=W14X211   TypeSize=Auto   AutoSFSize=0
+   SectionName=W14X22   TypeSize=Auto   AutoSFSize=0
+   SectionName=W14X233   TypeSize=Auto   AutoSFSize=0
+   SectionName=W14X257   TypeSize=Auto   AutoSFSize=0
+   SectionName=W14X26   TypeSize=Auto   AutoSFSize=0
+   SectionName=W14X283   TypeSize=Auto   AutoSFSize=0
+   SectionName=W14X30   TypeSize=Auto   AutoSFSize=0
+   SectionName=W14X311   TypeSize=Auto   AutoSFSize=0
+   SectionName=W14X34   TypeSize=Auto   AutoSFSize=0
+   SectionName=W14X342   TypeSize=Auto   AutoSFSize=0
+   SectionName=W14X370   TypeSize=Auto   AutoSFSize=0
+   SectionName=W14X38   TypeSize=Auto   AutoSFSize=0
+   SectionName=W14X398   TypeSize=Auto   AutoSFSize=0
+   SectionName=W14X426   TypeSize=Auto   AutoSFSize=0
+   SectionName=W14X43   TypeSize=Auto   AutoSFSize=0
+   SectionName=W14X455   TypeSize=Auto   AutoSFSize=0
+   SectionName=W14X48   TypeSize=Auto   AutoSFSize=0
+   SectionName=W14X500   TypeSize=Auto   AutoSFSize=0
+   SectionName=W14X53   TypeSize=Auto   AutoSFSize=0
+   SectionName=W14X550   TypeSize=Auto   AutoSFSize=0
+   SectionName=W14X605   TypeSize=Auto   AutoSFSize=0
+   SectionName=W14X61   TypeSize=Auto   AutoSFSize=0
+   SectionName=W14X665   TypeSize=Auto   AutoSFSize=0
+   SectionName=W14X68   TypeSize=Auto   AutoSFSize=0
+   SectionName=W14X730   TypeSize=Auto   AutoSFSize=0
+   SectionName=W14X74   TypeSize=Auto   AutoSFSize=0
+   SectionName=W14X808   TypeSize=Auto   AutoSFSize=0
+   SectionName=W14X82   TypeSize=Auto   AutoSFSize=0
+   SectionName=W14X873   TypeSize=Auto   AutoSFSize=0
+   SectionName=W14X90   TypeSize=Auto   AutoSFSize=0
+   SectionName=W14X99   TypeSize=Auto   AutoSFSize=0
+   SectionName=W16X100   TypeSize=Auto   AutoSFSize=0
+   SectionName=W16X26   TypeSize=Auto   AutoSFSize=0
+   SectionName=W16X31   TypeSize=Auto   AutoSFSize=0
+   SectionName=W16X36   TypeSize=Auto   AutoSFSize=0
+   SectionName=W16X40   TypeSize=Auto   AutoSFSize=0
+   SectionName=W16X45   TypeSize=Auto   AutoSFSize=0
+   SectionName=W16X50   TypeSize=Auto   AutoSFSize=0
+   SectionName=W16X57   TypeSize=Auto   AutoSFSize=0
+   SectionName=W16X67   TypeSize=Auto   AutoSFSize=0
+   SectionName=W16X77   TypeSize=Auto   AutoSFSize=0
+   SectionName=W16X89   TypeSize=Auto   AutoSFSize=0
+   SectionName=W18X106   TypeSize=Auto   AutoSFSize=0
+   SectionName=W18X119   TypeSize=Auto   AutoSFSize=0
+   SectionName=W18X130   TypeSize=Auto   AutoSFSize=0
+   SectionName=W18X143   TypeSize=Auto   AutoSFSize=0
+   SectionName=W18X158   TypeSize=Auto   AutoSFSize=0
+   SectionName=W18X175   TypeSize=Auto   AutoSFSize=0
+   SectionName=W18X192   TypeSize=Auto   AutoSFSize=0
+   SectionName=W18X211   TypeSize=Auto   AutoSFSize=0
+   SectionName=W18X234   TypeSize=Auto   AutoSFSize=0
+   SectionName=W18X258   TypeSize=Auto   AutoSFSize=0
+   SectionName=W18X283   TypeSize=Auto   AutoSFSize=0
+   SectionName=W18X311   TypeSize=Auto   AutoSFSize=0
+   SectionName=W18X35   TypeSize=Auto   AutoSFSize=0
+   SectionName=W18X40   TypeSize=Auto   AutoSFSize=0
+   SectionName=W18X46   TypeSize=Auto   AutoSFSize=0
+   SectionName=W18X50   TypeSize=Auto   AutoSFSize=0
+   SectionName=W18X55   TypeSize=Auto   AutoSFSize=0
+   SectionName=W18X60   TypeSize=Auto   AutoSFSize=0
+   SectionName=W18X65   TypeSize=Auto   AutoSFSize=0
+   SectionName=W18X71   TypeSize=Auto   AutoSFSize=0
+   SectionName=W18X76   TypeSize=Auto   AutoSFSize=0
+   SectionName=W18X86   TypeSize=Auto   AutoSFSize=0
+   SectionName=W18X97   TypeSize=Auto   AutoSFSize=0
+   SectionName=W8X10   TypeSize=Auto   AutoSFSize=0
+   SectionName=W8X13   TypeSize=Auto   AutoSFSize=0
+   SectionName=W8X15   TypeSize=Auto   AutoSFSize=0
+   SectionName=W8X18   TypeSize=Auto   AutoSFSize=0
+   SectionName=W8X21   TypeSize=Auto   AutoSFSize=0
+   SectionName=W8X24   TypeSize=Auto   AutoSFSize=0
+   SectionName=W8X28   TypeSize=Auto   AutoSFSize=0
+   SectionName=W8X31   TypeSize=Auto   AutoSFSize=0
+   SectionName=W8X35   TypeSize=Auto   AutoSFSize=0
+   SectionName=W8X40   TypeSize=Auto   AutoSFSize=0
+   SectionName=W8X48   TypeSize=Auto   AutoSFSize=0
+   SectionName=W8X58   TypeSize=Auto   AutoSFSize=0
+   SectionName=W8X67   TypeSize=Auto   AutoSFSize=0
+ 
+TABLE:  "FUNCTION - PLOT FUNCTIONS"
+   PlotFunc="Input Energy"   Type=Energy   Component=Input   Mode=All
+ 
+TABLE:  "FUNCTION - POWER SPECTRAL DENSITY - USER"
+   Name=UNIFPSD   Frequency=0   Value=1
+   Name=UNIFPSD   Frequency=1   Value=1
+ 
+TABLE:  "FUNCTION - RESPONSE SPECTRUM - USER"
+   Name=UNIFRS   Period=0   Accel=1   FuncDamp=0.05
+   Name=UNIFRS   Period=1   Accel=1
+ 
+TABLE:  "FUNCTION - STEADY STATE - USER"
+   Name=UNIFSS   Frequency=0   Value=1
+   Name=UNIFSS   Frequency=1   Value=1
+ 
+TABLE:  "FUNCTION - TIME HISTORY - USER"
+   Name=RAMPTH   Time=0   Value=0
+   Name=RAMPTH   Time=1   Value=1
+   Name=RAMPTH   Time=4   Value=1
+   Name=UNIFTH   Time=0   Value=1
+   Name=UNIFTH   Time=1   Value=1
+ 
+TABLE:  "GRID LINES"
+   CoordSys=GLOBAL   AxisDir=X   GridID=A   XRYZCoord=0   LineType=Primary   LineColor=Gray8Dark   Visible=Yes   BubbleLoc=End   AllVisible=Yes   BubbleSize=5
+   CoordSys=GLOBAL   AxisDir=X   GridID=B   XRYZCoord=15.25   LineType=Primary   LineColor=Gray8Dark   Visible=Yes   BubbleLoc=End
+   CoordSys=GLOBAL   AxisDir=X   GridID=C   XRYZCoord=44   LineType=Primary   LineColor=Gray8Dark   Visible=Yes   BubbleLoc=End
+   CoordSys=GLOBAL   AxisDir=X   GridID=D   XRYZCoord=59.25   LineType=Primary   LineColor=Gray8Dark   Visible=Yes   BubbleLoc=End
+   CoordSys=GLOBAL   AxisDir=Y   GridID=1   XRYZCoord=0   LineType=Primary   LineColor=Gray8Dark   Visible=Yes   BubbleLoc=Start
+   CoordSys=GLOBAL   AxisDir=Y   GridID=2   XRYZCoord=15.125   LineType=Primary   LineColor=Gray8Dark   Visible=Yes   BubbleLoc=Start
+   CoordSys=GLOBAL   AxisDir=Y   GridID=3   XRYZCoord=30.25   LineType=Primary   LineColor=Gray8Dark   Visible=Yes   BubbleLoc=Start
+   CoordSys=GLOBAL   AxisDir=Z   GridID=Z1   XRYZCoord=0   LineType=Primary   LineColor=Gray8Dark   Visible=Yes   BubbleLoc=End
+   CoordSys=GLOBAL   AxisDir=Z   GridID=Z2   XRYZCoord=4.5   LineType=Primary   LineColor=Gray8Dark   Visible=Yes   BubbleLoc=End
+ 
+TABLE:  "GROUPS 1 - DEFINITIONS"
+   GroupName=ALL   Selection=Yes   SectionCut=Yes   Steel=Yes   Concrete=Yes   Aluminum=Yes   ColdFormed=Yes   Stage=Yes   Bridge=Yes   AutoSeismic=No   AutoWind=No   SelDesSteel=No   SelDesAlum=No   SelDesCold=No   MassWeight=Yes   Color=Red
+ 
+TABLE:  "JOINT COORDINATES"
+   Joint=1   CoordSys=GLOBAL   CoordType=Cartesian   XorR=0   Y=0   Z=0   SpecialJt=No   GUID=47028d9a-ccf2-45b1-a04c-3f8606d246de
+   Joint=2   CoordSys=GLOBAL   CoordType=Cartesian   XorR=15.25   Y=15.125   Z=4.5   SpecialJt=No   GUID=85e53fb1-4636-45c1-86fc-e202c679ae72
+   Joint=3   CoordSys=GLOBAL   CoordType=Cartesian   XorR=0   Y=30.25   Z=0   SpecialJt=No   GUID=b6a8d0c0-02c7-4eb7-81b8-e7314160b9d6
+   Joint=4   CoordSys=GLOBAL   CoordType=Cartesian   XorR=59.25   Y=0   Z=0   SpecialJt=No   GUID=9d06f3eb-4515-4568-9114-f11ccbfb1113
+   Joint=5   CoordSys=GLOBAL   CoordType=Cartesian   XorR=44   Y=15.125   Z=4.5   SpecialJt=No   GUID=223c61a2-5aa6-4da5-9562-10ce4a242517
+   Joint=6   CoordSys=GLOBAL   CoordType=Cartesian   XorR=59.25   Y=30.25   Z=0   SpecialJt=No   GUID=b5f825c0-2a9b-498b-8258-cf7e7a73a29e
+   Joint=7   CoordSys=GLOBAL   CoordType=Cartesian   XorR=29.625   Y=15.125   Z=4.5   SpecialJt=No   GUID=89e30c06-b5f3-4a88-ba79-580c4fae2b89
+   Joint=8   CoordSys=GLOBAL   CoordType=Cartesian   XorR=29.625   Y=0   Z=0   SpecialJt=No   GUID=c3d63fcc-2921-44f4-b801-1c839ac4ea1b
+   Joint=9   CoordSys=GLOBAL   CoordType=Cartesian   XorR=36   Y=15.125   Z=4.5   SpecialJt=Yes   GUID=7654f9dc-e408-4863-b4f7-d98666d8b798
+   Joint=10   CoordSys=GLOBAL   CoordType=Cartesian   XorR=29.625   Y=30.25   Z=0   SpecialJt=No   GUID=b04e94df-39c7-48e2-9988-cd7a250e3a53
+   Joint=11   CoordSys=GLOBAL   CoordType=Cartesian   XorR=7.625   Y=7.5625   Z=2.25   SpecialJt=No   GUID=f00b76ae-9c98-46c9-adc6-027a1aa9c639
+   Joint=12   CoordSys=GLOBAL   CoordType=Cartesian   XorR=29.625   Y=7.5625   Z=2.25   SpecialJt=No   GUID=80ca0cbf-dbdd-48b2-8eed-1391aa2f5b83
+   Joint=13   CoordSys=GLOBAL   CoordType=Cartesian   XorR=51.625   Y=7.5625   Z=2.25   SpecialJt=No   GUID=f0c42a9c-6603-4072-9fa7-451e8534e717
+   Joint=14   CoordSys=GLOBAL   CoordType=Cartesian   XorR=51.625   Y=22.6875   Z=2.25   SpecialJt=No   GUID=2f0922e0-5225-4248-a1c2-172e12bf5b62
+   Joint=15   CoordSys=GLOBAL   CoordType=Cartesian   XorR=29.625   Y=22.6875   Z=2.25   SpecialJt=No   GUID=5d686f6b-9818-4d4d-a9c9-f9270d2a4eaa
+   Joint=16   CoordSys=GLOBAL   CoordType=Cartesian   XorR=7.625   Y=22.6875   Z=2.25   SpecialJt=No   GUID=955b07e0-d73f-41db-9088-ef8cb9493b45
+ 
+TABLE:  "JOINT PATTERN DEFINITIONS"
+   Pattern=Default
+ 
+TABLE:  "JOINT RESTRAINT ASSIGNMENTS"
+   Joint=1   U1=Yes   U2=Yes   U3=Yes   R1=No   R2=No   R3=No
+   Joint=3   U1=Yes   U2=Yes   U3=Yes   R1=No   R2=No   R3=No
+   Joint=4   U1=Yes   U2=Yes   U3=Yes   R1=No   R2=No   R3=No
+   Joint=6   U1=Yes   U2=Yes   U3=Yes   R1=No   R2=No   R3=No
+   Joint=8   U1=Yes   U2=Yes   U3=Yes   R1=No   R2=No   R3=No
+   Joint=9   U1=No   U2=No   U3=Yes   R1=No   R2=No   R3=No
+   Joint=10   U1=Yes   U2=Yes   U3=Yes   R1=No   R2=No   R3=No
+ 
+TABLE:  "LOAD CASE DEFINITIONS"
+   Case=CDL   Type=LinStatic   InitialCond=Zero   DesTypeOpt="Prog Det"   DesignType=Dead   DesActOpt="Prog Det"   DesignAct=Non-Composite   AutoType=None   RunCase=Yes   GUID=972296e4-47c7-4c0c-b33f-7abb8e1ba807
+   Case=SDL   Type=LinStatic   InitialCond=Zero   DesTypeOpt="Prog Det"   DesignType="Super Dead"   DesActOpt="Prog Det"   DesignAct="Long-Term Composite"   AutoType=None   RunCase=Yes   GUID=f93144d6-41ab-44e6-9278-09eb7c3d372f
+   Case=Lr   Type=LinStatic   InitialCond=Zero   DesTypeOpt="Prog Det"   DesignType="Roof Live"   DesActOpt="Prog Det"   DesignAct="Short-Term Composite"   AutoType=None   RunCase=Yes   GUID=ee929fc8-c80c-4cc2-a722-2a37d3fe0597
+   Case=Wu   Type=LinStatic   InitialCond=Zero   DesTypeOpt="Prog Det"   DesignType=Other   DesActOpt="Prog Det"   DesignAct=Other   AutoType=None   RunCase=Yes   GUID=9fbee1b9-76db-42e5-aba2-a9beb9dd8599
+   Case=Wd   Type=LinStatic   InitialCond=Zero   DesTypeOpt="Prog Det"   DesignType=Other   DesActOpt="Prog Det"   DesignAct=Other   AutoType=None   RunCase=Yes   GUID=4e8bc86b-d3eb-4451-af2d-dc5172a29118
+   Case=MODAL   Type=LinModal   InitialCond=Zero   DesTypeOpt="Prog Det"   DesignType=Other   DesActOpt="Prog Det"   DesignAct=Other   AutoType=None   RunCase=Yes   GUID=63914b0d-e581-4440-ace7-0addce943c26
+ 
+TABLE:  "LOAD PATTERN DEFINITIONS"
+   LoadPat=CDL   DesignType=Dead   SelfWtMult=1   GUID=ade9a3d2-1bad-4fde-8d28-6e80e614333f
+   LoadPat=SDL   DesignType="Super Dead"   SelfWtMult=0   GUID=c0a9b600-23ad-4424-ba1f-d5c5796920d2
+   LoadPat=Lr   DesignType="Roof Live"   SelfWtMult=0   GUID=40ee7f68-f5bb-4cc3-a103-740fd4370340
+   LoadPat=Wu   DesignType=Other   SelfWtMult=0   GUID=61b39297-9028-49a9-b398-5f140e0d2f2c
+   LoadPat=Wd   DesignType=Other   SelfWtMult=0   GUID=7ba64a02-7254-4ff1-9435-b405d57f71e8
+ 
+TABLE:  "MASS SOURCE"
+   MassSource=MSSSRC1   Elements=Yes   Masses=Yes   Loads=No   IsDefault=Yes
+ 
+TABLE:  "MATERIAL PROPERTIES 01 - GENERAL"
+   Material=4000Psi   Type=Concrete   Grade="f'c 4000 psi"   SymType=Isotropic   TempDepend=No   Color=Blue   GUID=87a04332-af5f-4169-8943-f71d41a72527   Notes="Customary f'c 4000 psi 3/13/2025 4:57:50 PM"
+   Material=A416Gr270   Type=Tendon   Grade="Grade 270"   SymType=Uniaxial   TempDepend=No   Color=Magenta   GUID=9981d40c-8c75-47a5-bd10-df667490cc6a   Notes="ASTM A416 Grade 270 3/14/2025 3:14:12 PM"
+   Material=A992Fy50   Type=Steel   Grade="Grade 50"   SymType=Isotropic   TempDepend=No   Color=Gray8Dark   GUID=358434e7-eda6-4f1c-9001-a480cb4f470e   Notes="ASTM A992 Grade 50 3/13/2025 4:57:50 PM"
+ 
+TABLE:  "MATERIAL PROPERTIES 02 - BASIC MECHANICAL PROPERTIES"
+   Material=4000Psi   UnitWeight=0.15000000000768   UnitMass=0.0046621423155456   E1=519119.496   G12=216299.79   U12=0.2   A1=5.5E-06
+   Material=A416Gr270   UnitWeight=0.49   UnitMass=0.0152296649007508   E1=4104000   A1=6.5E-06
+   Material=A992Fy50   UnitWeight=0.49   UnitMass=0.0152296649007508   E1=4176000   G12=1606153.84615385   U12=0.3   A1=6.5E-06
+ 
+TABLE:  "MATERIAL PROPERTIES 03A - STEEL DATA"
+   Material=A992Fy50   Fy=7200   Fu=9360   EffFy=7920   EffFu=10296   SSCurveOpt=Simple   SSHysType=Kinematic   SHard=0.015   SMax=0.11   SRup=0.17   FinalSlope=-0.1   CoupModType="Von Mises"
+ 
+TABLE:  "MATERIAL PROPERTIES 03B - CONCRETE DATA"
+   Material=4000Psi   Fc=576   eFc=576   LtWtConc=No   SSCurveOpt=Mander   SSHysType=Takeda   SFc=0.00221914   SCap=0.005   FinalSlope=-0.1   FAngle=0   DAngle=0   CoupModType="Modified Darwin-Pecknold"
+ 
+TABLE:  "MATERIAL PROPERTIES 03F - TENDON DATA"
+   Material=A416Gr270   Fy=35294.4   Fu=38880   SSCurveOpt="270 ksi"   SSHysType=Kinematic   FinalSlope=-0.1   CoupModType="Von Mises"
+ 
+TABLE:  "MATERIAL PROPERTIES 03J - COUPLED NONLINEAR VON MISES DATA"
+   Material=A416Gr270   YieldStress=35294.4   LinIsoHard=No   LinKinHard=No   NLIsoSaHard=No
+   Material=A992Fy50   YieldStress=7920   LinIsoHard=No   LinKinHard=No   NLIsoSaHard=No
+ 
+TABLE:  "MATERIAL PROPERTIES 06 - DAMPING PARAMETERS"
+   Material=4000Psi   ModalRatio=0   VisMass=0   VisStiff=0   HysMass=0   HysStiff=0
+   Material=A416Gr270   ModalRatio=0   VisMass=0   VisStiff=0   HysMass=0   HysStiff=0
+   Material=A992Fy50   ModalRatio=0   VisMass=0   VisStiff=0   HysMass=0   HysStiff=0
+ 
+TABLE:  "MATERIAL PROPERTIES 09 - ACCEPTANCE CRITERIA"
+   Material=4000Psi   IOTens=0.01   LSTens=0.02   CPTens=0.05   IOComp=-0.003   LSComp=-0.006   CPComp=-0.015   IgnoreTens=Yes
+   Material=A416Gr270   IOTens=0.015   LSTens=0.023   CPTens=0.03   IOComp=-0.015   LSComp=-0.023   CPComp=-0.03
+   Material=A992Fy50   IOTens=0.01   LSTens=0.02   CPTens=0.05   IOComp=-0.005   LSComp=-0.01   CPComp=-0.02
+ 
+TABLE:  "OPTIONS - COLORS - DISPLAY"
+   DeviceType=Screen   Points=Blue   LinesFrame=Blue   LinesFrmDL=Blue   LinesCable=Green   LinesTendon=Green   SpringLinks=Green   Restraints=Orange   Releases=Green   Axes=Cyan   Text=Black   ShadowLines=Gray8Dark   GuideLines=Gray8Dark _
+        Highlight=Red   Selection=10504778   AreaFillBot=Red   AreaFillTop=16744703   AreaFillSd=Red   AreaEdge=DarkRed   SolidF1=Red   SolidF2=Blue   SolidF3=Green   SolidF4=Yellow   SolidF5=White   SolidF6=Cyan   SolidEdge=DarkRed _
+        Floor=Gray4   Background=White   BGLowLeft=White   BGLowRight=White   BGUpRight=White   Darkness=0
+   DeviceType=Printer   Points=Gray8Dark   LinesFrame=Black   LinesFrmDL=Gray4   LinesCable=Black   LinesTendon=Black   SpringLinks=Gray8Dark   Restraints=Gray8Dark   Releases=Gray4   Axes=Black   Text=Black   ShadowLines=Gray4 _
+        GuideLines=Gray4   Highlight=Black   Selection=Black   AreaFillBot=Gray4   AreaFillTop=Gray8Dark   AreaFillSd=Gray4   AreaEdge=Black   SolidF1=Gray1Light   SolidF2=Gray2   SolidF3=Gray3   SolidF4=Gray4   SolidF5=Gray5 _
+        SolidF6=Gray6   SolidEdge=Black   Floor=Gray4   Background=White   BGLowLeft=White   BGLowRight=White   BGUpRight=White   Darkness=0.5
+   DeviceType="Color Printer"   Points=Blue   LinesFrame=Blue   LinesFrmDL=Blue   LinesCable=Green   LinesTendon=Green   SpringLinks=Green   Restraints=Green   Releases=Green   Axes=Cyan   Text=Black   ShadowLines=Gray8Dark _
+        GuideLines=Gray8Dark   Highlight=Red   Selection=10504778   AreaFillBot=Red   AreaFillTop=16744703   AreaFillSd=Red   AreaEdge=DarkRed   SolidF1=Red   SolidF2=Blue   SolidF3=Green   SolidF4=Yellow   SolidF5=White   SolidF6=Cyan _
+        SolidEdge=DarkRed   Floor=Gray4   Background=White   BGLowLeft=White   BGLowRight=White   BGUpRight=White   Darkness=0.5
+ 
+TABLE:  "OPTIONS - COLORS - OUTPUT"
+   DeviceType=Screen   Contour1=13107400   Contour2=6553828   Contour3=Red   Contour4=16639   Contour5=Orange   Contour6=43775   Contour7=54527   Contour8=Yellow   Contour9=65408   Contour10=Green   Contour11=8453888   Contour12=Cyan _
+        Contour13=16755200   Contour14=16733440   Contour15=Blue   Transpare=0.5   Ratio1=Cyan   Ratio2=Green   Ratio3=Yellow   Ratio4=Orange   Ratio5=Red   RatioNotD=Gray4   RatioNotC=Red   RatioVal1=0.5   RatioVal2=0.7   RatioVal3=0.9 _
+        RatioVal4=1   DFillPos=Blue   DFillNeg=Red   DFillRPos=Green   DFillRNeg=Green
+   DeviceType=Printer   Contour1=Black   Contour2=3158064   Contour3=4210752   Contour4=5263440   Contour5=6316128   Contour6=7368816   Contour7=Gray8Dark   Contour8=Gray7   Contour9=Gray6   Contour10=Gray5   Contour11=Gray4 _
+        Contour12=Gray3   Contour13=Gray2   Contour14=Gray1Light   Contour15=White   Transpare=0   Ratio1=Gray2   Ratio2=Gray4   Ratio3=Gray8Dark   Ratio4=4210752   Ratio5=Black   RatioNotD=Gray4   RatioNotC=Black   RatioVal1=0.5 _
+        RatioVal2=0.7   RatioVal3=0.9   RatioVal4=1   DFillPos=Gray8Dark   DFillNeg=Gray8Dark   DFillRPos=4210752   DFillRNeg=4210752
+   DeviceType="Color Printer"   Contour1=13107400   Contour2=6553828   Contour3=Red   Contour4=16639   Contour5=Orange   Contour6=43775   Contour7=54527   Contour8=Yellow   Contour9=65408   Contour10=Green   Contour11=8453888 _
+        Contour12=Cyan   Contour13=16755200   Contour14=16733440   Contour15=Blue   Transpare=0   Ratio1=Cyan   Ratio2=Green   Ratio3=Yellow   Ratio4=Orange   Ratio5=Red   RatioNotD=Gray4   RatioNotC=Red   RatioVal1=0.5   RatioVal2=0.7 _
+        RatioVal3=0.9   RatioVal4=1   DFillPos=Blue   DFillNeg=Red   DFillRPos=Green   DFillRNeg=Green
+ 
+TABLE:  "OVERWRITES - STEEL DESIGN - AISC 360-16"
+   Frame=1   DesignSect="Program Determined"   FrameType="Program Determined"   Fy=0   RLLF=0   AreaRatio=0   XLMajor=0   XLMinor=0   XLLTB=0   K1Major=0   K1Minor=0   K2Major=0   K2Minor=0   KLTB=0   CmMajor=0   CmMinor=0   Cb=0 _
+        B1Major=0   B1Minor=0   B2Major=0   B2Minor=0   HSSReduceT="Program Determined"   HSSWelding="Program Determined"   Omega0=0   Ry=0   Pnc=0   Pnt=0   Mn3=0   Mn2=0   Vn2=0   Vn3=0   CheckDefl="Program Determined" _
+        DeflType="Program Determined"   DLRat=0   SDLAndLLRat=0   LLRat=0   TotalRat=0   NetRat=0   DLAbs=0   SDLAndLLAbs=0   LLAbs=0   TotalAbs=0   NetAbs=0   SpecCamber=0   DCLimit=0
+   Frame=2   DesignSect="Program Determined"   FrameType="Program Determined"   Fy=0   RLLF=0   AreaRatio=0   XLMajor=0   XLMinor=0   XLLTB=0   K1Major=0   K1Minor=0   K2Major=0   K2Minor=0   KLTB=0   CmMajor=0   CmMinor=0   Cb=0 _
+        B1Major=0   B1Minor=0   B2Major=0   B2Minor=0   HSSReduceT="Program Determined"   HSSWelding="Program Determined"   Omega0=0   Ry=0   Pnc=0   Pnt=0   Mn3=0   Mn2=0   Vn2=0   Vn3=0   CheckDefl="Program Determined" _
+        DeflType="Program Determined"   DLRat=0   SDLAndLLRat=0   LLRat=0   TotalRat=0   NetRat=0   DLAbs=0   SDLAndLLAbs=0   LLAbs=0   TotalAbs=0   NetAbs=0   SpecCamber=0   DCLimit=0
+   Frame=3   DesignSect="Program Determined"   FrameType="Program Determined"   Fy=0   RLLF=0   AreaRatio=0   XLMajor=0   XLMinor=0   XLLTB=0   K1Major=0   K1Minor=0   K2Major=0   K2Minor=0   KLTB=0   CmMajor=0   CmMinor=0   Cb=0 _
+        B1Major=0   B1Minor=0   B2Major=0   B2Minor=0   HSSReduceT="Program Determined"   HSSWelding="Program Determined"   Omega0=0   Ry=0   Pnc=0   Pnt=0   Mn3=0   Mn2=0   Vn2=0   Vn3=0   CheckDefl="Program Determined" _
+        DeflType="Program Determined"   DLRat=0   SDLAndLLRat=0   LLRat=0   TotalRat=0   NetRat=0   DLAbs=0   SDLAndLLAbs=0   LLAbs=0   TotalAbs=0   NetAbs=0   SpecCamber=0   DCLimit=0
+   Frame=4   DesignSect="Program Determined"   FrameType="Program Determined"   Fy=0   RLLF=0   AreaRatio=0   XLMajor=0   XLMinor=0   XLLTB=0   K1Major=0   K1Minor=0   K2Major=0   K2Minor=0   KLTB=0   CmMajor=0   CmMinor=0   Cb=0 _
+        B1Major=0   B1Minor=0   B2Major=0   B2Minor=0   HSSReduceT="Program Determined"   HSSWelding="Program Determined"   Omega0=0   Ry=0   Pnc=0   Pnt=0   Mn3=0   Mn2=0   Vn2=0   Vn3=0   CheckDefl="Program Determined" _
+        DeflType="Program Determined"   DLRat=0   SDLAndLLRat=0   LLRat=0   TotalRat=0   NetRat=0   DLAbs=0   SDLAndLLAbs=0   LLAbs=0   TotalAbs=0   NetAbs=0   SpecCamber=0   DCLimit=0
+   Frame=5   DesignSect="Program Determined"   FrameType="Program Determined"   Fy=0   RLLF=0   AreaRatio=0   XLMajor=0   XLMinor=0   XLLTB=0   K1Major=0   K1Minor=0   K2Major=0   K2Minor=0   KLTB=0   CmMajor=0   CmMinor=0   Cb=0 _
+        B1Major=0   B1Minor=0   B2Major=0   B2Minor=0   HSSReduceT="Program Determined"   HSSWelding="Program Determined"   Omega0=0   Ry=0   Pnc=0   Pnt=0   Mn3=0   Mn2=0   Vn2=0   Vn3=0   CheckDefl="Program Determined" _
+        DeflType="Program Determined"   DLRat=0   SDLAndLLRat=0   LLRat=0   TotalRat=0   NetRat=0   DLAbs=0   SDLAndLLAbs=0   LLAbs=0   TotalAbs=0   NetAbs=0   SpecCamber=0   DCLimit=0
+   Frame=6   DesignSect="Program Determined"   FrameType="Program Determined"   Fy=0   RLLF=0   AreaRatio=0   XLMajor=0   XLMinor=0   XLLTB=0   K1Major=0   K1Minor=0   K2Major=0   K2Minor=0   KLTB=0   CmMajor=0   CmMinor=0   Cb=0 _
+        B1Major=0   B1Minor=0   B2Major=0   B2Minor=0   HSSReduceT="Program Determined"   HSSWelding="Program Determined"   Omega0=0   Ry=0   Pnc=0   Pnt=0   Mn3=0   Mn2=0   Vn2=0   Vn3=0   CheckDefl="Program Determined" _
+        DeflType="Program Determined"   DLRat=0   SDLAndLLRat=0   LLRat=0   TotalRat=0   NetRat=0   DLAbs=0   SDLAndLLAbs=0   LLAbs=0   TotalAbs=0   NetAbs=0   SpecCamber=0   DCLimit=0
+   Frame=7   DesignSect="Program Determined"   FrameType="Program Determined"   Fy=0   RLLF=0   AreaRatio=0   XLMajor=0   XLMinor=0   XLLTB=0   K1Major=0   K1Minor=0   K2Major=0   K2Minor=0   KLTB=0   CmMajor=0   CmMinor=0   Cb=0 _
+        B1Major=0   B1Minor=0   B2Major=0   B2Minor=0   HSSReduceT="Program Determined"   HSSWelding="Program Determined"   Omega0=0   Ry=0   Pnc=0   Pnt=0   Mn3=0   Mn2=0   Vn2=0   Vn3=0   CheckDefl="Program Determined" _
+        DeflType="Program Determined"   DLRat=0   SDLAndLLRat=0   LLRat=0   TotalRat=0   NetRat=0   DLAbs=0   SDLAndLLAbs=0   LLAbs=0   TotalAbs=0   NetAbs=0   SpecCamber=0   DCLimit=0
+   Frame=8   DesignSect="Program Determined"   FrameType="Program Determined"   Fy=0   RLLF=0   AreaRatio=0   XLMajor=0   XLMinor=0   XLLTB=0   K1Major=0   K1Minor=0   K2Major=0   K2Minor=0   KLTB=0   CmMajor=0   CmMinor=0   Cb=0 _
+        B1Major=0   B1Minor=0   B2Major=0   B2Minor=0   HSSReduceT="Program Determined"   HSSWelding="Program Determined"   Omega0=0   Ry=0   Pnc=0   Pnt=0   Mn3=0   Mn2=0   Vn2=0   Vn3=0   CheckDefl="Program Determined" _
+        DeflType="Program Determined"   DLRat=0   SDLAndLLRat=0   LLRat=0   TotalRat=0   NetRat=0   DLAbs=0   SDLAndLLAbs=0   LLAbs=0   TotalAbs=0   NetAbs=0   SpecCamber=0   DCLimit=0
+   Frame=9   DesignSect="Program Determined"   FrameType="Program Determined"   Fy=0   RLLF=0   AreaRatio=0   XLMajor=0   XLMinor=0   XLLTB=0   K1Major=0   K1Minor=0   K2Major=0   K2Minor=0   KLTB=0   CmMajor=0   CmMinor=0   Cb=0 _
+        B1Major=0   B1Minor=0   B2Major=0   B2Minor=0   HSSReduceT="Program Determined"   HSSWelding="Program Determined"   Omega0=0   Ry=0   Pnc=0   Pnt=0   Mn3=0   Mn2=0   Vn2=0   Vn3=0   CheckDefl="Program Determined" _
+        DeflType="Program Determined"   DLRat=0   SDLAndLLRat=0   LLRat=0   TotalRat=0   NetRat=0   DLAbs=0   SDLAndLLAbs=0   LLAbs=0   TotalAbs=0   NetAbs=0   SpecCamber=0   DCLimit=0
+   Frame=10   DesignSect="Program Determined"   FrameType="Program Determined"   Fy=0   RLLF=0   AreaRatio=0   XLMajor=0   XLMinor=0   XLLTB=0   K1Major=0   K1Minor=0   K2Major=0   K2Minor=0   KLTB=0   CmMajor=0   CmMinor=0   Cb=0 _
+        B1Major=0   B1Minor=0   B2Major=0   B2Minor=0   HSSReduceT="Program Determined"   HSSWelding="Program Determined"   Omega0=0   Ry=0   Pnc=0   Pnt=0   Mn3=0   Mn2=0   Vn2=0   Vn3=0   CheckDefl="Program Determined" _
+        DeflType="Program Determined"   DLRat=0   SDLAndLLRat=0   LLRat=0   TotalRat=0   NetRat=0   DLAbs=0   SDLAndLLAbs=0   LLAbs=0   TotalAbs=0   NetAbs=0   SpecCamber=0   DCLimit=0
+   Frame=11   DesignSect="Program Determined"   FrameType="Program Determined"   Fy=0   RLLF=0   AreaRatio=0   XLMajor=0   XLMinor=0   XLLTB=0   K1Major=0   K1Minor=0   K2Major=0   K2Minor=0   KLTB=0   CmMajor=0   CmMinor=0   Cb=0 _
+        B1Major=0   B1Minor=0   B2Major=0   B2Minor=0   HSSReduceT="Program Determined"   HSSWelding="Program Determined"   Omega0=0   Ry=0   Pnc=0   Pnt=0   Mn3=0   Mn2=0   Vn2=0   Vn3=0   CheckDefl="Program Determined" _
+        DeflType="Program Determined"   DLRat=0   SDLAndLLRat=0   LLRat=0   TotalRat=0   NetRat=0   DLAbs=0   SDLAndLLAbs=0   LLAbs=0   TotalAbs=0   NetAbs=0   SpecCamber=0   DCLimit=0
+   Frame=12   DesignSect="Program Determined"   FrameType="Program Determined"   Fy=0   RLLF=0   AreaRatio=0   XLMajor=0   XLMinor=0   XLLTB=0   K1Major=0   K1Minor=0   K2Major=0   K2Minor=0   KLTB=0   CmMajor=0   CmMinor=0   Cb=0 _
+        B1Major=0   B1Minor=0   B2Major=0   B2Minor=0   HSSReduceT="Program Determined"   HSSWelding="Program Determined"   Omega0=0   Ry=0   Pnc=0   Pnt=0   Mn3=0   Mn2=0   Vn2=0   Vn3=0   CheckDefl="Program Determined" _
+        DeflType="Program Determined"   DLRat=0   SDLAndLLRat=0   LLRat=0   TotalRat=0   NetRat=0   DLAbs=0   SDLAndLLAbs=0   LLAbs=0   TotalAbs=0   NetAbs=0   SpecCamber=0   DCLimit=0
+   Frame=13   DesignSect="Program Determined"   FrameType="Program Determined"   Fy=0   RLLF=0   AreaRatio=0   XLMajor=0   XLMinor=0   XLLTB=0   K1Major=0   K1Minor=0   K2Major=0   K2Minor=0   KLTB=0   CmMajor=0   CmMinor=0   Cb=0 _
+        B1Major=0   B1Minor=0   B2Major=0   B2Minor=0   HSSReduceT="Program Determined"   HSSWelding="Program Determined"   Omega0=0   Ry=0   Pnc=0   Pnt=0   Mn3=0   Mn2=0   Vn2=0   Vn3=0   CheckDefl="Program Determined" _
+        DeflType="Program Determined"   DLRat=0   SDLAndLLRat=0   LLRat=0   TotalRat=0   NetRat=0   DLAbs=0   SDLAndLLAbs=0   LLAbs=0   TotalAbs=0   NetAbs=0   SpecCamber=0   DCLimit=0
+ 
+TABLE:  "PREFERENCES - ALUMINUM DESIGN - AA 2015"
+   THDesign=Envelopes   SRatioLimit=1   Provision=LRFD   LatFact=1.33333333333333   UseLatFact=No   Bridge=No   PhiTy=0.9   PhiTr=0.75   PhiC=0.9   PhiBo=0.9   PhiBr=0.75   PhiVo=0.9   PhiVr=0.75
+ 
+TABLE:  "PREFERENCES - COLD FORMED DESIGN - AISI-16"
+   THDesign=Envelopes   FrameType="Braced Frame"   SRatioLimit=1   SOMethod="General 2nd Order"   Provision=LRFD   LatFact=1.33333333333333   UseLatFact=No   PhiTy=0.9   PhiTr=0.75   PhiC=0.85   PhiB=0.9   PhiBPipe=0.95   PhiV=0.95
+ 
+TABLE:  "PREFERENCES - CONCRETE DESIGN - ACI 318-14"
+   THDesign=Envelopes   NumCurves=24   NumPoints=11   MinEccen=Yes   BCCDesign=Yes   CTorsion=Yes   PatLLF=0.75   UFLimit=0.95   SeisCat=D   Rho=1   Sds=0.5   PhiT=0.9   PhiCTied=0.65   PhiCSpiral=0.75   PhiV=0.75   PhiVSeismic=0.6 _
+        PhiVJoint=0.85   TanTheta=1
+ 
+TABLE:  "PREFERENCES - CONCRETE SHELL DESIGN - EUROCODE 2-2004"
+   Country="CEN Default"   GammaS=1.15   GammaC=1.5   AlphaCC=1   AlphaCT=1   CrackCond="Program Determined"   ShrDesMet="Method 1"   CotTheta=1   AddTenForce=Yes
+ 
+TABLE:  "PREFERENCES - DIMENSIONAL"
+   MergeTol=0.00833333333333333   FineGrid=1   Nudge=1   SelectTol=3   SnapTol=12   SLineThick=2   PLineThick=4   MaxFont=15   MinFont=15   AutoZoom=10   ShrinkFact=70   TextFileLen=240
+ 
+TABLE:  "PREFERENCES - STEEL DESIGN - AISC 360-16"
+   THDesign=Envelopes   FrameType=SMF   PatLLF=0.75   SRatioLimit=0.95   MaxIter=1   SDC=D   SeisCode=No   SeisLoad=No   ImpFactor=1   SystemRho=1   SystemSds=0.5   SystemR=8   SystemCd=5.5   Omega0=3   Provision=LRFD _
+        AMethod="Direct Analysis"   SOMethod="General 2nd Order"   SRMethod="Tau-b Fixed"   NLCoeff=0.002   PhiB=0.9   PhiC=0.9   PhiTY=0.9   PhiTF=0.75   PhiV=0.9   PhiVRolledI=1   PhiVT=0.9   PlugWeld=Yes   HSSWelding=ERW   HSSReduceT=No _
+        CheckDefl=No   DLRat=120   SDLAndLLRat=120   LLRat=360   TotalRat=240   NetRat=240
+ 
+TABLE:  "PROGRAM CONTROL"
+   ProgramName=SAP2000   Version=25.3.1   CurrUnits="Kip, ft, F"   SteelCode="AISC 360-16"   ConcCode="ACI 318-14"   AlumCode="AA 2015"   ColdCode=AISI-16   RegenHinge=Yes
+ 
+TABLE:  "PROJECT INFORMATION"
+   Item="Company Name"
+   Item="Client Name"
+   Item="Project Name"   Data="221 VIA MENTONE, NEWPORT BEACH, CA"
+   Item="Project Number"   Data=25014
+   Item="Model Name"
+   Item="Model Description"
+   Item="Revision Number"
+   Item="Frame Type"
+   Item=Engineer
+   Item=Checker
+   Item=Supervisor
+   Item="Issue Code"
+   Item="Design Code"
+ 
+TABLE:  "REBAR SIZES"
+   RebarID=#2   Area=0.000347222222222222   Diameter=0.0208333333333333
+   RebarID=#3   Area=0.000763888884749677   Diameter=0.03125
+   RebarID=#4   Area=0.00138888890958495   Diameter=0.0416666666666667
+   RebarID=#5   Area=0.00215277779433462   Diameter=0.0520833333333333
+   RebarID=#6   Area=0.00305555553899871   Diameter=0.0625
+   RebarID=#7   Area=0.00416666683223512   Diameter=0.0729166666666667
+   RebarID=#8   Area=0.00548611126012272   Diameter=0.0833333333333333
+   RebarID=#9   Area=0.00694444444444444   Diameter=0.0940000017484029
+   RebarID=#10   Area=0.00881944431198968   Diameter=0.105833331743876
+   RebarID=#11   Area=0.010833332935969   Diameter=0.11749999721845
+   RebarID=#14   Area=0.015625   Diameter=0.141083329916
+   RebarID=#18   Area=0.0277777777777778   Diameter=0.188083330790202
+   RebarID=10M   Area=0.00107639107025332   Diameter=0.0370734930038452
+   RebarID=15M   Area=0.00215278214050664   Diameter=0.0524934381246567
+   RebarID=20M   Area=0.00322917331424024   Diameter=0.063976377248764
+   RebarID=25M   Area=0.00538195545474688   Diameter=0.0826771706342697
+   RebarID=30M   Area=0.00753473738829295   Diameter=0.0980971157550812
+   RebarID=35M   Area=0.0107639109094938   Diameter=0.117125988006592
+   RebarID=45M   Area=0.0161458667781618   Diameter=0.143372704585393
+   RebarID=55M   Area=0.0269097768598133   Diameter=0.185039381186167
+   RebarID=6d   Area=0.000304618669259879   Diameter=0.019685039917628
+   RebarID=8d   Area=0.000541424689193567   Diameter=0.0262467190623283
+   RebarID=10d   Area=0.000844966982387834   Diameter=0.0328083982070287
+   RebarID=12d   Area=0.00121632197664844   Diameter=0.0393700798352559
+   RebarID=14d   Area=0.00165764232062631   Diameter=0.0459317614634832
+   RebarID=16d   Area=0.00216354615986347   Diameter=0.0524934381246567
+   RebarID=20d   Area=0.00337986792955134   Diameter=0.0656167964140574
+   RebarID=25d   Area=0.00528508010837767   Diameter=0.0820209980010986
+   RebarID=26d   Area=0.00571563674343957   Diameter=0.0853018363316854
+   RebarID=28d   Area=0.00663056928250525   Diameter=0.0918635229269663
+   RebarID=N12   Area=0.00121632197664844   Diameter=0.0393700798352559
+   RebarID=N16   Area=0.00216354615986347   Diameter=0.0524934381246567
+   RebarID=N20   Area=0.00337986792955134   Diameter=0.0656167964140574
+   RebarID=N24   Area=0.00486528790659375   Diameter=0.0787401596705119
+   RebarID=N28   Area=0.00663056928250525   Diameter=0.0918635229269663
+   RebarID=N32   Area=0.00865418463945389   Diameter=0.104986876249313
+   RebarID=N36   Area=0.0109791888131036   Diameter=0.118110239505768
+ 
+TABLE:  "SOLID PROPERTY DEFINITIONS"
+   SolidProp=Solid1   Material=4000Psi   MatAngleA=0   MatAngleB=0   MatAngleC=0   InComp=Yes   Color=Yellow   GUID=2b4bcdfd-ca45-4a26-b8f2-12a4eea4b4f6
+ 
+END TABLE DATA

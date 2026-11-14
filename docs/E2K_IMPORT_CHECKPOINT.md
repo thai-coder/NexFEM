@@ -1,10 +1,17 @@
-# Checkpoint — Nhập ETABS `.e2k` (M1, phần ETABS)
+# Checkpoint: CSI text import (M1: ETABS `.e2k` and SAP2000 `.s2k`)
 
-- **Cập nhật và múi giờ:** 14/11/2026 (UTC).
-- **Repo / nhiệm vụ / người thực hiện:** `thai-coder/NexFEM` / CSI Text Import MVP, phần `.e2k` / Claude.
-- **Trạng thái:** `REVIEW` cho mã; M1 tổng thể chưa xong (thiếu `.s2k`), M2 bị chặn (thiếu bảng kết quả ETABS).
-- **Base / nhánh công việc:** xếp chồng trên `claude/box-and-reports` (PR #14). Nhánh `claude/e2k-import`.
-- **Đã làm:** package `@nexfem/io-formats` (tách cú pháp, ánh xạ, báo cáo); File ▸ Nhập ETABS (.e2k)… và hộp thoại báo cáo; file mẫu ETABS 23.2.0 chép từ `main` không đổi byte (`.gitattributes` chặn chuẩn hoá xuống dòng); tài liệu `docs/csi-import.md`.
-- **Kiểm thử cục bộ:** typecheck; 22 test io-formats, 79 model-core, 20 viewer, 8 desktop; 89 bài Playwright (3 mới).
-- **Hành động đầu tiên khi tiếp tục:** xem `docs/csi-import.md` mục "Việc tiếp theo"; ưu tiên tải tập trung tại nút (cần schema + bộ giải, phối hợp Codex).
-- **Điều kiện hoàn thành M1:** thêm `.s2k` thật; người dùng thử nhập file ETABS khác và xác nhận các giả định ánh xạ (đặc biệt DZ, PINNED).
+- **Updated / time zone:** 14/11/2026 (UTC).
+- **Repo / task / owner:** `thai-coder/NexFEM` / CSI Text Import MVP / Claude.
+- **Status:** `REVIEW`. Both importers have been tested on real files. M2 is blocked: there are still no ETABS/SAP2000 result tables to compare against.
+- **Branch:** the application branch `claude/etab-sap2000-connection-vts58p`.
+- **Done:**
+  - Package `@nexfem/io-formats` contains the `.e2k` importer (ETABS 23.2.0) and the `.s2k` / `.$2k` importer (SAP2000 23.1.0 and 25.3.1), plus `.sdb` binary detection.
+  - File ▸ **Import file** is a submenu with one entry per format: ETABS, SAP2000, and DXF/IFC/Excel (phase 8).
+  - The import report dialog is shared by both importers.
+  - The 3 real SAP2000 files are kept byte-for-byte in `tests/fixtures/csi/sap2000/` with a README.
+  - Documentation: `docs/csi-import.md`.
+- **Local tests:** typecheck; io-formats (43), desktop i18n; Playwright e2k-import (8 tests, 5 of them new for SAP2000 and the submenu).
+- **First action when resuming:** read "Next steps" in `docs/csi-import.md`.
+  - First priority: frame local-axis angle. The two columns of `24061_OMF.s2k` are rotated 90°, and ETABS frames use `ANG`.
+  - Next: joint loads (schema and solver, coordinate with Codex).
+- **M1 completion condition:** the user imports other ETABS/SAP2000 files and confirms the mapping assumptions (DZ, PINNED, partial fixity, None area).

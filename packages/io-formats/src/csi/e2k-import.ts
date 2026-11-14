@@ -18,7 +18,10 @@ import {
   type Story,
 } from "@nexfem/model-core";
 import { e2kNumber, e2kPairs, e2kSection, parseE2k, type E2kFile, type E2kRecord, type E2kToken } from "./e2k-parse.ts";
+import { Diagnostics, type ImportDiagnostic } from "./diagnostics.ts";
 import { conv, unitFactors, type UnitFactors } from "./units.ts";
+
+export type { ImportDiagnostic, ImportLevel } from "./diagnostics.ts";
 
 /**
  * Nhập file ETABS `.e2k` vào mô hình NexFEM.
@@ -30,21 +33,6 @@ import { conv, unitFactors, type UnitFactors } from "./units.ts";
  * - `warning`: nhập gần đúng hoặc bỏ một thuộc tính có ảnh hưởng (góc xoay trục, điểm chèn, lò xo…);
  * - `info`: dữ liệu không ảnh hưởng mô hình phân tích tuyến tính (lưới chia, thiết kế, nhóm…).
  */
-
-export type ImportLevel = "error" | "warning" | "info";
-
-export interface ImportDiagnostic {
-  level: ImportLevel;
-  /** Mã để giao diện dịch; tham số trong `params`. */
-  code: string;
-  params: Record<string, string | number>;
-  /** Số lần gặp. */
-  count: number;
-  /** Tối đa 20 số dòng trong file. */
-  lines: number[];
-  /** Tối đa 20 tên đối tượng ETABS. */
-  objects: string[];
-}
 
 export interface E2kImportReport {
   program: string;
@@ -60,27 +48,6 @@ export interface E2kImportReport {
 export interface E2kImportResult {
   model: Model;
   report: E2kImportReport;
-}
-
-const MAX_LIST = 20;
-
-class Diagnostics {
-  #map = new Map<string, ImportDiagnostic>();
-  add(level: ImportLevel, code: string, params: Record<string, string | number> = {}, at?: { line?: number; object?: string }): void {
-    const key = `${level}|${code}|${JSON.stringify(params)}`;
-    let d = this.#map.get(key);
-    if (!d) {
-      d = { level, code, params, count: 0, lines: [], objects: [] };
-      this.#map.set(key, d);
-    }
-    d.count++;
-    if (at?.line !== undefined && d.lines.length < MAX_LIST) d.lines.push(at.line);
-    if (at?.object !== undefined && d.objects.length < MAX_LIST && !d.objects.includes(at.object)) d.objects.push(at.object);
-  }
-  list(): ImportDiagnostic[] {
-    const rank: Record<ImportLevel, number> = { error: 0, warning: 1, info: 2 };
-    return [...this.#map.values()].sort((a, b) => rank[a.level] - rank[b.level]);
-  }
 }
 
 /** Gộp các dòng cùng một đối tượng (cùng tên, hoặc cùng tên + tầng) thành một bộ cặp từ khoá. */

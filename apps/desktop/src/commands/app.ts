@@ -4,7 +4,7 @@ import { t } from "../i18n/index.ts";
 import type { Strings } from "../i18n/vi.ts";
 import { useModel } from "../stores/model.ts";
 import { openProject, openSample, saveProject } from "../services/files.ts";
-import { importEtabsFile } from "../services/csiImport.ts";
+import { importCsiFromPicker } from "../services/csiImport.ts";
 import { selectActiveCase, selectDeformationCase, useResults } from "../stores/results.ts";
 import { solve } from "../services/solver.ts";
 import { toDisplay, unitLabel } from "@nexfem/model-core";
@@ -193,8 +193,11 @@ export const COMMANDS: AppCommand[] = [
   { id: "file.startPage", run: () => window.dispatchEvent(new CustomEvent("nexfem:start-page")) },
   { id: "file.save", icon: "save", shortcut: "Ctrl+S", keys: ["ctrl+s"], run: () => void saveProject(false) },
   { id: "file.saveAs", shortcut: "Ctrl+Shift+S", keys: ["ctrl+shift+s"], run: () => void saveProject(true) },
-  { id: "file.importE2k", icon: "open", run: () => void importEtabsFile() },
-  later("file.import", 8),
+  { id: "file.importEtabs", icon: "open", run: () => void importCsiFromPicker("e2k") },
+  { id: "file.importSap", icon: "open", run: () => void importCsiFromPicker("s2k") },
+  later("file.importDxf", 8),
+  later("file.importIfc", 8),
+  later("file.importExcel", 8),
   later("file.export", 6),
 
   {
@@ -435,10 +438,11 @@ export function runCommand(id: CommandId): void {
   c.run();
 }
 
-export type MenuItem = CommandId | "-";
+/** Mục menu: lệnh, dòng kẻ, hoặc menu con (mở sang bên khi rê chuột hoặc bấm). */
+export type MenuItem = CommandId | "-" | { submenu: keyof Strings["submenu"]; items: MenuItem[] };
 
 export const MENUS: { id: keyof Strings["menu"]; items: MenuItem[] }[] = [
-  { id: "file", items: ["file.new", "file.open", "file.openSample", "file.startPage", "file.save", "file.saveAs", "-", "file.importE2k", "file.import", "file.export"] },
+  { id: "file", items: ["file.new", "file.open", "file.openSample", "file.startPage", "file.save", "file.saveAs", "-", { submenu: "import", items: ["file.importEtabs", "file.importSap", "-", "file.importDxf", "file.importIfc", "file.importExcel"] }, "file.export"] },
   { id: "edit", items: ["edit.undo", "edit.redo", "-", "edit.delete", "edit.replicate", "-", "edit.selectAll"] },
   {
     id: "view",

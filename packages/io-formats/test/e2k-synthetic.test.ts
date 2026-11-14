@@ -106,7 +106,9 @@ describe("nhận diện định dạng CSI", () => {
     expect(r.format).toBe("s2k");
     expect(r.model.joints).toEqual([]);
     expect(r.report.program).toBe("SAP2000");
-    expect(r.report.diagnostics.map((d) => d.code)).toEqual(["format_s2k_unsupported"]);
+    // Nút thiếu toạ độ: báo lỗi, không nhập (bộ nhập SAP2000 thật được kiểm tra trên file thật trong s2k-fixture.test.ts).
+    expect(r.report.units).toEqual({ force: "KN", length: "M", temperature: "C" });
+    expect(r.report.diagnostics.filter((d) => d.level === "error").map((d) => d.code)).toEqual(["point_invalid", "no_supports_imported"]);
     expect(importCsi("hello").report.diagnostics.map((d) => d.code)).toEqual(["format_unknown"]);
     expect(importCsi(SMALL).format).toBe("e2k");
   });

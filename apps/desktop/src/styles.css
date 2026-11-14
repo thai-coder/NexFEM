@@ -266,6 +266,20 @@ select:disabled {
   text-align: right;
 }
 
+.menu-sub {
+  position: relative;
+}
+
+.menu-item.open {
+  background: var(--color-accent-soft);
+}
+
+.menu-subdropdown {
+  top: -5px;
+  left: calc(100% - 2px);
+  min-width: 260px;
+}
+
 .menu-sep {
   height: 1px;
   margin: 4px 6px;

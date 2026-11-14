@@ -1,6 +1,6 @@
 import { Icon } from "@nexfem/ui";
 import { useEffect, useRef, useState } from "react";
-import { MENUS, command, runCommand, type CommandId } from "../commands/app.ts";
+import { MENUS, command, runCommand, type CommandId, type MenuItem } from "../commands/app.ts";
 import { useT } from "../i18n/index.ts";
 import { basename } from "../services/files.ts";
 import { useModel } from "../stores/model.ts";
@@ -63,13 +63,7 @@ export function MenuBar() {
           </button>
           {open === m.id && (
             <div className="menu-dropdown" role="menu">
-              {m.items.map((item, i) =>
-                item === "-" ? (
-                  <div key={i} className="menu-sep" role="separator" />
-                ) : (
-                  <MenuEntry key={item} id={item} onChoose={choose} />
-                ),
-              )}
+              <MenuItems items={m.items} onChoose={choose} />
             </div>
           )}
         </div>
@@ -92,7 +86,59 @@ export function MenuBar() {
   );
 }
 
-function MenuEntry({ id, onChoose }: { id: CommandId; onChoose(id: CommandId): void }) {
+function MenuItems({ items, onChoose, nested }: { items: MenuItem[]; onChoose(id: CommandId): void; nested?: boolean }) {
+  return (
+    <>
+      {items.map((item, i) =>
+        item === "-" ? (
+          <div key={i} className="menu-sep" role="separator" />
+        ) : typeof item === "object" ? (
+          <SubMenu key={item.submenu} item={item} onChoose={onChoose} />
+        ) : (
+          <MenuEntry key={item} id={item} onChoose={onChoose} nested={nested} />
+        ),
+      )}
+    </>
+  );
+}
+
+/** Menu con: mở sang bên phải khi rê chuột, bấm, hoặc phím mũi tên phải. */
+function SubMenu({ item, onChoose }: { item: Extract<MenuItem, { submenu: string }>; onChoose(id: CommandId): void }) {
+  const T = useT();
+  const [open, setOpen] = useState(false);
+  const label = T.submenu[item.submenu];
+  return (
+    <div className="menu-sub" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
+      <button
+        className={`menu-item${open ? " open" : ""}`}
+        role="menuitem"
+        aria-haspopup="true"
+        aria-expanded={open}
+        onClick={() => setOpen(true)}
+        onKeyDown={(e) => {
+          if (e.key === "ArrowRight") setOpen(true);
+          if (e.key === "ArrowLeft") setOpen(false);
+        }}
+      >
+        <span className="menu-check">
+          <Icon name="open" size={14} />
+        </span>
+        <span className="menu-label">{label}</span>
+        <span />
+        <span className="menu-shortcut">
+          <Icon name="chevronRight" size={14} />
+        </span>
+      </button>
+      {open && (
+        <div className="menu-dropdown menu-subdropdown" role="menu" aria-label={label}>
+          <MenuItems items={item.items} onChoose={onChoose} nested />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MenuEntry({ id, onChoose, nested }: { id: CommandId; onChoose(id: CommandId): void; nested?: boolean }) {
   const T = useT();
   const c = command(id);
   const disabled = c.enabled ? !c.enabled() : false;
@@ -100,7 +146,7 @@ function MenuEntry({ id, onChoose }: { id: CommandId; onChoose(id: CommandId): v
   return (
     <button className="menu-item" role="menuitem" disabled={disabled} onClick={() => onChoose(id)}>
       <span className="menu-check">{checked ? <Icon name="check" size={14} /> : c.icon ? <Icon name={c.icon} size={14} /> : null}</span>
-      <span className="menu-label">{T.cmd[id]}</span>
+      <span className="menu-label">{(nested && T.cmdShort[id]) || T.cmd[id]}</span>
       {c.phase ? <span className="phase-badge">{T.fmt(T.phase.badge, { n: c.phase })}</span> : null}
       <span className="menu-shortcut">{c.shortcut ?? ""}</span>
     </button>

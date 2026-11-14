@@ -15,7 +15,7 @@ export function csiMessage(T: Strings, d: Pick<ImportDiagnostic, "code" | "param
 
 const LEVELS: ImportLevel[] = ["error", "warning", "info"];
 
-/** Báo cáo nhập ETABS: số lượng, các thứ không nhập được / gần đúng, rồi mới cho mở mô hình. */
+/** Báo cáo nhập ETABS / SAP2000: số lượng, các thứ không nhập được / gần đúng, rồi mới cho mở mô hình. */
 export function CsiImportDialog({ onClose }: { onClose(): void }) {
   const T = useT();
   const C = T.csi;
@@ -23,8 +23,9 @@ export function CsiImportDialog({ onClose }: { onClose(): void }) {
   const [open, setOpen] = useState<Record<string, boolean>>({ error: true, warning: true, info: false });
   if (!result) return null;
   const { model, report } = result;
-  // Chỉ mở được khi là file ETABS đọc được đơn vị; .s2k và định dạng lạ chỉ xem báo cáo.
-  const canOpen = result.format === "e2k" && report.units !== null;
+  // Chỉ mở được khi là file văn bản ETABS/SAP2000 đọc được đơn vị; file nhị phân và định dạng lạ chỉ xem báo cáo.
+  const canOpen = (result.format === "e2k" || result.format === "s2k") && report.units !== null;
+  const program = result.format === "e2k" ? "ETABS" : result.format === "s2k" || result.format === "sdb" ? "SAP2000" : report.program || "CSI";
   const close = () => {
     clear();
     onClose();
@@ -37,13 +38,13 @@ export function CsiImportDialog({ onClose }: { onClose(): void }) {
     ].join("\n");
   return (
     <Modal
-      title={`${C.title} — ${fileName ?? ""}`}
+      title={`${T.fmt(C.title, { program })} — ${fileName ?? ""}`}
       onClose={close}
       width={860}
       testId="dlg-csiImport"
       footer={
         <>
-          <div className="modal-error">{canOpen ? C.notEquivalent : C.nothingToOpen}</div>
+          <div className="modal-error">{canOpen ? T.fmt(C.notEquivalent, { program }) : C.nothingToOpen}</div>
           <button className="btn" onClick={() => void navigator.clipboard?.writeText(textReport())} data-testid="csi-copy">
             {C.copy}
           </button>

@@ -1,16 +1,16 @@
 import { expect, test, type Page } from "@playwright/test";
-import { mkdtempSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const FIXTURE = fileURLToPath(new URL("../../fixtures/csi/etabs/23217_SMFs 3D model_updated v4.e2k", import.meta.url));
+const SAP = (name: string) => fileURLToPath(new URL(`../../fixtures/csi/sap2000/${name}`, import.meta.url));
 type M = { name: string; frames: { kind: string }[]; joints: unknown[]; shells: unknown[]; combos: unknown[] };
 const model = (page: Page) => page.evaluate(() => (window as unknown as { __nexfem: { model: { getState(): { model: unknown } } } }).__nexfem.model.getState().model as M);
 
-async function importFixture(page: Page, file = FIXTURE) {
+/** File → Nhập file → mục của chương trình (menu con, mỗi định dạng một mục riêng). */
+async function importFixture(page: Page, file = FIXTURE, item = "ETABS (.e2k)…") {
   await page.getByRole("menuitem", { name: "File", exact: true }).click();
-  const [chooser] = await Promise.all([page.waitForEvent("filechooser"), page.getByRole("menu").getByRole("menuitem", { name: "Nhập ETABS / SAP2000 (.e2k, .s2k)…" }).click()]);
+  await page.getByRole("menuitem", { name: "Nhập file" }).click();
+  const [chooser] = await Promise.all([page.waitForEvent("filechooser"), page.getByRole("menu", { name: "Nhập file" }).getByRole("menuitem", { name: item }).click()]);
   await chooser.setFiles(file);
   await expect(page.getByTestId("dlg-csiImport")).toBeVisible();
 }
@@ -62,12 +62,48 @@ test("Huỷ thì không đổi mô hình", async ({ page }) => {
   expect((await model(page)).name).toBe("Toa_nha_A");
 });
 
-test("file SAP2000 .s2k: báo rõ chưa hỗ trợ, không cho mở", async ({ page }) => {
-  // Dạng bảng của .s2k (dữ liệu tự tạo, chỉ để kiểm tra nhận diện định dạng).
-  const path = join(mkdtempSync(join(tmpdir(), "nexfem-e2e-")), "24061_OMF.s2k");
-  writeFileSync(path, 'File C:\\x\\24061_OMF.s2k\r\n\r\nTABLE:  "PROGRAM CONTROL"\r\n   ProgramName=SAP2000   Version=23.1.0   CurrUnits="KN, m, C"\r\n');
-  await importFixture(page, path);
-  await expect(page.getByTestId("csi-error")).toContainText("SAP2000 23.1.0 (.s2k): chưa hỗ trợ nhập SAP2000");
+test("menu Nhập file: mỗi định dạng một mục riêng, DXF/IFC/Excel để giai đoạn sau", async ({ page }) => {
+  await page.getByRole("menuitem", { name: "File", exact: true }).click();
+  await page.getByRole("menuitem", { name: "Nhập file" }).hover();
+  const sub = page.getByRole("menu", { name: "Nhập file" });
+  await expect(sub.getByRole("menuitem")).toHaveText([/ETABS \(\.e2k\)…/, /SAP2000 \(\.s2k, \.\$2k\)…/, /DXF…/, /IFC…/, /Excel…/]);
+  await expect(sub.getByRole("menuitem", { name: /DXF/ })).toContainText("GĐ 8");
+});
+
+test("nhập file SAP2000 thật (.s2k): báo cáo rồi mở mô hình", async ({ page }) => {
+  await importFixture(page, SAP("24061_OMF.s2k"), "SAP2000 (.s2k, .$2k)…");
+  await expect(page.getByTestId("dlg-csiImport")).toContainText("Nhập file SAP2000");
+  await expect(page.getByTestId("csi-source")).toContainText("SAP2000 23.1.0");
+  await expect(page.getByTestId("csi-source")).toContainText("LB, FT");
+  await expect(page.getByTestId("csi-error")).toContainText("Tải tập trung tại nút (mẫu WY)");
+  await expect(page.getByTestId("csi-warning")).toContainText("Góc xoay trục địa phương 90°");
+  await page.getByTestId("csi-open").click();
+  const m = await model(page);
+  expect(m.name).toBe("24061_OMF");
+  expect(m.frames.map((f) => f.kind)).toEqual(["column", "column", "beam"]);
+  expect(m.combos.length).toBe(87);
+  await expect(page.getByTestId("bottom")).toContainText("Đã nhập 24061_OMF.s2k");
+});
+
+test("file SAP2000 25 có mặt None (.2k)", async ({ page }) => {
+  await importFixture(page, SAP("Roof_model.2k"), "SAP2000 (.s2k, .$2k)…");
+  await expect(page.getByTestId("csi-source")).toContainText("SAP2000 25.3.1");
+  await expect(page.getByTestId("csi-error")).toHaveCount(0);
+  await page.getByTestId("csi-open").click();
+  const m = await model(page);
+  expect([m.frames.length, m.shells.length]).toEqual([13, 4]);
+});
+
+test("file .sdb nhị phân: báo cách xuất .s2k, không cho mở", async ({ page }) => {
+  await importFixture(page, SAP("Roof_model.sdb"), "SAP2000 (.s2k, .$2k)…");
+  await expect(page.getByTestId("csi-error")).toContainText("cơ sở dữ liệu nhị phân riêng của CSI");
+  await expect(page.getByTestId("csi-error")).toContainText("File → Export");
   await expect(page.getByTestId("csi-open")).toBeDisabled();
   await expect(page.getByTestId("dlg-csiImport")).toContainText("Không có mô hình để mở");
+});
+
+test("chọn mục ETABS nhưng file là SAP2000: nhập theo nội dung, có cảnh báo", async ({ page }) => {
+  await importFixture(page, SAP("Roof_model.2k"), "ETABS (.e2k)…");
+  await expect(page.getByTestId("csi-warning")).toContainText("Đã chọn mục nhập ETABS nhưng file là SAP2000");
+  await expect(page.getByTestId("csi-open")).toBeEnabled();
 });
