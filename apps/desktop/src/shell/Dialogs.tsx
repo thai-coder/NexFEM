@@ -7,6 +7,7 @@ import { PreferencesDialog } from "../dialogs/PreferencesDialog.tsx";
 import { RenameDialog } from "../dialogs/RenameDialog.tsx";
 import { ReplicateDialog } from "../dialogs/ReplicateDialog.tsx";
 import { ReportDialog } from "../dialogs/ReportDialog.tsx";
+import { CsiImportDialog } from "../dialogs/CsiImportDialog.tsx";
 import { ViewOptionsDialog } from "../dialogs/ViewOptionsDialog.tsx";
 import {
   AssignFrameLoadDialog,
@@ -47,6 +48,8 @@ export function Dialogs() {
       return <PreferencesDialog onClose={close} />;
     case "replicate":
       return <ReplicateDialog onClose={close} />;
+    case "csiImport":
+      return <CsiImportDialog onClose={close} />;
     case "report":
       return <ReportDialog kind={(REPORT_KINDS.find((k) => k === dialog.report) ?? "summary") as ReportKind} onClose={close} />;
     case "viewOptions":

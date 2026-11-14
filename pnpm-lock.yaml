@@ -17,6 +17,9 @@ importers:
 
   apps/desktop:
     dependencies:
+      '@nexfem/io-formats':
+        specifier: workspace:*
+        version: link:../../packages/io-formats
       '@nexfem/model-core':
         specifier: workspace:*
         version: link:../../packages/model-core

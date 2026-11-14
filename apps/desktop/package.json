@@ -13,6 +13,7 @@
     "build:wasm": "node scripts/build-wasm.mjs"
   },
   "dependencies": {
+    "@nexfem/io-formats": "workspace:*",
     "@nexfem/model-core": "workspace:*",
     "@nexfem/ui": "workspace:*",
     "@nexfem/viewer": "workspace:*",
