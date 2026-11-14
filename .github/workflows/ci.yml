@@ -28,7 +28,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
       - run: pnpm test
-      - run: node --test scripts/validation/compare-csi.test.mjs
+      - run: node --test scripts/validation/compare-csi.test.mjs scripts/version-rule.test.mjs
       - run: pnpm build
       - run: pnpm --filter @nexfem/e2e exec playwright install --with-deps chromium
       - run: pnpm e2e
@@ -73,7 +73,7 @@ jobs:
           targets: wasm32-unknown-unknown
       - uses: Swatinem/rust-cache@v2
       - run: pnpm install --frozen-lockfile
-      # Mỗi lần đẩy code là một phiên bản: 0.<MINOR từ file VERSION>.<số lần chạy CI>.
+      # Mỗi lần đẩy code là một phiên bản X.Y.Z: X = năm − 2026, Y = tháng đếm từ 10/2026, Z = số lần chạy CI (docs/versioning.md).
       - name: Đặt số phiên bản
         run: node scripts/set-version.mjs --build ${{ github.run_number }}
       - run: pnpm tauri build

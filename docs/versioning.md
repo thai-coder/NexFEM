@@ -14,14 +14,12 @@ Phiên bản có dạng **`X.Y.Z`** (quy tắc do chủ dự án chốt ngày 14
 
 - Hôm nay (11/2026) là `0.1.Z`; bản `0.1.153` là bản cuối đã theo đúng quy tắc, các bản sau là `0.1.154`, … cho đến hết tháng 11. Sang 12/2026 thì `0.2.Z` với `Z` tiếp tục tăng (không về 0). Sang 01/2027 thì `1.3.Z`.
 - **Mỗi lần đẩy code lên nhánh phát triển là một phiên bản mới**, luôn tăng dần, không trùng.
-- `X.Y` hiện lấy từ file [`VERSION`](../VERSION) ở gốc repo (đang `0.1`) và **phải đổi tay đầu mỗi tháng** theo công thức trên. Việc tính tự động `X.Y` từ ngày chạy CI trong `scripts/set-version.mjs` chưa làm (ghi trong "Việc tiếp theo").
-- Giới hạn kỹ thuật: MSI chỉ nhận phần thứ nhất ≤ 255, thứ hai ≤ 255, thứ ba ≤ 65535, nên `Z` còn dùng được đến 65535 lần chạy CI (hiện 153).
+- `X.Y` được **tính tự động** từ ngày chạy CI (UTC) trong [`scripts/version-rule.mjs`](../scripts/version-rule.mjs); không còn file `VERSION`, không phải đổi tay đầu tháng. Test các mốc: `scripts/version-rule.test.mjs` (chạy trong CI).
+- Giới hạn kỹ thuật của MSI: phần thứ nhất ≤ 255, thứ hai ≤ 255, thứ ba ≤ 65535.
+  - `Z` dùng được đến 65535 lần chạy CI (hiện khoảng 155). Khi `Z` vượt 60000, CI hiện cảnh báo để kịp chốt cách xử lý. Đề xuất lúc đó: đặt lại `Z` về 0 vào đầu một tháng mới; phiên bản vẫn tăng dần vì `X.Y` đã đổi.
+  - `Y` chạm 255 vào tháng 01/2048 (`22.255.Z`); từ 02/2048 script báo lỗi và cần chốt quy tắc mới.
 - Ở Windows, phiên bản file hiển thị 4 số: `0.1.16.0`.
 - Bản chạy `pnpm dev`/`cargo build` trên máy lập trình mang phiên bản `0.1.0` (chưa qua CI).
-
-## Việc tiếp theo
-
-- Cho `scripts/set-version.mjs --build` tự tính `X.Y` từ ngày chạy CI (UTC) thay vì đọc `VERSION`, để không quên đổi tay đầu tháng; thêm test cho các mốc 11/2026, 12/2026, 01/2027.
 
 ## Phiên bản xuất hiện ở đâu
 
@@ -37,7 +35,7 @@ Phiên bản có dạng **`X.Y.Z`** (quy tắc do chủ dự án chốt ngày 14
 
 ## Cách hoạt động
 
-- CI chạy `node scripts/set-version.mjs --build <số lần chạy>` trước khi build: ghi phiên bản vào `apps/desktop/src-tauri/tauri.conf.json` và `Cargo.toml` (workspace). Thay đổi này chỉ nằm trong máy CI, **không commit** về repo.
+- CI chạy `node scripts/set-version.mjs --build <số lần chạy>` trước khi build (thử ngày khác: thêm `--date 2027-01-15`): ghi phiên bản vào `apps/desktop/src-tauri/tauri.conf.json` và `Cargo.toml` (workspace). Thay đổi này chỉ nằm trong máy CI, **không commit** về repo.
 - Frontend lấy phiên bản và mã commit lúc build (`vite.config.ts`), nên "Giới thiệu" luôn khớp với file cài.
 - File cài NSIS dùng mẫu riêng [`installer/installer.nsi`](../apps/desktop/src-tauri/installer/installer.nsi) (copy từ mẫu mặc định của Tauri, chỉ thêm `CompanyName` và `FileDescription`) vì mẫu mặc định không ghi công ty.
 - Sau khi cài thử trên Windows, CI **kiểm tra lại** công ty, mô tả, phiên bản và sự có mặt của biểu tượng trên file cài và `NexFEM.exe`; sai là CI đỏ (`scripts/ci/test-windows-install.ps1`).
