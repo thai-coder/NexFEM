@@ -1,6 +1,6 @@
 # Danh sách thử trên Windows
 
-Dùng cho bộ cài của nhánh `claude/box-and-reports` (gồm toàn bộ PR #10–#13 và Giai đoạn 5–6.3 của Codex). Ghi kết quả vào cột cuối rồi gửi lại cho Claude hoặc Codex. Mục nào lỗi, chụp màn hình và ghi phiên bản trong Help ▸ About.
+Dùng cho bộ cài của nhánh `claude/box-and-reports` (gồm toàn bộ PR #10–#13 và Giai đoạn 5–6.3 của Codex). Bộ cài nằm ở [Releases](https://github.com/thai-coder/NexFEM/releases) với tag **`test-box-and-reports`** (bản thử, đánh dấu pre-release), tạo bằng Actions ▸ CI ▸ Run workflow trên nhánh đó. Bản chính thức `v0.1.130` chỉ có phần của Codex, chưa có PR #10–#13. Ghi kết quả vào cột cuối rồi gửi lại cho Claude hoặc Codex. Mục nào lỗi, chụp màn hình và ghi phiên bản trong Help ▸ About.
 
 ## 0. Cài đặt
 | # | Bước | Mong đợi | Kết quả |
@@ -34,7 +34,7 @@ Dùng cho bộ cài của nhánh `claude/box-and-reports` (gồm toàn bộ PR #
 ## 3. Tiết diện thép (#12, #13 và bản này)
 | # | Bước | Mong đợi | Kết quả |
 |---|---|---|---|
-| 3.1 | Define ▸ Tiết diện thanh ▸ Thêm, "Chữ I", h 0,3, bf 0,15, tf 0,0107, tw 0,0071, r 0 | A = 5.14e-3 m² (thiếu so với bảng) | |
+| 3.1 | Define ▸ Tiết diện thanh ▸ Thêm, "Chữ I", h 0,3, bf 0,15, tf 0,0107, tw 0,0071, r 0 | A = 5.188e-3 m² (thiếu so với bảng IPE 300: 5.381e-3) | |
 | 3.2 | Đổi r thành 0,015 | A = 5.381e-3 m² (bảng IPE 300: 53,81 cm²), I33 = 8.356e-5 m⁴ | |
 | 3.3 | "Hộp", h 0,2, b 0,2, t 0,01, r 0 rồi r 0,02 | A = 7.600e-3 rồi 7.342e-3 m² | |
 | 3.4 | "Nạp thư viện thép (CSV)…", chọn `tests/e2e/fixtures/steel-library-sample.csv` (lấy từ repo) | "3 tiết diện; đối chiếu được 3, lệch quá ngưỡng 1"; "1 dòng không đọc được"; "IPE 300 sai" nằm trong danh sách lệch | |

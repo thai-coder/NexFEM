@@ -100,7 +100,9 @@ jobs:
   publish:
     name: Phát hành bộ cài thử
     needs: [web, rust, windows]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/claude/etab-sap2000-connection-vts58p'
+    # Nhánh phát triển: phát hành chính thức khi push. Nhánh khác: chỉ khi chạy tay (Actions ▸ CI ▸ Run workflow),
+    # tạo bản phát hành thử (pre-release) `test-<tên nhánh>` để tải về cài thử, không đụng nhánh `installer`.
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/claude/etab-sap2000-connection-vts58p') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -111,7 +113,25 @@ jobs:
           merge-multiple: true
           path: dl
 
+      - name: Chuẩn bị bản thử (nhánh khác nhánh phát triển)
+        if: github.ref != 'refs/heads/claude/etab-sap2000-connection-vts58p'
+        run: |
+          set -euo pipefail
+          exe=$(find "$PWD/dl" -name '*-setup.exe' | head -1)
+          msi=$(find "$PWD/dl" -name '*.msi' | head -1)
+          VERSION=$(basename "$exe" | sed -E 's/^NexFEM_([0-9]+\.[0-9]+\.[0-9]+)_.*/\1/')
+          case "$VERSION" in *[!0-9.]*|"") echo "Không đọc được phiên bản từ $exe"; exit 1;; esac
+          # Tên nhánh -> tên tag an toàn: chỉ chữ, số, gạch ngang.
+          SLUG=$(printf '%s' "${GITHUB_REF_NAME}" | sed -E 's#^claude/##; s#[^A-Za-z0-9]+#-#g; s#^-+|-+$##g')
+          echo "EXE=$exe" >> "$GITHUB_ENV"
+          echo "MSI=$msi" >> "$GITHUB_ENV"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "TAG=test-$SLUG" >> "$GITHUB_ENV"
+          echo "PRERELEASE=1" >> "$GITHUB_ENV"
+          ls -la "$exe" "$msi"
+
       - name: Nhánh installer (cắt phần 95 MB)
+        if: github.ref == 'refs/heads/claude/etab-sap2000-connection-vts58p'
         run: |
           set -euo pipefail
           exe=$(find "$PWD/dl" -name '*-setup.exe' | head -1)
@@ -160,9 +180,16 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           # Bản phát hành cố định "latest-build" của các lần trước được thay bằng bản có số phiên bản.
-          gh release delete latest-build -R "${{ github.repository }}" -y --cleanup-tag || true
+          [ "${PRERELEASE:-}" = "1" ] || gh release delete latest-build -R "${{ github.repository }}" -y --cleanup-tag || true
           # Chạy lại cùng một lần CI thì thay bản cũ cùng phiên bản.
           gh release delete "$TAG" -R "${{ github.repository }}" -y --cleanup-tag || true
-          gh release create "$TAG" "$EXE" "$MSI" -R "${{ github.repository }}" --target "${{ github.sha }}" --latest \
-            --title "NexFEM $VERSION" \
-            --notes "NexFEM $VERSION (nhà phát hành: lkat.vn). Bản build tự động từ CI run ${{ github.run_id }}, commit ${{ github.sha }}. Chạy file -setup.exe hoặc .msi bằng quyền quản trị. Chưa có chữ ký số: SmartScreen → More info → Run anyway."
+          if [ "${PRERELEASE:-}" = "1" ]; then
+            # Bản thử của nhánh ${GITHUB_REF_NAME}: pre-release, không phải "latest", thay bản thử cũ cùng nhánh.
+            gh release create "$TAG" "$EXE" "$MSI" -R "${{ github.repository }}" --target "${{ github.sha }}" --prerelease \
+              --title "NexFEM $VERSION (bản thử: ${GITHUB_REF_NAME})" \
+              --notes "Bản thử của nhánh ${GITHUB_REF_NAME}, NexFEM $VERSION (nhà phát hành: lkat.vn). CI run ${{ github.run_id }}, commit ${{ github.sha }}. Chưa qua review. Chạy file -setup.exe hoặc .msi bằng quyền quản trị. Chưa có chữ ký số: SmartScreen → More info → Run anyway."
+          else
+            gh release create "$TAG" "$EXE" "$MSI" -R "${{ github.repository }}" --target "${{ github.sha }}" --latest \
+              --title "NexFEM $VERSION" \
+              --notes "NexFEM $VERSION (nhà phát hành: lkat.vn). Bản build tự động từ CI run ${{ github.run_id }}, commit ${{ github.sha }}. Chạy file -setup.exe hoặc .msi bằng quyền quản trị. Chưa có chữ ký số: SmartScreen → More info → Run anyway."
+          fi
