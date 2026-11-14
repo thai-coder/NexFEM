@@ -13,6 +13,7 @@ import {
   type Model,
   type Quantity,
   type ShellSection,
+  type SteelLibraryRow,
 } from "@nexfem/model-core";
 import { Icon } from "@nexfem/ui";
 import type { DefinitionCollection } from "@nexfem/model-core";
@@ -20,6 +21,8 @@ import { DefineDialog, type DefineSection, type Drafts, type Item } from "../com
 import { Field, NumberField, fmtNum } from "../components/fields.tsx";
 import { useT, type T as Strings } from "../i18n/index.ts";
 import { useModel } from "../stores/model.ts";
+import { pickCsvText, useSteelLibrary } from "../stores/steelLibrary.ts";
+import { useUi } from "../stores/ui.ts";
 
 const MPa = 1000;
 
@@ -155,13 +158,23 @@ export function SectionPreview({ g }: { g: FrameShape }) {
   );
 }
 
-function frameSectionSection(T: Strings, model: Model): DefineSection<FrameSection & Item> {
+function frameSectionSection(T: Strings, model: Model, steel: SteelLibraryRow[] = []): DefineSection<FrameSection & Item> {
+  // Tiết diện từ thư viện thép dùng vật liệu thép đầu tiên của mô hình (nếu có).
+  const steelMat = model.materials.find((m) => m.type === "steel") ?? model.materials[0];
+  const group = new Map<string, string>();
+  const library = steel.map((row, i) => {
+    const id = `lib-${i}`;
+    group.set(id, [row.standard, row.family].filter(Boolean).join(" · "));
+    return { id, name: row.name, material: steelMat?.id ?? "", geometry: structuredClone(row.geometry) } as FrameSection & Item;
+  });
   return {
     collection: "frameSections",
     label: T.dlg.frameSections.title,
     icon: "section",
     idPrefix: "sec",
     namePrefix: "SEC",
+    ...(library.length ? { library, libraryGroup: (x: Item) => group.get(x.id) ?? "" } : {}),
+    toolbar: <SteelLibraryPanel hasSteel={model.materials.some((m) => m.type === "steel")} />,
     create: (id, name, drafts) => ({
       id,
       name,
@@ -255,7 +268,83 @@ function frameSectionSection(T: Strings, model: Model): DefineSection<FrameSecti
 export function FrameSectionsDialog({ onClose }: { onClose(): void }) {
   const T = useT();
   const model = useModel((s) => s.model);
-  return <DefineDialog title={T.dlg.frameSections.title} sections={[frameSectionSection(T, model) as unknown as DefineSection]} onClose={onClose} testId="dlg-frameSections" />;
+  const steel = useSteelLibrary((s) => s.rows);
+  return <DefineDialog title={T.dlg.frameSections.title} sections={[frameSectionSection(T, model, steel) as unknown as DefineSection]} onClose={onClose} testId="dlg-frameSections" />;
+}
+
+/** Nạp thư viện thép từ CSV và báo kết quả đối chiếu với giá trị trong bảng gốc. */
+function SteelLibraryPanel({ hasSteel }: { hasSteel: boolean }) {
+  const T = useT();
+  const L = T.dlg.steelLibrary;
+  const { fileName, rows, checks, errors, importText, clear } = useSteelLibrary();
+  const flagged = checks.filter((c) => c.flagged.length);
+  const checked = checks.filter((c) => Object.keys(c.dev).length).length;
+  const pct = (v: number | undefined) => (v === undefined ? "—" : `${(v * 100).toFixed(2)} %`);
+  return (
+    <div className="steel-library" data-testid="steel-library">
+      <div className="steel-library-actions">
+        <button
+          className="btn small"
+          data-testid="steel-import"
+          onClick={async () => {
+            const f = await pickCsvText();
+            if (!f) return;
+            const r = importText(f.name, f.text);
+            useUi.getState().log(r.added ? "success" : "error", T.fmt(L.imported, { name: f.name, n: r.added, e: r.errors }));
+          }}
+        >
+          {L.import}
+        </button>
+        {rows.length > 0 && (
+          <button className="btn small" data-testid="steel-clear" onClick={clear}>
+            {L.clear}
+          </button>
+        )}
+      </div>
+      <p className="form-hint" data-testid="steel-status">
+        {rows.length ? T.fmt(L.status, { name: fileName ?? "", n: rows.length, checked, flagged: flagged.length }) : L.none}
+      </p>
+      {rows.length > 0 && !hasSteel && <p className="form-hint is-error">{L.noSteel}</p>}
+      {errors.length > 0 && (
+        <details className="form-hint">
+          <summary>{T.fmt(L.errors, { n: errors.length })}</summary>
+          <ul>
+            {errors.slice(0, 20).map((e) => (
+              <li key={e.line}>{T.fmt(L.errorLine, { line: e.line, message: e.message })}</li>
+            ))}
+          </ul>
+        </details>
+      )}
+      {flagged.length > 0 && (
+        <details className="form-hint" data-testid="steel-flagged">
+          <summary>{T.fmt(L.flaggedTitle, { n: flagged.length })}</summary>
+          <table className="steel-flagged">
+            <thead>
+              <tr>
+                <th>{L.section}</th>
+                <th>A</th>
+                <th>I33</th>
+                <th>I22</th>
+                <th>J</th>
+              </tr>
+            </thead>
+            <tbody>
+              {flagged.slice(0, 50).map((c) => (
+                <tr key={c.row.name}>
+                  <td>{c.row.name}</td>
+                  {(["A", "I33", "I22", "J"] as const).map((k) => (
+                    <td key={k} className={c.flagged.includes(k) ? "is-error" : ""}>
+                      {pct(c.dev[k])}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </details>
+      )}
+    </div>
+  );
 }
 
 // ------------------------------------------------------------------ shell sections

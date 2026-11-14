@@ -1966,3 +1966,33 @@ input[aria-invalid="true"] {
 .pane-options {
   margin-left: auto;
 }
+
+/* ---------------------------------------------- steel section library */
+
+.steel-library {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.steel-library-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.steel-flagged {
+  border-collapse: collapse;
+  font-size: 11px;
+}
+.steel-flagged th,
+.steel-flagged td {
+  padding: 1px 6px;
+  text-align: right;
+}
+.steel-flagged td:first-child,
+.steel-flagged th:first-child {
+  text-align: left;
+}
+.steel-library .is-error {
+  color: var(--color-danger);
+}
