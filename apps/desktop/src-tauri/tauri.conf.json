@@ -72,7 +72,9 @@
       },
       "wix": {
         "bannerPath": "installer/wix-banner.bmp",
-        "dialogImagePath": "installer/wix-dialog.bmp"
+        "dialogImagePath": "installer/wix-dialog.bmp",
+        "fragmentPaths": ["installer/nxf-icon.wxs"],
+        "componentRefs": ["NxfDefaultIcon"]
       }
     },
     "copyright": "Copyright (c) lkat.vn. All rights reserved.",

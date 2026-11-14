@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Biểu tượng cho file .nxf trong bộ cài MSI.
+  Mẫu WiX mặc định của Tauri đăng ký ProgId "NexFEM.nxf" (tên sản phẩm + đuôi) với lệnh mở
+  nhưng không ghi DefaultIcon, nên Explorer hiện biểu tượng trắng. Thành phần này ghi
+  DefaultIcon = biểu tượng đầu tiên trong NexFEM.exe; gỡ cài thì khoá bị xoá cùng thành phần.
+  Bộ cài NSIS tự ghi DefaultIcon trong installer.nsi.
+-->
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Fragment>
+    <DirectoryRef Id="INSTALLDIR">
+      <Component Id="NxfDefaultIcon" Guid="F5C427CB-1037-4744-AF49-C8FAFBF03122">
+        <RegistryKey Root="HKCR" Key="NexFEM.nxf\DefaultIcon">
+          <RegistryValue Type="string" Value="[INSTALLDIR]NexFEM.exe,0" KeyPath="yes" />
+        </RegistryKey>
+      </Component>
+    </DirectoryRef>
+  </Fragment>
+</Wix>

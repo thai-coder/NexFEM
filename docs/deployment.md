@@ -85,4 +85,6 @@ type %TEMP%\nexfem-check.json
 
 Bộ cài (MSI và NSIS) đăng ký đuôi `.nxf` với NexFEM: file dự án mang biểu tượng chữ N (lấy từ `NexFEM.exe`) và bấm đúp thì mở NexFEM với đúng file đó. App đọc đường dẫn file từ dòng lệnh (`NexFEM.exe "đường dẫn"`) và nạp nó thay cho mô hình trống lúc khởi động. Mỗi lần bấm đúp mở một cửa sổ NexFEM riêng, như ETABS. Gỡ cài đặt thì gỡ luôn kiểu file.
 
+Mẫu WiX mặc định của Tauri đăng ký ProgId `NexFEM.nxf` và lệnh mở nhưng không ghi biểu tượng, nên bộ cài MSI có thêm thành phần `installer/nxf-icon.wxs` (ghi `HKCR\NexFEM.nxf\DefaultIcon = …\NexFEM.exe,0`, khai báo qua `bundle.windows.wix.fragmentPaths` và `componentRefs`). Bộ cài NSIS ghi biểu tượng trong `installer/installer.nsi`.
+
 CI kiểm tra: khoá `HKCR\.nxf` và biểu tượng, mở một file `.nxf` có dấu cách trong tên bằng ShellExecute (như bấm đúp) và kiểm tra app đã nạp đúng mô hình, rồi kiểm tra gỡ cài đặt đã xoá kiểu file.
