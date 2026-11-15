@@ -16,7 +16,7 @@
   - Joint loads are done (schema `Model.jointLoads`, solver, validation, Assign ▸ Joint loads, viewer, both importers). Points lying inside a frame become frame point loads.
   - Joint springs are done (schema `Joint.springs`, solver with spring reactions, validation, Properties, viewer symbol). ETABS line and area springs are lumped into joint springs, with warnings.
   - Angle (L) and General sections are done (schema, TypeScript, Rust, dialog, ETABS import). Frames are split at joints lying on them, as ETABS/SAP2000 auto mesh does. The ETABS import now has no errors.
-  - Open question for the owner: F5 on the ETABS sample stops at joint 253 (X). That joint has only pinned members in one plane, and diaphragm D1 is defined but never assigned in the file. Options: assign a diaphragm or restraints, or add a small stiffness with a warning, as CSI programs do.
-  - Next: concentrated moments on frames; an elastic-foundation element.
+  - Mechanism stabilization is done, option 2 chosen by the owner. The ETABS sample now runs F5 with a warning listing 8 stabilized DOFs. Its results are not usable yet: lateral cases drift hundreds of metres because the file has only negligible lateral soil springs, and column C3 hangs because its base lies inside a footing that NexFEM does not mesh.
+  - Next: mesh slabs/footings at interior joints (so the column base gets the soil springs); concentrated moments on frames; an elastic-foundation element.
   - **Schema note for Codex:** `Frame.angle` (optional), `Model.jointLoads` (default `[]`) `Joint.springs` (optional) and frame shapes `L` and `general` are new and backward compatible; files without them still open.
 - **M1 completion condition:** the user imports other ETABS/SAP2000 files and confirms the mapping assumptions (DZ, PINNED, partial fixity, None area).

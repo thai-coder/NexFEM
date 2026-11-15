@@ -367,6 +367,12 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
             used[k] = true;
         }
     }
+    // Nút có lò xo (ví dụ góc móng trên nền đàn hồi) cũng tham gia dù không có thanh: lò xo giữ nó và nhận tải đặt vào.
+    for (k, j) in model.joints.iter().enumerate() {
+        if j.springs.is_some_and(|s| s.iter().any(|x| *x > 0.0)) {
+            used[k] = true;
+        }
+    }
     let nodes: Vec<usize> = (0..model.joints.len()).filter(|&k| used[k]).collect();
     let node_of: HashMap<usize, usize> = nodes.iter().enumerate().map(|(n, &k)| (k, n)).collect();
     // Master/slave thuộc cùng diaphragm; dùng MPC chính xác theo mặt phẳng XY:
@@ -719,18 +725,75 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
         warn(&mut warnings, "sparse_pcg",
             "Đã chuyển sang giải thưa PCG; chưa thể coi đây là Cholesky trực tiếp và yêu cầu kiểm tra hội tụ".into(), vec![]);
     }
-    k.factor(1e-11).map_err(|s| {
-        let (n, d) = dof_owner[s.dof];
-        let jt = &model.joints[nodes[n]];
-        AnalysisError::new(
-            "unstable",
+    // Bậc tự do mất ổn định (cơ cấu, ví dụ nút chỉ nối các thanh khớp nằm trong một mặt phẳng):
+    // thêm độ cứng rất nhỏ rồi phân tích lại, chỉ để ma trận giải được. Sau khi lắp tải, bậc tự do nào
+    // trong số này có tải thì vẫn báo "unstable" (tải đi vào cơ cấu → kết quả vô nghĩa).
+    let k_ref = (0..ndof)
+        .map(|d| k.get(d, d).abs())
+        .fold(0.0_f64, f64::max)
+        .max(1.0);
+    let k_stab = 1e-9 * k_ref;
+    let mut mechanism_dofs: Vec<usize> = Vec::new();
+    // Mô hình không có gối hay lò xo nào: không ổn định hoá (cả kết cấu trôi tự do), báo lỗi như cũ.
+    let supported = nodes.iter().any(|&jk| {
+        let j = &model.joints[jk];
+        j.restraint.is_some_and(|r| r.iter().any(|x| *x))
+            || j.springs.is_some_and(|s| s.iter().any(|x| *x > 0.0))
+    });
+    let max_mechanism = if supported { 1000 } else { 0 };
+    let base = k.clone();
+    loop {
+        let mut trial = base.clone();
+        for &d in &mechanism_dofs {
+            trial.add(d, d, k_stab);
+        }
+        match trial.factor_with_floor(1e-11, 1e-12 * k_ref) {
+            Ok(()) => {
+                k = trial;
+                break;
+            }
+            Err(s) if !mechanism_dofs.contains(&s.dof) && mechanism_dofs.len() < max_mechanism => {
+                mechanism_dofs.push(s.dof)
+            }
+            Err(s) => {
+                let (n, d) = dof_owner[s.dof];
+                let jt = &model.joints[nodes[n]];
+                return Err(AnalysisError::new(
+                    "unstable",
+                    format!(
+                        "Kết cấu mất ổn định tại nút {} theo phương {} (thiếu gối hoặc liên kết)",
+                        jt.label, DOF_NAMES[d]
+                    ),
+                    vec![jt.id.clone()],
+                ));
+            }
+        }
+    }
+    if !mechanism_dofs.is_empty() {
+        let mut list: Vec<String> = mechanism_dofs
+            .iter()
+            .map(|&d| {
+                let (n, c) = dof_owner[d];
+                format!("{} {}", model.joints[nodes[n]].label, DOF_NAMES[c])
+            })
+            .collect();
+        list.sort();
+        let ids: Vec<String> = mechanism_dofs
+            .iter()
+            .map(|&d| model.joints[nodes[dof_owner[d].0]].id.clone())
+            .collect();
+        warn(
+            &mut warnings,
+            "mechanism_stabilized",
             format!(
-                "Kết cấu mất ổn định tại nút {} theo phương {} (thiếu gối hoặc liên kết)",
-                jt.label, DOF_NAMES[d]
+                "{} bậc tự do mất ổn định không chịu tải được thêm độ cứng rất nhỏ ({:.1e}) để giải: {}. Chuyển vị theo các phương này không có ý nghĩa; nên thêm gối, sàn cứng hoặc liên kết",
+                list.len(),
+                k_stab,
+                list.join(", ")
             ),
-            vec![jt.id.clone()],
-        )
-    })?;
+            ids,
+        );
+    }
 
     // ---- tải theo mẫu tải
     let frame_by_id: HashMap<&str, usize> = model
@@ -980,6 +1043,20 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
             feq_cond.insert(ei, fc);
         }
         let rhs_scale = rhs.iter().map(|x| x.abs()).fold(0.0_f64, f64::max);
+        for &d in &mechanism_dofs {
+            if rhs[d].abs() > 1e-10 * (1.0 + rhs_scale) {
+                let (n, direction) = dof_owner[d];
+                let joint = &model.joints[nodes[n]];
+                return Err(AnalysisError::new(
+                    "unstable",
+                    format!(
+                        "Kết cấu mất ổn định tại nút {} theo phương {} và có tải theo phương đó (trường hợp {}): cần thêm gối hoặc liên kết",
+                        joint.label, DOF_NAMES[direction], lc.name
+                    ),
+                    vec![joint.id.clone()],
+                ));
+            }
+        }
         for &d in &zero_rotation_dofs {
             if rhs[d].abs() > 1e-10 * (1.0 + rhs_scale) {
                 let (n, direction) = dof_owner[d];
@@ -1008,6 +1085,38 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
             AnalysisError::new(code, msg, vec![])
         })?;
         let u = rhs;
+        // Độ cứng giả ở bậc tự do cơ cấu không được chịu lực: nếu chịu (tải đi vào cơ cấu qua các bậc tự do khác),
+        // kết quả vô nghĩa → báo lỗi thay vì trả chuyển vị khổng lồ.
+        // Lò xo xoay đơn vị ở khớp xoay tự do cũng chỉ để giải: nếu nó phải chịu mô men đáng kể thì
+        // phần kết cấu quanh đó là cơ cấu (ví dụ cột treo, dầm khớp tựa lên nút không có gì đỡ).
+        for &d in &zero_rotation_dofs {
+            if u[d].abs() > 1e-6 * (1.0 + rhs_scale) {
+                let (n, direction) = dof_owner[d];
+                let joint = &model.joints[nodes[n]];
+                return Err(AnalysisError::new(
+                    "unstable",
+                    format!(
+                        "Kết cấu mất ổn định quanh nút {} (xoay {} tự do chịu mô men, trường hợp {}): có phần kết cấu không được đỡ, cần thêm gối hoặc liên kết",
+                        joint.label, DOF_NAMES[direction], lc.name
+                    ),
+                    vec![joint.id.clone()],
+                ));
+            }
+        }
+        for &d in &mechanism_dofs {
+            if (k_stab * u[d]).abs() > 1e-6 * (1.0 + rhs_scale) {
+                let (n, direction) = dof_owner[d];
+                let joint = &model.joints[nodes[n]];
+                return Err(AnalysisError::new(
+                    "unstable",
+                    format!(
+                        "Kết cấu mất ổn định tại nút {} theo phương {} và cơ cấu này chịu tải (trường hợp {}): cần thêm gối, sàn cứng hoặc liên kết",
+                        joint.label, DOF_NAMES[direction], lc.name
+                    ),
+                    vec![joint.id.clone()],
+                ));
+            }
+        }
 
         let disp_of = |n: usize| -> [f64; 6] {
             let mut d = [0.0; 6];

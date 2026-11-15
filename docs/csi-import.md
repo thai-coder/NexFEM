@@ -80,6 +80,21 @@ NexFEM dùng đúng quy ước mặc định của ETABS/SAP2000. Trục 1 đi t
 
 `Frame.angle` (độ) xoay trục 2, 3 quanh trục 1: e2' = cos·e2 + sin·e3, dương ngược chiều kim đồng hồ khi nhìn từ đầu +1. Bộ giải (`crates/fem-solver/src/element.rs::local_axes`), biểu đồ mô men (`packages/viewer/src/moment.ts`) và cả hai bộ nhập dùng chung quy ước này. Sửa góc trong bảng Properties của thanh. Test: `local_axis_angle_turns_the_strong_axis_like_csi` kiểm tra cột công xôn tải theo Y ở góc 0°, 90° và 30°, so với lời giải giải tích theo I22 và I33.
 
+## Ổn định hoá cơ cấu (bộ giải)
+
+Bậc tự do không có độ cứng, hoặc có độ cứng cực nhỏ, là một cơ cấu. Ví dụ: nút chỉ nối các thanh khớp nằm trong một mặt phẳng, hoặc các thanh gần như thẳng hàng vì toạ độ lệch 1e-6 m. Trước đây bộ giải dừng ngay. Nay (lựa chọn của chủ dự án):
+
+1. Khi phân tích Cholesky, trụ ≤ max(1e-11 × đường chéo, 1e-12 × độ cứng lớn nhất của mô hình) bị coi là cơ cấu. Ngưỡng tuyệt đối bắt các cơ cấu "gần như".
+2. Bậc tự do đó được thêm độ cứng 1e-9 × độ cứng lớn nhất rồi phân tích lại. Cảnh báo `mechanism_stabilized` liệt kê nút, phương và độ lớn, kèm câu "chuyển vị theo các phương này không có ý nghĩa".
+3. Sau khi giải từng trường hợp, nếu độ cứng giả này (hoặc lò xo xoay đơn vị ở khớp xoay tự do) phải chịu lực đáng kể, tức tải đi vào cơ cấu, thì bộ giải báo lỗi `unstable` và không trả kết quả.
+4. Mô hình hoàn toàn không có gối hay lò xo vẫn báo `unstable` ngay.
+
+Nút chỉ có lò xo, không có thanh nối vào (ví dụ góc móng), nay cũng được đưa vào tính và nhận tải.
+
+Đây **không** phải lò xo mô phỏng vật thật. Lò xo thật là gối đàn hồi, nền đất, gối cao su. Cách ETABS/SAP2000 xử lý cơ cấu bên trong chưa kiểm chứng được, nên NexFEM chọn cách minh bạch nói trên.
+
+Test: `unloaded_mechanism_is_stabilized_with_warning_loaded_one_fails`, `near_mechanism_with_tiny_stiffness_is_detected`, `sprung_joint_without_frames_takes_its_load`, `unstable_model_reports_joint`.
+
 ## Chia thanh tại nút
 
 ETABS (`AUTOMESH "YES"`) và SAP2000 (`FRAME AUTO MESH ASSIGNMENTS` AutoMesh=Yes, AtJoints=Yes) tự chia thanh khi phân tích, tại nút nằm trên thân thanh: đầu thanh khác hoặc góc sàn, trong dung sai MERGETOL / MergeTol. Nếu không chia, thanh tựa lên thân thanh khác sẽ treo lơ lửng. Bộ nhập chia giống vậy (`splitFramesAtJoints` trong `locate.ts`):
@@ -145,7 +160,11 @@ Test: `joint_forces_and_moments_in_global_axes` (bộ giải: công xôn với l
 | Tải tập trung tại nút | 31 | 31 | 8 tại nút đầu thanh; 23 ở điểm riêng nằm trên dầm, đổi thành tải tập trung trên dầm |
 | Trường hợp tải / tổ hợp | 12 / 87 | 12 / 87 | |
 
-Báo cáo nhập file ETABS mẫu **không còn lỗi**. Mô hình dùng lò xo nút thay cho gối, như file gốc. F5 hiện **dừng vì mất ổn định tại nút 253 theo X**: nút này chỉ nối các thanh khớp hai đầu (cột C47, dầm B152/B153, giằng D11) nằm trong mặt phẳng x = const, nên không có gì giữ theo X. File có định nghĩa sàn cứng `D1` nhưng không gán cho nút hay sàn nào. Cách xử lý (gán sàn cứng, thêm gối, hoặc tự thêm độ cứng nhỏ như ETABS) cần chủ dự án quyết định. Kết quả phân tích **chưa so được với ETABS**, và sẽ khác ETABS vì: lò xo nền quy về nút và tuyến tính (file gốc chỉ chịu nén); giằng chữ L tuyến tính (file gốc chỉ chịu kéo, `LIMITCOMPRESSION 0`); cột HSS nhồi bê tông tính như ống rỗng.
+Báo cáo nhập file ETABS mẫu **không còn lỗi**. Mô hình dùng lò xo nút thay cho gối, như file gốc. **F5 chạy được** (cân bằng lực đúng ở mọi trường hợp), với cảnh báo 8 bậc tự do mất ổn định không chịu tải được thêm độ cứng rất nhỏ, ví dụ nút 253 theo X (xem "Ổn định hoá cơ cấu"). Kết quả số **chưa dùng được** và **chưa so được với ETABS**:
+
+- **Tải ngang (WX, WY, EX, EY):** chuyển vị hàng chục tới hàng trăm mét. Theo phương ngang, file gốc chỉ có lò xo nền ngang cực nhỏ (U1 = U2 = 8,68e-5 lb/in³, khoảng 1e-6 lần độ cứng đứng) và không có gối nào.
+- **Tĩnh tải (CDL):** chân cột C3 (nút 57) nằm bên trong một tấm móng chứ không ở góc. ETABS chia tấm móng tại đó nên cột được đỡ. NexFEM chưa chia sàn và quy lò xo nền về góc tấm, nên cột này và các dầm khớp tựa lên nó chỉ còn được giữ bởi độ cứng xoắn của dầm: lún hàng chục mét.
+- Lò xo nền và giằng chữ L tuyến tính, trong khi file gốc dùng lò xo chỉ chịu nén và giằng chỉ chịu kéo. Cột HSS nhồi bê tông được tính như ống rỗng.
 
 Mô hình này đặt hầu hết đối tượng bằng DZ dưới một tầng duy nhất (Story1, cao 12 in), nên mặt bằng của tầng chỉ thấy những gì nằm đúng cao độ tầng. Xem bằng khung nhìn 3D hoặc mặt đứng.
 
@@ -209,7 +228,7 @@ File OMF là khung phẳng YZ, hai cột xoay 90°: nhờ góc xoay, trục 2 c�
 
 ## Việc tiếp theo
 
-1. Ổn định của file ETABS mẫu (nút 253): chờ chủ dự án chọn cách xử lý.
+1. Chia sàn/móng tại nút nằm bên trong (để chân cột trong móng nhận lò xo nền), rồi phần tử shell có độ cứng (Giai đoạn 9).
 2. Phần tử nền đàn hồi cho thanh/sàn (thay cho quy lò xo về nút); lò xo SAP2000 khi có file thật; lò xo chỉ chịu nén (phân tích phi tuyến).
 3. Mô men tập trung trên thanh (để nhập mô men ở điểm nằm giữa thanh).
 4. Đối chiếu kết quả (M2) khi có bảng chuyển vị, phản lực, nội lực xuất từ ETABS/SAP2000.

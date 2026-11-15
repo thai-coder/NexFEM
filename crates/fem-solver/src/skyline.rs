@@ -1,6 +1,7 @@
 //! Ma trận đối xứng lưu dạng skyline (profile) và phân tích Cholesky K = UᵀU.
 
 /// Ma trận đối xứng n×n: mỗi cột j lưu các hàng first[j]..=j (tam giác trên).
+#[derive(Clone)]
 pub struct Skyline {
     first: Vec<usize>,
     ptr: Vec<usize>,
@@ -63,6 +64,13 @@ impl Skyline {
 
     /// Phân tích Cholesky tại chỗ. Trụ ≤ `rel_tol` × đường chéo ban đầu được coi là suy biến.
     pub fn factor(&mut self, rel_tol: f64) -> Result<(), Singular> {
+        self.factor_with_floor(rel_tol, 0.0)
+    }
+
+    /// Như `factor`, thêm ngưỡng tuyệt đối: trụ ≤ max(rel_tol·đường chéo, abs_tol) là suy biến.
+    /// Ngưỡng tuyệt đối bắt cơ cấu "gần như" (độ cứng khác 0 nhưng cực nhỏ, ví dụ do toạ độ lệch 1e-6 m),
+    /// mà phép so tương đối với đường chéo của chính bậc tự do đó bỏ sót.
+    pub fn factor_with_floor(&mut self, rel_tol: f64, abs_tol: f64) -> Result<(), Singular> {
         let n = self.n();
         for j in 0..n {
             let fj = self.first[j];
@@ -81,7 +89,7 @@ impl Skyline {
                     self.data[at] = s / d;
                 } else {
                     // Viết dạng "không lớn hơn" để NaN cũng bị coi là suy biến.
-                    if s.partial_cmp(&(rel_tol * diag0.max(f64::MIN_POSITIVE)))
+                    if s.partial_cmp(&(rel_tol * diag0.max(f64::MIN_POSITIVE)).max(abs_tol))
                         != Some(std::cmp::Ordering::Greater)
                         || !s.is_finite()
                     {

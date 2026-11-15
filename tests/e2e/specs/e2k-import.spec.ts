@@ -39,7 +39,7 @@ test("nhập file ETABS thật: báo cáo số lượng và phần không nhập
   expect((await model(page)).name).toBe("Toa_nha_A");
 });
 
-test("mở mô hình đã nhập; lò xo làm gối; F5 báo nút 253 mất ổn định (sàn cứng D1 không được gán trong file)", async ({ page }) => {
+test("mở mô hình đã nhập; lò xo làm gối; F5 chạy được, cơ cấu không chịu tải được ổn định hoá có cảnh báo", async ({ page }) => {
   await importFixture(page);
   await page.getByTestId("csi-open").click();
   await expect(page.getByTestId("dlg-csiImport")).toHaveCount(0);
@@ -55,8 +55,11 @@ test("mở mô hình đã nhập; lò xo làm gối; F5 báo nút 253 mất ổn
   expect(m.frameLoads.filter((l) => l.kind === "point").length).toBe(23);
   await expect(page.getByTestId("bottom")).toContainText("Đã nhập 23217_SMFs 3D model_updated v4.e2k");
   await page.keyboard.press("F5");
-  // Nút 253 chỉ nối các thanh khớp nằm trong mặt phẳng x = const: không có gì giữ theo X (sàn cứng D1 có định nghĩa nhưng không gán).
-  await expect(page.getByTestId("bottom")).toContainText("mất ổn định tại nút 253");
+  // Nút 253 chỉ nối các thanh khớp nằm trong mặt phẳng x = const: không có gì giữ theo X (sàn cứng D1 có định nghĩa nhưng
+  // không gán). Bậc tự do đó không chịu tải nên được thêm độ cứng rất nhỏ, có cảnh báo liệt kê nút.
+  await expect(page.getByTestId("bottom")).toContainText("Phân tích xong", { timeout: 60_000 });
+  await expect(page.getByTestId("bottom")).toContainText("253 Ux");
+  await expect(page.getByTestId("bottom")).toContainText("không có ý nghĩa");
 });
 
 test("Huỷ thì không đổi mô hình", async ({ page }) => {

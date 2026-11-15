@@ -365,6 +365,101 @@ fn unstable_model_reports_joint() {
 }
 
 #[test]
+fn unloaded_mechanism_is_stabilized_with_warning_loaded_one_fails() {
+    // Thanh a–b ngàm tại a; thanh b–c khớp hai đầu (nhả M2, M3, giữ xoắn) nằm cùng phương X với a–b.
+    // Nút c chỉ nối thanh khớp dọc X: theo Y và Z không có gì giữ (cơ cấu).
+    let pin =
+        json!({"i":[false,false,false,false,true,true],"j":[false,false,false,false,true,true]});
+    let m = model(
+        json!([
+            {"id":"a","label":"1","x":0,"y":0,"z":0,"restraint":FIX},
+            {"id":"b","label":"2","x":3,"y":0,"z":0},
+            {"id":"c","label":"3","x":6,"y":0,"z":0}
+        ]),
+        json!([
+            {"id":"f1","label":"B1","kind":"beam","i":"a","j":"b","section":"s"},
+            {"id":"f2","label":"B2","kind":"beam","i":"b","j":"c","section":"s","releases":pin}
+        ]),
+        json!([{"id":"l","frame":"f1","pattern":"p","kind":"point","direction":"gravity","value":10.0,"at":1.0}]),
+    );
+    let r = run(&m);
+    let w = r
+        .warnings
+        .iter()
+        .find(|w| w.code == "mechanism_stabilized")
+        .expect("có cảnh báo");
+    assert!(
+        w.message.contains("3 Uy") && w.message.contains("3 Uz"),
+        "{}",
+        w.message
+    );
+    // Kết quả phần còn lại đúng như công xôn a–b.
+    let uz = r.cases[0].displacements["b"][2];
+    assert!(close(uz, -10.0 * 27.0 / (3.0 * E * I33), 1e-6), "uz = {uz}");
+    // Có tải theo phương cơ cấu: báo lỗi, không cho tải "biến mất" vào độ cứng giả.
+    let mut loaded = m.clone();
+    loaded.joint_loads = serde_json::from_value(
+        json!([{"id":"j","joint":"c","pattern":"p","values":[0.0,1.0,0.0,0.0,0.0,0.0]}]),
+    )
+    .unwrap();
+    let e = analyze(&loaded, &Options::default()).unwrap_err();
+    assert_eq!(e.code, "unstable");
+    assert!(e.message.contains("có tải"), "{}", e.message);
+}
+
+#[test]
+fn sprung_joint_without_frames_takes_its_load() {
+    // Nút c chỉ có lò xo Kz (góc móng trên nền đàn hồi, không có thanh) và chịu Fz: lò xo nhận tải, không báo mất tải.
+    // Các phương khác của c không có độ cứng và không chịu tải → được ổn định hoá có cảnh báo.
+    let mut m = model(
+        json!([
+            {"id":"a","label":"1","x":0,"y":0,"z":0,"restraint":FIX},
+            {"id":"b","label":"2","x":3,"y":0,"z":0},
+            {"id":"c","label":"3","x":9,"y":0,"z":0,"springs":[0.0,0.0,500.0,0.0,0.0,0.0]}
+        ]),
+        json!([{"id":"f","label":"B1","kind":"beam","i":"a","j":"b","section":"s"}]),
+        json!([]),
+    );
+    m.joint_loads = serde_json::from_value(
+        json!([{"id":"j","joint":"c","pattern":"p","values":[0.0,0.0,-20.0,0.0,0.0,0.0]}]),
+    )
+    .unwrap();
+    let r = run(&m);
+    let c = &r.cases[0];
+    assert!(close(c.displacements["c"][2], -20.0 / 500.0, 1e-9));
+    assert!(close(c.reactions["c"][2], 20.0, 1e-9));
+    assert!(r.warnings.iter().any(|w| w.code == "mechanism_stabilized"));
+}
+
+#[test]
+fn near_mechanism_with_tiny_stiffness_is_detected() {
+    // Thanh khớp b–c gần như thẳng hàng với a–b (lệch 1e-9 m theo Y): độ cứng ngang của c khác 0 nhưng cực nhỏ.
+    // Ngưỡng tuyệt đối phải coi đó là cơ cấu; có tải ngang tại c thì báo lỗi thay vì trả chuyển vị khổng lồ.
+    let pin =
+        json!({"i":[false,false,false,false,true,true],"j":[false,false,false,false,true,true]});
+    let mut m = model(
+        json!([
+            {"id":"a","label":"1","x":0,"y":0,"z":0,"restraint":FIX},
+            {"id":"b","label":"2","x":3,"y":0,"z":0},
+            {"id":"c","label":"3","x":6,"y":1e-9,"z":0}
+        ]),
+        json!([
+            {"id":"f1","label":"B1","kind":"beam","i":"a","j":"b","section":"s"},
+            {"id":"f2","label":"B2","kind":"beam","i":"b","j":"c","section":"s","releases":pin}
+        ]),
+        json!([]),
+    );
+    m.joint_loads = serde_json::from_value(
+        json!([{"id":"j","joint":"c","pattern":"p","values":[0.0,1.0,0.0,0.0,0.0,0.0]}]),
+    )
+    .unwrap();
+    assert_eq!(
+        analyze(&m, &Options::default()).unwrap_err().code,
+        "unstable"
+    );
+}
+
+#[test]
 fn sample_building_gravity_equilibrium() {
     let path = concat!(
         env!("CARGO_MANIFEST_DIR"),

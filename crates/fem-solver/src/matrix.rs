@@ -7,6 +7,7 @@ use std::collections::BTreeMap;
 /// The skyline profile budget is measured in doubles (2M ~= 16 MiB).
 pub const MAX_SKYLINE_PROFILE: usize = 2_000_000;
 
+#[derive(Clone)]
 pub enum Matrix {
     Skyline(Skyline),
     Sparse(SparseCg),
@@ -61,8 +62,12 @@ impl Matrix {
     }
 
     pub fn factor(&mut self, rel_tol: f64) -> Result<(), Singular> {
+        self.factor_with_floor(rel_tol, 0.0)
+    }
+
+    pub fn factor_with_floor(&mut self, rel_tol: f64, abs_tol: f64) -> Result<(), Singular> {
         match self {
-            Self::Skyline(k) => k.factor(rel_tol),
+            Self::Skyline(k) => k.factor_with_floor(rel_tol, abs_tol),
             Self::Sparse(k) => k.factor(),
         }
     }
@@ -79,6 +84,7 @@ impl Matrix {
 }
 
 /// Upper-triangular assembly is compressed to full CSR only once per analysis.
+#[derive(Clone)]
 pub struct SparseCg {
     rows: Vec<BTreeMap<usize, f64>>,
     diag: Vec<f64>,
