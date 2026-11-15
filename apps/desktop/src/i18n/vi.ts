@@ -30,6 +30,7 @@ export const vi = {
     "file.open": "Mở…",
     "file.openSample": "Mở mô hình mẫu",
     "file.startPage": "Trang chủ",
+    "file.close": "Đóng mô hình",
     "file.save": "Lưu",
     "file.saveAs": "Lưu thành…",
     "file.importEtabs": "Nhập file ETABS (.e2k)…",
@@ -749,6 +750,10 @@ export const vi = {
     openFailed: "Không mở được file: {message}",
     saveFailed: "Không lưu được file: {message}",
     confirmDiscard: "Mô hình có thay đổi chưa lưu. Bỏ các thay đổi đó?",
+    closePrompt: "Lưu thay đổi trước khi đóng mô hình?",
+    closeSave: "Lưu và đóng",
+    closeDiscard: "Đóng không lưu",
+    closeSaveIncomplete: "Chưa lưu được mô hình. Mô hình vẫn mở.",
     filterName: "Dự án NexFEM",
   },
 } as const;

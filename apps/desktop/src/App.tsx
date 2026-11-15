@@ -137,6 +137,8 @@ export function App() {
   const theme = useUi((s) => s.theme);
   const panels = useUi((s) => s.panels);
   const apiRef = useRef<DockviewApi | null>(null);
+  const hasClosedModel = useRef(false);
+  const modelOpen = useModel((s) => s.modelOpen);
   const name = useModel((s) => s.model.name);
   const dirty = useModel((s) => s.dirty);
 
@@ -146,10 +148,16 @@ export function App() {
 
   const fileName = useModel((s) => s.fileName);
   useEffect(() => {
-    const title = `NexFEM — ${fileName ? basename(fileName) : `${name}.nxf`}${dirty ? " •" : ""}`;
+    const title = modelOpen ? `NexFEM — ${fileName ? basename(fileName) : `${name}.nxf`}${dirty ? " •" : ""}` : "NexFEM";
     document.title = title;
     void setWindowTitle(title);
-  }, [name, dirty, fileName]);
+  }, [name, dirty, fileName, modelOpen]);
+
+  useEffect(() => {
+    if (modelOpen) return;
+    apiRef.current = null;
+    hasClosedModel.current = true;
+  }, [modelOpen]);
 
   useEffect(() => {
     // Cửa sổ chính đang ẩn nên requestAnimationFrame không chạy; dùng bộ đếm giờ để đợi bố cục xong.
@@ -268,10 +276,14 @@ export function App() {
     }
     // Trang chủ theo tuỳ chọn "hiện khi khởi động", không theo layout đã lưu.
     const start = api.getPanel("start");
-    if (showStartAtStartup()) openStart(api, T, true);
+    if (hasClosedModel.current) api.getPanel("viewport")?.api.setActive();
+    else if (showStartAtStartup()) openStart(api, T, true);
     else if (start) api.removePanel(start);
-    api.onDidLayoutChange(() => save(LAYOUT_KEY, api.toJSON()));
+    api.onDidLayoutChange(() => {
+      if (useModel.getState().modelOpen) save(LAYOUT_KEY, api.toJSON());
+    });
     api.onDidRemovePanel((p) => {
+      if (!useModel.getState().modelOpen) return;
       const key = (Object.keys(PANEL_OF) as (keyof PanelVisibility)[]).find((k) => PANEL_OF[k] === p.id);
       if (key && useUi.getState().panels[key]) {
         const next = { ...useUi.getState().panels, [key]: false };
@@ -285,20 +297,20 @@ export function App() {
   return (
     <div className="app">
       <MenuBar />
-      <Toolbar />
+      {modelOpen && <Toolbar />}
       <div className="workspace">
-        <ToolStrip />
+        {modelOpen && <ToolStrip />}
         <main className="dock-host">
-          <DockviewReact
+          {modelOpen ? <DockviewReact
             components={components}
             tabComponents={tabComponents}
             onReady={onReady}
             theme={theme === "dark" ? themeDark : themeLight}
             disableFloatingGroups={false}
-          />
+          /> : <StartPage />}
         </main>
       </div>
-      <StatusBar />
+      {modelOpen && <StatusBar />}
       <CommandPalette />
       <ContextMenu />
       <Dialogs />

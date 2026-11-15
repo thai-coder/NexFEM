@@ -3,6 +3,7 @@ import { COMMANDS } from "../commands/app.ts";
 import { FrameSectionsDialog, LoadsDialog, MaterialsDialog, ShellSectionsDialog } from "../dialogs/DefinitionDialogs.tsx";
 import { GridStoryDialog } from "../dialogs/GridStoryDialog.tsx";
 import { NewModelDialog } from "../dialogs/NewModelDialog.tsx";
+import { CloseModelDialog } from "../dialogs/CloseModelDialog.tsx";
 import { PreferencesDialog } from "../dialogs/PreferencesDialog.tsx";
 import { RenameDialog } from "../dialogs/RenameDialog.tsx";
 import { ReplicateDialog } from "../dialogs/ReplicateDialog.tsx";
@@ -35,6 +36,8 @@ export function Dialogs() {
   switch (dialog.kind) {
     case "newModel":
       return <NewModelDialog onClose={close} />;
+    case "closeModel":
+      return <CloseModelDialog onClose={close} />;
     case "gridStory":
       return <GridStoryDialog onClose={close} />;
     case "materials":

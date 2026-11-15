@@ -1,4 +1,4 @@
-import { PROJECT_EXTENSION, parseProject, sampleModel, serializeProject, type Model } from "@nexfem/model-core";
+import { PROJECT_EXTENSION, emptyModel, parseProject, sampleModel, serializeProject, type Model } from "@nexfem/model-core";
 import { t } from "../i18n/index.ts";
 import { useModel } from "../stores/model.ts";
 import { load, save } from "../stores/persist.ts";
@@ -38,6 +38,16 @@ export function confirmDiscard(): boolean {
 /** Như `confirmDiscard` nhưng dùng hộp thoại hệ điều hành khi chạy trong Tauri. */
 export async function confirmDiscardAsync(): Promise<boolean> {
   return !useModel.getState().dirty || askYesNo(t().file.confirmDiscard);
+}
+
+/** Kết thúc phiên làm việc với mô hình. Người gọi đã xử lý các thay đổi chưa lưu. */
+export function closeProject() {
+  useModel.getState().reset(emptyModel(t().app.untitled), null, false);
+  useUi.getState().set({
+    dialog: null, contextMenu: null, paletteOpen: false, tool: "select",
+    drawPoints: [], drawSections: {}, drawPane: 0, activePane: 0, cursor: null, loadDisplay: null,
+    logs: [], bottomTab: "log",
+  });
 }
 
 function loadBytes(bytes: Uint8Array, path: string) {
@@ -152,10 +162,11 @@ export async function pickProjectModel(): Promise<{ model: Model; name: string }
 }
 
 export async function saveProject(saveAs = false): Promise<boolean> {
-  const { model, fileName } = useModel.getState();
-  const bytes = serializeProject(model);
+  const { model, fileName, modelOpen } = useModel.getState();
+  if (!modelOpen) return false;
   const suggested = `${model.name || "model"}.${PROJECT_EXTENSION}`;
   try {
+    const bytes = serializeProject(model);
     if (isTauri()) {
       const { invoke, dialog } = await tauri();
       let path = fileName && /[\\/]/.test(fileName) ? fileName : null;
@@ -165,7 +176,7 @@ export async function saveProject(saveAs = false): Promise<boolean> {
         path = chosen.toLowerCase().endsWith(`.${PROJECT_EXTENSION}`) ? chosen : `${chosen}.${PROJECT_EXTENSION}`;
       }
       await invoke("write_project_file", { path, data: Array.from(bytes) });
-      useModel.getState().markSaved(path);
+      if (useModel.getState().model === model) useModel.getState().markSaved(path);
       pushRecent(path);
       useUi.getState().log("success", t().fmt(t().file.saved, { name: basename(path) }));
       return true;

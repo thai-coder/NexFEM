@@ -8,6 +8,7 @@ export type SelectMode = "replace" | "toggle" | "add";
 
 interface ModelState {
   model: Model;
+  modelOpen: boolean;
   /** Đường dẫn file đang mở (bản desktop) hoặc tên file (bản trình duyệt). */
   fileName: string | null;
   dirty: boolean;
@@ -29,7 +30,7 @@ interface ModelState {
   undo(): void;
   redo(): void;
   select(ids: string[], mode?: SelectMode): void;
-  reset(model: Model, fileName?: string | null): void;
+  reset(model: Model, fileName?: string | null, modelOpen?: boolean): void;
 }
 
 /**
@@ -55,6 +56,7 @@ function snapshot() {
 
 export const useModel = create<ModelState>((set, get) => ({
   ...snapshot(),
+  modelOpen: true,
   fileName: null,
   dirty: false,
   locked: false,
@@ -145,10 +147,10 @@ export const useModel = create<ModelState>((set, get) => ({
     set({ selection: [...s] });
   },
 
-  reset(model, fileName = null) {
+  reset(model, fileName = null, modelOpen = true) {
     stack.reset(model);
     // Chỉ mở mô hình từ file đã lưu mới được xem là "clean"; mô hình mới phải được Save lần đầu.
-    set({ ...snapshot(), fileName, dirty: fileName === null, locked: false, selection: [] });
+    set({ ...snapshot(), modelOpen, fileName, dirty: modelOpen && fileName === null, locked: false, selection: [] });
     useResults.getState().clear();
     useUi.getState().set({ messages: null, views: defaultViewsFor(model), hover: null });
   },

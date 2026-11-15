@@ -3,7 +3,7 @@ import type { DisplayOptions, ViewSpec } from "@nexfem/viewer";
 import { t } from "../i18n/index.ts";
 import type { Strings } from "../i18n/vi.ts";
 import { useModel } from "../stores/model.ts";
-import { openProject, openSample, saveProject } from "../services/files.ts";
+import { closeProject, openProject, openSample, saveProject } from "../services/files.ts";
 import { importCsiFromPicker } from "../services/csiImport.ts";
 import { selectActiveCase, selectDeformationCase, useResults } from "../stores/results.ts";
 import { solve } from "../services/solver.ts";
@@ -186,19 +186,30 @@ const later = (id: CommandId, phase: number, icon?: string, shortcut?: string, k
   run: () => notYet(id, phase),
 });
 
-export const COMMANDS: AppCommand[] = [
+const commands: AppCommand[] = [
   { id: "file.new", icon: "new", shortcut: "Ctrl+N", keys: ["ctrl+n"], run: () => dialog("newModel") },
   { id: "file.open", icon: "open", shortcut: "Ctrl+O", keys: ["ctrl+o"], run: () => void openProject() },
   { id: "file.openSample", icon: "view3d", run: () => void openSample() },
   { id: "file.startPage", run: () => window.dispatchEvent(new CustomEvent("nexfem:start-page")) },
-  { id: "file.save", icon: "save", shortcut: "Ctrl+S", keys: ["ctrl+s"], run: () => void saveProject(false) },
-  { id: "file.saveAs", shortcut: "Ctrl+Shift+S", keys: ["ctrl+shift+s"], run: () => void saveProject(true) },
+  { id: "file.save", icon: "save", shortcut: "Ctrl+S", keys: ["ctrl+s"], enabled: () => model().modelOpen, run: () => void saveProject(false) },
+  { id: "file.saveAs", shortcut: "Ctrl+Shift+S", keys: ["ctrl+shift+s"], enabled: () => model().modelOpen, run: () => void saveProject(true) },
+  {
+    id: "file.close",
+    icon: "close",
+    shortcut: "Ctrl+W",
+    keys: ["ctrl+w"],
+    enabled: () => model().modelOpen,
+    run: () => {
+      if (model().dirty) dialog("closeModel");
+      else closeProject();
+    },
+  },
   { id: "file.importEtabs", icon: "open", run: () => void importCsiFromPicker("e2k") },
   { id: "file.importSap", icon: "open", run: () => void importCsiFromPicker("s2k") },
   later("file.importDxf", 8),
   later("file.importIfc", 8),
   later("file.importExcel", 8),
-  later("file.export", 6),
+  { ...later("file.export", 6), enabled: () => model().modelOpen },
 
   {
     id: "edit.undo",
@@ -425,6 +436,10 @@ export const COMMANDS: AppCommand[] = [
   { id: "help.about", icon: "info", run: () => ui().set({ dialog: { kind: "about" } }) },
 ];
 
+export const COMMANDS = commands.map((c) =>
+  /^(file|tools|help)\./.test(c.id) ? c : { ...c, enabled: () => model().modelOpen && (c.enabled?.() ?? true) },
+);
+
 const byId = new Map(COMMANDS.map((c) => [c.id, c]));
 
 export function command(id: CommandId): AppCommand {
@@ -443,7 +458,7 @@ export function runCommand(id: CommandId): void {
 export type MenuItem = CommandId | "-" | { submenu: keyof Strings["submenu"]; items: MenuItem[] };
 
 export const MENUS: { id: keyof Strings["menu"]; items: MenuItem[] }[] = [
-  { id: "file", items: ["file.new", "file.open", "file.openSample", "file.startPage", "file.save", "file.saveAs", "-", { submenu: "import", items: ["file.importEtabs", "file.importSap", "-", "file.importDxf", "file.importIfc", "file.importExcel"] }, "file.export"] },
+  { id: "file", items: ["file.new", "file.open", "file.openSample", "file.startPage", "file.save", "file.saveAs", "file.close", "-", { submenu: "import", items: ["file.importEtabs", "file.importSap", "-", "file.importDxf", "file.importIfc", "file.importExcel"] }, "file.export"] },
   { id: "edit", items: ["edit.undo", "edit.redo", "-", "edit.delete", "edit.replicate", "-", "edit.selectAll"] },
   {
     id: "view",
