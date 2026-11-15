@@ -720,6 +720,7 @@ export const en: Strings = {
       section_angle_geometric_axes: "Angle (L): properties about geometric axes parallel to the legs (product of inertia I23 and principal axes ignored), without fillets",
       section_general_imported: "General section: A, I33, I22, J and shear areas AS2, AS3 taken directly from the file",
       frames_split: "Split {hosts} frames into {segments} segments at joints lying on them (the source program meshes frames at joints); releases stay at the outer ends, loads move to the segments",
+      area_spring_interior_nodes: "Slab with joints inside it (for example a column base inside a footing): split at those joints to lump the area spring, as the source program meshes the slab; total area and stiffness unchanged",
       section_ignored: "Section \"{section}\" ignored ({records} lines): not used by the analysis model",
       no_supports_imported: "The imported model has no supports (for example the file relies on springs, not supported yet): assign supports before analysis",
     },

@@ -721,6 +721,7 @@ export const vi = {
       section_angle_geometric_axes: "Thép góc chữ L: đặc trưng theo trục hình học song song với cánh (bỏ tích quán tính I23 và trục chính), không tính bán kính lượn",
       section_general_imported: "Tiết diện General: nhập thẳng A, I33, I22, J và diện tích chịu cắt AS2, AS3 từ file",
       frames_split: "Chia {hosts} thanh thành {segments} đoạn tại nút nằm trên thân thanh (chương trình gốc tự chia thanh tại nút); nhả liên kết giữ ở hai đầu ngoài, tải chuyển sang các đoạn",
+      area_spring_interior_nodes: "Tấm có nút nằm bên trong (ví dụ chân cột giữa móng): chia tấm tại các nút đó để quy lò xo nền, như chương trình gốc tự chia tấm; tổng diện tích và độ cứng giữ nguyên",
       section_ignored: "Bỏ qua phần \"{section}\" ({records} dòng): không dùng cho mô hình phân tích",
       no_supports_imported: "Mô hình không có gối sau khi nhập (ví dụ file dùng lò xo nền chưa hỗ trợ): cần gán gối trước khi phân tích",
     },

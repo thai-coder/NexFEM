@@ -20,7 +20,7 @@ import {
 } from "@nexfem/model-core";
 import { e2kNumber, e2kPairs, e2kSection, parseE2k, type E2kFile, type E2kRecord, type E2kToken } from "./e2k-parse.ts";
 import { Diagnostics, type ImportDiagnostic } from "./diagnostics.ts";
-import { cornerAreas, frameAxes, globalAxisOf, locatePoint, remapFrameLoads, splitFramesAtJoints } from "./locate.ts";
+import { frameAxes, globalAxisOf, locatePoint, meshedNodeAreas, remapFrameLoads, splitFramesAtJoints } from "./locate.ts";
 import { conv, unitFactors, type UnitFactors } from "./units.ts";
 
 export type { ImportDiagnostic, ImportLevel } from "./diagnostics.ts";
@@ -711,6 +711,9 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
     if (ok) d.add("warning", "frame_spring_lumped", {}, { object: f.label });
     else d.add("error", "spring_direction_unsupported", {}, { object: f.label });
   }
+  // Nút có thanh nối vào: ứng viên để chia tấm tại chỗ (nút chỉ là góc sàn đã có trong đa giác).
+  const frameNodes = new Set(frames.flatMap((f) => [f.i, f.j]));
+  const connectedJoints = joints.filter((j) => frameNodes.has(j.id));
   for (const s of shells) {
     const key = [...shellIdByKey].find(([, id]) => id === s.id)?.[0];
     const name = key ? shellSpring.get(key) : undefined;
@@ -731,8 +734,11 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
       continue;
     }
     if (def.u[0] !== def.u[1]) d.add("warning", "area_spring_inplane_assumed", {}, { object: s.label });
-    const areas = cornerAreas(pts);
-    pts.forEach((p, k) => def.u.forEach((ku, c) => ku > 0 && addSpring(p.id, c, conv.unitWeight(U, ku) * areas[k]!)));
+    // ETABS chia tấm tại nút nằm bên trong (ví dụ chân cột giữa móng): nút đó nhận phần lò xo của mình.
+    const shares = meshedNodeAreas(pts, connectedJoints, tolM);
+    for (const [id, area] of shares) def.u.forEach((ku, c) => ku > 0 && addSpring(id, c, conv.unitWeight(U, ku) * area));
+    const inner = [...shares.keys()].filter((id) => !s.joints.includes(id));
+    if (inner.length) d.add("info", "area_spring_interior_nodes", {}, { object: `${s.label} (${inner.map((id) => jointById.get(id)!.label).join(", ")})` });
     d.add("warning", "area_spring_lumped", {}, { object: s.label });
   }
   for (const j of joints) if (j.springs) j.springs = j.springs.map((v) => (v === 0 ? 0 : Number(v.toPrecision(12)))) as NonNullable<Joint["springs"]>;
