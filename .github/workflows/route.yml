@@ -1,0 +1,27 @@
+name: Gợi ý phân việc
+
+# Chỉ ghi job summary (không bình luận, không gắn nhãn). Xem docs/WORK_ROUTING.md.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  route:
+    name: Gợi ý mô hình, review chéo, PR chồng lấn
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test scripts/route/route.test.mjs
+      - name: Ghi gợi ý
+        run: node scripts/route/pr-summary.mjs
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}

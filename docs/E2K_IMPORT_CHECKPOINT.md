@@ -20,3 +20,4 @@
   - Next: mesh slabs/footings at interior joints (so the column base gets the soil springs); concentrated moments on frames; an elastic-foundation element.
   - **Schema note for Codex:** `Frame.angle` (optional), `Model.jointLoads` (default `[]`) `Joint.springs` (optional) and frame shapes `L` and `general` are new and backward compatible; files without them still open.
 - **M1 completion condition:** the user imports other ETABS/SAP2000 files and confirms the mapping assumptions (DZ, PINNED, partial fixity, None area).
+- **Phân việc giữa Claude, Codex và chủ dự án:** xem `docs/WORK_ROUTING.md` (bảng định tuyến, review chéo, khoá schema, công cụ `scripts/route`).

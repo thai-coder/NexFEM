@@ -1,0 +1,24 @@
+{
+  "_doc": "Bảng định tuyến công việc (docs/WORK_ROUTING.md). Khớp theo tiền tố đường dẫn; đường dẫn khớp quy tắc dài nhất.",
+  "areas": [
+    { "id": "contract", "label": "Hợp đồng dữ liệu (schema)", "risk": "high", "lock": true, "crossReview": true,
+      "paths": ["packages/model-core/src/schema.ts", "packages/model-core/schema/", "crates/fem-core/src/model.rs", "resources/templates/"] },
+    { "id": "solver", "label": "Bộ giải", "risk": "high", "crossReview": true,
+      "paths": ["crates/fem-solver/", "crates/fem-wasm/"] },
+    { "id": "csi-import", "label": "Nhập CSI và đối chiếu", "risk": "high", "crossReview": true,
+      "paths": ["packages/io-formats/", "tests/fixtures/csi/", "scripts/validation/"] },
+    { "id": "model-core", "label": "Lõi mô hình và lệnh", "risk": "medium", "paths": ["packages/model-core/"] },
+    { "id": "viewer", "label": "Khung nhìn 2D/3D", "risk": "medium", "paths": ["packages/viewer/"] },
+    { "id": "installer", "label": "Bộ cài và CI", "risk": "medium", "windows": true,
+      "paths": [".github/", "scripts/ci/", "apps/desktop/src-tauri/", "scripts/set-version.mjs", "scripts/version-rule", "scripts/route/", "pnpm-lock.yaml", ".gitattributes", "VERSION", "apps/desktop/turbo.json", "turbo.json"] },
+    { "id": "i18n", "label": "Chuỗi giao diện", "risk": "low", "paths": ["apps/desktop/src/i18n/"] },
+    { "id": "ui", "label": "Giao diện desktop", "risk": "medium", "paths": ["apps/desktop/", "packages/ui/"] },
+    { "id": "e2e", "label": "Kiểm thử e2e", "risk": "low", "paths": ["tests/e2e/"] },
+    { "id": "docs", "label": "Tài liệu", "risk": "low", "paths": ["docs/", "README.md", "PROJECT_STATUS.md", "CLAUDE.md", "AGENTS.md"] }
+  ],
+  "tiers": {
+    "deep": "Mô hình mạnh nhất, mức suy nghĩ cao (ví dụ Opus, extra). Thay đổi mà sai âm thầm sẽ cho kết quả kỹ thuật sai.",
+    "standard": "Mô hình tầm trung, mức suy nghĩ vừa (ví dụ Sonnet). Làm theo mẫu có sẵn, có test bao quanh.",
+    "light": "Mô hình nhẹ (ví dụ Haiku). Sửa cơ học, kiểm tra trạng thái, báo cáo."
+  }
+}
