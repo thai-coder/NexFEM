@@ -20,7 +20,7 @@ import {
 } from "@nexfem/model-core";
 import { e2kNumber, e2kPairs, e2kSection, parseE2k, type E2kFile, type E2kRecord, type E2kToken } from "./e2k-parse.ts";
 import { Diagnostics, type ImportDiagnostic } from "./diagnostics.ts";
-import { frameAxes, globalAxisOf, locatePoint, meshedNodeAreas, remapFrameLoads, splitFramesAtJoints } from "./locate.ts";
+import { cornerAreas, frameAxes, globalAxisOf, locatePoint, meshedNodeAreas, remapFrameLoads, splitFramesAtJoints } from "./locate.ts";
 import { conv, unitFactors, type UnitFactors } from "./units.ts";
 
 export type { ImportDiagnostic, ImportLevel } from "./diagnostics.ts";
@@ -736,8 +736,13 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
     if (def.u[0] !== def.u[1]) d.add("warning", "area_spring_inplane_assumed", {}, { object: s.label });
     // ETABS chia tấm tại nút nằm bên trong (ví dụ chân cột giữa móng): nút đó nhận phần lò xo của mình.
     const shares = meshedNodeAreas(pts, connectedJoints, tolM);
-    for (const [id, area] of shares) def.u.forEach((ku, c) => ku > 0 && addSpring(id, c, conv.unitWeight(U, ku) * area));
-    const inner = [...shares.keys()].filter((id) => !s.joints.includes(id));
+    const assignArea = (id: string, area: number) => def.u.forEach((ku, c) => ku > 0 && addSpring(id, c, conv.unitWeight(U, ku) * area));
+    if (shares) shares.forEach((area, id) => assignArea(id, area));
+    else {
+      d.add("warning", "area_spring_mesh_failed", {}, { object: s.label });
+      cornerAreas(pts).forEach((area, k) => assignArea(pts[k]!.id, area));
+    }
+    const inner = shares ? [...shares.keys()].filter((id) => !s.joints.includes(id)) : [];
     if (inner.length) d.add("info", "area_spring_interior_nodes", {}, { object: `${s.label} (${inner.map((id) => jointById.get(id)!.label).join(", ")})` });
     d.add("warning", "area_spring_lumped", {}, { object: s.label });
   }

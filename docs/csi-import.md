@@ -125,9 +125,9 @@ Hầu hết thép góc dùng làm giằng khớp hai đầu, chỉ chịu lực 
 
 **Chia tấm tại nút nằm bên trong** (`meshedNodeAreas` trong `locate.ts`). ETABS chia tấm móng tại nút có thanh nối vào nằm trong tấm, ví dụ chân cột C3 (nút 57) giữa móng F17. Khi quy lò xo nền, bộ nhập làm tương tự:
 
-- Chỉ nhận nút cách mặt phẳng tấm không quá MERGETOL và nằm trong đa giác, kể cả trên cạnh. Nút lệch mặt phẳng, như đỉnh cột phía trên, không bị ghép.
-- Tam giác hoá tấm: tấm lồi quạt từ nút bên trong đầu tiên, tấm lõm cắt tai, rồi chèn các nút còn lại. Mỗi tam giác chia 1/3 diện tích cho mỗi đỉnh, nên tổng diện tích và tổng độ cứng giữ nguyên.
-- Tấm không có nút bên trong giữ cách chia A/4 mỗi góc như trước.
+- MERGETOL giới hạn khoảng cách tới mặt phẳng tấm. Trong mặt phẳng chiếu, nút phải nằm trong đa giác hoặc ngay trên cạnh, trong sai số số học.
+- Bộ nhập sắp các nút theo tọa độ chiếu và ID trước khi tam giác hoá. Tấm lồi dùng lưới quạt, tấm lõm dùng cắt tai với đường chéo tránh các đỉnh còn lại. Mỗi tam giác chia 1/3 diện tích cho mỗi đỉnh. Bộ nhập kiểm tra tổng diện tích trước khi quy lò xo.
+- Tấm không có nút thêm dùng cách quy lò xo về góc như trước (A/4 mỗi góc đối với hình chữ nhật). Khi chia tấm thất bại, báo cáo nhập cảnh báo rằng lò xo chỉ được quy về góc.
 - Tấm trong mô hình không đổi (góc và tải mặt như cũ). Việc chia chỉ dùng để quy lò xo, nên tải mặt vẫn phân phối đúng một lần.
 
 File mẫu có 19 tấm móng với 22 nút bên trong. Tĩnh tải CDL lún lớn nhất còn 9,3 cm (trước là 40,6 m vì cột C3 treo). Test: `test/locate.test.ts` và ca "chân cột C3 (nút 57)" trong `e2k-fixture.test.ts`.
