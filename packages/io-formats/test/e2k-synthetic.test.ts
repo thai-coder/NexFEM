@@ -124,6 +124,15 @@ describe("mô men ETABS tại điểm riêng nằm giữa thanh", () => {
     expect(report.diagnostics.filter((d) => d.level === "error")).toEqual([]);
   });
 
+  it("giữ cách gán mô men vào nút có sẵn trong dung sai MERGETOL", () => {
+    const source = input.replace('POINT "M" 3 0', 'POINT "M" 6 0.0005').replace('AUTOMESH "YES"', 'AUTOMESH "NO"');
+    const { model, report } = importE2k(source);
+    expect(model.frames).toHaveLength(1);
+    expect(model.joints).toHaveLength(2);
+    expect(model.jointLoads).toMatchObject([{ joint: model.frames[0]!.j, values: [0, 0, 0, 0, 12, 0] }]);
+    expect(report.diagnostics.find((d) => d.code === "point_load_at_joint")).toMatchObject({ level: "info" });
+  });
+
   it.each([
     ["tắt chia lưới", input.replace('AUTOMESH "YES"', 'AUTOMESH "NO"'), 1],
     ["lệch trục thanh nhưng vẫn trong MERGETOL", input.replace('POINT "M" 3 0', 'POINT "M" 3 0.0005'), 1],

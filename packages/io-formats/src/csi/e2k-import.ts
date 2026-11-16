@@ -742,7 +742,7 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
     const axisTol = Math.min(tolM, 1e-7);
     for (const { key, point, at, hasMoment } of pointLoads) {
       if (!point || !hasMoment || jointKeys.has(key) || momentJoints.has(key)) continue;
-      const place = locatePoint(point, jointsBeforeMoments, split.frames, axisTol, true);
+      const place = locatePoint(point, jointsBeforeMoments, split.frames, tolM, axisTol);
       if (!place) continue;
       if ("joint" in place) {
         momentJoints.set(key, place.joint.id);
@@ -751,7 +751,7 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
         continue;
       }
       // Kiểm tra thanh gốc để tránh gán nhầm tại giao điểm hoặc trên đoạn đã lệch trục do gộp nút.
-      const original = split.segments.size ? locatePoint(point, jointsBeforeMoments, frames, axisTol, true) : place;
+      const original = split.segments.size ? locatePoint(point, jointsBeforeMoments, frames, tolM, axisTol) : place;
       if (!original || "joint" in original || !canSplit(original.frame)) continue;
       const host = original.frame;
       if (host.id !== (split.hostOf.get(place.frame.id) ?? place.frame.id)) continue;
