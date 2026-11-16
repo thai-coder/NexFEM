@@ -107,6 +107,8 @@ export const en: Strings = {
     "tools.theme": "Toggle light/dark",
     "tools.language": "Tiếng Việt",
     "tools.preferences": "Preferences…",
+    "help.guide": "NexFEM Help",
+    "help.documentation": "Documentation…",
     "help.shortcuts": "Keyboard shortcuts",
     "help.about": "About NexFEM",
   },
@@ -256,6 +258,19 @@ export const en: Strings = {
   phase: { badge: "Phase {n}" },
   about: "NexFEM {version} · structural analysis for Windows. © {company}",
   shortcuts: "Keyboard shortcuts",
+  help: {
+    documentation: "Documentation",
+    guideSteps: [
+      "Create a model or open an .nxf file. Use File → Import for ETABS (.e2k) or SAP2000 (.s2k) models.",
+      "Read the import report and check units, local axes, restraints and load cases before analysis.",
+      "Press F5 to run linear static frame analysis. Use Display to view deformation and M2/M3 moments. Press F6 to unlock the model.",
+    ],
+    vendorReferences: "Official CSI documentation",
+    vendorScope: "Select the documentation for the product and version used to export the model. NexFEM runs its own frame solver. Comparison with CSI results is in progress.",
+    etabs: "Open ETABS documentation",
+    sap2000: "Open SAP2000 documentation",
+    validation: "NexFEM validation plan",
+  },
   confirmNew: "Create a new model? Unsaved changes will be lost.",
   dlg: {
     ok: "OK",

@@ -432,7 +432,9 @@ const commands: AppCommand[] = [
   },
   { id: "tools.language", icon: "language", run: () => ui().setLang(ui().lang === "vi" ? "en" : "vi") },
   { id: "tools.preferences", run: () => dialog("preferences") },
-  { id: "help.shortcuts", icon: "keyboard", shortcut: "F1", keys: ["f1"], run: () => ui().set({ dialog: { kind: "shortcuts" } }) },
+  { id: "help.guide", icon: "info", shortcut: "F1", keys: ["f1"], run: () => dialog("helpGuide") },
+  { id: "help.documentation", icon: "folder", run: () => dialog("documentation") },
+  { id: "help.shortcuts", icon: "keyboard", run: () => dialog("shortcuts") },
   { id: "help.about", icon: "info", run: () => ui().set({ dialog: { kind: "about" } }) },
 ];
 
@@ -510,7 +512,7 @@ export const MENUS: { id: keyof Strings["menu"]; items: MenuItem[] }[] = [
   { id: "display", items: ["display.deformed", "display.moment", "display.momentM2", "display.shear", "display.axial"] },
   { id: "design", items: ["design.concrete", "design.steel"] },
   { id: "tools", items: ["tools.palette", "-", "tools.theme", "tools.language", "tools.preferences"] },
-  { id: "help", items: ["help.shortcuts", "help.about"] },
+  { id: "help", items: ["help.guide", "help.documentation", "-", "help.shortcuts", "help.about"] },
 ];
 
 /** Chuẩn hoá sự kiện bàn phím thành chuỗi như "ctrl+shift+p". */

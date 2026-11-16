@@ -240,6 +240,8 @@ File OMF là khung phẳng YZ, hai cột xoay 90°: nhờ góc xoay, trục 2 c�
 
 ## Việc tiếp theo
 
+Xem [mục lục nguồn và yêu cầu tách chế độ SAP2000/ETABS](validation/CSI_DOCUMENTATION_AND_MODES.md) trước khi thay đổi quy tắc phân tích hay ánh xạ kết quả.
+
 1. Phần tử shell có độ cứng (Giai đoạn 9); tới lúc đó tải mặt vẫn chia về thanh/nút biên theo diện tích chịu tải.
 2. Phần tử nền đàn hồi cho thanh/sàn (thay cho quy lò xo về nút); lò xo SAP2000 khi có file thật; lò xo chỉ chịu nén (phân tích phi tuyến).
 3. Nhập mô men gán trực tiếp trên thanh và mô men tại điểm riêng của SAP2000.
