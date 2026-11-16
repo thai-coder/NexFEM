@@ -169,3 +169,128 @@ export function remapFrameLoads<T extends { id: string; frame: string; kind: "di
   }
   return out;
 }
+
+/**
+ * Diện tích chịu tải của các nút trên một tấm phẳng khi chia tấm tại các nút nằm bên trong nó, như ETABS/SAP2000
+ * tự chia sàn khi phân tích (ví dụ chân cột đặt giữa tấm móng). Chỉ nhận nút cách mặt phẳng tấm không quá `tol`
+ * và nằm trong đa giác (kể cả trên cạnh); nút lệch mặt phẳng (ví dụ đỉnh cột phía trên) không bị ghép.
+ * Không có nút bên trong: giữ đúng `cornerAreas`. Có nút bên trong: chia tam giác (quạt từ nút bên trong đầu tiên
+ * với tấm lồi, cắt tai với tấm lõm, rồi chèn các nút còn lại) và mỗi tam giác chia đều 1/3 diện tích cho ba đỉnh,
+ * nên tổng diện tích luôn bằng diện tích tấm. Trả null nếu không chia được một lưới hợp lệ.
+ */
+export function meshedNodeAreas(corners: readonly (P3 & { id: string })[], candidates: readonly (P3 & { id: string })[], tol: number): Map<string, number> | null {
+  const n = corners.length;
+  if (n < 3) return null;
+  const cornerIds = new Set(corners.map((c) => c.id));
+  const o = corners[0]!;
+  // Pháp tuyến (Newell) và trục chiếu: bỏ thành phần lớn nhất của pháp tuyến.
+  const nrm: V3 = [0, 0, 0];
+  corners.forEach((p, k) => {
+    const q = corners[(k + 1) % n]!;
+    nrm[0] += (p.y - q.y) * ((p.z - o.z) + (q.z - o.z));
+    nrm[1] += (p.z - q.z) * ((p.x - o.x) + (q.x - o.x));
+    nrm[2] += (p.x - q.x) * ((p.y - o.y) + (q.y - o.y));
+  });
+  const nl = Math.hypot(...nrm);
+  if (!Number.isFinite(nl) || nl === 0) return null;
+  const unit = nrm.map((v) => v / nl) as V3;
+  const drop = unit.map(Math.abs).indexOf(Math.max(...unit.map(Math.abs)));
+  const uv = (p: P3): [number, number] => (drop === 0 ? [p.y - o.y, p.z - o.z] : drop === 1 ? [p.z - o.z, p.x - o.x] : [p.x - o.x, p.y - o.y]);
+  const scale = 1 / Math.abs(unit[drop]!); // diện tích 3D = diện tích chiếu × scale
+  const planeDist = (p: P3) => Math.abs((p.x - o.x) * unit[0] + (p.y - o.y) * unit[1] + (p.z - o.z) * unit[2]);
+  if (corners.some((p) => planeDist(p) > tol)) return null;
+  const ids = corners.map((p) => p.id);
+  const cross2 = (a: [number, number], b: [number, number], c: [number, number]) => (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
+  const poly = corners.map(uv);
+  const points = [...poly];
+  const signedArea = poly.reduce((s, p, k) => s + (p[0] * poly[(k + 1) % n]![1] - poly[(k + 1) % n]![0] * p[1]), 0) / 2;
+  const orient = Math.sign(signedArea);
+  const span = Math.max(...poly.map(([x, y]) => Math.hypot(x, y)));
+  const eps = 64 * Number.EPSILON * span ** 2;
+  if (Math.abs(signedArea) <= eps) return null;
+  const samePoint = (a: [number, number], b: [number, number]) =>
+    Math.hypot(a[0] - b[0], a[1] - b[1]) <= 64 * Number.EPSILON * span;
+  const inside = (q: [number, number]) => {
+    let wind = false;
+    for (let k = 0; k < n; k++) {
+      const a = poly[k]!, b = poly[(k + 1) % n]!;
+      // MERGETOL chỉ dùng theo phương pháp tuyến. Mép tấm dùng sai số số học.
+      const onSegment = (q[0] - a[0]) * (q[0] - b[0]) + (q[1] - a[1]) * (q[1] - b[1]) <= 0;
+      if (onSegment && Math.abs(cross2(a, b, q)) <= eps) return true;
+      if ((a[1] > q[1]) !== (b[1] > q[1]) && q[0] < ((b[0] - a[0]) * (q[1] - a[1])) / (b[1] - a[1]) + a[0]) wind = !wind;
+    }
+    return wind;
+  };
+  const interior = candidates.filter((c) => !cornerIds.has(c.id) && planeDist(c) <= tol)
+    .map((c) => ({ id: c.id, xy: uv(c) }))
+    .filter(({ xy }) => inside(xy) && poly.every((p) => !samePoint(p, xy)))
+    .sort((a, b) => a.xy[0] - b.xy[0] || a.xy[1] - b.xy[1] || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+  if (!interior.length) {
+    const out = new Map<string, number>();
+    cornerAreas(corners).forEach((area, k) => out.set(ids[k]!, (out.get(ids[k]!) ?? 0) + area));
+    return out;
+  }
+  const convex = poly.every((p, k) => orient * cross2(p, poly[(k + 1) % n]!, poly[(k + 2) % n]!) >= -eps);
+  let tris: [number, number, number][] = [];
+  let rest = interior;
+  if (convex) {
+    const first = interior[0]!;
+    const f = points.push(first.xy) - 1;
+    ids.push(first.id);
+    for (let k = 0; k < n; k++) {
+      const j = (k + 1) % n;
+      if (orient * cross2(first.xy, poly[k]!, poly[j]!) > eps) tris.push([f, k, j]);
+    }
+    rest = interior.slice(1);
+  } else {
+    // Cắt tai.
+    const idx = corners.map((_, k) => k);
+    while (idx.length > 3) {
+      let cut = false;
+      for (let k = 0; k < idx.length && !cut; k++) {
+        const [i0, i1, i2] = [idx[(k + idx.length - 1) % idx.length]!, idx[k]!, idx[(k + 1) % idx.length]!];
+        const [a, b, c] = [poly[i0]!, poly[i1]!, poly[i2]!];
+        if (orient * cross2(a, b, c) <= eps) continue;
+        const blocked = idx.some((j) => j !== i0 && j !== i1 && j !== i2 &&
+          orient * cross2(a, b, poly[j]!) >= -eps && orient * cross2(b, c, poly[j]!) >= -eps && orient * cross2(c, a, poly[j]!) >= -eps);
+        if (blocked) continue;
+        tris.push([i0, i1, i2]);
+        idx.splice(k, 1);
+        cut = true;
+      }
+      if (!cut) return null;
+    }
+    if (idx.length === 3) tris.push([idx[0]!, idx[1]!, idx[2]!]);
+  }
+  for (const { id, xy: q } of rest) {
+    if (points.some((p) => samePoint(p, q))) continue;
+    const ci = points.push(q) - 1;
+    ids.push(id);
+    const next: [number, number, number][] = [];
+    let inserted = false;
+    for (const t of tris) {
+      const [i, j, k] = t;
+      const [a, b, c] = [points[i]!, points[j]!, points[k]!];
+      const [ab, bc, ca] = [orient * cross2(a, b, q), orient * cross2(b, c, q), orient * cross2(c, a, q)];
+      if (Math.min(ab, bc, ca) < -eps) {
+        next.push(t);
+        continue;
+      }
+      if (ab > eps) next.push([i, j, ci]);
+      if (bc > eps) next.push([j, k, ci]);
+      if (ca > eps) next.push([k, i, ci]);
+      inserted = true;
+    }
+    if (!inserted) return null;
+    tris = next;
+  }
+  const out = new Map<string, number>();
+  let total = 0;
+  for (const t of tris) {
+    const a = orient * cross2(points[t[0]]!, points[t[1]]!, points[t[2]]!) / 2;
+    if (a <= 0) return null;
+    total += a;
+    for (const i of t) out.set(ids[i]!, (out.get(ids[i]!) ?? 0) + a * scale / 3);
+  }
+  return Math.abs(total - Math.abs(signedArea)) <= Math.max(eps * tris.length, Math.abs(signedArea) * 1e-10) ? out : null;
+}

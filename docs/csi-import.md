@@ -123,6 +123,15 @@ Hầu hết thép góc dùng làm giằng khớp hai đầu, chỉ chịu lực 
 
 `Joint.springs` = [Kx, Ky, Kz] (kN/m) và [Krx, Kry, Krz] (kN·m/rad) theo hệ tổng thể, không ghép; bậc tự do đã giữ thì bỏ qua lò xo. Bộ giải cộng vào đường chéo ma trận độ cứng và đưa lực lò xo −k·u vào phản lực (kiểm tra cân bằng). Check model coi nút có lò xo là gối. Sửa trong Properties của nút; khung nhìn vẽ ký hiệu zigzag cho nút chỉ có lò xo. Test: `joint_spring_carries_load_and_shows_in_reactions` (công xôn trên lò xo: chuyển vị, phản lực, tổ hợp, chỉ lò xo không gối).
 
+**Chia tấm tại nút nằm bên trong** (`meshedNodeAreas` trong `locate.ts`). ETABS chia tấm móng tại nút có thanh nối vào nằm trong tấm, ví dụ chân cột C3 (nút 57) giữa móng F17. Khi quy lò xo nền, bộ nhập làm tương tự:
+
+- MERGETOL giới hạn khoảng cách tới mặt phẳng tấm. Trong mặt phẳng chiếu, nút phải nằm trong đa giác hoặc ngay trên cạnh, trong sai số số học.
+- Bộ nhập sắp các nút theo tọa độ chiếu và ID trước khi tam giác hoá. Tấm lồi dùng lưới quạt, tấm lõm dùng cắt tai với đường chéo tránh các đỉnh còn lại. Mỗi tam giác chia 1/3 diện tích cho mỗi đỉnh. Bộ nhập kiểm tra tổng diện tích trước khi quy lò xo.
+- Tấm không có nút thêm dùng cách quy lò xo về góc như trước (A/4 mỗi góc đối với hình chữ nhật). Khi chia tấm thất bại, báo cáo nhập cảnh báo rằng lò xo chỉ được quy về góc.
+- Tấm trong mô hình không đổi (góc và tải mặt như cũ). Việc chia chỉ dùng để quy lò xo, nên tải mặt vẫn phân phối đúng một lần.
+
+File mẫu có 19 tấm móng với 22 nút bên trong. Tĩnh tải CDL lún lớn nhất còn 9,3 cm (trước là 40,6 m vì cột C3 treo). Test: `test/locate.test.ts` và ca "chân cột C3 (nút 57)" trong `e2k-fixture.test.ts`.
+
 Lò xo dọc thanh và lò xo nền của ETABS được **quy về lò xo nút** vì NexFEM chưa có phần tử nền đàn hồi. Chỉ nhận khi trục địa phương của lò xo trùng một trục tổng thể (thanh/sàn xiên: lỗi). Lò xo SAP2000 (`… SPRING ASSIGNMENTS`) báo lỗi vì chưa có file thật để kiểm chứng cú pháp.
 
 ## Tải tại nút
@@ -163,7 +172,7 @@ Test: `joint_forces_and_moments_in_global_axes` (bộ giải: công xôn với l
 Báo cáo nhập file ETABS mẫu **không còn lỗi**. Mô hình dùng lò xo nút thay cho gối, như file gốc. **F5 chạy được** (cân bằng lực đúng ở mọi trường hợp), với cảnh báo 8 bậc tự do mất ổn định không chịu tải được thêm độ cứng rất nhỏ, ví dụ nút 253 theo X (xem "Ổn định hoá cơ cấu"). Kết quả số **chưa dùng được** và **chưa so được với ETABS**:
 
 - **Tải ngang (WX, WY, EX, EY):** chuyển vị hàng chục tới hàng trăm mét. Theo phương ngang, file gốc chỉ có lò xo nền ngang cực nhỏ (U1 = U2 = 8,68e-5 lb/in³, khoảng 1e-6 lần độ cứng đứng) và không có gối nào.
-- **Tĩnh tải (CDL):** chân cột C3 (nút 57) nằm bên trong một tấm móng chứ không ở góc. ETABS chia tấm móng tại đó nên cột được đỡ. NexFEM chưa chia sàn và quy lò xo nền về góc tấm, nên cột này và các dầm khớp tựa lên nó chỉ còn được giữ bởi độ cứng xoắn của dầm: lún hàng chục mét.
+- **Tĩnh tải (CDL):** đã sửa bằng cách chia tấm tại nút nằm bên trong (xem "Lò xo nút"). Chân cột C3 (nút 57) giữa móng F17 nay nhận lò xo nền; lún lớn nhất 9,3 cm (trước 40,6 m).
 - Lò xo nền và giằng chữ L tuyến tính, trong khi file gốc dùng lò xo chỉ chịu nén và giằng chỉ chịu kéo. Cột HSS nhồi bê tông được tính như ống rỗng.
 
 Mô hình này đặt hầu hết đối tượng bằng DZ dưới một tầng duy nhất (Story1, cao 12 in), nên mặt bằng của tầng chỉ thấy những gì nằm đúng cao độ tầng. Xem bằng khung nhìn 3D hoặc mặt đứng.
@@ -228,7 +237,7 @@ File OMF là khung phẳng YZ, hai cột xoay 90°: nhờ góc xoay, trục 2 c�
 
 ## Việc tiếp theo
 
-1. Chia sàn/móng tại nút nằm bên trong (để chân cột trong móng nhận lò xo nền), rồi phần tử shell có độ cứng (Giai đoạn 9).
+1. Phần tử shell có độ cứng (Giai đoạn 9); tới lúc đó tải mặt vẫn chia về thanh/nút biên theo diện tích chịu tải.
 2. Phần tử nền đàn hồi cho thanh/sàn (thay cho quy lò xo về nút); lò xo SAP2000 khi có file thật; lò xo chỉ chịu nén (phân tích phi tuyến).
 3. Mô men tập trung trên thanh (để nhập mô men ở điểm nằm giữa thanh).
 4. Đối chiếu kết quả (M2) khi có bảng chuyển vị, phản lực, nội lực xuất từ ETABS/SAP2000.

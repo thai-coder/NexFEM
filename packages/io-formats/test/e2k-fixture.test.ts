@@ -255,7 +255,30 @@ describe("file mẫu ETABS 23.2.0: nhập vào NexFEM", () => {
     const sumA = model.shells.filter((x) => areaShells.includes(x.label)).reduce((t, x) => t + area(x.joints), 0);
     const kz = model.joints.reduce((t, j) => t + (j.springs?.[2] ?? 0), 0);
     expect(kz).toBeCloseTo(kLine * sumL + kArea * sumA, 3);
-    expect(model.joints.filter((j) => j.springs).length).toBe(108);
+    // 108 nút góc móng và đầu dầm móng + 22 nút có thanh nằm bên trong tấm móng (chia tấm tại chỗ, như ETABS).
+    expect(model.joints.filter((j) => j.springs).length).toBe(130);
+  });
+
+  it("chân cột C3 (nút 57) nằm giữa tấm móng F17: chia tấm tại chỗ, nút 57 nhận lò xo nền, tổng được giữ đúng", () => {
+    const byId = new Map(model.joints.map((j) => [j.id, j]));
+    const j57 = model.joints.find((j) => j.label === "57")!;
+    const c3 = model.frames.find((f) => f.label === "C3")!;
+    expect(c3.i).toBe(j57.id); // chân cột
+    const f17 = model.shells.find((x) => x.label === "F17")!;
+    expect(f17.joints).not.toContain(j57.id); // không phải góc tấm
+    expect(diag("area_spring_interior_nodes").flatMap((x) => x.objects)).toContain("F17 (57)");
+    // 150 kcf = 86.80556 lb/in³; nút 57 nhận phần diện tích của mình trên F17 (tấm lồi: quạt từ nút 57, mỗi tam giác 1/3).
+    const kArea = (86.80556 * LB) / IN ** 3;
+    const pts = f17.joints.map((id) => byId.get(id)!);
+    let a2 = 0;
+    pts.forEach((p, k) => { const q = pts[(k + 1) % pts.length]!; a2 += p.x * q.y - q.x * p.y; });
+    const area = Math.abs(a2) / 2;
+    expect(j57.springs![2]).toBeCloseTo((kArea * area) / 3, 6);
+    expect(j57.springs![0]).toBeGreaterThan(0);
+    // Tấm không bị thay đổi: vẫn 4 góc, tải mặt vẫn gán đúng một lần cho F17 (chia tấm chỉ dùng để quy lò xo).
+    expect(f17.joints.length).toBe(4);
+    const fileLoads = parseE2k(text).sections.get("SHELL OBJECT LOADS")!.filter((r) => r.tokens[1]?.text === "F17").length;
+    expect(model.shellLoads.filter((l) => l.shell === f17.id).length).toBe(fileLoads);
   });
 
   it("mô hình hợp lệ theo schema; kiểm tra mô hình không còn lỗi", () => {
