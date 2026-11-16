@@ -33,9 +33,23 @@ Nguồn gốc bảng: [ETABS Analysis Reference Manual](https://github.com/thai-
 
 Các bảng công bố giúp chọn chỉ số và kiểm tra sơ bộ khi dựng lại. Bản nhà sản xuất trong thư mục `manual/` không ghi phiên bản đã chạy các ví dụ trên. Việc nghiệm thu dùng bảng xuất độc lập có phiên bản, đầu vào và giả thiết đi kèm. Không dùng kết quả do NexFEM sinh làm tham chiếu CSI.
 
+## Phạm vi đã có bằng chứng
+
+Đối chiếu ngày 16/11/2026 (UTC+7) với nhánh ứng dụng tại `7669db8`. Thư mục nguồn tại `4f162a7` có 418 PDF ETABS và 326 PDF SAP2000. Đợt đọc hiện tại chỉ bao phủ các mục ưu tiên về phân tích khung và các ví dụ được ghi ở trên.
+
+| Phạm vi | Bằng chứng đã có | Điểm còn thiếu |
+| --- | --- | --- |
+| Giai đoạn 6, hiển thị kết quả | Đã có biến dạng và biểu đồ mô men M2/M3. | Hai lệnh biểu đồ V/N còn là mục chờ. Cần rà phạm vi còn lại theo roadmap và ghi nhận nghiệm thu Windows trước khi chốt toàn bộ giai đoạn. |
+| Bộ giải tĩnh tuyến tính khung | [PR #19](https://github.com/thai-coder/NexFEM/pull/19) ghi nhận 43/43 chỉ số giải tích trên 5 mô hình, 6 ca tải. | Kiểm chứng này giới hạn ở các mô hình, giả thiết và chỉ số đã chạy. PR đang ở trạng thái nháp. |
+| Nhập mô hình CSI | [M1](../csi-import.md) có kiểm thử nhập tệp thật ETABS 23.2.0 và SAP2000 23.1.0/25.3.1 trong phạm vi công bố. | Cần kiểm chứng tiếp phiên bản SAP2000 26.2.0 và các quy tắc chưa được bao phủ. |
+| Đối chiếu kết quả và hai chế độ CSI | Có ghi chú quy tắc nguồn và ứng viên benchmark cho từng sản phẩm. | M2 còn chờ kết quả xuất độc lập. Hai chế độ phân tích đang ở mức đặc tả. Ca một trong hai diện tích chịu cắt bằng 0 là một khoảng trống đã thấy trong mã. |
+| Phân tích nâng cao và kiểm tra thiết kế | [Roadmap](../ROADMAP.md) và [phạm vi tiêu chuẩn thiết kế](../design-codes.md) liệt kê các đợt cần làm. | Cần kiểm chứng độc lập cho từng loại phân tích hoặc phép kiểm tra. Các mục thiết kế BTCT và thép trên app vẫn là lệnh chờ. |
+
+Khi xác nhận một tính năng, ghi rõ phiên bản phần mềm hoặc tiêu chuẩn, mục nguồn, giả thiết, dữ liệu đầu vào, chỉ số, dung sai và commit đã chạy. Với phân tích, chọn ca có nghiệm giải tích và ca xuất độc lập của đúng sản phẩm khi công bố tương thích. Với thiết kế, đối chiếu điều khoản của bản tiêu chuẩn chính thức và xác minh ca đạt, ca không đạt và ca sát ngưỡng. Phạm vi công bố bám theo những tổ hợp điều kiện đã kiểm chứng.
+
 ## Đề xuất thứ tự làm tiếp
 
-1. Chốt Giai đoạn 6 cho kết quả khung. Đối chiếu phạm vi còn thiếu với roadmap và chốt rõ mục nào thuộc bản này. Nghiệm thu thao tác hiển thị trên Windows.
+1. Hoàn thành phần còn lại của Giai đoạn 6 cho kết quả khung. Đối chiếu phạm vi còn thiếu với roadmap và chốt rõ mục nào thuộc bản này. Nghiệm thu thao tác hiển thị trên Windows.
 2. Ưu tiên phần đối chiếu của Giai đoạn 8 với mốc M2. Xác minh giả thiết mô hình, đơn vị, dấu và cách đọc kết quả riêng từng sản phẩm. Sau khi có bằng chứng, triển khai chuyển chế độ với kiểm tra đầu vào và bắt buộc tính lại.
 3. Giai đoạn 7 có thể triển khai API đọc mô hình và kết quả theo nhu cầu. Cầu nối CSI OAPI tiếp tục theo thứ tự đã được duyệt trong `CLAUDE.md` và kế hoạch M0–M4.
 4. Giai đoạn 9 triển khai shell tuyến tính và chia lưới trước các đợt modal, phổ phản ứng và P-Delta. Giai đoạn 10 dùng thêm bộ tài liệu thiết kế riêng theo tiêu chuẩn, sản phẩm và phiên bản.
