@@ -1,0 +1,49 @@
+File portal-lateral.$2k was saved on m/d/yy at h:mm:ss
+
+TABLE:  "PROGRAM CONTROL"
+   ProgramName=SAP2000   Version=23.1.0   CurrUnits="kN, m, C"
+
+TABLE:  "ACTIVE DEGREES OF FREEDOM"
+   UX=Yes   UY=Yes   UZ=Yes   RX=Yes   RY=Yes   RZ=Yes
+
+TABLE:  "MATERIAL PROPERTIES 01 - GENERAL"
+   Material=STEEL   Type=Steel   SymType=Isotropic
+
+TABLE:  "MATERIAL PROPERTIES 02 - BASIC MECHANICAL PROPERTIES"
+   Material=STEEL   UnitWeight=0   E1=200000000   U12=0.3
+
+TABLE:  "FRAME SECTION PROPERTIES 01 - GENERAL"
+   SectionName=R200X400   Material=STEEL   Shape=Rectangular   t3=0.4   t2=0.2
+
+TABLE:  "JOINT COORDINATES"
+   Joint=1   CoordSys=GLOBAL   CoordType=Cartesian   XorR=0   Y=0   Z=0   SpecialJt=No
+   Joint=2   CoordSys=GLOBAL   CoordType=Cartesian   XorR=0   Y=0   Z=4   SpecialJt=No
+   Joint=3   CoordSys=GLOBAL   CoordType=Cartesian   XorR=6   Y=0   Z=4   SpecialJt=No
+   Joint=4   CoordSys=GLOBAL   CoordType=Cartesian   XorR=6   Y=0   Z=0   SpecialJt=No
+
+TABLE:  "CONNECTIVITY - FRAME"
+   Frame=1   JointI=1   JointJ=2   IsCurved=No
+   Frame=2   JointI=2   JointJ=3   IsCurved=No
+   Frame=3   JointI=4   JointJ=3   IsCurved=No
+
+TABLE:  "JOINT RESTRAINT ASSIGNMENTS"
+   Joint=1   U1=Yes   U2=Yes   U3=Yes   R1=Yes   R2=Yes   R3=Yes
+   Joint=4   U1=Yes   U2=Yes   U3=Yes   R1=Yes   R2=Yes   R3=Yes
+
+TABLE:  "FRAME SECTION ASSIGNMENTS"
+   Frame=1   AutoSelect=N.A.   AnalSect=R200X400   MatProp=Default
+   Frame=2   AutoSelect=N.A.   AnalSect=R200X400   MatProp=Default
+   Frame=3   AutoSelect=N.A.   AnalSect=R200X400   MatProp=Default
+
+TABLE:  "LOAD PATTERN DEFINITIONS"
+   LoadPat=H   DesignType=Other   SelfWtMult=0
+
+TABLE:  "LOAD CASE DEFINITIONS"
+   Case=H   Type=LinStatic   InitialCond=Zero   RunCase=Yes
+
+TABLE:  "CASE - STATIC 1 - LOAD ASSIGNMENTS"
+   Case=H   LoadType="Load pattern"   LoadName=H   LoadSF=1
+
+TABLE:  "JOINT LOADS - FORCE"
+   Joint=2   LoadPat=H   CoordSys=GLOBAL   F1=10   F2=0   F3=0   M1=0   M2=0   M3=0
+

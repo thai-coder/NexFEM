@@ -1,0 +1,86 @@
+{
+  "schema": 1,
+  "id": "fixed-fixed-midspan-point",
+  "description": "Dầm hai đầu ngàm L = 6 m, lực tập trung P = 20 kN hướng xuống tại giữa nhịp (hai thanh nối tại nút giữa).",
+  "file": "fixed-fixed-midspan-point.s2k",
+  "provenance": {
+    "input": "synthetic: SAP2000 text tables written by hand from the grammar of real SAP2000 files in tests/fixtures/csi/sap2000; NOT exported from SAP2000",
+    "reference": "closed-form analytic solution; NOT ETABS/SAP2000 results"
+  },
+  "basis": "δ = PL³/192EI; Fz = P/2; mômen ngàm = PL/8 (hogging; My = −PL/8 ở đầu trái, +PL/8 ở đầu phải); M3 giữa nhịp = +PL/8.",
+  "classification": "analytic-exact",
+  "limitations": [],
+  "source": {
+    "program": "analytic",
+    "version": "closed-form"
+  },
+  "units": {
+    "force": "kN",
+    "length": "m"
+  },
+  "metrics": [
+    {
+      "case": "P",
+      "kind": "displacement",
+      "object": "2",
+      "component": "U3",
+      "value": -0.00010546874999999999,
+      "absTol": 1e-10,
+      "relTol": 0.000001
+    },
+    {
+      "case": "P",
+      "kind": "reaction",
+      "object": "1",
+      "component": "F3",
+      "value": 10,
+      "absTol": 1e-8,
+      "relTol": 0.000001
+    },
+    {
+      "case": "P",
+      "kind": "reaction",
+      "object": "3",
+      "component": "F3",
+      "value": 10,
+      "absTol": 1e-8,
+      "relTol": 0.000001
+    },
+    {
+      "case": "P",
+      "kind": "reaction",
+      "object": "1",
+      "component": "M2",
+      "value": -15,
+      "absTol": 1e-8,
+      "relTol": 0.000001
+    },
+    {
+      "case": "P",
+      "kind": "reaction",
+      "object": "3",
+      "component": "M2",
+      "value": 15,
+      "absTol": 1e-8,
+      "relTol": 0.000001
+    },
+    {
+      "case": "P",
+      "kind": "frameForce",
+      "object": "1@x=0",
+      "component": "M3",
+      "value": -15,
+      "absTol": 1e-8,
+      "relTol": 0.000001
+    },
+    {
+      "case": "P",
+      "kind": "frameForce",
+      "object": "1@x=3",
+      "component": "M3",
+      "value": 15,
+      "absTol": 1e-8,
+      "relTol": 0.000001
+    }
+  ]
+}

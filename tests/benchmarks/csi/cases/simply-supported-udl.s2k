@@ -1,0 +1,43 @@
+File simply-supported-udl.$2k was saved on m/d/yy at h:mm:ss
+
+TABLE:  "PROGRAM CONTROL"
+   ProgramName=SAP2000   Version=23.1.0   CurrUnits="kN, m, C"
+
+TABLE:  "ACTIVE DEGREES OF FREEDOM"
+   UX=Yes   UY=Yes   UZ=Yes   RX=Yes   RY=Yes   RZ=Yes
+
+TABLE:  "MATERIAL PROPERTIES 01 - GENERAL"
+   Material=STEEL   Type=Steel   SymType=Isotropic
+
+TABLE:  "MATERIAL PROPERTIES 02 - BASIC MECHANICAL PROPERTIES"
+   Material=STEEL   UnitWeight=0   E1=200000000   U12=0.3
+
+TABLE:  "FRAME SECTION PROPERTIES 01 - GENERAL"
+   SectionName=R200X400   Material=STEEL   Shape=Rectangular   t3=0.4   t2=0.2
+
+TABLE:  "JOINT COORDINATES"
+   Joint=1   CoordSys=GLOBAL   CoordType=Cartesian   XorR=0   Y=0   Z=0   SpecialJt=No
+   Joint=2   CoordSys=GLOBAL   CoordType=Cartesian   XorR=6   Y=0   Z=0   SpecialJt=No
+
+TABLE:  "CONNECTIVITY - FRAME"
+   Frame=1   JointI=1   JointJ=2   IsCurved=No
+
+TABLE:  "JOINT RESTRAINT ASSIGNMENTS"
+   Joint=1   U1=Yes   U2=Yes   U3=Yes   R1=Yes   R2=No   R3=No
+   Joint=2   U1=No   U2=Yes   U3=Yes   R1=Yes   R2=No   R3=No
+
+TABLE:  "FRAME SECTION ASSIGNMENTS"
+   Frame=1   AutoSelect=N.A.   AnalSect=R200X400   MatProp=Default
+
+TABLE:  "LOAD PATTERN DEFINITIONS"
+   LoadPat=W   DesignType=Other   SelfWtMult=0
+
+TABLE:  "LOAD CASE DEFINITIONS"
+   Case=W   Type=LinStatic   InitialCond=Zero   RunCase=Yes
+
+TABLE:  "CASE - STATIC 1 - LOAD ASSIGNMENTS"
+   Case=W   LoadType="Load pattern"   LoadName=W   LoadSF=1
+
+TABLE:  "FRAME LOADS - DISTRIBUTED"
+   Frame=1   LoadPat=W   CoordSys=GLOBAL   Type=Force   Dir=Gravity   DistType=RelDist   RelDistA=0   RelDistB=1   AbsDistA=0   AbsDistB=0   FOverLA=5   FOverLB=5
+

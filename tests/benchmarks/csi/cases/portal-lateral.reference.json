@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "id": "portal-lateral",
+  "description": "Khung cổng một nhịp: cột h = 4 m, dầm L = 6 m, cùng EI, chân ngàm; lực ngang H = 10 kN tại nút trên trái (3D, trong mặt phẳng XZ).",
+  "file": "portal-lateral.s2k",
+  "provenance": {
+    "input": "synthetic: SAP2000 text tables written by hand from the grammar of real SAP2000 files in tests/fixtures/csi/sap2000; NOT exported from SAP2000",
+    "reference": "closed-form analytic solution; NOT ETABS/SAP2000 results"
+  },
+  "basis": "Phương trình góc xoay-độ võng, bỏ qua biến dạng dọc trục: θ = 6ψ/(4+6h/L), Δ = H·h³(4+x)/(24EI(1+x)) với x = 6h/L, M chân cột = 2EI/h·(θ − 3ψ). Tổng phản lực ngang = −H (cân bằng, chính xác).",
+  "classification": "analytic-approximate",
+  "limitations": [
+    "Công thức đóng bỏ qua biến dạng dọc trục; mô hình NexFEM có kể dọc trục nên chênh ≤ ~1%. Đây là chênh lệch giả thiết mô hình, không phải sai số bộ giải."
+  ],
+  "source": {
+    "program": "analytic",
+    "version": "closed-form"
+  },
+  "units": {
+    "force": "kN",
+    "length": "m"
+  },
+  "metrics": [
+    {
+      "case": "H",
+      "kind": "displacement",
+      "object": "mean(2,3)",
+      "component": "U1",
+      "value": 0.00019999999999999998,
+      "absTol": 1e-9,
+      "relTol": 0.01
+    },
+    {
+      "case": "H",
+      "kind": "reaction",
+      "object": "sum(1,4)",
+      "component": "F1",
+      "value": -10,
+      "absTol": 1e-8,
+      "relTol": 0.000001
+    },
+    {
+      "case": "H",
+      "kind": "reaction",
+      "object": "sum(1,4)",
+      "component": "F3",
+      "value": 0,
+      "absTol": 1e-8,
+      "relTol": 0.000001
+    },
+    {
+      "case": "H",
+      "kind": "reaction",
+      "object": "mean(1,4)",
+      "component": "M2",
+      "value": -12.000000000000002,
+      "absTol": 0.000001,
+      "relTol": 0.01
+    },
+    {
+      "case": "H",
+      "kind": "reaction",
+      "object": "4",
+      "component": "F3",
+      "value": 2.666666666666666,
+      "absTol": 0.000001,
+      "relTol": 0.01
+    }
+  ]
+}

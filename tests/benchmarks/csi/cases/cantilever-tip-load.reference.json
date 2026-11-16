@@ -1,0 +1,86 @@
+{
+  "schema": 1,
+  "id": "cantilever-tip-load",
+  "description": "Công xôn L = 6 m, lực tập trung P = 10 kN hướng xuống tại đầu tự do (tải nút).",
+  "file": "cantilever-tip-load.s2k",
+  "provenance": {
+    "input": "synthetic: SAP2000 text tables written by hand from the grammar of real SAP2000 files in tests/fixtures/csi/sap2000; NOT exported from SAP2000",
+    "reference": "closed-form analytic solution; NOT ETABS/SAP2000 results"
+  },
+  "basis": "δ = PL³/3EI; θy = PL²/2EI (θy = −dw/dx); phản lực Fz = P; mômen ngàm My = −PL (cân bằng tĩnh: tải gây +PL quanh Y); M3(x) = −P(L−x).",
+  "classification": "analytic-exact",
+  "limitations": [],
+  "source": {
+    "program": "analytic",
+    "version": "closed-form"
+  },
+  "units": {
+    "force": "kN",
+    "length": "m"
+  },
+  "metrics": [
+    {
+      "case": "P",
+      "kind": "displacement",
+      "object": "2",
+      "component": "U3",
+      "value": -0.0033749999999999995,
+      "absTol": 1e-10,
+      "relTol": 0.000001
+    },
+    {
+      "case": "P",
+      "kind": "displacement",
+      "object": "2",
+      "component": "R2",
+      "value": 0.0008437499999999999,
+      "absTol": 1e-10,
+      "relTol": 0.000001
+    },
+    {
+      "case": "P",
+      "kind": "reaction",
+      "object": "1",
+      "component": "F3",
+      "value": 10,
+      "absTol": 1e-8,
+      "relTol": 0.000001
+    },
+    {
+      "case": "P",
+      "kind": "reaction",
+      "object": "1",
+      "component": "M2",
+      "value": -60,
+      "absTol": 1e-8,
+      "relTol": 0.000001
+    },
+    {
+      "case": "P",
+      "kind": "frameForce",
+      "object": "1@x=0",
+      "component": "M3",
+      "value": -60,
+      "absTol": 1e-8,
+      "relTol": 0.000001
+    },
+    {
+      "case": "P",
+      "kind": "frameForce",
+      "object": "1@x=3",
+      "component": "M3",
+      "value": -30,
+      "absTol": 1e-8,
+      "relTol": 0.000001
+    },
+    {
+      "case": "P",
+      "kind": "frameForce",
+      "object": "1@x=6",
+      "component": "M3",
+      "value": 0,
+      "absTol": 1e-8,
+      "relTol": 0.000001
+    }
+  ]
+}

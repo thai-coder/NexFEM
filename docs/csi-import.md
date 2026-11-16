@@ -244,3 +244,7 @@ File OMF là khung phẳng YZ, hai cột xoay 90°: nhờ góc xoay, trục 2 c�
 2. Phần tử nền đàn hồi cho thanh/sàn (thay cho quy lò xo về nút); lò xo SAP2000 khi có file thật; lò xo chỉ chịu nén (phân tích phi tuyến).
 3. Nhập mô men gán trực tiếp trên thanh và mô men tại điểm riêng của SAP2000.
 4. Đối chiếu kết quả (M2) khi có bảng chuyển vị, phản lực, nội lực xuất từ ETABS/SAP2000.
+
+## Đối chiếu giải tích (M2, phần không cần kết quả CSI)
+
+`pnpm --filter @nexfem/io-formats test` chạy `test/csi-benchmarks.test.ts`: nhập các file `.s2k` nhỏ trong `tests/benchmarks/csi/cases/`, giải bằng `crates/fem-solver` (ví dụ `solve`, gọi qua `cargo run`) và so với nghiệm đóng bằng `scripts/validation/compare-csi.mjs`, dung sai riêng từng chỉ số. Báo cáo: [`docs/validation/CSI_BENCHMARK_REPORT.md`](validation/CSI_BENCHMARK_REPORT.md). File đầu vào là **tổng hợp** (dựng theo cú pháp file SAP2000 thật) và giá trị chuẩn là **công thức**, nên kết quả này **không** chứng minh tương đương ETABS/SAP2000. Cập nhật ca: sửa `tests/benchmarks/csi/generate-cases.mjs`, chạy lại, rồi đặt `CSI_BENCH_REPORT` để ghi lại báo cáo.
