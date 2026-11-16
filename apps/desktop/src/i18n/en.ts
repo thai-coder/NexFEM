@@ -699,6 +699,8 @@ export const en: Strings = {
       point_load_at_joint: "Load at a standalone point coincides with an imported joint: applied to that joint",
       point_load_on_frame: "Load at a standalone point lying on a frame (the source program meshes the frame there): converted to a point load on the frame at that position, equivalent for member forces",
       point_load_moment_on_frame: "A moment at a point inside a frame is not supported (NexFEM has no concentrated moment on frames): dropped",
+      point_load_moment_split: "An ETABS frame was split to apply the point moment at a connected joint",
+      point_load_moment_location: "Could not locate this point moment at a joint or on one unambiguous ETABS frame with auto mesh enabled: load skipped",
       ground_displacement_unsupported: "Ground displacement at supports (pattern {pattern}) is not supported: dropped",
       case_unsupported: "Load case type {type} is not supported: skipped",
       case_initcond_ignored: "Load case initial condition {value} ignored",

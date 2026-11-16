@@ -2,6 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { fileURLToPath } from "node:url";
 
 const FIXTURE = fileURLToPath(new URL("../../fixtures/csi/etabs/23217_SMFs 3D model_updated v4.e2k", import.meta.url));
+const MOMENT = fileURLToPath(new URL("../../fixtures/csi/synthetic/etabs-interior-moment.e2k", import.meta.url));
 const SAP = (name: string) => fileURLToPath(new URL(`../../fixtures/csi/sap2000/${name}`, import.meta.url));
 type M = { name: string; frames: { kind: string; label: string; angle?: number }[]; joints: unknown[]; shells: unknown[]; combos: unknown[]; jointLoads: unknown[]; frameLoads: { kind: string }[] };
 const model = (page: Page) => page.evaluate(() => (window as unknown as { __nexfem: { model: { getState(): { model: unknown } } } }).__nexfem.model.getState().model as M);
@@ -67,6 +68,30 @@ test("Huỷ thì không đổi mô hình", async ({ page }) => {
   await page.getByRole("button", { name: "Huỷ" }).click();
   await expect(page.getByTestId("dlg-csiImport")).toHaveCount(0);
   expect((await model(page)).name).toBe("Toa_nha_A");
+});
+
+test("mô men giữa công xôn ETABS: nhập, phân tích và đối chiếu với lời giải giải tích", async ({ page }) => {
+  await importFixture(page, MOMENT);
+  await expect(page.getByTestId("csi-error")).toHaveCount(0);
+  await expect(page.getByTestId("csi-info")).toContainText("Đã chia thanh ETABS để đặt mô men tập trung");
+  await page.getByTestId("csi-open").click();
+  const m = await model(page);
+  expect(m.frames.map((f) => f.label)).toEqual(["B1-1", "B1-2"]);
+
+  await page.keyboard.press("F5");
+  const bottom = page.getByTestId("bottom");
+  await expect(bottom).toContainText("Phân tích xong");
+  await bottom.getByRole("tab", { name: /Bảng dữ liệu/ }).click();
+  const table = bottom.getByLabel("Bảng");
+  await table.selectOption("reactions");
+  const base = bottom.getByRole("row").filter({ has: page.getByRole("cell", { name: "A", exact: true }) });
+  await expect(base.getByRole("cell").nth(5)).toHaveText("-12.000");
+  expect(Math.abs(Number(await base.getByRole("cell").nth(3).innerText()))).toBe(0);
+
+  // u_z(L) = −M·a·(L−a/2)/(E·I), L = 6 m, a = 3 m, I = 0.4⁴/12 m⁴.
+  await table.selectOption("displacements");
+  const tip = bottom.getByRole("row").filter({ has: page.getByRole("cell", { name: "B", exact: true }) });
+  await expect(tip.getByRole("cell").nth(3)).toHaveText("-2.531");
 });
 
 test("menu Nhập file: mỗi định dạng một mục riêng, DXF/IFC/Excel để giai đoạn sau", async ({ page }) => {

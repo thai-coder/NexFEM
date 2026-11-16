@@ -700,6 +700,8 @@ export const vi = {
       point_load_at_joint: "Tải ở điểm riêng trùng vị trí một nút đã nhập: đặt lên nút đó",
       point_load_on_frame: "Tải ở điểm riêng nằm trên thanh (chương trình gốc tự chia thanh tại điểm này): đổi thành tải tập trung trên thanh tại đúng vị trí, tương đương về nội lực",
       point_load_moment_on_frame: "Mô men tại điểm nằm giữa thanh chưa hỗ trợ (NexFEM chưa có mô men tập trung trên thanh): bỏ",
+      point_load_moment_split: "Đã chia thanh ETABS để đặt mô men tập trung tại nút liên kết",
+      point_load_moment_location: "Không xác định được nút hoặc một thanh ETABS duy nhất có bật tự chia lưới để đặt mô men tập trung. Đã bỏ bản ghi tải",
       ground_displacement_unsupported: "Chuyển vị cưỡng bức tại gối (mẫu {pattern}) chưa hỗ trợ: bỏ",
       case_unsupported: "Trường hợp tải loại {type} chưa hỗ trợ: bỏ",
       case_initcond_ignored: "Điều kiện ban đầu {value} của trường hợp tải bị bỏ qua",
