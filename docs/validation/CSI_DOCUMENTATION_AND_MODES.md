@@ -1,6 +1,6 @@
 # Tra cứu tài liệu và kiểm chứng chế độ phân tích CSI
 
-Cập nhật 16/11/2026 (UTC+7). Tài liệu này ghi yêu cầu của dự án, nguồn theo từng sản phẩm và điều kiện nghiệm thu. Bộ PDF và mã mẫu do chủ dự án chỉ định đang chờ quyền đọc. Các mục dưới đây mô tả thiết kế cần triển khai sau khi đối chiếu đủ nguồn. Hai chế độ tương thích CSI chưa có trong app.
+Cập nhật 16/11/2026 (UTC+7). Tài liệu này ghi yêu cầu của dự án, nguồn theo từng sản phẩm và điều kiện nghiệm thu. Hai bộ PDF hiện nằm trong `manual/` trên nhánh `main`. Xem [ghi chú phân tích khung và kiểm chứng](CSI_FRAME_REFERENCE_NOTES.md) để tra phiên bản, trang gốc và các khoảng trống của bộ giải. Hai chế độ tương thích CSI vẫn ở mức đặc tả.
 
 ## Mục lục tra cứu
 
@@ -39,6 +39,6 @@ Mỗi ghi chú có các trường sau.
 
 ## Checkpoint
 
-- NexFEM, 16/11/2026 (UTC+7). Base `7669db8`. Nhánh làm việc `codex/csi-help-and-analysis-modes`. Bộ tài liệu do chủ dự án chỉ định đang `BLOCKED` ở bước đọc nguồn.
+- NexFEM, 16/11/2026 (UTC+7). Base `7669db8`. Nhánh làm việc `codex/csi-help-and-analysis-modes`. Đã đọc các mục ưu tiên cho M2 từ bộ nguồn được ghim tại `4f162a7` trên `main`.
 - Help bổ sung hướng dẫn NexFEM qua F1, mục Tài liệu và liên kết chính thức theo sản phẩm. [PR #19](https://github.com/thai-coder/NexFEM/pull/19) tiếp tục giữ bộ benchmark giải tích và phần đối chiếu M2 đang chờ dữ liệu CSI.
-- Hành động đầu tiên khi nhận được bộ tài liệu là lập danh mục tệp, đọc chương về phân tích khung và quy ước kết quả của từng phần mềm, rồi bổ sung ghi chú nguồn cho các ca M2. Chỉ bật chế độ phân tích sau khi xác minh và kiểm thử các quy tắc tương ứng.
+- Hành động đầu tiên khi tiếp tục M2 là dựng hai ca kiểm chứng được ghi trong [ghi chú phân tích khung](CSI_FRAME_REFERENCE_NOTES.md), rồi lấy mô hình và các bảng kết quả xuất độc lập từ đúng phiên bản CSI. Chỉ bật chế độ phân tích sau khi xác minh và kiểm thử các quy tắc tương ứng.
