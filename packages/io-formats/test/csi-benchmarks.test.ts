@@ -5,18 +5,21 @@
  * (tests/benchmarks/csi/cases/*.reference.json). KHÔNG phải đối chiếu với ETABS/SAP2000: các file đầu vào là tổng hợp
  * và giá trị chuẩn là công thức. Ca cần kết quả CSI thật nằm ở tests/benchmarks/csi/manifest.json (reference-results-pending).
  *
- * Đặt CSI_BENCH_REPORT=<đường dẫn .md> để ghi báo cáo đối chiếu.
+ * Bộ published dùng mô hình .json dựng từ PDF CSI và đối chiếu với bảng số liệu công bố.
+ * Đặt CSI_BENCH_REPORT=<đường dẫn .md> để ghi báo cáo giải tích.
  */
 import { spawnSync } from "node:child_process";
 import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { beforeAll, describe, expect, it } from "vitest";
+import { checkModel, parseProject, type Model } from "@nexfem/model-core";
 import { decodeE2k, importS2k } from "../src/index.ts";
 // @ts-expect-error: tập lệnh .mjs không có kiểu
 import { compareNormalized } from "../../../scripts/validation/compare-csi.mjs";
 
 const root = fileURLToPath(new URL("../../../", import.meta.url));
 const casesDir = `${root}tests/benchmarks/csi/cases/`;
+const publishedDir = `${root}tests/benchmarks/csi/published/`;
 
 interface Metric { case: string; kind: string; object: string; component: string; value: number; absTolerance?: number; absTol?: number; relTolerance?: number; relTol?: number }
 interface Reference {
@@ -72,7 +75,7 @@ function caseResult(results: SolverResults, name: string): CaseResults {
 }
 
 /** Giá trị theo `object`: nhãn nút, `mean(a,b)`, `sum(a,b)` hoặc `nhãnThanh@x=giá_trị`. */
-function observe(ref: Reference, model: ReturnType<typeof importS2k>["model"], results: SolverResults): { units: Record<string, string>; metrics: Metric[] } {
+function observe(ref: Reference, model: Model, results: SolverResults): { units: Record<string, string>; metrics: Metric[] } {
   const jointId = (label: string) => {
     const j = model.joints.find((x) => x.label === label);
     if (!j) throw new Error(`không có nút ${label}`);
@@ -117,12 +120,31 @@ const refs: Reference[] = readdirSync(casesDir).filter((f) => f.endsWith(".refer
   .map((f) => JSON.parse(readFileSync(casesDir + f, "utf8")));
 const done: Array<{ ref: Reference; cmp: Comparison; equilibrium: number }> = [];
 
-describe("đối chiếu giải tích: nhập .s2k → bộ giải", () => {
-  let solver: string;
-  beforeAll(() => {
-    solver = buildSolver();
-  }, BUILD_TIMEOUT + 5_000);
+let solver: string;
+beforeAll(() => {
+  solver = buildSolver();
+}, BUILD_TIMEOUT + 5_000);
 
+function checkBenchmark(ref: Reference, model: Model) {
+  const out = solve(solver, JSON.stringify(model));
+  if (!out.ok) throw new Error(`Không giải được ${ref.id}: ${JSON.stringify(out.error)}`);
+  const results = out.results;
+  expect(results.warnings, "bộ giải không được cảnh báo").toEqual([]);
+  const cmp = compareNormalized(ref, observe(ref, model, results)) as Comparison;
+  const failing = cmp.rows.filter((r) => r.status !== "pass");
+  expect(failing, JSON.stringify(failing, null, 1)).toEqual([]);
+  expect(cmp.passed).toBe(true);
+
+  const caseNames = new Set(ref.metrics.map((m) => m.case));
+  const equilibrium = Math.max(...Array.from(caseNames, (name) => {
+    const c = caseResult(results, name);
+    return Math.max(...([0, 1, 2] as const).map((i) => Math.abs(c.applied[i] + c.sumReactions[i])));
+  }));
+  expect(equilibrium).toBeLessThan(1e-8);
+  return { ref, cmp, equilibrium };
+}
+
+describe("đối chiếu giải tích: nhập .s2k → bộ giải", () => {
   it("có ít nhất 5 ca", () => expect(refs.length).toBeGreaterThanOrEqual(5));
 
   for (const ref of refs) {
@@ -131,23 +153,8 @@ describe("đối chiếu giải tích: nhập .s2k → bộ giải", () => {
       // Không được mất dữ liệu âm thầm: mọi lỗi/cảnh báo nhập đều làm ca hỏng.
       const issues = report.diagnostics.filter((d) => d.level !== "info");
       expect(issues, JSON.stringify(issues)).toEqual([]);
-      const out = solve(solver, JSON.stringify(model));
-      if (!out.ok) throw new Error(`Không giải được ${ref.id}: ${JSON.stringify(out.error)}`);
-      const results = out.results;
-      expect(results.warnings, "bộ giải không được cảnh báo").toEqual([]);
       const reference = { ...ref, metrics: ref.metrics.map((m) => ({ ...m, absTolerance: m.absTol, relTolerance: m.relTol })) };
-      const cmp = compareNormalized(reference, observe(ref, model, results)) as Comparison;
-      const failing = cmp.rows.filter((r) => r.status !== "pass");
-      expect(failing, JSON.stringify(failing, null, 1)).toEqual([]);
-      expect(cmp.passed).toBe(true);
-      // Cân bằng tổng thể: tải đặt vào = −phản lực (đo độc lập với nghiệm đóng).
-      const caseNames = new Set(ref.metrics.map((m) => m.case));
-      const eq = Math.max(...Array.from(caseNames, (name) => {
-        const c = caseResult(results, name);
-        return Math.max(...([0, 1, 2] as const).map((i) => Math.abs(c.applied[i] + c.sumReactions[i])));
-      }));
-      expect(eq).toBeLessThan(1e-8);
-      done.push({ ref, cmp, equilibrium: eq });
+      done.push(checkBenchmark(reference, model));
     });
   }
 
@@ -156,6 +163,16 @@ describe("đối chiếu giải tích: nhập .s2k → bộ giải", () => {
     if (!target) return;
     expect(done).toHaveLength(refs.length);
     writeFileSync(target, renderReport(done));
+  });
+});
+
+describe("đối chiếu bảng công bố CSI: mô hình dựng lại → bộ giải", () => {
+  it.each(["ExampleEtabs 01", "ExampleSAP2000 01"])("%s", (name) => {
+    const ref: Reference = JSON.parse(readFileSync(`${publishedDir}${name}.reference.json`, "utf8"));
+    const { model } = parseProject(readFileSync(publishedDir + ref.file));
+    const errors = checkModel(model).filter((message) => message.level === "error");
+    expect(errors, JSON.stringify(errors)).toEqual([]);
+    checkBenchmark(ref, model);
   });
 });
 
