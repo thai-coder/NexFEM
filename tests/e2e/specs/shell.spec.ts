@@ -47,6 +47,26 @@ test("mở app: đủ menu, thanh công cụ, panel và không có lỗi", async
   expect(errors).toEqual([]);
 });
 
+test("F1 mở hướng dẫn và Help cho phép tra tài liệu theo sản phẩm", async ({ page }) => {
+  await page.keyboard.press("F1");
+  const guide = page.getByRole("dialog", { name: "Trợ giúp NexFEM" });
+  await expect(guide).toBeVisible();
+  await guide.getByRole("button", { name: "Tài liệu", exact: true }).click();
+  const documentation = page.getByRole("dialog", { name: "Tài liệu" });
+  await expect(documentation.getByRole("button", { name: "Mở tài liệu ETABS" })).toBeVisible();
+  await expect(documentation.getByRole("button", { name: "Mở tài liệu SAP2000" })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(documentation).toBeHidden();
+
+  await page.getByRole("menuitem", { name: "Help", exact: true }).click();
+  await page.getByRole("menuitem", { name: "Tài liệu…", exact: true }).click();
+  await expect(documentation).toBeVisible();
+  await documentation.getByRole("button", { name: "OK", exact: true }).click();
+  await page.getByRole("menuitem", { name: "Help", exact: true }).click();
+  await page.getByRole("menuitem", { name: "Phím tắt", exact: true }).click();
+  await expect(page.getByRole("dialog").getByRole("heading", { name: "Phím tắt" })).toBeVisible();
+});
+
 test("bấm chọn dầm trên mặt bằng, đổi tiết diện, rồi hoàn tác", async ({ page }) => {
   // Dầm trục 1 giữa A và B ở Tầng 3 (z = 11.1).
   const at = await screenOf(page, 0, [3, 0, 11.1]);

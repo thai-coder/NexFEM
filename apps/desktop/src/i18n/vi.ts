@@ -108,6 +108,8 @@ export const vi = {
     "tools.theme": "Đổi nền sáng/tối",
     "tools.language": "English",
     "tools.preferences": "Tuỳ chọn…",
+    "help.guide": "Trợ giúp NexFEM",
+    "help.documentation": "Tài liệu…",
     "help.shortcuts": "Phím tắt",
     "help.about": "Giới thiệu NexFEM",
   },
@@ -257,6 +259,19 @@ export const vi = {
   phase: { badge: "GĐ {n}" },
   about: "NexFEM {version} · phân tích kết cấu cho Windows. © {company}",
   shortcuts: "Phím tắt",
+  help: {
+    documentation: "Tài liệu",
+    guideSteps: [
+      "Tạo mô hình hoặc mở tệp .nxf. Dùng File → Nhập file cho mô hình ETABS (.e2k) hay SAP2000 (.s2k).",
+      "Đọc báo cáo nhập và kiểm tra đơn vị, trục địa phương, gối và ca tải trước khi phân tích.",
+      "Nhấn F5 để phân tích tĩnh tuyến tính khung. Dùng Display để xem biến dạng và mô men M2/M3. Nhấn F6 để mở khoá mô hình.",
+    ],
+    vendorReferences: "Tài liệu chính thức của CSI",
+    vendorScope: "Chọn tài liệu theo phần mềm và phiên bản đã xuất mô hình. NexFEM hiện chạy bộ giải khung riêng. Việc đối chiếu kết quả với CSI đang được thực hiện.",
+    etabs: "Mở tài liệu ETABS",
+    sap2000: "Mở tài liệu SAP2000",
+    validation: "Kế hoạch kiểm chứng NexFEM",
+  },
   confirmNew: "Tạo mô hình mới? Các thay đổi chưa lưu sẽ mất.",
   dlg: {
     ok: "OK",
