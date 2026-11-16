@@ -20,6 +20,7 @@ export function MenuBar() {
   const lang = useUi((s) => s.lang);
   const name = useModel((s) => s.model.name);
   const fileName = useModel((s) => s.fileName);
+  const modelOpen = useModel((s) => s.modelOpen);
   const dirty = useModel((s) => s.dirty);
 
   useEffect(() => {
@@ -69,10 +70,10 @@ export function MenuBar() {
         </div>
       ))}
       <div className="menubar-spacer" />
-      <div className="project-name" title={fileName ?? undefined}>
+      {modelOpen && <div className="project-name" title={fileName ?? undefined}>
         {fileName ? basename(fileName) : `${name}.nxf`}
         {dirty && <span className="dirty-dot" aria-label="*" />}
-      </div>
+      </div>}
       <button className="icon-btn" title={`${T.cmd["tools.palette"]} (Ctrl+Shift+P)`} onClick={() => runCommand("tools.palette")}>
         <Icon name="search" size={16} />
       </button>

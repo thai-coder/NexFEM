@@ -29,6 +29,7 @@ export const en: Strings = {
     "file.open": "Open…",
     "file.openSample": "Open sample model",
     "file.startPage": "Start page",
+    "file.close": "Close model",
     "file.save": "Save",
     "file.saveAs": "Save as…",
     "file.importEtabs": "Import ETABS file (.e2k)…",
@@ -752,6 +753,10 @@ export const en: Strings = {
     openFailed: "Could not open the file: {message}",
     saveFailed: "Could not save the file: {message}",
     confirmDiscard: "The model has unsaved changes. Discard them?",
+    closePrompt: "Save changes before closing the model?",
+    closeSave: "Save and close",
+    closeDiscard: "Close without saving",
+    closeSaveIncomplete: "The model remains open because the changes were not saved.",
     filterName: "NexFEM project",
   },
 };

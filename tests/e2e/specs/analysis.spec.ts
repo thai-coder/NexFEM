@@ -80,8 +80,8 @@ test("nhãn kết quả 5B đúng loại và New/Open xoá case đang xem", asyn
   await page.keyboard.press("F5");
   await expect(toolbarCase).toHaveValue("lc-dl");
   page.once("dialog", (dialog) => void dialog.accept());
-  const [chooser] = await Promise.all([page.waitForEvent("filechooser"), page.keyboard.press("Control+o")]);
-  await chooser.setFiles(file);
+  await page.keyboard.press("Control+o");
+  await page.getByTestId("open-input").setInputFiles(file);
   await expect(toolbarCase).toHaveCount(0);
   expect(await state(page)).toBe(false);
 

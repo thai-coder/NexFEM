@@ -13,6 +13,7 @@ export type DialogKind =
   | "about"
   | "shortcuts"
   | "newModel"
+  | "closeModel"
   | "gridStory"
   | "materials"
   | "frameSections"
