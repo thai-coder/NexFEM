@@ -41,3 +41,4 @@ TABLE:  "CASE - STATIC 1 - LOAD ASSIGNMENTS"
 TABLE:  "FRAME LOADS - DISTRIBUTED"
    Frame=1   LoadPat=W   CoordSys=GLOBAL   Type=Force   Dir=Gravity   DistType=RelDist   RelDistA=0   RelDistB=1   AbsDistA=0   AbsDistB=0   FOverLA=5   FOverLB=5
 
+END TABLE DATA

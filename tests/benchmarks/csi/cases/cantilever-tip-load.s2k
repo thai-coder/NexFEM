@@ -28,15 +28,23 @@ TABLE:  "JOINT RESTRAINT ASSIGNMENTS"
 TABLE:  "FRAME SECTION ASSIGNMENTS"
    Frame=1   AutoSelect=N.A.   AnalSect=R200X400   MatProp=Default
 
+TABLE:  "FRAME OUTPUT STATION ASSIGNMENTS"
+   Frame=1   StationType=MinNumSta   MinNumSta=3   AddAtElmInt=Yes   AddAtPtLoad=Yes
+
 TABLE:  "LOAD PATTERN DEFINITIONS"
    LoadPat=P   DesignType=Other   SelfWtMult=0
+   LoadPat=PY   DesignType=Other   SelfWtMult=0
 
 TABLE:  "LOAD CASE DEFINITIONS"
    Case=P   Type=LinStatic   InitialCond=Zero   RunCase=Yes
+   Case=PY   Type=LinStatic   InitialCond=Zero   RunCase=Yes
 
 TABLE:  "CASE - STATIC 1 - LOAD ASSIGNMENTS"
    Case=P   LoadType="Load pattern"   LoadName=P   LoadSF=1
+   Case=PY   LoadType="Load pattern"   LoadName=PY   LoadSF=1
 
 TABLE:  "JOINT LOADS - FORCE"
    Joint=2   LoadPat=P   CoordSys=GLOBAL   F1=0   F2=0   F3=-10   M1=0   M2=0   M3=0
+   Joint=2   LoadPat=PY   CoordSys=GLOBAL   F1=0   F2=10   F3=0   M1=0   M2=0   M3=0
 
+END TABLE DATA
