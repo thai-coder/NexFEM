@@ -68,7 +68,7 @@ Cột "File mẫu" cho biết cú pháp đã có trong file ETABS 23.2.0 thật 
 | `LINESPRING` U1, U2, U3 (lực/dài²) + `LINEASSIGN SPRINGPROP` | lò xo nút ở hai đầu thanh, mỗi đầu k·L/2 theo trục địa phương (cảnh báo: gần đúng) | 24 dầm móng, U2 |
 | `AREASPRING` U1, U2, U3 (lực/dài³) + `AREAASSIGN SPRINGPROP` | lò xo nút ở các góc sàn ngang, k × diện tích chịu tải của góc (cảnh báo: gần đúng) | 21 móng, U3 |
 | `NONLINEAROPT* "Compression Only"` | lò xo tuyến tính, chịu cả kéo (cảnh báo) | có |
-| `POINTLOAD` TYPE FORCE: FX, FY, FZ, MX, MY, MZ | tải nút `jointLoads` (hệ tổng thể); điểm riêng nằm trên thanh: tải tập trung trên thanh (xem dưới) | FX, FY |
+| `POINTLOAD` TYPE FORCE: FX, FY, FZ, MX, MY, MZ | tải nút `jointLoads` theo hệ tổng thể. Điểm riêng trên thanh được xử lý theo thành phần tải (xem dưới) | FX, FY |
 
 **Không nhập, có báo cáo:** lò xo nút (`POINTASSIGN SPRINGPROP`, chưa có trong file mẫu), điểm chèn `CARDINALPT`, đoạn lệch đầu thanh khác 0, liên kết nửa cứng `PARFIXM*`, giới hạn kéo/nén, sàn cứng, P-Delta, trường hợp tải khác Linear Static/Modal, Range Add.
 
@@ -141,8 +141,11 @@ Lò xo dọc thanh và lò xo nền của ETABS được **quy về lò xo nút*
 **Điểm riêng (không phải đầu thanh/sàn):** ETABS/SAP2000 tự chia thanh tại điểm nằm trên thanh. Bộ nhập định vị theo toạ độ (dung sai MERGETOL / MergeTol của file):
 
 - Trùng một nút đã nhập: tải đặt lên nút đó (ghi chú).
-- Nằm trong đoạn một thanh: lực đổi thành tải tập trung trên thanh (`globalX/Y/Z`) tại đúng vị trí tương đối. Cách này tương đương chính xác về nội lực và chuyển vị của thanh (cảnh báo, vì không có nút để xem chuyển vị tại đó). Mô men ở điểm giữa thanh chưa nhập được (lỗi).
+- Điểm riêng chỉ có lực: bộ nhập đổi thành tải tập trung trên thanh (`globalX/Y/Z`) theo vị trí tương đối. Báo cáo ghi rõ cách chuyển đổi.
+- Điểm riêng có mô men trong ETABS `.e2k`: khi điểm nằm trên trục của duy nhất một thanh có `AUTOMESH "YES"`, bộ nhập tạo nút nối hai đoạn và đặt cả sáu thành phần tải vào nút theo hệ tổng thể. Vị trí phải nằm trên trục thanh trong sai số số học và đủ xa các điểm chia khác theo `MERGETOL`. Giữ nhả liên kết ở hai đầu ngoài và chuyển tải thanh gốc sang các đoạn. Điểm giữa thanh mơ hồ, lệch trục hoặc trên thanh tắt tự chia được báo lỗi.
 - Không thuộc trường hợp nào: lỗi.
+
+Hỗ trợ mô men ở điểm riêng của ETABS áp dụng cho `POINTLOAD TYPE FORCE`. Việc nhập mô men gán trực tiếp lên thanh và mô men tại điểm riêng của SAP2000 còn trong kế hoạch. Tham chiếu [ETABS Joint Loads: Force](https://docs.csiamerica.com/help-files/etabs/Menus/Assign/Joint_Loads/Force.htm).
 
 Test: `joint_forces_and_moments_in_global_axes` (bộ giải: công xôn với lực và mô men, phản lực cân bằng, lỗi mất tải, lỗi tham chiếu), `joint.assignLoad` (model-core), các test nhập file thật và dữ liệu tự tạo.
 
@@ -239,5 +242,5 @@ File OMF là khung phẳng YZ, hai cột xoay 90°: nhờ góc xoay, trục 2 c�
 
 1. Phần tử shell có độ cứng (Giai đoạn 9); tới lúc đó tải mặt vẫn chia về thanh/nút biên theo diện tích chịu tải.
 2. Phần tử nền đàn hồi cho thanh/sàn (thay cho quy lò xo về nút); lò xo SAP2000 khi có file thật; lò xo chỉ chịu nén (phân tích phi tuyến).
-3. Mô men tập trung trên thanh (để nhập mô men ở điểm nằm giữa thanh).
+3. Nhập mô men gán trực tiếp trên thanh và mô men tại điểm riêng của SAP2000.
 4. Đối chiếu kết quả (M2) khi có bảng chuyển vị, phản lực, nội lực xuất từ ETABS/SAP2000.

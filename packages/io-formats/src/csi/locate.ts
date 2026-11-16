@@ -5,12 +5,14 @@ import type { Frame, Joint } from "@nexfem/model-core";
  * ETABS/SAP2000 tự chia thanh tại điểm nằm trên thanh (auto mesh), nên tải ở điểm đó truyền vào thanh.
  * - Trùng một nút đã có (trong dung sai): đặt tải lên nút đó.
  * - Nằm trong đoạn một thanh: trả về thanh và vị trí tương đối; lực tại đó tương đương chính xác với tải tập trung trên thanh.
+ * `uniqueFrameTol` yêu cầu một thanh duy nhất trong dung sai cho trục thanh, vẫn dùng `tol` cho nút đã nối.
  */
 export function locatePoint(
   p: { x: number; y: number; z: number },
   joints: readonly Joint[],
   frames: readonly Frame[],
   tol: number,
+  uniqueFrameTol?: number,
 ): { joint: Joint } | { frame: Frame; at: number } | null {
   const used = new Set(frames.flatMap((f) => [f.i, f.j]));
   for (const j of joints) if (used.has(j.id) && Math.hypot(j.x - p.x, j.y - p.y, j.z - p.z) <= tol) return { joint: j };
@@ -26,9 +28,11 @@ export function locatePoint(
     const t = ((p.x - a.x) * d[0]! + (p.y - a.y) * d[1]! + (p.z - a.z) * d[2]!) / len2;
     if (t <= 0 || t >= 1) continue;
     const dist = Math.hypot(a.x + t * d[0]! - p.x, a.y + t * d[1]! - p.y, a.z + t * d[2]! - p.z);
-    if (dist <= tol && (!best || dist < best.dist)) best = { frame: f, at: t, dist };
+    if (!(dist <= (uniqueFrameTol ?? tol))) continue;
+    if (best && uniqueFrameTol !== undefined) return null;
+    if (!best || dist < best.dist) best = { frame: f, at: t, dist };
   }
-  return best ? { frame: best.frame, at: Number(best.at.toPrecision(12)) } : null;
+  return best ? { frame: best.frame, at: uniqueFrameTol === undefined ? Number(best.at.toPrecision(12)) : best.at } : null;
 }
 
 type P3 = { x: number; y: number; z: number };
@@ -89,6 +93,7 @@ export interface FrameSegment {
 /**
  * Chia thanh tại các nút (đầu thanh khác, góc sàn) nằm trên thân thanh, như ETABS/SAP2000 tự chia thanh (auto mesh tại nút).
  * Chỉ chia thanh `canSplit` cho phép. Nhả liên kết và vùng cứng giữ ở hai đầu ngoài; các thuộc tính khác chép sang mọi đoạn.
+ * Các nút trong `jointsByHost` chỉ chia thanh được chỉ định, ví dụ nút tạo từ tải.
  * Thanh được chia nhận nhãn "B6-1", "B6-2"…; thanh không chia giữ nguyên.
  */
 export function splitFramesAtJoints(
@@ -97,6 +102,7 @@ export function splitFramesAtJoints(
   extraNodes: Iterable<string>,
   canSplit: (f: Frame) => boolean,
   tol: number,
+  jointsByHost?: ReadonlyMap<string, readonly Joint[]>,
 ): { frames: Frame[]; segments: Map<string, FrameSegment[]>; hostOf: Map<string, string> } {
   const byId = new Map(joints.map((j) => [j.id, j]));
   const nodes = new Set([...frames.flatMap((f) => [f.i, f.j]), ...extraNodes]);
@@ -115,7 +121,8 @@ export function splitFramesAtJoints(
     const len2 = d[0] ** 2 + d[1] ** 2 + d[2] ** 2;
     const len = Math.sqrt(len2);
     const cuts: { t: number; id: string }[] = [];
-    for (const p of cand) {
+    const hostJoints = jointsByHost?.get(f.id);
+    for (const p of hostJoints ? [...cand, ...hostJoints] : cand) {
       if (p.id === f.i || p.id === f.j) continue;
       const t = ((p.x - a.x) * d[0] + (p.y - a.y) * d[1] + (p.z - a.z) * d[2]) / len2;
       if (t * len <= tol || (1 - t) * len <= tol) continue;

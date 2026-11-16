@@ -668,11 +668,119 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
   count("shells", areaAssigns.size, shells.length);
   void skippedShells;
 
+  // ------------------------------------------------------------------ mẫu tải
+  const patterns: LoadPattern[] = [];
+  const patByName = new Map<string, string>();
+  const patRecs = e2kSection(file, "LOAD PATTERNS");
+  for (const r of patRecs) {
+    const name = r.tokens[1]?.text ?? "";
+    const p = new Map(e2kPairs(r, 2));
+    const t = (p.get("TYPE")?.text ?? "").toLowerCase();
+    const type: LoadPattern["type"] =
+      t === "dead" ? "dead" : t === "super dead" ? "superDead" : t === "live" || t === "roof live" || t === "reducible live" ? "live" : t === "wind" ? "wind" : t === "seismic" || t === "quake" ? "seismic" : "other";
+    if (t !== "dead" && t !== "super dead" && t !== "live" && t !== "wind" && t !== "seismic") d.add("info", "pattern_type_mapped", { from: p.get("TYPE")?.text ?? "?", to: type }, { line: r.line, object: name });
+    const sw = e2kNumber(p.get("SELFWEIGHT")?.text);
+    const id = `lp-${patterns.length + 1}`;
+    patterns.push({ id, name, type, selfWeight: Number.isFinite(sw) && sw >= 0 ? sw : 0 });
+    patByName.set(name, id);
+  }
+  count("loadPatterns", patRecs.length, patterns.length);
+
+  // ------------------------------------------------------------------ đọc tải tập trung trước khi chia thanh
+  const pointLoadRecs = e2kSection(file, "POINT OBJECT LOADS");
+  const pointLoads: {
+    key: string;
+    point: Pick<Joint, "x" | "y" | "z" | "story"> | undefined;
+    at: { line: number; object: string };
+    pat: string;
+    values: JointLoad["values"];
+    hasMoment: boolean;
+  }[] = [];
+  const PL_KEYS = ["FX", "FY", "FZ", "MX", "MY", "MZ"] as const;
+  for (const r of pointLoadRecs) {
+    const pt = r.tokens[1]?.text ?? "?";
+    const stName = r.tokens[2]?.text ?? "?";
+    const at = { line: r.line, object: `${pt}@${stName}` };
+    const p = new Map(e2kPairs(r, 3));
+    const type = (p.get("TYPE")?.text ?? "").toUpperCase();
+    const pat = patByName.get(p.get("LC")?.text ?? "");
+    const key = `${pt}|${stName}`;
+    if (type !== "FORCE") {
+      d.add("error", "point_load_type_unsupported", { type: p.get("TYPE")?.text ?? "?" }, at);
+      continue;
+    }
+    if (!pat) {
+      d.add("error", "load_target_missing", { kind: "joint" }, at);
+      continue;
+    }
+    for (const k of p.keys()) if (k !== "TYPE" && k !== "LC" && !(PL_KEYS as readonly string[]).includes(k)) d.add("warning", "point_load_key_unsupported", { key: k }, at);
+    const raw = PL_KEYS.map((k) => (p.has(k) ? e2kNumber(p.get(k)!.text) : 0));
+    if (raw.some((v) => !Number.isFinite(v))) {
+      d.add("error", "point_load_type_unsupported", { type }, at);
+      continue;
+    }
+    const values = raw.map((v, i) => (i < 3 ? conv.force(U, v) : conv.force(U, v) * U.l)) as JointLoad["values"];
+    const pp = points.get(pt);
+    const st = stories.find((s) => s.name === stName);
+    const point = pp && st ? { x: L(pp.x), y: L(pp.y), z: st.elevation - L(pp.dz), story: st.id } : undefined;
+    pointLoads.push({ key, point, at, pat, values, hasMoment: values.slice(3).some((v) => v !== 0) });
+  }
+
   // ------------------------------------------------------------------ chia thanh tại nút nằm trên thân thanh
   // ETABS tự chia thanh (AUTOMESH "YES") tại đầu thanh khác hoặc góc sàn nằm trên thân thanh; không chia thì thanh tựa lên
   // thân thanh khác sẽ treo lơ lửng (mất ổn định). Tải trên thanh gốc được chuyển sang các đoạn ở cuối bộ nhập.
   const autoHosts = new Set([...frameIdByKey].filter(([k]) => autoMeshKeys.has(k)).map(([, id]) => id));
-  const split = splitFramesAtJoints(frames, joints, shells.flatMap((s) => s.joints), (f) => autoHosts.has(f.id), tolM);
+  const shellCorners = shells.flatMap((s) => s.joints);
+  const canSplit = (f: Frame) => autoHosts.has(f.id);
+  let split = splitFramesAtJoints(frames, joints, shellCorners, canSplit, tolM);
+  const momentJoints = new Map<string, string>();
+  const addedByHost = new Map<string, Joint[]>();
+  if (pointLoads.some(({ key, point, hasMoment }) => point && hasMoment && !jointKeys.has(key))) {
+    const jointsBeforeMoments = [...joints];
+    const endpoints = new Map(joints.map((j) => [j.id, j]));
+    // CSI yêu cầu điểm riêng nằm đúng trên trục thanh có auto mesh. Dung sai này chỉ bù sai số số học.
+    const axisTol = Math.min(tolM, 1e-7);
+    for (const { key, point, at, hasMoment } of pointLoads) {
+      if (!point || !hasMoment || jointKeys.has(key) || momentJoints.has(key)) continue;
+      const place = locatePoint(point, jointsBeforeMoments, split.frames, tolM, axisTol);
+      if (!place) continue;
+      if ("joint" in place) {
+        momentJoints.set(key, place.joint.id);
+        mappingJoints[key] = place.joint.id;
+        d.add("info", "point_load_at_joint", {}, { ...at, object: `${at.object} → ${place.joint.label}` });
+        continue;
+      }
+      // Kiểm tra thanh gốc để tránh gán nhầm tại giao điểm hoặc trên đoạn đã lệch trục do gộp nút.
+      const original = split.segments.size ? locatePoint(point, jointsBeforeMoments, frames, tolM, axisTol) : place;
+      if (!original || "joint" in original || !canSplit(original.frame)) continue;
+      const host = original.frame;
+      if (host.id !== (split.hostOf.get(place.frame.id) ?? place.frame.id)) continue;
+      const { t0, t1 } = split.segments.get(host.id)?.find((segment) => segment.id === place.frame.id) ?? { t0: 0, t1: 1 };
+      const a = endpoints.get(host.i)!;
+      const b = endpoints.get(host.j)!;
+      const len = Math.hypot(b.x - a.x, b.y - a.y, b.z - a.z);
+      if (Math.min(original.at - t0, t1 - original.at) * len <= tolM + axisTol) continue;
+      const added = addedByHost.get(host.id) ?? [];
+      const existing = added.find((j) => Math.hypot(j.x - point.x, j.y - point.y, j.z - point.z) <= tolM);
+      if (existing) {
+        momentJoints.set(key, existing.id);
+        mappingJoints[key] = existing.id;
+        continue;
+      }
+      const joint: Joint = {
+        id: `j-${joints.length + 1}`, label: at.object, story: point.story,
+        x: a.x + original.at * (b.x - a.x), y: a.y + original.at * (b.y - a.y), z: a.z + original.at * (b.z - a.z),
+      };
+      joints.push(joint);
+      added.push(joint);
+      addedByHost.set(host.id, added);
+      momentJoints.set(key, joint.id);
+      mappingJoints[key] = joint.id;
+      d.add("info", "point_load_moment_split", {}, { ...at, object: `${at.object} → ${host.label}` });
+    }
+    // Chia lại thanh gốc để ID đoạn, tải và nhả đầu đều dùng chung một bản ánh xạ.
+    if (addedByHost.size) split = splitFramesAtJoints(frames, joints, shellCorners, canSplit, tolM, addedByHost);
+  }
   frames.splice(0, frames.length, ...split.frames);
   if (split.segments.size) d.add("info", "frames_split", { hosts: split.segments.size, segments: [...split.segments.values()].reduce((t, l) => t + l.length, 0) });
 
@@ -748,24 +856,6 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
   }
   for (const j of joints) if (j.springs) j.springs = j.springs.map((v) => (v === 0 ? 0 : Number(v.toPrecision(12)))) as NonNullable<Joint["springs"]>;
   count("joints", points.size, joints.length);
-
-  // ------------------------------------------------------------------ mẫu tải
-  const patterns: LoadPattern[] = [];
-  const patByName = new Map<string, string>();
-  const patRecs = e2kSection(file, "LOAD PATTERNS");
-  for (const r of patRecs) {
-    const name = r.tokens[1]?.text ?? "";
-    const p = new Map(e2kPairs(r, 2));
-    const t = (p.get("TYPE")?.text ?? "").toLowerCase();
-    const type: LoadPattern["type"] =
-      t === "dead" ? "dead" : t === "super dead" ? "superDead" : t === "live" || t === "roof live" || t === "reducible live" ? "live" : t === "wind" ? "wind" : t === "seismic" || t === "quake" ? "seismic" : "other";
-    if (t !== "dead" && t !== "super dead" && t !== "live" && t !== "wind" && t !== "seismic") d.add("info", "pattern_type_mapped", { from: p.get("TYPE")?.text ?? "?", to: type }, { line: r.line, object: name });
-    const sw = e2kNumber(p.get("SELFWEIGHT")?.text);
-    const id = `lp-${patterns.length + 1}`;
-    patterns.push({ id, name, type, selfWeight: Number.isFinite(sw) && sw >= 0 ? sw : 0 });
-    patByName.set(name, id);
-  }
-  count("loadPatterns", patRecs.length, patterns.length);
 
   // ------------------------------------------------------------------ tải trên thanh
   const frameLoads: FrameLoad[] = [];
@@ -845,39 +935,17 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
   // ------------------------------------------------------------------ tải tập trung tại nút (hệ tổng thể)
   const jointLoads: JointLoad[] = [];
   let convertedToFrame = 0;
-  const pointLoadRecs = e2kSection(file, "POINT OBJECT LOADS");
-  const PL_KEYS = ["FX", "FY", "FZ", "MX", "MY", "MZ"] as const;
-  for (const r of pointLoadRecs) {
-    const pt = r.tokens[1]?.text ?? "?";
-    const stName = r.tokens[2]?.text ?? "?";
-    const at = { line: r.line, object: `${pt}@${stName}` };
-    const p = new Map(e2kPairs(r, 3));
-    const type = (p.get("TYPE")?.text ?? "").toUpperCase();
-    const pat = patByName.get(p.get("LC")?.text ?? "");
-    const key = `${pt}|${stName}`;
-    if (type !== "FORCE") {
-      d.add("error", "point_load_type_unsupported", { type: p.get("TYPE")?.text ?? "?" }, at);
+  for (const { key, point, at, pat, values, hasMoment } of pointLoads) {
+    const joint = jointKeys.has(key) ? jid(key) : momentJoints.get(key);
+    if (joint) {
+      jointLoads.push({ id: `jl-${jointLoads.length + 1}`, joint, pattern: pat, values });
       continue;
     }
-    if (!pat) {
-      d.add("error", "load_target_missing", { kind: "joint" }, at);
+    if (hasMoment) {
+      d.add("error", "point_load_moment_location", {}, at);
       continue;
     }
-    for (const k of p.keys()) if (k !== "TYPE" && k !== "LC" && !(PL_KEYS as readonly string[]).includes(k)) d.add("warning", "point_load_key_unsupported", { key: k }, at);
-    const raw = PL_KEYS.map((k) => (p.has(k) ? e2kNumber(p.get(k)!.text) : 0));
-    if (raw.some((v) => !Number.isFinite(v))) {
-      d.add("error", "point_load_type_unsupported", { type }, at);
-      continue;
-    }
-    const values = raw.map((v, i) => (i < 3 ? conv.force(U, v) : conv.force(U, v) * U.l)) as JointLoad["values"];
-    if (jointKeys.has(key)) {
-      jointLoads.push({ id: `jl-${jointLoads.length + 1}`, joint: jid(key), pattern: pat, values });
-      continue;
-    }
-    // Điểm riêng (không phải đầu thanh/sàn): ETABS tự chia thanh tại điểm nằm trên thanh, nên định vị theo toạ độ.
-    const pp = points.get(pt);
-    const st = stories.find((s) => s.name === stName);
-    const place = pp && st ? locatePoint({ x: L(pp.x), y: L(pp.y), z: st.elevation - L(pp.dz) }, joints, frames, tolM) : null;
+    const place = point ? locatePoint(point, joints, frames, tolM) : null;
     if (!place) {
       d.add("error", "point_load_no_joint", {}, at);
       continue;
@@ -885,10 +953,6 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
     if ("joint" in place) {
       jointLoads.push({ id: `jl-${jointLoads.length + 1}`, joint: place.joint.id, pattern: pat, values });
       d.add("info", "point_load_at_joint", {}, { ...at, object: `${at.object} → ${place.joint.label}` });
-      continue;
-    }
-    if (values.slice(3).some((v) => v !== 0)) {
-      d.add("error", "point_load_moment_on_frame", {}, at);
       continue;
     }
     const DIR3 = ["globalX", "globalY", "globalZ"] as const;

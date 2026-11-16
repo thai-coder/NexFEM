@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { decodeE2k, importE2k, tokenizeE2kLine } from "../src/index.ts";
 
@@ -91,6 +92,60 @@ describe("nhập dữ liệu tự tạo", () => {
 
   it("giải mã Windows-1252 khi file không phải UTF-8", () => {
     expect(decodeE2k(new Uint8Array([0x24, 0x20, 0xb0]))).toBe("$ °");
+  });
+});
+
+describe("mô men ETABS tại điểm riêng nằm giữa thanh", () => {
+  const input = readFileSync(new URL("../../../tests/fixtures/csi/synthetic/etabs-interior-moment.e2k", import.meta.url), "utf8");
+
+  it("tạo một nút dùng chung, chuyển đủ thành phần tải và giữ nhả tại đầu ngoài", () => {
+    const source = input
+      .replace('AUTOMESH "YES"', 'AUTOMESH "YES" RELEASE "M3I M2J"')
+      .replace('$ POINT OBJECT LOADS', '$ FRAME OBJECT LOADS\n  LINELOAD "B1" "S1" TYPE "UNIFF" DIR "Z" LC "MOMENT" FVAL -2\n$ POINT OBJECT LOADS')
+      .replace('MY 12', 'FX 1 FY 2 FZ 3 MX 4 MY 12 MZ 6\n  POINTLOAD "M" "S1" TYPE "FORCE" LC "MOMENT" FZ -5');
+    const { model, report } = importE2k(source);
+    const [left, right] = model.frames;
+    const [a, b, middle] = model.joints;
+    expect(model.frames).toHaveLength(2);
+    expect(model.joints).toHaveLength(3);
+    expect(middle).toMatchObject({ label: "M@S1", x: 3, y: 0, z: 4 });
+    expect(left).toMatchObject({ label: "B1-1", i: a!.id, j: middle!.id,
+      releases: { i: [false, false, false, false, false, true], j: Array(6).fill(false) } });
+    expect(right).toMatchObject({ label: "B1-2", i: middle!.id, j: b!.id,
+      releases: { i: Array(6).fill(false), j: [false, false, false, false, true, false] } });
+    expect(model.jointLoads.map((l) => [l.joint, l.pattern, l.values])).toEqual([
+      [middle!.id, model.loadPatterns[0]!.id, [1, 2, 3, 4, 12, 6]],
+      [middle!.id, model.loadPatterns[0]!.id, [0, 0, -5, 0, 0, 0]],
+    ]);
+    expect(model.frameLoads.map((l) => [l.frame, l.kind, l.value])).toEqual([
+      [left!.id, "distributed", -2], [right!.id, "distributed", -2],
+    ]);
+    expect(report.diagnostics.find((d) => d.code === "point_load_moment_split")).toMatchObject({ level: "info", count: 1 });
+    expect(report.diagnostics.filter((d) => d.level === "error")).toEqual([]);
+  });
+
+  it("giữ cách gán mô men vào nút có sẵn trong dung sai MERGETOL", () => {
+    const source = input.replace('POINT "M" 3 0', 'POINT "M" 6 0.0005').replace('AUTOMESH "YES"', 'AUTOMESH "NO"');
+    const { model, report } = importE2k(source);
+    expect(model.frames).toHaveLength(1);
+    expect(model.joints).toHaveLength(2);
+    expect(model.jointLoads).toMatchObject([{ joint: model.frames[0]!.j, values: [0, 0, 0, 0, 12, 0] }]);
+    expect(report.diagnostics.find((d) => d.code === "point_load_at_joint")).toMatchObject({ level: "info" });
+  });
+
+  it.each([
+    ["tắt chia lưới", input.replace('AUTOMESH "YES"', 'AUTOMESH "NO"'), 1],
+    ["lệch trục thanh nhưng vẫn trong MERGETOL", input.replace('POINT "M" 3 0', 'POINT "M" 3 0.0005'), 1],
+    ["giao điểm của hai thanh", input
+      .replace('$ LINE CONNECTIVITIES', '  POINT "C" 3 -2\n  POINT "D" 3 2\n$ LINE CONNECTIVITIES')
+      .replace('$ POINT ASSIGNS', '  LINE "B2" BEAM "C" "D" 0\n$ POINT ASSIGNS')
+      .replace('$ LOAD PATTERNS', '  LINEASSIGN "B2" "S1" SECTION "C400" AUTOMESH "YES"\n$ LOAD PATTERNS'), 2],
+  ] as const)("báo lỗi và giữ nguyên hình học khi %s", (_, source, numFrames) => {
+    const { model, report } = importE2k(source);
+    expect(model.frames).toHaveLength(numFrames);
+    expect(model.joints).toHaveLength(numFrames * 2);
+    expect(model.jointLoads).toEqual([]);
+    expect(report.diagnostics.find((d) => d.code === "point_load_moment_location")).toMatchObject({ level: "error", objects: ["M@S1"] });
   });
 });
 
