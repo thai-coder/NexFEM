@@ -1,0 +1,893 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Documents>
+  <Folder name="Release Information">
+    <Document name="Release Notes" relPath="ReleaseNotes.pdf"
+              description="This document lists all changes made to ETABS since the last release. Most changes do not affect most users. Significant issues are indicated with an exclamation mark (!) in the first column of the tables."/>
+    <Document name="ReadMe" relPath="ReadMe.pdf"
+              description="This document contains instructions for updating to the latest version of the program and a listing of significant changes made in each update that has been released."/>
+  </Folder>
+  <Folder name="License Agreement and Copyrights">
+    <Document name="License Agreement" relPath="CSI License Agreement.pdf"
+              description="This document contains the CSI license agreement."/>
+    <Document name="Copyrights" relPath="Copyrights.pdf"
+              description="This document contains the CSI copyright and third party copyrights."/>
+  </Folder>
+  <Folder name="Tutorials">
+    <Document name="Introductory Tutorial" relPath="Introductory Tutorial.pdf"
+              description="This tutorial guides the user through an example modeling and design process using a typical engineering project example."/>
+  </Folder>
+  <Folder name="Manuals">
+    <Document name="Welcome to ETABS" relPath="Welcome to ETABS.pdf"
+              description="This manual provides an overview of the program and describes the complex tasks that can be easily accomplished using ETABS."/>
+    <Document name="User's Guide" relPath="User's Guide.pdf"
+              description="This manual provides a very basic step-by-step explanation of how to use ETABS, including providing tabular summaries of various menu/submenu functions."/>
+    <Document name="CSI Analysis Reference Manual" relPath="CSI Analysis Reference Manual.pdf"
+                description="This manual provides a detailed description of the modeling and analysis features available in the program."/>
+    <Document name="Lateral Loads Manual" relPath="Lateral Loads Manual.pdf"
+              description="This manual provides a detailed description of creating automated lateral loads in the program."/>
+    <Document name="CSiXRevit Manual" relPath="CSiXRevit Manual.pdf"
+              description="This manual describes the capabilities of the CSIxRevit link between ETABS and Autodesk Revit."/>
+  </Folder>
+  <Folder name="Steel Frame Design">
+    <Document name="AISC 360-22" relPath="Steel Frame Design\SFD-AISC-360-22.pdf"
+                description="This document describes the details of the steel frame design procedure used by ETABS for the AISC 360-22 design code."/>
+    <Document name="AISC 360-16" relPath="Steel Frame Design\SFD-AISC-360-16.pdf"
+                description="This document describes the details of the steel frame design procedure used by ETABS for the AISC 360-16 design code."/>
+    <Document name="AISC 360-10" relPath="Steel Frame Design\SFD-AISC-360-10.pdf"
+                description="This document describes the details of the steel frame design procedure used by ETABS for the AISC 360-10 design code."/>
+    <Document name="AISC 360-05" relPath="Steel Frame Design\SFD-AISC-360-05.pdf"
+                description="This document describes the details of the steel frame design procedure used by ETABS for the AISC 360-05 design code."/>
+    <Document name="AISC ASD-89" relPath="Steel Frame Design\SFD-OlderCodes.pdf"
+              description="This document describes the details of the steel frame design procedure used by ETABS for the AISC ASD-89 design code."/>
+    <Document name="AISC LRFD-93" relPath="Steel Frame Design\SFD-OlderCodes.pdf"
+              description="This document describes the details of the steel frame design procedure used by ETABS for the AISC LRFD-93 design code."/>
+    <Document name="AS 4100-2020" relPath="Steel Frame Design\SFD-AS-4100-2020.pdf"
+              description="This document describes the details of the steel frame design procedure used by ETABS for the AS 4100-1998 design code."/>
+    <Document name="AS 4100-1998" relPath="Steel Frame Design\SFD-AS-4100-1998.pdf"
+              description="This document describes the details of the steel frame design procedure used by ETABS for the AS 4100-1998 design code."/>
+    <Document name="BS 5950-2000" relPath="Steel Frame Design\SFD-OlderCodes.pdf"
+                description="This document describes the details of the steel frame design procedure used by ETABS for the BS 5950-2000 design code."/>
+    <Document name="CSA S16-14" relPath="Steel Frame Design\SFD-CSA-S16-14.pdf"
+              description="This document describes the details of the steel frame design procedure used by ETABS for the CSA S16-14 design code."/>
+    <Document name="CSA S16-19" relPath="Steel Frame Design\SFD-CSA-S16-19.pdf"
+              description="This document describes the details of the steel frame design procedure used by ETABS for the CSA S16-19 design code."/>
+    <Document name="CSA S16-24" relPath="Steel Frame Design\SFD-CSA-S16-24.pdf"
+              description="This document describes the details of the steel frame design procedure used by ETABS for the CSA S16-24 design code."/>
+    <Document name="Eurocode EN 1993-1-1:2005" relPath="Steel Frame Design\SFD-EN 1993-1-1 2005.pdf"
+                description="This document describes the details of the steel frame design procedure used by ETABS for the Eurocode EN 1993-1-1:2005 design code."/>
+    <Document name="Eurocode EN 1993-1-1:2022" relPath="Steel Frame Design\SFD-EN 1993-1-1 2022.pdf"
+              description="This document describes the details of the steel frame design procedure used by ETABS for the Eurocode EN 1993-1-1:2022 design code."/>
+    <Document name="IS 800-2007" relPath="Steel Frame Design\SFD-IS-800-2007.pdf"
+                description="This document describes the details of the steel frame design procedure used by ETABS for the IS 800-2007 design code."/>
+    <Document name="KBC 2016" relPath="Steel Frame Design\SFD-KBC-2016.pdf"
+              description="This document describes the details of the steel frame design procedure used by ETABS for the KBC 2016 design code."/>
+    <Document name="KBC 2009" relPath="Steel Frame Design\SFD-KBC-2009.pdf"
+              description="This document describes the details of the steel frame design procedure used by ETABS for the KBC 2009 design code."/>
+    <Document name="KDS 14-31-00:2022" relPath="Steel Frame Design\SFD-KDS-14-31-00-2022.pdf"
+              description="This document describes the details of the steel frame design procedure used by ETABS for the KBC 2009 design code."/>
+    <Document name="NTC 2018" relPath="Steel Frame Design\SFD-NTC-2018.pdf"
+                description="This document describes the details of the steel frame design procedure used by ETABS for the NTC 2018 design code."/>
+    <Document name="NTC 2008" relPath="Steel Frame Design\SFD-NTC-2008.pdf"
+                description="This document describes the details of the steel frame design procedure used by ETABS for the NTC 2008 design code."/>
+    <Document name="NZS 3404-1997" relPath="Steel Frame Design\SFD-NZS-3404-1997.pdf"
+                description="This document describes the details of the steel frame design procedure used by ETABS for the NZS 3404-1997 design code."/>
+    <Document name="SP 16.13330.2017" relPath="Steel Frame Design\SFD-SP-16-13330-2017.pdf"
+                description="This document describes the details of the steel frame design procedure used by ETABS for the NZS 3404-1997 design code."/>
+  </Folder>
+  <Folder name="Steel Connection Design">
+    <Document name="AISC 360-22" relPath="Steel Connection Design\SCD-AISC-360-22.pdf"
+                description="This document describes the details of the steel connection design procedure used by ETABS for the AISC 360-22 design code."/>
+    <Document name="AISC 360-16" relPath="Steel Connection Design\SCD-AISC-360-16.pdf"
+                description="This document describes the details of the steel connection design procedure used by ETABS for the AISC 360-16 design code."/>
+    <Document name="AISC 360-10" relPath="Steel Connection Design\SCD-AISC-360-10.pdf"
+                description="This document describes the details of the steel connection design procedure used by ETABS for the AISC 360-10 design code."/>
+  </Folder>
+  <Folder name="Concrete Frame Design">
+    <Document name="ACI 318-25" relPath="Concrete Frame Design\CFD-ACI-318-25.pdf"
+            description="This document describes the details of the concrete frame design procedure used by ETABS for the ACI 318-25 design code."/>
+    <Document name="ACI 318-19" relPath="Concrete Frame Design\CFD-ACI-318-19.pdf"
+            description="This document describes the details of the concrete frame design procedure used by ETABS for the ACI 318-19 design code."/>
+    <Document name="ACI 318-14" relPath="Concrete Frame Design\CFD-ACI-318-14.pdf"
+                description="This document describes the details of the concrete frame design procedure used by ETABS for the ACI 318-14 design code."/>
+    <Document name="ACI 318-11" relPath="Concrete Frame Design\CFD-ACI-318-11.pdf"
+              description="This document describes the details of the concrete frame design procedure used by ETABS for the ACI 318-11 design code."/>
+    <Document name="ACI 318-08" relPath="Concrete Frame Design\CFD-ACI-318-08.pdf"
+                description="This document describes the details of the concrete frame design procedure used by ETABS for the ACI 318-08 design code."/>
+    <Document name="AS 3600-2018" relPath="Concrete Frame Design\CFD-AS-3600-2018.pdf"
+                description="This document describes the details of the concrete frame design procedure used by ETABS for the AS 3600-2018 design code."/>
+    <Document name="AS 3600-09" relPath="Concrete Frame Design\CFD-AS-3600-09.pdf"
+              description="This document describes the details of the concrete frame design procedure used by ETABS for the AS 3600-09 design code."/>
+    <Document name="BS 8110-97" relPath="Concrete Frame Design\CFD-BS-8110-97.pdf"
+              description="This document describes the details of the concrete frame design procedure used by ETABS for the BS 8110-97 design code."/>
+    <Document name="CP 65:99" relPath="Concrete Frame Design\CFD-CP-65-99.pdf"
+              description="This document describes the details of the concrete frame design procedure used by ETABS for the Singapore CP 65:99 design code."/>
+    <Document name="CSA A23.3-14" relPath="Concrete Frame Design\CFD-CSA-A23.3-14.pdf"
+                description="This document describes the details of the concrete frame design procedure used by ETABS for the CSA A23.3-14 design code."/>
+    <Document name="CSA A23.3-19" relPath="Concrete Frame Design\CFD-CSA-A23.3-19.pdf"
+                description="This document describes the details of the concrete frame design procedure used by ETABS for the CSA A23.3-19 design code."/>
+    <Document name="CSA A23.3-24" relPath="Concrete Frame Design\CFD-CSA-A23.3-24.pdf"
+                description="This document describes the details of the concrete frame design procedure used by ETABS for the CSA A23.3-24 design code."/>
+    <Document name="Eurocode 2-2004" relPath="Concrete Frame Design\CFD-EC-2-2004.pdf"
+                description="This document describes the details of the concrete frame design procedure used by ETABS for the Eurocode 2-2004 design code."/>
+    <Document name="Eurocode EN 1992-1-1:2023" relPath="Concrete Frame Design\CFD-EC-2-2023.pdf"
+                description="This document describes the details of the concrete frame design procedure used by ETABS for the Eurocode 2-2023 design code."/>
+    <Document name="Hong Kong CP 2013" relPath="Concrete Frame Design\CFD-HK-CP-2013.pdf"
+                description="This document describes the details of the concrete frame design procedure used by ETABS for the Hong Kong CP 2013 design code."/>
+    <Document name="IS 456-2000" relPath="Concrete Frame Design\CFD-IS-456-2000.pdf"
+              description="This document describes the details of the concrete frame design procedure used by ETABS for the IS 456-2000 design code."/>
+    <Document name="KBC 2016" relPath="Concrete Frame Design\CFD-KBC-2016.pdf"
+                description="This document describes the details of the concrete frame design procedure used by ETABS for the KBC 2016 design code."/>
+    <Document name="KBC 2016" relPath="Concrete Frame Design\CFD-KBC-2016.pdf"
+                description="This document describes the details of the concrete frame design procedure used by ETABS for the KBC 2016 design code."/>
+    <Document name="KDS 14-20:2022" relPath="Concrete Frame Design\CFD-KDS-14-20-2022.pdf"
+              description="This document describes the details of the concrete frame design procedure used by ETABS for the KBC 2009 design code."/>
+    <Document name="NTC 2008" relPath="Concrete Frame Design\CFD-NTC-2008.pdf"
+                description="This document describes the details of the concrete frame design procedure used by ETABS for the NTC 2008 design code."/>
+    <Document name="NZS 3101-06" relPath="Concrete Frame Design\CFD-NZS-3101-2006.pdf"
+              description="This document describes the details of the concrete frame design procedure used by ETABS for the NZS 3101-06 design code."/>
+    <Document name="RCDF 2017" relPath="Concrete Frame Design\CFD-RCDF-2017.pdf"
+               description="This document describes the details of the concrete frame design procedure used by ETABS for the RCDF 2017 design code."/>
+    <Document name="RCDF 2004" relPath="Concrete Frame Design\CFD-RCDF-2004.pdf"
+              description="This document describes the details of the concrete frame design procedure used by ETABS for the RCDF 2004 design code."/>
+    <Document name="TCVN 5574-2018" relPath="Concrete Frame Design\CFD-TCVN-5574-2018.pdf"
+                description="This document describes the details of the concrete frame design procedure used by ETABS for the CFD-TCVN-5574-2018.pdf design code."/>    
+    <Document name="TS 500-2000(R 2018)" relPath="Concrete Frame Design\CFD-TS-500-2000(R 2018).pdf"
+                description="This document describes the details of the concrete frame design procedure used by ETABS for the TS 500-2000(R2018) design code."/>
+    <Document name="TS 500-2000" relPath="Concrete Frame Design\CFD-TS-500-2000.pdf"
+          description="This document describes the details of the concrete frame design procedure used by ETABS for the TS 500-2000 design code."/>
+  </Folder>
+  <Folder name="Composite Beam Design">
+    <Document name="AISC 360-22" relPath="Composite Beam Design\CBD-AISC-360-22.pdf"
+              description="This document describes the details of the composite beam design procedure used by ETABS for the AISC 360-22 design code."/>
+    <Document name="AISC 360-16" relPath="Composite Beam Design\CBD-AISC-360-16.pdf"
+              description="This document describes the details of the composite beam design procedure used by ETABS for the AISC 360-16 design code."/>
+    <Document name="AISC 360-10" relPath="Composite Beam Design\CBD-AISC-360-10.pdf"
+                description="This document describes the details of the composite beam design procedure used by ETABS for the AISC 360-10 design code."/>
+    <Document name="AISC 360-05" relPath="Composite Beam Design\CBD-AISC-360-05.pdf"
+                description="This document describes the details of the composite beam design procedure used by ETABS for the AISC 360-05 design code."/>
+    <Document name="BS 5950-90" relPath="Composite Beam Design\CBD-BS-5950-90.pdf"
+              description="This document describes the details of the composite beam design procedure used by ETABS for the BS 5950-90 design code."/>
+    <Document name="CSA S16-14" relPath="Composite Beam Design\CBD-CSA-S16-14.pdf"
+                description="This document describes the details of the composite beam design procedure used by ETABS for the CSA S16-14 design code."/>
+    <Document name="CSA S16-19" relPath="Composite Beam Design\CBD-CSA-S16-19.pdf"
+                description="This document describes the details of the composite beam design procedure used by ETABS for the CSA S16-19 design code."/>
+    <Document name="CSA S16-24" relPath="Composite Beam Design\CBD-CSA-S16-24.pdf"
+                description="This document describes the details of the composite beam design procedure used by ETABS for the CSA S16-24 design code."/>
+    <Document name="Eurocode 4-2004" relPath="Composite Beam Design\CBD-EC-4-2004.pdf"
+                description="This document describes the details of the composite beam design procedure used by ETABS for the Eurocode 4-2004 design code."/>
+    <Document name="Indian IS 11384:2022" relPath="Composite Beam Design\CBD-IS-11384-2022.pdf"
+                description="This document describes the details of the composite beam design procedure used by ETABS for the IS 11384:2022 design code."/>
+    <Document name="Korean KDS 14-31-80:2022" relPath="Composite Beam Design\CBD-KDS-143180-2022.pdf"
+                description="This document describes the details of the composite beam design procedure used by ETABS for the Korean KDS 14 31:2022 design code."/>
+  </Folder>
+  <Folder name="Composite Column Design">
+    <Document name="AISC 360-10" relPath="Composite Column Design\CCD-AISC-360-10.pdf"
+              description="This document describes the details of the composite column design procedure used by ETABS for the AISC 360-10 design code."/>
+    <Document name="AISC 360-16" relPath="Composite Column Design\CCD-AISC-360-16.pdf"
+              description="This document describes the details of the composite column design procedure used by ETABS for the AISC 360-16 design code."/>
+    <Document name="AISC 360-22" relPath="Composite Column Design\CCD-AISC-360-22.pdf"
+              description="This document describes the details of the composite column design procedure used by ETABS for the AISC 360-22 design code."/>
+    <Document name="Eurocode 4-2004" relPath="Composite Column Design\CCD-EC-4-2004.pdf"
+              description="This document describes the details of the composite column design procedure used by ETABS for the Eurocode 4-2004 design code."/>
+    <Document name="Indian IS11384-2022" relPath="Composite Column Design\CCD-IS-11384-2022.pdf"
+              description="This document describes the details of the composite column design procedure used by ETABS for the Eurocode 4-2004 design code."/>
+    <Document name="CSA S16-19" relPath="Composite Column Design\CCD-CSA-S16-19.pdf"
+              description="This document describes the details of the composite column design procedure used by ETABS for the Canadian CSA-S16-19 design code."/>
+    <Document name="CSA S16-24" relPath="Composite Column Design\CCD-CSA-S16-24.pdf"
+              description="This document describes the details of the composite column design procedure used by ETABS for the Canadian CSA-S16-24 design code."/>
+    <Document name="KDS-14-31-00:2022" relPath="Composite Column Design\CCD-KDS-14-31-00-2022.pdf"
+              description="This document describes the details of the composite column design procedure used by ETABS for the Korean KDS-14-31-00:2022 design code."/>
+  </Folder>
+  <Folder name="Shear Wall Design">
+    <Document name="ACI 318-25" relPath="Shear Wall Design\SWD-ACI-318-25.pdf"
+            description="This document describes the details of the shear wall design procedure used by ETABS for the ACI 318-25 design code."/>
+    <Document name="ACI 318-19" relPath="Shear Wall Design\SWD-ACI-318-19.pdf"
+            description="This document describes the details of the shear wall design procedure used by ETABS for the ACI 318-19 design code."/>
+    <Document name="ACI 318-14" relPath="Shear Wall Design\SWD-ACI-318-14.pdf"
+                description="This document describes the details of the shear wall design procedure used by ETABS for the ACI 318-14 design code."/>
+    <Document name="ACI 318-11" relPath="Shear Wall Design\SWD-ACI-318-11.pdf"
+              description="This document describes the details of the shear wall design procedure used by ETABS for the ACI 318-11 design code."/>
+    <Document name="ACI 318-08" relPath="Shear Wall Design\SWD-ACI-318-08.pdf"
+                description="This document describes the details of the shear wall design procedure used by ETABS for the ACI 318-08 design code."/>
+    <Document name="ACI 530-11 Masonry" relPath="Shear Wall Design\SWD-ACI-530-11.pdf"
+                description="This document describes the details of the CMU shear wall design procedure used by ETABS for the ACI 530-11 design code."/>
+    <Document name="AISC 360-22" relPath="Shear Wall Design\CSWD-AISC-360-22.pdf"
+              description="This document describes the details of the composite shear wall design procedure used by ETABS for the AISC 360-22 design code."/>
+    <Document name="AS 3600-2018" relPath="Shear Wall Design\SWD-AS-3600-2018.pdf"
+                description="This document describes the details of the shear wall design procedure used by ETABS for the AS 3600-2018 design code."/>
+    <Document name="AS 3600-09" relPath="Shear Wall Design\SWD-AS-3600-09.pdf"
+              description="This document describes the details of the shear wall design procedure used by ETABS for the AS 3600-09 design code."/>
+    <Document name="BS 8110-97" relPath="Shear Wall Design\SWD-BS-8110-97.pdf"
+                description="This document describes the details of the shear wall design procedure used by ETABS for the BS 8110-97 design code."/>
+    <Document name="CP 65:99" relPath="Shear Wall Design\SWD-CP-65-99.pdf"
+              description="This document describes the details of the shear wall design procedure used by ETABS for the Singapore Code of Practice for Structural Use of Concrete 65:1999 design code."/>
+    <Document name="CSA A23.3-24" relPath="Shear Wall Design\SWD-CSA-A23.3-24.pdf"
+                description="This document describes the details of the shear wall design procedure used by ETABS for the CSA A23.3-24 design code."/>
+    <Document name="CSA A23.3-19" relPath="Shear Wall Design\SWD-CSA-A23.3-19.pdf"
+                description="This document describes the details of the shear wall design procedure used by ETABS for the CSA A23.3-19 design code."/>
+    <Document name="CSA A23.3-14" relPath="Shear Wall Design\SWD-CSA-A23.3-14.pdf"
+                description="This document describes the details of the shear wall design procedure used by ETABS for the CSA A23.3-14 design code."/>
+    <Document name="Eurocode 2-2004" relPath="Shear Wall Design\SWD-EC-2-2004.pdf"
+                description="This document describes the details of the shear wall design procedure used by ETABS for the Eurocode 2-2004 design code."/>
+    <Document name="Hong Kong CP 2013" relPath="Shear Wall Design\SWD-HK-CP-2013.pdf"
+                description="This document describes the details of the shear wall design procedure used by ETABS for the Hong Kong Code of Practice for Structural Use of Concrete 2013 design code."/>
+    <Document name="IS 456-2000" relPath="Shear Wall Design\SWD-IS-456-2000.pdf"
+              description="This document describes the details of the shear wall design procedure used by ETABS for the IS 456-2000 design code."/>
+    <Document name="KBC 2016" relPath="Shear Wall Design\SWD-KBC-2016.pdf"
+              description="This document describes the details of the shear wall design procedure used by ETABS for the KBC 2016 design code."/>
+    <Document name="KBC 2009" relPath="Shear Wall Design\SWD-KBC-2009.pdf"
+              description="This document describes the details of the shear wall design procedure used by ETABS for the KBC 2009 design code."/>
+    <Document name="KDS 14-20:2022" relPath="Shear Wall Design\SWD-KDS-14-20-2022.pdf"
+              description="This document describes the details of the shear wall design procedure used by ETABS for the KDS 14-20:2022 design code."/>
+    <Document name="NZS 3101-2006" relPath="Shear Wall Design\SWD-NZS-3101-2006.pdf"
+                description="This document describes the details of the shear wall design procedure used by ETABS for the NZS 3101-2006 design code."/>
+    <Document name="RCDF 2017" relPath="Shear Wall Design\SWD-RCDF-2017.pdf"
+                description="This document describes the details of the shear wall design procedure used by ETABS for the RCDF 2017 design code."/>
+    <Document name="RCDF 2004" relPath="Shear Wall Design\SWD-RCDF-2004.pdf"
+              description="This document describes the details of the shear wall design procedure used by ETABS for the RCDF 2004 design code."/>
+    <Document name="TS 500-2000(R2018)" relPath="Shear Wall Design\SWD-TS-500-2000(R 2018).pdf"
+                description="This document describes the details of the shear wall design procedure used by ETABS for the TS 500-2000(R2018) design code."/>
+    <Document name="TS 500-2000" relPath="Shear Wall Design\SWD-TS-500-2000.pdf"
+              description="This document describes the details of the shear wall design procedure used by ETABS for the TS 500-2000 design code."/>
+  </Folder>
+  <Folder name="Concrete Slab Design">
+    <Document name="ETABS RC Slab Design" relPath="Concrete Slab Design\ETABS RC Slab Design.pdf"
+                description="This document describes the details of the reinforced concrete slab and mat design procedures used by ETABS for all supported codes. This includes design for punching shear."/>
+    <Document name="ETABS PT Slab Design" relPath="Concrete Slab Design\ETABS PT Slab Design.pdf"
+              description="This document describes the details of the post-tensioned concrete slab and mat design procedures used by ETABS for for all supported codes."/>
+  </Folder>
+  <Folder name="Concrete Shell Design">
+    <Document name="CSD-EC-2-2004" relPath="Concrete Shell Design\CSD-EC-2-2004.pdf"
+                description="This document describes the details of the concrete shell design procedure used by ETABS for the Eurocode EC2-2004 design code."/>
+  </Folder>
+  <Folder name="Steel Joist Design">
+    <Document name="SJI-2020" relPath="Steel Joist Design\SJD-SJI-2020.pdf"
+              description="This document describes the details of the steel joist design procedure used by ETABS for the Steel Joist Institute 201 and 2010 design standards."/>
+  </Folder>
+  <Folder name="Verification">
+    <Document name="ETABS Verification Examples Main" relPath="Verification\ETABS Verification Main.pdf"
+			  description="Title, Copyright, Contents, Log, Methodology, Conclusions."/>
+    <Folder name="Analysis">
+      <Document name="Example 1 - Static Gravity Load Analysis" relPath="Verification\Analysis\Example 01.pdf"
+          description="This example considers a one-story, two-dimensional frame subjected to vertical static loading."/>
+      <Document name="Example 2 - Dynamic Response Spectrum Analysis" relPath="Verification\Analysis\Example 02.pdf"
+          description="This example considers a three-story plane frame subjected to the El Centro 1940 seismic response spectra, N-S component with 5 percent damping."/>
+      <Document name="Example 3 - Code Specified Static Lateral Load Analysis" relPath="Verification\Analysis\Example 03.pdf"
+          description="This example considers a three-story plane frame subjected to UBC 1997 seismic loads, IBC 2000 seismic loads, and UBC 1997 wind loads."/>
+      <Document name="Example 4 - Dynamic Response Spectrum Analysis" relPath="Verification\Analysis\Example 04.pdf"
+          description="This example considers a one-story, four-bay, three-dimensional frame subjected to the El Centro 1940 N-S component seismic response spectrum for 5 percent damping, applied in two orthogonal directions."/>
+      <Document name="Example 5 - Dynamic Response Spectrum Analysis" relPath="Verification\Analysis\Example 05.pdf"
+          description="This example considers an L-shaped structure with four identical braced frames, subjected to the El Centro 1940 N-S component seismic response spectrum for 5 percent damping, applied in the X-direction."/>
+      <Document name="Example 6 - Eigenvalue Analysis" relPath="Verification\Analysis\Example 06.pdf"
+          description="This example considers a nine-story, ten-bay plane frame, for which an eigenvalue analysis is performed."/>
+      <Document name="Example 7 - Gravity and Lateral Loads Analysis" relPath="Verification\Analysis\Example 07.pdf"
+          description="This example considers a seven-story plane frame subjected to static, response spectrum, and time history loading."/>
+      <Document name="Example 8 - Dynamic Response Spectrum Analysis" relPath="Verification\Analysis\Example 08.pdf"
+          description="This example considers a two-story, three-dimensional frame subjected to a response spectrum of constant amplitude."/>
+      <Document name="Example 9 - Dynamic Response Spectrum Analysis" relPath="Verification\Analysis\Example 09.pdf"
+          description="This example considers a two-story, three-dimensional unsymmetrical frame subjected to a seismic response spectrum along two horizontal axes that are at a 30-degree angle to the building axes."/>
+      <Document name="Example 10 - Nonlinear Time History Analysis" relPath="Verification\Analysis\Example 10.pdf"
+          description="This example considers a single bay, three-story plane frame subjected to the El Centro 1940 N-S time history record for a nonlinear time history analysis."/>
+      <Document name="Example 11 - Nonlinear Time History Analysis" relPath="Verification\Analysis\Example 11.pdf"
+          description="This example considers a three-story plane frame with viscous damper elements subjected to the El Centro 1940 N-S time history record for a nonlinear time history analysis."/>
+      <Document name="Example 12 - Nonlinear Time History Analysis" relPath="Verification\Analysis\Example 12.pdf"
+          description="This example considers a two-bay, seven-story plane frame linked to a one-bay, four-story plane frame using gap link elements. The structure is subjected to the El Centro 1940 N-S time history record for a nonlinear time history analysis."/>
+      <Document name="Example 13 - Nonlinear Time History Analysis" relPath="Verification\Analysis\Example 13.pdf"
+          description="This example considers a two-story, three-dimensional frame with base isolation subjected to earthquake motion in two perpendicular directions using the Loma Prieta acceleration records."/>
+      <Document name="Example 14 - Nonlinear Time History Analysis" relPath="Verification\Analysis\Example 14.pdf"
+          description="This example considers a two-story, three-dimensional frame with friction pendulum base isolators subjected to earthquake motion in two perpendicular directions usig the Loma Prieta acceleration records."/>
+      <Document name="Example 15 - Static Lateral Loads Analysis" relPath="Verification\Analysis\Example 15.pdf"
+          description="This example considers a series of wall configurations subjected to a static lateral load for verifying the area object with wall section assignments."/>
+    </Folder>
+    <Folder name="Steel Frame Design">
+      <Document name="AISC 360-05 Example 001" relPath="Verification\Design\Steel Frame\AISC 360-05 Example 001.pdf"
+          description="This example checks the design flexural strength of a wide flange member, according to AISC 360-05."/>
+      <Document name="AISC 360-05 Example 002" relPath="Verification\Design\Steel Frame\AISC 360-05 Example 002.pdf"
+          description="This example checks the demand capacity ratio of a built-up wide flange member under compression, according to AISC 360-05."/>
+      <Document name="AISC 360-10 Example 001" relPath="Verification\Design\Steel Frame\AISC 360-10 Example 001.pdf"
+          description="This example checks the design flexural strength of a wide flange member, according to AISC 360-10."/>
+      <Document name="AISC 360-10 Example 002" relPath="Verification\Design\Steel Frame\AISC 360-10 Example 002.pdf"
+          description="This example checks the demand capacity ratio of a built-up wide flange member under compression, according to AISC 360-10."/>
+      <Document name="AISC 360-16 Example 001" relPath="Verification\Design\Steel Frame\AISC 360-16 Example 001.pdf"
+          description="This example checks the design flexural strength of a wide flange member, according to AISC 360-16."/>
+      <Document name="AISC 360-16 Example 002" relPath="Verification\Design\Steel Frame\AISC 360-16 Example 002.pdf"
+          description="This example checks the demand capacity ratio of a built-up wide flange member under compression, according to AISC 360-16."/>
+      <Document name="AISC 360-22 Example 001" relPath="Verification\Design\Steel Frame\AISC 360-22 Example 001.pdf"
+         description="This example checks the design flexural strength of a wide flange member, according to AISC 360-22."/>
+      <Document name="AISC 360-22 Example 002" relPath="Verification\Design\Steel Frame\AISC 360-22 Example 002.pdf"
+         description="This example checks the demand capacity ratio of a built-up wide flange member under compression, according to AISC 360-22."/>
+      <Document name="AISC 360-22 Example 003" relPath="Verification\Design\Steel Frame\AISC 360-22 Example 003.pdf"
+         description="This example checks the design capacity ratio of a built-up wide flange member under biaxial bending and compression, according to AISC 360-22."/>
+      <Document name="AISC 360-22 Example 004" relPath="Verification\Design\Steel Frame\AISC 360-22 Example 004.pdf"
+         description="This example checks the design shear strength of a wide flange member under flexural shear according to AISC 360-22."/>
+      <Document name="AISC ASD-89 Example 001" relPath="Verification\Design\Steel Frame\AISC ASD-89 Example 001.pdf"
+          description="This example checks the design flexural strength of a wide flange member, according to AISC ASD-89."/>
+      <Document name="AISC ASD-89 Example 002" relPath="Verification\Design\Steel Frame\AISC ASD-89 Example 002.pdf"
+          description="This example checks the section classification and axial strees of a wide flange member under compression, according to AISC ASD-89."/>
+      <Document name="AISC LRFD-93 Example 001" relPath="Verification\Design\Steel Frame\AISC LRFD-93 Example 001.pdf"
+          description="This example checks the design flexural strength of a wide flange member, according to AISC LRFD-99."/>
+      <Document name="AISC LRFD-93 Example 002" relPath="Verification\Design\Steel Frame\AISC LRFD-93 Example 002.pdf"
+          description="This example checks the adequacy of a wide flange member under combined compression and biaxial bending, according to AISC LRFD-99."/>
+      <Document name="AS 4100-1998 Example 001" relPath="Verification\Design\Steel Frame\AS 4100-1998 Example 001.pdf"
+          description="This example checks the axial strengths of a wide flange member under compression, according to AS 4100-1998."/>
+      <Document name="AS 4100-1998 Example 002" relPath="Verification\Design\Steel Frame\AS 4100-1998 Example 002.pdf"
+          description="This example checks the bending strengths of a wide flange member under bending, according to AS 4100-1998."/>
+      <Document name="AS 4100-1998 Example 003" relPath="Verification\Design\Steel Frame\AS 4100-1998 Example 003.pdf"
+          description="This example checks the interacting axial and bending strengths of a wide flange member under combined compression and bending, according to AS 4100-1998."/>
+      <Document name="AS 4100-2020 Example 001" relPath="Verification\Design\Steel Frame\AS 4100-2020 Example 001.pdf"
+		  description="This example checks the axial strengths of a wide flange member under compression, according to AS 4100-2020."/>
+      <Document name="AS 4100-2020 Example 002" relPath="Verification\Design\Steel Frame\AS 4100-2020 Example 002.pdf"
+          description="This example checks the bending strengths of a wide flange member under bending, according to AS 4100-2020."/>
+      <Document name="AS 4100-2020 Example 003" relPath="Verification\Design\Steel Frame\AS 4100-2020 Example 003.pdf"
+          description="This example checks the interacting axial and bending strengths of a wide flange member under combined compression and bending, according to AS 4100-2020."/>
+      <Document name="BS 5950-2000 Example 001" relPath="Verification\Design\Steel Frame\BS 5950-2000 Example 001.pdf"
+          description="This example checks the moment and shear strengths of a wide flange member under bending, according to BS 5950-2000."/>
+      <Document name="BS 5950-2000 Example 002" relPath="Verification\Design\Steel Frame\BS 5950-2000 Example 002.pdf"
+          description="This example checks the axial and moment strengths of a square tube member under compression and bending, according to BS 5950-2000."/>
+      <Document name="CSA S16-14 Example 001" relPath="Verification\Design\Steel Frame\CSA S16-14 Example 001.pdf"
+          description="This example checks the moment and shear strength of a wide flange member, according to CSA S16-14."/>
+      <Document name="CSA S16-14 Example 002" relPath="Verification\Design\Steel Frame\CSA S16-14 Example 002.pdf"
+          description="This example checks the axial and moment strengths of a wide flange member under compression and bending, according to CSA S16-14."/>
+      <Document name="CSA S16-19 Example 001" relPath="Verification\Design\Steel Frame\CSA S16-19 Example 001.pdf"
+          description="This example checks the moment and shear strength of a wide flange member, according to CSA S16-19."/>
+      <Document name="CSA S16-19 Example 002" relPath="Verification\Design\Steel Frame\CSA S16-19 Example 002.pdf"
+          description="This example checks the axial and moment strengths of a wide flange member under compression and bending, according to CSA S16-19."/>
+      <Document name="CSA S16-24 Example 001" relPath="Verification\Design\Steel Frame\CSA S16-24 Example 001.pdf"
+          description="This example checks the moment and shear strength of a wide flange member, according to CSA S16-24."/>
+      <Document name="CSA S16-24 Example 002" relPath="Verification\Design\Steel Frame\CSA S16-24 Example 002.pdf"
+          description="This example checks the axial and moment strengths of a wide flange member under compression and bending, according to CSA S16-24."/>
+      <Document name="EN 3-2005 Example 001" relPath="Verification\Design\Steel Frame\EN 3-2005 Example 001.pdf"
+          description="This example checks the axial strengths of a wide flange member under combined compression and bending, according to EN 3-2005."/>
+      <Document name="EN 3-2005 Example 002" relPath="Verification\Design\Steel Frame\EN 3-2005 Example 002.pdf"
+          description="This example checks the moment and shear strengths of a wide flange member under bending, according to EN 3-2005."/>
+      <Document name="EN 3-2005 Example 003" relPath="Verification\Design\Steel Frame\EN 3-2005 Example 003.pdf"
+          description="This example checks the axial and moment strengths of a wide flange member under combined compression and bending, according to EN 3-2005."/>
+      <Document name="EN 3-2022 Example 001" relPath="Verification\Design\Steel Frame\EN 3-2022 Example 001.pdf"
+          description="This example checks the axial strengths of a wide flange member under combined compression and bending, according to EN 3-2022."/>
+      <Document name="EN 3-2022 Example 002" relPath="Verification\Design\Steel Frame\EN 3-2022 Example 002.pdf"
+          description="This example checks the moment and shear strengths of a wide flange member under bending, according to EN 3-2022."/>
+      <Document name="EN 3-2022 Example 003" relPath="Verification\Design\Steel Frame\EN 3-2022 Example 003.pdf"
+          description="This example checks the moment and shear strengths of a wide flange member under bending and compression according to EN 3-2022."/>
+      <Document name="IS 800-2007 Example 001" relPath="Verification\Design\Steel Frame\IS 800-2007 Example 001.pdf"
+          description="This example checks the axial strengths of a wide flange member under compression, according to IS 800-2007."/>
+      <Document name="IS 800-2007 Example 002" relPath="Verification\Design\Steel Frame\IS 800-2007 Example 002.pdf"
+          description="This example checks the moment and shear strengths of a wide flange member under bending, according to IS 800-2007."/>
+      <Document name="IS 800-2007 Example 003" relPath="Verification\Design\Steel Frame\IS 800-2007 Example 003.pdf"
+          description="This example checks the adequacy of a wide flange member under combined compression and biaxial bending, according to IS 800-2007."/>
+      <Document name="KBC 2009 Example 001" relPath="Verification\Design\Steel Frame\KBC 2009 Example 001.pdf"
+          description="This example checks the design flexural strength of a wide flange member, according to KBC 2009."/>
+      <Document name="KBC 2009 Example 002" relPath="Verification\Design\Steel Frame\KBC 2009 Example 002.pdf"
+          description="This example checks the demand capacity ratio of a built-up wide flange member under compression, according to KBC 2009."/>
+      <Document name="KBC 2016 Example 001" relPath="Verification\Design\Steel Frame\KBC 2016 Example 001.pdf"
+          description="This example checks the design flexural strength of a wide flange member, according to KBC 2016."/>
+      <Document name="KBC 2016 Example 002" relPath="Verification\Design\Steel Frame\KBC 2016 Example 002.pdf"
+          description="This example checks the demand capacity ratio of a built-up wide flange member under compression, according to KBC 2016."/>
+      <Document name="KDS 2022 Example 001" relPath="Verification\Design\Steel Frame\KDS 2022 Example 001.pdf"
+          description="This example checks the design flexural strength of a wide flange member, according to KBC 2016."/>
+      <Document name="KDS 2022 Example 002" relPath="Verification\Design\Steel Frame\KDS 2022 Example 002.pdf"
+          description="This example checks the demand capacity ratio of a built-up wide flange member under compression, according to KBC 2016."/>
+      <Document name="NTC 2008 Example 001" relPath="Verification\Design\Steel Frame\NTC 2008 Example 001.pdf"
+          description="This example checks the adequacy of a wide flange member under combined compression and bending, according to NTC 2008."/>
+      <Document name="NTC 2008 Example 002" relPath="Verification\Design\Steel Frame\NTC 2008 Example 002.pdf"
+          description="This example checks the adequacy of a wide flange member under combined compression and bending, according to NTC 2008."/>
+      <Document name="NZS 3404-1997 Example 001" relPath="Verification\Design\Steel Frame\NZS 3404-1997 Example 001.pdf"
+          description="This example checks the axial strengths of a wide flange member under compression, according to NZS 3404-1997."/>
+      <Document name="NZS 3404-1997 Example 002" relPath="Verification\Design\Steel Frame\NZS 3404-1997 Example 002.pdf"
+          description="This example checks the bending strengths of a wide flange member under bending, according to NZS 3404-1997."/>
+      <Document name="NZS 3404-1997 Example 003" relPath="Verification\Design\Steel Frame\NZS 3404-1997 Example 003.pdf"
+          description="This example checks the interacting axial and bending strengths of a wide flange member under combined compression and bending, according to NZS 3404-1997."/>
+    </Folder>
+    <Folder name="Steel Connection Design">
+      <Document name="AISC 360-10-01" relPath="Verification\Design\Steel Connection\AISC-360-10 Connection 001 (BB).pdf"
+                     description="This example checks the design of a beam to beam single plate shear connection used by ETABS for the AISC 360-10 design code."/>
+      <Document name="AISC 360-10-02" relPath="Verification\Design\Steel Connection\AISC-360-10 Connection 002 (BCw-S).pdf"
+                  description="This example checks the design of a beam to column web shear connection used by ETABS for the AISC 360-10 design code."/>
+      <Document name="AISC 360-10-03" relPath="Verification\Design\Steel Connection\AISC-360-10 Connection 003 (BCf-S).pdf"
+                description="This example checks the design of a beam to column flange shear connection used by ETABS for the AISC 360-10 design code."/>
+      <Document name="AISC 360-10-04" relPath="Verification\Design\Steel Connection\AISC-360-10 Connection 004 (BCf-M).pdf"
+                  description="This example checks the design of a beam to column flange moment connection used by ETABS for the AISC 360-10 design code."/>
+      <Document name="AISC 360-10-05" relPath="Verification\Design\Steel Connection\AISC-360-10 Connection 005 (CF-SM).pdf"
+                  description="This example checks the design of a column to base place connection for small moments used by ETABS for the AISC 360-10 design code."/>
+      <Document name="AISC 360-16-01" relPath="Verification\Design\Steel Connection\AISC-360-16 Connection 001 (BB).pdf"
+                     description="This example checks the design of a beam to beam single plate shear connection used by ETABS for the AISC 360-16 design code."/>
+      <Document name="AISC 360-16-02" relPath="Verification\Design\Steel Connection\AISC-360-16 Connection 002 (BCw-S).pdf"
+                  description="This example checks the design of a beam to column web shear connection used by ETABS for the AISC 360-16 design code."/>
+      <Document name="AISC 360-16-03" relPath="Verification\Design\Steel Connection\AISC-360-16 Connection 003 (BCf-S).pdf"
+                description="This example checks the design of a beam to column flange shear connection used by ETABS for the AISC 360-16 design code."/>
+      <Document name="AISC 360-16-04" relPath="Verification\Design\Steel Connection\AISC-360-16 Connection 004 (BCf-M).pdf"
+                  description="This example checks the design of a beam to column flange moment connection used by ETABS for the AISC 360-16 design code."/>
+      <Document name="AISC 360-16-05" relPath="Verification\Design\Steel Connection\AISC-360-16 Connection 005 (CF).pdf"
+                  description="This example checks the design of a column to base place connection for small moments used by ETABS for the AISC 360-16 design code."/>
+      <Document name="AISC 360-22-01" relPath="Verification\Design\Steel Connection\AISC-360-22 Connection 001 (BB).pdf"
+                     description="This example checks the design of a beam to beam single plate shear connection used by ETABS for the AISC 360-22 design code."/>
+      <Document name="AISC 360-22-02" relPath="Verification\Design\Steel Connection\AISC-360-22 Connection 002 (BCw-S).pdf"
+                  description="This example checks the design of a beam to column web shear connection used by ETABS for the AISC 360-22 design code."/>
+      <Document name="AISC 360-22-03" relPath="Verification\Design\Steel Connection\AISC-360-22 Connection 003 (BCf-S).pdf"
+                description="This example checks the design of a beam to column flange shear connection used by ETABS for the AISC 360-22 design code."/>
+      <Document name="AISC 360-22-04" relPath="Verification\Design\Steel Connection\AISC-360-22 Connection 004 (BCf-M).pdf"
+                  description="This example checks the design of a beam to column flange moment connection used by ETABS for the AISC 360-22 design code."/>
+      <Document name="AISC 360-22-05" relPath="Verification\Design\Steel Connection\AISC-360-22 Connection 005 (CF).pdf"
+                  description="This example checks the design of a column to base place connection for small moments used by ETABS for the AISC 360-22 design code."/>
+    </Folder>
+    <Folder name="Concrete Frame Design">
+      <Document name="ACI 318-08 Example 001" relPath="Verification\Design\Concrete Frame\ACI 318-08 Example 001.pdf"
+          description="This example checks the flexural and shear design of a rectangular beam, according to ACI 318-08."/>
+      <Document name="ACI 318-08 Example 002" relPath="Verification\Design\Concrete Frame\ACI 318-08 Example 002.pdf"
+          description="This example checks the demand capacity ratio of a rectangular column, according to ACI 318-08."/>
+      <Document name="ACI 318-11 Example 001" relPath="Verification\Design\Concrete Frame\ACI 318-11 Example 001.pdf"
+          description="This example checks the flexural and shear design of a rectangular beam, according to ACI 318-11."/>
+      <Document name="ACI 318-11 Example 002" relPath="Verification\Design\Concrete Frame\ACI 318-11 Example 002.pdf"
+          description="This example checks the demand capacity ratio of a rectangular column, according to ACI 318-11."/>
+      <Document name="ACI 318-14 Example 001" relPath="Verification\Design\Concrete Frame\ACI 318-14 Example 001.pdf"
+          description="This example checks the flexural and shear design of a rectangular beam, according to ACI 318-14."/>
+      <Document name="ACI 318-14 Example 002" relPath="Verification\Design\Concrete Frame\ACI 318-14 Example 002.pdf"
+          description="This example checks the demand capacity ratio of a rectangular column, according to ACI 318-14."/>
+      <Document name="ACI 318-19 Example 001" relPath="Verification\Design\Concrete Frame\ACI 318-19 Example 001.pdf"
+				description="This example checks the flexural and shear design of a rectangular beam, according to ACI 318-19."/>
+      <Document name="ACI 318-19 Example 002" relPath="Verification\Design\Concrete Frame\ACI 318-19 Example 002.pdf"
+				description="This example checks the demand capacity ratio of a rectangular column, according to ACI 318-19."/>
+      <Document name="ACI 318-25 Example 001" relPath="Verification\Design\Concrete Frame\ACI 318-25 Example 001.pdf"
+				description="This example checks the flexural and shear design of a rectangular beam, according to ACI 318-25."/>
+      <Document name="ACI 318-25 Example 002" relPath="Verification\Design\Concrete Frame\ACI 318-25 Example 002.pdf"
+				description="This example checks the demand capacity ratio of a rectangular column, according to ACI 318-25."/>
+      <Document name="AS 3600-2009 Example 001" relPath="Verification\Design\Concrete Frame\AS 3600-2009 Example 001.pdf"
+          description="This example checks the flexural and shear design of a tee beam, according to AS 3600-09."/>
+      <Document name="AS 3600-2009 Example 002" relPath="Verification\Design\Concrete Frame\AS 3600-2009 Example 002.pdf"
+          description="This example checks the demand capacity ratio of a rectangular column, according to AS 3600-09."/>
+      <Document name="AS 3600-2018 Example 001" relPath="Verification\Design\Concrete Frame\AS 3600-2018 Example 001.pdf"
+				description="This example checks the flexural and shear design of a tee beam, according to AS 3600-2018."/>
+      <Document name="AS 3600-2018 Example 002" relPath="Verification\Design\Concrete Frame\AS 3600-2018 Example 002.pdf"
+				description="This example checks the demand capacity ratio of a rectangular column, according to AS 3600-2018."/>
+      <Document name="BS 8110-1997 Example 001" relPath="Verification\Design\Concrete Frame\BS 8110-1997 Example 001.pdf"
+				description="This example checks the flexural and shear design of a rectangular beam, according to BS 8110-97."/>
+      <Document name="BS 8110-1997 Example 002" relPath="Verification\Design\Concrete Frame\BS 8110-1997 Example 002.pdf"
+          description="This example checks the demand capacity ratio of a rectangular column, according to BS 8110-97."/>
+      <Document name="CSA A23.3-14 Example 001" relPath="Verification\Design\Concrete Frame\CSA A23.3-14 Example 001.pdf"
+          description="This example checks the flexural and shear design of a rectangular beam, according to CSA A23.3-14."/>
+      <Document name="CSA A23.3-14 Example 002" relPath="Verification\Design\Concrete Frame\CSA A23.3-14 Example 002.pdf"
+          description="This example checks the demand capacity ratio of a rectangular column, according to CSA A23.3-14."/>
+      <Document name="CSA A23.3-19 Example 001" relPath="Verification\Design\Concrete Frame\CSA A23.3-19 Example 001.pdf"
+          description="This example checks the flexural and shear design of a rectangular beam, according to CSA A23.3-19."/>
+      <Document name="CSA A23.3-19 Example 002" relPath="Verification\Design\Concrete Frame\CSA A23.3-19 Example 002.pdf"
+          description="This example checks the demand capacity ratio of a rectangular column, according to CSA A23.3-19."/>
+      <Document name="CSA A23.3-24 Example 001" relPath="Verification\Design\Concrete Frame\CSA A23.3-24 Example 001.pdf"
+				description="This example checks the flexural and shear design of a rectangular beam, according to CSA A23.3-24."/>
+      <Document name="CSA A23.3-24 Example 002" relPath="Verification\Design\Concrete Frame\CSA A23.3-24 Example 002.pdf"
+				description="This example checks the demand capacity ratio of a rectangular column, according to CSA A23.3-24."/>
+      <Document name="EN 2-2004 Example 001" relPath="Verification\Design\Concrete Frame\EN 2-2004 Example 001.pdf"
+          description="This example checks the flexural and shear design of a rectangular beam, according to EN 2-2004."/>
+      <Document name="EN 2-2004 Example 002" relPath="Verification\Design\Concrete Frame\EN 2-2004 Example 002.pdf"
+          description="This example checks the demand capacity ratio of a rectangular column, according to EN 2-2004."/>
+      <Document name="EN 2-2004 Example 003" relPath="Verification\Design\Concrete Frame\EN 2-2004 Example 003.pdf"
+	      description="This example checks the P-M interaction of a compression controled rectangular column, according to EN 2-2004."/>
+      <Document name="EN 2-2004 Example 004" relPath="Verification\Design\Concrete Frame\EN 2-2004 Example 004.pdf"
+	      description="This example checks the P-M interaction of a compression controled rectangular column, according to EN 2-2004."/>
+      <Document name="EN 2-2023 Example 001" relPath="Verification\Design\Concrete Frame\EN 2-2023 Example 001.pdf"
+          description="This example checks the flexural and shear design of a rectangular beam, according to EN 2-2023."/>
+      <Document name="EN 2-2023 Example 002" relPath="Verification\Design\Concrete Frame\EN 2-2023 Example 002.pdf"
+          description="This example checks the demand capacity ratio of a rectangular column, according to EN 2-2023."/>
+      <Document name="HK CP-2013 Example 001" relPath="Verification\Design\Concrete Frame\HK CP-2013 Example 001.pdf"
+          description="This example checks the flexural and shear design of a rectangular beam, according to HK CP-2013."/>
+      <Document name="HK CP-2013 Example 002" relPath="Verification\Design\Concrete Frame\HK CP-2013 Example 002.pdf"
+          description="This example checks the demand capacity ratio of a rectangular column, according to HK CP-2013."/>
+      <Document name="IS 456-2000 Example 001" relPath="Verification\Design\Concrete Frame\IS 456-2000 Example 001.pdf"
+          description="This example checks the flexural and shear design of a rectangular beam, according to IS 456-2000."/>
+      <Document name="IS 456-2000 Example 002" relPath="Verification\Design\Concrete Frame\IS 456-2000 Example 002.pdf"
+          description="This example checks the demand capacity ratio of a rectangular column, according to IS 456-2000."/>
+      <Document name="KBC 2009 Example 001" relPath="Verification\Design\Concrete Frame\KBC 2009 Example 001.pdf"
+          description="This example checks the flexural and shear design of a rectangular beam, according to KBC 2009."/>
+      <Document name="KBC 2009 Example 002" relPath="Verification\Design\Concrete Frame\KBC 2009 Example 002.pdf"
+          description="This example checks the demand capacity ratio of a rectangular column, according to KBC 2009."/>
+      <Document name="KBC 2016 Example 001" relPath="Verification\Design\Concrete Frame\KBC 2016 Example 001.pdf"
+          description="This example checks the flexural and shear design of a rectangular beam, according to KBC 2016."/>
+      <Document name="KBC 2016 Example 002" relPath="Verification\Design\Concrete Frame\KBC 2016 Example 002.pdf"
+          description="This example checks the demand capacity ratio of a rectangular column, according to KBC 2016."/>
+      <Document name="KDS 14 20 2022 Example 001" relPath="Verification\Design\Concrete Frame\KDS 14 20 2022 Example 001.pdf"
+          description="This example checks the flexural and shear design of a rectangular beam, according to KDS 14 20 2022."/>
+      <Document name="KDS 14 20 2022 Example 002" relPath="Verification\Design\Concrete Frame\KDS 14 20 2022 Example 002.pdf"
+          description="This example checks the demand capacity ratio of a rectangular column, according to KDS 14 20 2022."/>
+      <Document name="NTC 2008 Example 001" relPath="Verification\Design\Concrete Frame\NTC 2008 Example 001.pdf"
+          description="This example checks the flexural and shear design of a rectangular beam, according to NTC 2008."/>
+      <Document name="NTC 2008 Example 002" relPath="Verification\Design\Concrete Frame\NTC 2008 Example 002.pdf"
+          description="This example checks the demand capacity ratio of a rectangular column, according to NTC 2008."/>
+      <Document name="NTC 2008 Example 003" relPath="Verification\Design\Concrete Frame\NTC 2008 Example 003.pdf"
+				description="This example checks the P-M interaction of a compression controled rectangular column, according to NTC 2008."/>
+      <Document name="NTC 2008 Example 004" relPath="Verification\Design\Concrete Frame\NTC 2008 Example 004.pdf"
+				description="This example checks the P-M interaction of a compression controled rectangular column, according to NTC 2008."/>
+      <Document name="NZS 3101-2006 Example 001" relPath="Verification\Design\Concrete Frame\NZS 3101-2006 Example 001.pdf"
+				description="This example checks the flexural and shear design of a rectangular beam, according to NZS 3101-2006."/>
+      <Document name="NZS 3101-2006 Example 002" relPath="Verification\Design\Concrete Frame\NZS 3101-2006 Example 002.pdf"
+          description="This example checks the demand capacity ratio of a rectangular column, according to NZS 3101-2006."/>
+      <Document name="RCDF 2004 Example 001" relPath="Verification\Design\Concrete Frame\RCDF 2004 Example 001.pdf"
+          description="This example checks the flexural and shear design of a rectangular beam, according to RCDF 2004."/>
+      <Document name="RCDF 2004 Example 002" relPath="Verification\Design\Concrete Frame\RCDF 2004 Example 002.pdf"
+          description="This example checks the demand capacity ratio of a rectangular column, according to RCDF 2004."/>
+      <Document name="RCDF 2017 Example 001" relPath="Verification\Design\Concrete Frame\RCDF 2017 Example 001.pdf"
+          description="This example checks the flexural and shear design of a rectangular beam, according to RCDF 2017."/>
+      <Document name="RCDF 2017 Example 002" relPath="Verification\Design\Concrete Frame\RCDF 2017 Example 002.pdf"
+          description="This example checks the demand capacity ratio of a rectangular column, according to RCDF 2017."/>
+      <Document name="SS CP 65-1999 Example 001" relPath="Verification\Design\Concrete Frame\SS CP 65-1999 Example 001.pdf"
+          description="This example checks the flexural and shear design of a rectangular beam, according to SS CP 65-1999."/>
+      <Document name="SS CP 65-1999 Example 002" relPath="Verification\Design\Concrete Frame\SS CP 65-1999 Example 002.pdf"
+          description="This example checks the demand capacity ratio of a rectangular column, according to SS CP 65-1999."/>
+      <Document name="TCVN 5574-2018 Example 001" relPath="Verification\Design\Concrete Frame\TCVN 5574-2018 Example 001.pdf"
+          description="This example checks the flexural and shear design of a rectangular beam, according to TCVN 5574-2018."/>
+      <Document name="TCVN 5574-2018 Example 002" relPath="Verification\Design\Concrete Frame\TCVN 5574-2018 Example 002.pdf"
+          description="This example checks the demand capacity ratio of a rectangular column, according to TCVN 5574-2018."/>
+      <Document name="TS 500-2000 Example 001" relPath="Verification\Design\Concrete Frame\TS 500-2000 Example 001.pdf"
+          description="This example checks the flexural and shear design of a rectangular beam, according to TS 500-2000."/>
+      <Document name="TS 500-2000 Example 002" relPath="Verification\Design\Concrete Frame\TS 500-2000 Example 002.pdf"
+          description="This example checks the demand capacity ratio of a rectangular column, according to TS 500-2000."/>
+      <Document name="TS 500-2000(R2018) Example 001" relPath="Verification\Design\Concrete Frame\TS 500-2000(R2018) Example 001.pdf"
+          description="This example checks the flexural and shear design of a rectangular beam, according to TS 500-2000(R 2018)."/>
+      <Document name="TS 500-2000(R2018) Example 002" relPath="Verification\Design\Concrete Frame\TS 500-2000(R2018) Example 002.pdf"
+          description="This example checks the demand capacity ratio of a rectangular column, according to TS 500-2000(R 2018)."/>
+    </Folder>
+    <Folder name="Composite Beam Design">
+      <Document name="AISC 360-05 Example 001" relPath="Verification\Design\Composite Beam\AISC-360-05 Example 001.pdf"
+          description="This example performs the design of a composite beam, according to AISC 360-05."/>
+      <Document name="AISC 360-10 Example 001" relPath="Verification\Design\Composite Beam\AISC-360-10 Example 001.pdf"
+          description="This example performs the design of a composite beam, according to AISC 360-10."/>
+      <Document name="AISC 360-10 Example 002" relPath="Verification\Design\Composite Beam\AISC-360-10 Example 002.pdf"
+          description="This example checks the design of a composite beam, according to AISC 360-10."/>
+      <Document name="AISC 360-16 Example 001" relPath="Verification\Design\Composite Beam\AISC-360-16 Example 001.pdf"
+          description="This example performs the design of a composite beam, according to AISC 360-16."/>
+      <Document name="AISC 360-16 Example 002" relPath="Verification\Design\Composite Beam\AISC-360-16 Example 002.pdf"
+          description="This example checks the design of a composite beam, according to AISC 360-16."/>
+      <Document name="AISC 360-16 Example 003" relPath="Verification\Design\Composite Beam\AISC-360-16 Example 003.pdf"
+          description="This example checks the design of a composite beam for compression forces, according to AISC 360-16."/>
+      <Document name="AISC 360-22 Example 001" relPath="Verification\Design\Composite Beam\AISC-360-22 Example 001.pdf"
+          description="This example performs the design of a composite beam, according to AISC 360-22."/>
+      <Document name="AISC 360-22 Example 002" relPath="Verification\Design\Composite Beam\AISC-360-22 Example 002.pdf"
+          description="This example checks the design of a composite beam, according to AISC 360-22."/>
+      <Document name="AISC 360-22 Example 003" relPath="Verification\Design\Composite Beam\AISC-360-22 Example 003.pdf"
+          description="This example checks the design of a composite beam for compression forces, according to AISC 360-22."/>
+      <Document name="AISC DG02 Example 001" relPath="Verification\Design\Composite Beam\AISC DG02 Example 001.pdf"
+          description="This example checks the design of a steel beam with unreinforced opening according to AISC Design Guide 2."/>
+      <Document name="AISC DG02 Example 002" relPath="Verification\Design\Composite Beam\AISC DG02 Example 002.pdf"
+          description="This example checks the design of a steel beam with reinforced opening according to AISC Design Guide 2."/>
+      <Document name="AISC DG02 Example 003" relPath="Verification\Design\Composite Beam\AISC DG02 Example 003.pdf"
+          description="This example checks the design of a composite beam with unreinforced opening according to AISC Design Guide 2."/>
+      <Document name="AISC DG02 Example 004" relPath="Verification\Design\Composite Beam\AISC DG02 Example 004.pdf"
+          description="This example checks the design of a composite beam with reinforced opening according to AISC Design Guide 2."/>
+      <Document name="AISC DG11 2nd Edition Example 001" relPath="Verification\Design\Composite Beam\AISC DG11 2nd Edition Example 001.pdf"
+          description="This example checks the design of a composite beam for vibration according to AISC Design Guide 11, 2nd edition."/>
+      <Document name="AISC DG11 2nd Edition Example 002" relPath="Verification\Design\Composite Beam\AISC DG11 2nd Edition Example 002.pdf"
+          description="This example checks the design of a composite beam for vibration according to AISC Design Guide 11, 2nd edition."/>
+      <Document name="AISC DG31 Example 001" relPath="Verification\Design\Composite Beam\AISC DG31 Example 001.pdf"
+          description="This example checks the design of a non-composite castellated steel beam per AISC Design Guide 31, Example 4.1."/>
+      <Document name="AISC DG31 Example 002" relPath="Verification\Design\Composite Beam\AISC DG31 Example 002.pdf"
+          description="This example checks the design of a non-composite cellular steel beam per AISC Design Guide 31, Example 4.2."/>
+      <Document name="AISC DG31 Example 003" relPath="Verification\Design\Composite Beam\AISC DG31 Example 003.pdf"
+          description="This example checks the design of a composite castellated steel beam per AISC Design Guide 31, Example 4.3."/>
+      <Document name="AISC DG31 Example 004" relPath="Verification\Design\Composite Beam\AISC DG31 Example 004.pdf"
+          description="This example checks the design of a composite cellular steel beam per AISC Design Guide 31, Example 4.4."/>
+      <Document name="BS 5950-1990 Example 001" relPath="Verification\Design\Composite Beam\BS-5950-90 Example 001.pdf"
+          description="This example performs the design of a composite beam, according to BS 5950-1990."/>
+      <Document name="CSA S16-14 Example 001" relPath="Verification\Design\Composite Beam\CSA-S16-14 Example 001.pdf"
+          description="This example performs the design of a composite beam, according to CSA S16-14."/>
+      <Document name="CSA S16-19 Example 001" relPath="Verification\Design\Composite Beam\CSA-S16-19 Example 001.pdf"
+          description="This example performs the design of a composite beam, according to CSA S16-19."/>
+      <Document name="CSA S16-24 Example 001" relPath="Verification\Design\Composite Beam\CSA-S16-24 Example 001.pdf"
+          description="This example performs the design of a composite beam, according to CSA S16-24."/>
+      <Document name="EC 4-2004 Example 001" relPath="Verification\Design\Composite Beam\EC-4-2004 Example 001.pdf"
+          description="This example performs the design of a composite beam, according to EC 4-2004."/>
+      <Document name="IS 11384-2022 Example 001" relPath="Verification\Design\Composite Beam\IS-11384-2022 Example 001.pdf"
+          description="This example performs the design of a composite beam, according to the IS 11384-2022 (Indian) code."/>
+      <Document name="KDS-14-31-80:2022 Example 001" relPath="Verification\Design\Composite Beam\KDS-14-31-80 2022 Example 001.pdf"
+          description="This example performs the design of a composite beam, according to KDS-14-31-80:2022."/>
+      <Document name="SCI Publication 355 Example 001" relPath="Verification\Design\Composite Beam\SCI Publication 355 Example 001.pdf"
+          description="This example performs the design of a composite beam with web openings per SCI publication 355."/>
+    </Folder>
+    <Folder name="Composite Column Design">
+      <Document name="AISC 360-22 Example 001" relPath="Verification\Design\Composite Column\AISC-360-22 Example 001.pdf"
+          description="This example checks a concrete filled tube for applied axial compression, according to AISC 360-22."/>
+      <Document name="AISC 360-22 Example 002" relPath="Verification\Design\Composite Column\AISC-360-22 Example 002.pdf"
+          description="This example checks a concrete filled tube for applied axial load, according to AISC 360-22."/>
+      <Document name="AISC 360-22 Example 003" relPath="Verification\Design\Composite Column\AISC-360-22 Example 003.pdf"
+          description="This example checks a concrete filled tube for applied axial force, shear, and moment, according to AISC 360-22."/>
+      <Document name="AISC 360-22 Example 004" relPath="Verification\Design\Composite Column\AISC-360-22 Example 004.pdf"
+          description="This example checks a concrete encased wide flange for applied axial compression, according to AISC 360-22."/>
+      <Document name="AISC 360-22 Example 005" relPath="Verification\Design\Composite Column\AISC-360-22 Example 005.pdf"
+          description="This example checks a concrete encased wide flange for applied axial load, according to AISC 360-22."/>
+      <Document name="AISC 360-22 Example 006" relPath="Verification\Design\Composite Column\AISC-360-22 Example 006.pdf"
+          description="This example checks a concrete encased wide flange for applied axial force, shear, and moment, according to AISC 360-22."/>
+      <Document name="AISC 360-22 Example 007" relPath="Verification\Design\Composite Column\AISC-360-22 Example 007.pdf"
+          description="This example checks a concrete encased wide flange for applied axial force and moment, according to AISC 360-22."/>
+      <Document name="AISC 360-22 Example 008" relPath="Verification\Design\Composite Column\AISC-360-22 Example 008.pdf"
+          description="This example checks a concrete encased wide flange for applied axial force and moment, according to AISC 360-22."/>
+      <Document name="AISC 360-16 Example 001" relPath="Verification\Design\Composite Column\AISC-360-16 Example 001.pdf"
+          description="This example checks a concrete filled tube for applied axial compression, according to AISC 360-16."/>
+      <Document name="AISC 360-16 Example 002" relPath="Verification\Design\Composite Column\AISC-360-16 Example 002.pdf"
+          description="This example checks a concrete filled tube for applied axial load, according to AISC 360-16."/>
+      <Document name="AISC 360-16 Example 003" relPath="Verification\Design\Composite Column\AISC-360-16 Example 003.pdf"
+          description="This example checks a concrete filled tube for applied axial force, shear, and moment, according to AISC 360-16."/>
+      <Document name="AISC 360-16 Example 004" relPath="Verification\Design\Composite Column\AISC-360-16 Example 004.pdf"
+          description="This example checks a concrete encased wide flange for applied axial compression, according to AISC 360-16."/>
+      <Document name="AISC 360-16 Example 005" relPath="Verification\Design\Composite Column\AISC-360-16 Example 005.pdf"
+          description="This example checks a concrete encased wide flange for applied axial load, according to AISC 360-16."/>
+      <Document name="AISC 360-16 Example 006" relPath="Verification\Design\Composite Column\AISC-360-16 Example 006.pdf"
+          description="This example checks a concrete encased wide flange for applied axial force, shear, and moment, according to AISC 360-16."/>
+      <Document name="AISC 360-10 Example 001" relPath="Verification\Design\Composite Column\AISC-360-10 Example 001.pdf"
+          description="This example checks a concrete filled tube for applied axial compression, according to AISC 360-10."/>
+      <Document name="AISC 360-10 Example 002" relPath="Verification\Design\Composite Column\AISC-360-10 Example 002.pdf"
+          description="This example checks a concrete filled tube for applied axial load, according to AISC 360-10."/>
+      <Document name="AISC 360-10 Example 003" relPath="Verification\Design\Composite Column\AISC-360-10 Example 003.pdf"
+          description="This example checks a concrete filled tube for applied axial force, shear, and moment, according to AISC 360-10."/>
+      <Document name="EC-4-2004 Example 001" relPath="Verification\Design\Composite Column\EC-4-2004 CCD Ex001.pdf"
+          description="This example checks a concrete encased WF column for applied axial compression, according to Eurocode 4-2020."/>
+      <Document name="EC-4-2004 Example 002" relPath="Verification\Design\Composite Column\EC-4-2004 CCD Ex002.pdf"
+          description="This example checks a concrete filled circular tube for applied axial load, according to Eurocode 4-2020."/>
+      <Document name="IS-11384-2022 Example 001" relPath="Verification\Design\Composite Column\IS-11384 2022 Ex001.pdf"
+          description="This example checks a concrete encased WF column for applied axial compression, according to IS 11384:2020."/>
+      <Document name="IS-11384-2022 Example 002" relPath="Verification\Design\Composite Column\IS-11384 2022 Ex002.pdf"
+          description="This example checks a concrete filled circular tube for applied axial load, according to IS 11384:2020."/>
+      <Document name="CSA S16-19 Example 001" relPath="Verification\Design\Composite Column\CSA-S16-19 Example 001.pdf"
+          description="This example checks a concrete filled tube column for applied axial compression and bending according to CSA-S16-19."/>
+      <Document name="CSA S16-19 Example 002" relPath="Verification\Design\Composite Column\CSA-S16-19 Example 002.pdf"
+          description="This example checks a concrete encased wide flange column for applied axial load and bending, according to CSA-S16-19 Example."/>
+      <Document name="CSA S16-24 Example 001" relPath="Verification\Design\Composite Column\CSA-S16-24 Example 001.pdf"
+          description="This example checks a concrete filled tube column for applied axial compression and bending according to CSA-S16-24."/>
+      <Document name="CSA S16-24 Example 002" relPath="Verification\Design\Composite Column\CSA-S16-24 Example 002.pdf"
+          description="This example checks a concrete encased wide flange column for applied axial load and bending, according to CSA-S16-24 Example."/>
+      <Document name="KDS-14-31-00:2022 Example 001" relPath="Verification\Design\Composite Column\KDS-2022 Example 001.pdf"
+          description="This example checks a concrete filled tube for applied axial compression, according to the Korean code KDS-14-31-00:2022."/>
+      <Document name="KDS-14-31-00:2022 Example 002" relPath="Verification\Design\Composite Column\KDS-2022 Example 002.pdf"
+          description="This example checks a concrete filled tube for applied axial load, according to to the Korean code KDS-14-31-00:2022."/>
+      <Document name="KDS-14-31-00:2022 Example 003" relPath="Verification\Design\Composite Column\KDS-2022 Example 003.pdf"
+          description="This example checks a concrete filled tube for applied axial force, shear, and moment, according to the Korean code KDS-14-31-00:2022."/>
+      <Document name="KDS-14-31-00:2022 Example 004" relPath="Verification\Design\Composite Column\KDS-2022 Example 004.pdf"
+          description="This example checks a concrete encased wide flange for applied axial compression, according to the Korean code KDS-14-31-00:2022."/>
+      <Document name="KDS-14-31-00:2022 Example 005" relPath="Verification\Design\Composite Column\KDS-2022 Example 005.pdf"
+          description="This example checks a concrete encased wide flange for applied axial load, according to the Korean code KDS-14-31-00:2022."/>
+      <Document name="KDS-14-31-00:2022 Example 006" relPath="Verification\Design\Composite Column\KDS-2022 Example 006.pdf"
+          description="This example checks a concrete encased wide flange for applied axial force, shear, and moment, according to the Korean code KDS-14-31-00:2022."/>
+      <Document name="KDS-14-31-00:2022 Example 007" relPath="Verification\Design\Composite Column\KDS-2022 Example 007.pdf"
+          description="This example checks a concrete encased wide flange for applied axial force and moment, according to the Korean code KDS-14-31-00:2022."/>
+      <Document name="KDS-14-31-00:2022 Example 008" relPath="Verification\Design\Composite Column\KDS-2022 Example 008.pdf"
+          description="This example checks a concrete encased wide flange for applied axial force and moment, according to the Korean code KDS-14-31-00:2022."/>
+    </Folder>
+    <Folder name="Concrete Shell Design">
+      <Document name="EN 2-2004 Example 001" relPath="Verification\Design\Concrete Shell\EN 2-2004 Example 001.pdf"
+           description="This example checks the longitudinal reinforcment for both top and bottom layers of a concrete shell describes the details of the concrete shell model per the Euro EC-2-2004 design code."/>
+    </Folder>
+    <Folder name="Shear Wall Design">
+      <Document name="ACI 318-08 Example 001" relPath="Verification\Design\Shear Wall\ACI 318-08 WALL-001.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to ACI 318-08."/>
+      <Document name="ACI 318-08 Example 002" relPath="Verification\Design\Shear Wall\ACI 318-08 WALL-002.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to ACI 318-08."/>
+      <Document name="ACI 318-11 Example 001" relPath="Verification\Design\Shear Wall\ACI 318-11 WALL-001.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to ACI 318-11."/>
+      <Document name="ACI 318-11 Example 002" relPath="Verification\Design\Shear Wall\ACI 318-11 WALL-002.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to ACI 318-11."/>
+      <Document name="ACI 318-14 Example 001" relPath="Verification\Design\Shear Wall\ACI 318-14 WALL-001.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to ACI 318-14."/>
+      <Document name="ACI 318-14 Example 002" relPath="Verification\Design\Shear Wall\ACI 318-14 WALL-002.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to ACI 318-14"/>
+      <Document name="ACI 318-19 Example 001" relPath="Verification\Design\Shear Wall\ACI 318-19 WALL-001.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to ACI 318-19."/>
+      <Document name="ACI 318-19 Example 002" relPath="Verification\Design\Shear Wall\ACI 318-19 WALL-002.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to ACI 318-19"/>
+      <Document name="ACI 318-25 Example 001" relPath="Verification\Design\Shear Wall\ACI 318-25 WALL-001.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to ACI 318-25."/>
+      <Document name="ACI 318-25 Example 002" relPath="Verification\Design\Shear Wall\ACI 318-25 WALL-002.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to ACI 318-25"/>
+      <Document name="ACI 530-11 Example 001" relPath="Verification\Design\Shear Wall\ACI 530-11 Masonry-WALL-001.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to ACI 530-11."/>
+      <Document name="ACI 530-11 Example 002" relPath="Verification\Design\Shear Wall\ACI 530-11 Masonry-WALL-002.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to ACI 530-11."/>
+      <Document name="AISC 360-22 Example 001 (Composite)" relPath="Verification\Design\Shear Wall\AISC 360-22 Wall-001.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to AISC 360-22."/>
+      <Document name="AS 3600-09 Example 001" relPath="Verification\Design\Shear Wall\AS 3600-09 WALL-001.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to AS 3600-09."/>
+      <Document name="AS 3600-09 Example 002" relPath="Verification\Design\Shear Wall\AS 3600-09 WALL-002.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to AS 3600-09."/>
+      <Document name="AS 3600-2018 Example 001" relPath="Verification\Design\Shear Wall\AS 3600-2018 WALL-001.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to AS 3600-2018."/>
+      <Document name="AS 3600-2018 Example 002" relPath="Verification\Design\Shear Wall\AS 3600-2018 WALL-002.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to AS 3600-2018."/>
+      <Document name="BS 8110-97 Example 001" relPath="Verification\Design\Shear Wall\BS 8110-97 WALL-001.pdf"
+				  description="This example checks the demand/capacity ratio for a given axial load and moment, according to BS 8110-97."/>
+      <Document name="BS 8110-97 Example 002" relPath="Verification\Design\Shear Wall\BS 8110-97 WALL-002.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to BS 8110-97."/>
+      <Document name="CSA A23.3-14 Example 001" relPath="Verification\Design\Shear Wall\CSA A23.3-14 WALL-001.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment according to CSA A23.3-14."/>
+      <Document name="CSA A23.3-14 Example 002" relPath="Verification\Design\Shear Wall\CSA A23.3-14 WALL-002.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to CSA A23.3-14."/>
+      <Document name="CSA A23.3-19 Example 001" relPath="Verification\Design\Shear Wall\CSA A23.3-19 WALL-001.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment according to CSA A23.3-19."/>
+      <Document name="CSA A23.3-19 Example 002" relPath="Verification\Design\Shear Wall\CSA A23.3-19 WALL-002.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to CSA A23.3-19."/>
+      <Document name="CSA A23.3-24 Example 001" relPath="Verification\Design\Shear Wall\CSA A23.3-24 WALL-001.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment according to CSA A23.3-24."/>
+      <Document name="CSA A23.3-24 Example 002" relPath="Verification\Design\Shear Wall\CSA A23.3-24 WALL-002.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to CSA A23.3-24."/>
+      <Document name="EC 2-2004 Example 001" relPath="Verification\Design\Shear Wall\Eurocode 2-2004 WALL-001.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to EC 2-2004."/>
+      <Document name="EC 2-2004 Example 002" relPath="Verification\Design\Shear Wall\Eurocode 2-2004 WALL-002.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to EC 2-2004."/>
+      <Document name="HK CP-2013 Example 001" relPath="Verification\Design\Shear Wall\HK CP-2013 WALL-001.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to HK CP-2013."/>
+      <Document name="HK CP-2013 Example 002" relPath="Verification\Design\Shear Wall\HK CP-2013 WALL-002.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to HK CP-2013."/>
+      <Document name="IS 456-2000 Example 001" relPath="Verification\Design\Shear Wall\Indian IS 456-2000 WALL-001.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to IS 456-2000."/>
+      <Document name="IS 456-2000 Example 002" relPath="Verification\Design\Shear Wall\Indian IS 456-2000 WALL-002.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to IS 456-2000."/>
+      <Document name="KBC 2009 Example 001" relPath="Verification\Design\Shear Wall\KBC 2009 WALL-001.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to KBC 2009."/>
+      <Document name="KBC 2009 Example 002" relPath="Verification\Design\Shear Wall\KBC 2009 WALL-002.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to KBC 2009"/>
+      <Document name="KBC 2016 Example 001" relPath="Verification\Design\Shear Wall\KBC 2016 WALL-001.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to KBC 2016."/>
+      <Document name="KBC 2016 Example 002" relPath="Verification\Design\Shear Wall\KBC 2016 WALL-002.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to KBC 2016"/>
+      <Document name="KDS 14-20-2022 Example 001" relPath="Verification\Design\Shear Wall\KDS 14-20-2022 WALL-001.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to KDS 14-20-2022."/>
+      <Document name="KDS 14-20-2022 Example 002" relPath="Verification\Design\Shear Wall\KDS 14-20-2022 WALL-002.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to KDS 14-20-2022"/>
+      <Document name="RCDF 2004 Example 001" relPath="Verification\Design\Shear Wall\Mexican RCDF-04 WALL-001.pdf"
+				  description="This example checks the demand/capacity ratio for a given axial load and moment, according to RCDF 2004."/>
+      <Document name="RCDF 2004 Example 002" relPath="Verification\Design\Shear Wall\Mexican RCDF-04 WALL-002.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to RCDF 2004."/>
+      <Document name="RCDF 2017 Example 001" relPath="Verification\Design\Shear Wall\Mexican RCDF-2017 WALL-001.pdf"
+				  description="This example checks the demand/capacity ratio for a given axial load and moment, according to RCDF 2017."/>
+      <Document name="RCDF 2017 Example 002" relPath="Verification\Design\Shear Wall\Mexican RCDF-2017 WALL-002.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to RCDF 2017."/>
+      <Document name="NZS 3101-06 Example 001" relPath="Verification\Design\Shear Wall\NZS-3101-2006 WALL-001.pdf"
+				  description="This example checks the demand/capacity ratio for a given axial load and moment, according to NZS 3101-06."/>
+      <Document name="NZS 3101-06 Example 002" relPath="Verification\Design\Shear Wall\NZS-3101-2006 WALL-002.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to NZS 3101-06."/>
+      <Document name="CP 65-99 Example 001" relPath="Verification\Design\Shear Wall\Singapore CP65-99 WALL-001.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to CP 65-99."/>
+      <Document name="CP 65-99 Example 002" relPath="Verification\Design\Shear Wall\Singapore CP65-99 WALL-002.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to CP 65-99."/>
+      <Document name="TS 500-2000 Example 001" relPath="Verification\Design\Shear Wall\Turkish TS 500-2000 WALL-001.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to TS 500-2000."/>
+      <Document name="TS 500-2000 Example 002" relPath="Verification\Design\Shear Wall\Turkish TS 500-2000 WALL-002.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to TS 500-2000."/>
+      <Document name="TS 500-2000(R2018) Example 001" relPath="Verification\Design\Shear Wall\Turkish TS 500-2000(R2018) WALL-001.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to TS 500-2000(R2018)."/>
+      <Document name="TS 500-2000(R2018) Example 002" relPath="Verification\Design\Shear Wall\Turkish TS 500-2000(R2018) WALL-002.pdf"
+          description="This example checks the demand/capacity ratio for a given axial load and moment, according to TS 500-2000(R2018)."/>
+    </Folder>
+    <Folder name="Concrete Slab Design">
+      <Document name="ACI 318-08 PT-SL Example 001" relPath="Verification\Design\Concrete Slab\ACI 318-08 PT-SL Example 001.pdf"
+          description="This example verifies the slab stresses and the required area of mild steel reinforcement for a post-tensioned slab, according to ACI 318-08."/>
+      <Document name="ACI 318-08 RC-SL Example 001" relPath="Verification\Design\Concrete Slab\ACI 318-08 RC-SL Example 001.pdf"
+          description="This example verifies the required area of reinforcement for a reinforced concrete slab, according to ACI 318-08."/>
+      <Document name="ACI 318-08 RC-PN Example 001" relPath="Verification\Design\Concrete Slab\ACI 318-08 RC-PN Example 001.pdf"
+          description="This example verifies the slab punching shear design, according to ACI 318-08."/>
+      <Document name="ACI 318-11 PT-SL Example 001" relPath="Verification\Design\Concrete Slab\ACI 318-11 PT-SL Example 001.pdf"
+          description="This example verifies the slab stresses and the required area of mild steel reinforcement for a post-tensioned slab, according to ACI 318-11."/>
+      <Document name="ACI 318-11 RC-SL Example 001" relPath="Verification\Design\Concrete Slab\ACI 318-11 RC-SL Example 001.pdf"
+          description="This example verifies the required area of reinforcement for a reinforced concrete slab, according to ACI 318-11."/>
+      <Document name="ACI 318-11 RC-PN Example 001" relPath="Verification\Design\Concrete Slab\ACI 318-11 RC-PN Example 001.pdf"
+          description="This example verifies the slab punching shear design, according to ACI 318-11."/>
+      <Document name="ACI 318-14 PT-SL Example 001" relPath="Verification\Design\Concrete Slab\ACI 318-14 PT-SL Example 001.pdf"
+          description="This example verifies the slab stresses and the required area of mild steel reinforcement for a post-tensioned slab, according to ACI 318-14."/>
+      <Document name="ACI 318-14 RC-SL Example 001" relPath="Verification\Design\Concrete Slab\ACI 318-14 RC-SL Example 001.pdf"
+          description="This example verifies the required area of reinforcement for a reinforced concrete slab, according to ACI 318-14."/>
+      <Document name="ACI 318-14 RC-PN Example 001" relPath="Verification\Design\Concrete Slab\ACI 318-14 RC-PN Example 001.pdf"
+          description="This example verifies the slab punching shear design, according to ACI 318-14."/>
+      <Document name="ACI 318-19 PT-SL Example 001" relPath="Verification\Design\Concrete Slab\ACI 318-19 PT-SL Example 001.pdf"
+          description="This example verifies the slab stresses and the required area of mild steel reinforcement for a post-tensioned slab, according to ACI 318-19."/>
+      <Document name="ACI 318-19 RC-SL Example 001" relPath="Verification\Design\Concrete Slab\ACI 318-19 RC-SL Example 001.pdf"
+          description="This example verifies the required area of reinforcement for a reinforced concrete slab, according to ACI 318-19."/>
+      <Document name="ACI 318-19 RC-PN Example 001" relPath="Verification\Design\Concrete Slab\ACI 318-19 RC-PN Example 001.pdf"
+          description="This example verifies the slab punching shear design, according to ACI 318-19."/>
+      <Document name="ACI 318-19 RC-PN Example 002" relPath="Verification\Design\Concrete Slab\ACI 318-19 RC-PN Example 002.pdf"
+          description="This example verifies the slab punching shear design for a circular column, according to ACI 318-19."/>
+      <Document name="ACI 318-25 PT-SL Example 001" relPath="Verification\Design\Concrete Slab\ACI 318-25 PT-SL Example 001.pdf"
+          description="This example verifies the slab stresses and the required area of mild steel reinforcement for a post-tensioned slab, according to ACI 318-25."/>
+      <Document name="ACI 318-25 RC-SL Example 001" relPath="Verification\Design\Concrete Slab\ACI 318-25 RC-SL Example 001.pdf"
+          description="This example verifies the required area of reinforcement for a reinforced concrete slab, according to ACI 318-25."/>
+      <Document name="ACI 318-25 RC-PN Example 001" relPath="Verification\Design\Concrete Slab\ACI 318-25 RC-PN Example 001.pdf"
+          description="This example verifies the slab punching shear design, according to ACI 318-25."/>
+      <Document name="ACI 318-25 RC-PN Example 002" relPath="Verification\Design\Concrete Slab\ACI 318-25 RC-PN Example 002.pdf"
+          description="This example verifies the slab punching shear design for a circular column, according to ACI 318-25."/>
+      <Document name="AS 3600-2018 PT-SL Example 001" relPath="Verification\Design\Concrete Slab\AS 3600-2018 PT-SL Example 001.pdf"
+          description="This example verifies the slab stresses and the required area of mild steel reinforcement for a post-tensioned slab, according to AS 3600-2018."/>
+      <Document name="AS 3600-2018 RC-SL Example 001" relPath="Verification\Design\Concrete Slab\AS 3600-2018 RC-SL Example 001.pdf"
+          description="This example verifies the required area of reinforcement for a reinforced concrete slab, according to AS 3600-2018."/>
+      <Document name="AS 3600-2018 RC-PN Example 001" relPath="Verification\Design\Concrete Slab\AS 3600-2018 RC-PN Example 001.pdf"
+          description="This example verifies the slab punching shear design, according to AS 3600-2018."/>
+      <Document name="BS 8110-1997 PT-SL Example 001" relPath="Verification\Design\Concrete Slab\BS 8110-1997 PT-SL Example 001.pdf"
+          description="This example verifies the slab stresses and the required area of mild steel reinforcement for a post-tensioned slab, according to BS 8110-1997."/>
+      <Document name="BS 8110-1997 RC-SL Example 001" relPath="Verification\Design\Concrete Slab\BS 8110-1997 RC-SL Example 001.pdf"
+          description="This example verifies the required area of reinforcement for a reinforced concrete slab, according to BS 8110-1997."/>
+      <Document name="BS 8110-1997 RC-PN Example 001" relPath="Verification\Design\Concrete Slab\BS 8110-1997 RC-PN Example 001.pdf"
+          description="This example verifies the slab punching shear design, according to BS 8110-1997."/>
+      <Document name="CSA A23.3-14 PT-SL Example 001" relPath="Verification\Design\Concrete Slab\CSA A23.3-14 PT-SL Example 001.pdf"
+          description="This example verifies the slab stresses and the required area of mild steel reinforcement for a post-tensioned slab, according to CSA A23.3-14."/>
+      <Document name="CSA A23.3-14 RC-SL Example 001" relPath="Verification\Design\Concrete Slab\CSA A23.3-14 RC-SL Example 001.pdf"
+          description="This example verifies the required area of reinforcement for a reinforced concrete slab, according to CSA A23.3-14."/>
+      <Document name="CSA A23.3-14 RC-PN Example 001" relPath="Verification\Design\Concrete Slab\CSA A23.3-14 RC-PN Example 001.pdf"
+          description="This example verifies the slab punching shear design, according to CSA A23.3-14."/>
+      <Document name="CSA A23.3-19 PT-SL Example 001" relPath="Verification\Design\Concrete Slab\CSA A23.3-19 PT-SL Example 001.pdf"
+          description="This example verifies the slab stresses and the required area of mild steel reinforcement for a post-tensioned slab, according to CSA A23.3-19."/>
+      <Document name="CSA A23.3-19 RC-SL Example 001" relPath="Verification\Design\Concrete Slab\CSA A23.3-19 RC-SL Example 001.pdf"
+          description="This example verifies the required area of reinforcement for a reinforced concrete slab, according to CSA A23.3-19."/>
+      <Document name="CSA A23.3-19 RC-PN Example 001" relPath="Verification\Design\Concrete Slab\CSA A23.3-19 RC-PN Example 001.pdf"
+          description="This example verifies the slab punching shear design, according to CSA A23.3-19."/>
+      <Document name="EN 2-2004 PT-SL Example 001" relPath="Verification\Design\Concrete Slab\EN 2-2004 PT-SL Example 001.pdf"
+          description="This example verifies the slab stresses and the required area of mild steel reinforcement for a post-tensioned slab, according to EN 2-2004."/>
+      <Document name="EN 2-2004 RC-SL Example 001" relPath="Verification\Design\Concrete Slab\EN 2-2004 RC-SL Example 001.pdf"
+          description="This example verifies the required area of reinforcement for a reinforced concrete slab, according to EN 2-2004."/>
+      <Document name="EN 2-2004 RC-PN Example 001" relPath="Verification\Design\Concrete Slab\EN 2-2004 RC-PN Example 001.pdf"
+          description="This example verifies the slab punching shear design, according to EN 2-2004."/>
+      <Document name="HK CP-2013 PT-SL Example 001" relPath="Verification\Design\Concrete Slab\HK CP-2013 PT-SL Example 001.pdf"
+          description="This example verifies the slab stresses and the required area of mild steel reinforcement for a post-tensioned slab, according to HK CP-2013."/>
+      <Document name="HK CP-2013 RC-SL Example 001" relPath="Verification\Design\Concrete Slab\HK CP-2013 RC-SL Example 001.pdf"
+          description="This example verifies the required area of reinforcement for a reinforced concrete slab, according to HK CP-2013."/>
+      <Document name="HK CP-2013 RC-PN Example 001" relPath="Verification\Design\Concrete Slab\HK CP-2013 RC-PN Example 001.pdf"
+          description="This example verifies the slab punching shear design, according to HK CP-2013."/>
+      <Document name="IS 456-2000 PT-SL Example 001" relPath="Verification\Design\Concrete Slab\IS 456-2000 PT-SL Example 001.pdf"
+          description="This example verifies the slab stresses and the required area of mild steel reinforcement for a post-tensioned slab, according to IS 456-2000."/>
+      <Document name="IS 456-2000 RC-SL Example 001" relPath="Verification\Design\Concrete Slab\IS 456-2000 RC-SL Example 001.pdf"
+          description="This example verifies the required area of reinforcement for a reinforced concrete slab, according to IS 456-2000."/>
+      <Document name="IS 456-2000 RC-PN Example 001" relPath="Verification\Design\Concrete Slab\IS 456-2000 RC-PN Example 001.pdf"
+          description="This example verifies the slab punching shear design, according to IS 456-2000."/>
+      <Document name="KDS 14-20-2022 PT-SL Example 001" relPath="Verification\Design\Concrete Slab\KDS 14-20-2022 PT-SL Example 001.pdf"
+          description="This example verifies the slab stresses and the required area of mild steel reinforcement for a post-tensioned slab, according to KDS 14-20-2022."/>
+      <Document name="KDS 14-20-2022 RC-SL Example 001" relPath="Verification\Design\Concrete Slab\KDS 14-20-2022 RC-SL Example 001.pdf"
+          description="This example verifies the required area of reinforcement for a reinforced concrete slab, according to KDS 14-20-2022."/>
+      <Document name="KDS 14-20-2022 RC-PN Example 00" relPath="Verification\Design\Concrete Slab\KDS 14-20-2022 RC-PN Example 001.pdf"
+          description="This example verifies the slab punching shear design, according to KDS 14-20-2022."/>
+      <Document name="NTC 2008 PT-SL Example 001" relPath="Verification\Design\Concrete Slab\NTC 2008 PT-SL Example 001.pdf"
+          description="This example verifies the slab stresses and the required area of mild steel reinforcement for a post-tensioned slab, according to NTC 2008."/>
+      <Document name="NTC 2008 RC-SL Example 001" relPath="Verification\Design\Concrete Slab\NTC 2008 RC-SL Example 001.pdf"
+          description="This example verifies the required area of reinforcement for a reinforced concrete slab, according to NTC 2008."/>
+      <Document name="NTC 2008 RC-PN Example 001" relPath="Verification\Design\Concrete Slab\NTC 2008 RC-PN Example 001.pdf"
+          description="This example verifies the slab punching shear design, according to NTC 2008."/>
+      <Document name="NZS 3101-2006 PT-SL Example 001" relPath="Verification\Design\Concrete Slab\NZS 3101-2006 PT-SL Example 001.pdf"
+          description="This example verifies the slab stresses and the required area of mild steel reinforcement for a post-tensioned slab, according to NZS 3101-2006."/>
+      <Document name="NZS 3101-2006 RC-SL Example 001" relPath="Verification\Design\Concrete Slab\NZS 3101-2006 RC-SL Example 001.pdf"
+          description="This example verifies the required area of reinforcement for a reinforced concrete slab, according to NZS 3101-2006."/>
+      <Document name="NZS 3101-2006 RC-PN Example 001" relPath="Verification\Design\Concrete Slab\NZS 3101-2006 RC-PN Example 001.pdf"
+          description="This example verifies the slab punching shear design, according to NZS 3101-2006."/>
+      <Document name="SS CP 65-1999 PT-SL Example 001" relPath="Verification\Design\Concrete Slab\SS CP 65-1999 PT-SL Example 001.pdf"
+          description="This example verifies the slab stresses and the required area of mild steel reinforcement for a post-tensioned slab, according to SS CP 65-1999."/>
+      <Document name="SS CP 65-1999 RC-SL Example 001" relPath="Verification\Design\Concrete Slab\SS CP 65-1999 RC-SL Example 001.pdf"
+          description="This example verifies the required area of reinforcement for a reinforced concrete slab, according to SS CP 65-1999."/>
+      <Document name="SS CP 65-1999 RC-PN Example 001" relPath="Verification\Design\Concrete Slab\SS CP 65-1999 RC-PN Example 001.pdf"
+          description="This example verifies the slab punching shear design, according to SS CP 65-1999."/>
+      <Document name="TS 500-2000 PT-SL Example 001" relPath="Verification\Design\Concrete Slab\TS 500-2000 PT-SL Example 001.pdf"
+          description="This example verifies the slab stresses and the required area of mild steel reinforcement for a post-tensioned slab, according to TS 500-2000."/>
+      <Document name="TS 500-2000 RC-SL Example 001" relPath="Verification\Design\Concrete Slab\TS 500-2000 RC-SL Example 001.pdf"
+          description="This example verifies the required area of reinforcement for a reinforced concrete slab, according to TS 500-2000."/>
+      <Document name="TS 500-2000 RC-PN Example 001" relPath="Verification\Design\Concrete Slab\TS 500-2000 RC-PN Example 001.pdf"
+          description="This example verifies the slab punching shear design, according to TS 500-2000."/>
+    </Folder>
+    <Folder name="Floor Vibration Design">
+      <Document name="AISC Design Guide 11 Example 7.1" relPath="Verification\Design\Vibration\AISC-DG11 2ED Ex001.pdf"
+            description="This example checks the design for floor vibrations due to walking excitation of a composite beam floor system with a cantilever according to the procedures of AISC Design Guide 11 Chapter 7."/>
+    </Folder>
+  </Folder>
+  <Folder name="Technical Notes">
+    <Document name="Title Page and Contents" relPath="Technical Notes\Title Page and Contents.pdf"
+                description="Provides copyright information and a table of contents."/>
+    <Document name="Material Stress-Strain Curves" relPath="Technical Notes\S-TN-MAT-001.pdf"
+                description="This technical note describes the material stress-strain curves used in ETABS."/>
+    <Document name="Darwin-Pecknold Concrete Model" relPath="Technical Notes\S-TN-MAT-002.pdf"
+              description="This technical note describes the Modified Darwin-Pecknold 2-D reinforced concrete material model."/>
+    <Document name="Material Time-Dependent Properties" relPath="Technical Notes\S-TN-ECS-001.pdf"
+              description="This technical note describes the material time-dependent properties used to model creep, shrinkage, and age-dependent stiffness according to various codes."/>
+    <Document name="Point Spring Supports from Soil Profiles and Footings" relPath="Technical Notes\S-TN-SSI-001.pdf"
+              description="This technical note describes the automatic generation of point-spring supports based on defined soil profiles and isolated column-footing properties."/>
+    <Document name="Parametric P-M2-M3 Hinge Model" relPath="Technical Notes\S-TN-HNG-001.pdf"
+              description="This technical note describes the Parametric P-M2-M3 hinge model, a nonlinear frame hinge model that can couple the behavior in the axial and bending directions."/>
+    <Document name="ETABS Wall Hinge Models" relPath="Technical Notes\S-TN-WHM-001.pdf"
+              description="This technical note describes the wall hinge models available in ETABS."/>
+    <Document name="High-Damping Rubber Isolator Link Property" relPath="Technical Notes\S-TN-LNK-001.pdf"
+              description="This technical note describes the nonlinear behavior of the high-damping rubber isolator link property."/>
+    <Document name="Sumitomo Viscoelastic Damper Link Property" relPath="Technical Notes\S-TN-LNK-002.pdf"
+              description="This technical note describes the nonlinear behavior of the Sumitomo Viscoelastic Dampter link property."/>
+    <Document name="IFC Import and Export" relPath="Technical Notes\S-TN-IFC-001.pdf"
+              description="This technical note describes the import and export of IFC files."/>
+    <Document name="Floor Vibration Analysis" relPath="Technical Notes\S-TN-VIB-001.pdf"
+              description="This technical note describes the steel floor vibratoin analysis integrated within the program."/>
+    <Document name="FEM Buckling Analysis" relPath="Technical Notes\S-TN-BFEM-001.pdf"
+              description="This technical note describes the Finite Element Analsyis Plug-In program."/>
+  </Folder>
+</Documents>

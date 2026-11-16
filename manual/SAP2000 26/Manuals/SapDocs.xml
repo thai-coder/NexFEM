@@ -1,0 +1,706 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Documents>
+  <Folder name="Release Information">
+    <Document name="Release Notes" relPath="ReleaseNotes.pdf" 
+              description="This document lists all changes made to SAP2000 since the last release. Most changes do not affect most users. Significant issues are indicated with an asterisk (*) in the first column of the tables."/>
+    <Document name="ReadMe" relPath="ReadMe.pdf"
+              description="This document contains instructions for installing or updating to the latest version of the program."/>
+  </Folder>
+  <Folder name="License Agreement and Copyrights">
+    <Document name="CSI License Agreement" relPath="CSI License Agreement.pdf" 
+              description="This document contains the CSI license agreement."/>
+    <Document name="Copyrights" relPath="Copyrights.pdf"
+              description="This document contains the CSI copyright and third party copyrights."/>
+  </Folder>
+  <Folder name="Tutorials">
+    <Document name="Introductory Tutorial" relPath="SapTutor.pdf"
+              description="This tutorial guides the user through a step-by-step example using SAP2000."/>
+  </Folder>
+  <Folder name="Manuals">
+    <Document name="Getting Started" relPath="SapStart.pdf"
+              description="This manual provides installation instructions, an overview of the graphical user interface, an overview of a structural model, and an introduction to the SAP2000 tabular data."/>
+    <Document name="CSI Analysis Reference Manual" relPath="CSI Analysis Reference Manual.pdf"
+              description="This manual provides a detailed description of the modeling and analysis features available in SAP2000."/>
+    <Document name="Lateral Loads Manual" relPath="Lateral Loads Manual.pdf"
+              description="This manual provides a detailed description of creating automated lateral loads in SAP2000."/>
+    <Document name="CSiXRevit Manual" relPath="CSiXRevit Manual.pdf"
+              description="This manual describes the capabilities of the CSIxRevit link between SAP2000 and Autodesk Revit."/>
+    <Document name="StruCAD*3D Import" relPath="StruCAD3D Import.pdf"
+              description="This manual describes the import of StruCAD*3D models into SAP2000."/>
+    <Document name="SACS Import" relPath="SACS Import.pdf"
+              description="This manual describes the import of SACS models into SAP2000."/>
+    <Document name="Report Contents XML File" relPath="Report Contents XML File.pdf"
+              description="This manual describes the format of a report contents XML file that controls the contents of a report produced by SAP2000. You can create and modify report contents XML files to customize reports to suit your needs and the needs of your clients."/>
+    <Document name="Table and Field Name Overwrites XML File" relPath="Table and Field Name Overwrites XML File.pdf"
+              description="This manual describes the format of a table and field name overwrites XML file that defines the names used in the database tables that are imported, exported, displayed, printed, and edited by SAP2000. You can create and modify table and field name overwrites XML files to suit your needs, such as for language translation."/>
+  </Folder>
+  <Folder name="Steel Frame Design">
+    <Document name="AISC 360-22" relPath="Design\SFD-AISC-360-22.pdf"
+              description="This document describes the details of the steel frame design procedure used by SAP2000 for the AISC 360-22 design code."/>
+    <Document name="AISC 360-16" relPath="Design\SFD-AISC-360-16.pdf"
+              description="This document describes the details of the steel frame design procedure used by SAP2000 for the AISC 360-16 design code."/>
+    <Document name="AISC 360-10" relPath="Design\SFD-AISC-360-10.pdf"
+              description="This document describes the details of the steel frame design procedure used by SAP2000 for the AISC 360-10 design code."/>
+    <Document name="AISC 360-05" relPath="Design\SFD-AISC-360-05.pdf"
+              description="This document describes the details of the steel frame design procedure used by SAP2000 for the AISC 360-05 design code."/>
+    <Document name="AISC ASD-89" relPath="Design\SFD-OlderCodes.pdf"
+              description="This document describes the details of the steel frame design procedure used by SAP2000 for the AISC ASD-89 design code."/>
+    <Document name="AISC LRFD-93" relPath="Design\SFD-OlderCodes.pdf"
+              description="This document describes the details of the steel frame design procedure used by SAP2000 for the AISC LRFD-93 design code."/>
+    <Document name="API RP 2A-WSD 22nd" relPath="Design\SFD-API-RP-2A-WSD-22nd.pdf"
+              description="This document describes the details of the steel frame design procedure used by SAP2000 for the API RP 2A-WSD 22nd Edition design code."/>
+    <Document name="API RP 2A-WSD 21st" relPath="Design\SFD-API-RP-2A-WSD-21st.pdf"
+              description="This document describes the details of the steel frame design procedure used by SAP2000 for the API RP 2A-WSD 21st Edition design code."/>
+    <Document name="API 4F-2020" relPath="Design\SFD-API-4F-2020.pdf"
+              description="This document describes the details of the steel frame design procedure used by SAP2000 for the API 4F-2020 design code."/>
+    <Document name="AS 4100-1998" relPath="Design\SFD-AS-4100-1998.pdf"
+              description="This document describes the details of the steel frame design procedure used by SAP2000 for the AS 4100-1998 design code."/>
+    <Document name="AS 4100-2020" relPath="Design\SFD-AS-4100-2020.pdf"
+              description="This document describes the details of the steel frame design procedure used by SAP2000 for the AS 4100-2020 design code."/>
+    <Document name="BS 5950-2000" relPath="Design\SFD-OlderCodes.pdf"
+              description="This document describes the details of the steel frame design procedure used by SAP2000 for the BS 5950-2000 design code."/>
+    <Document name="CSA S16-19" relPath="Design\SFD-CSA-S16-19.pdf"
+              description="This document describes the details of the steel frame design procedure used by SAP2000 for the CSA S16-19 design code."/>
+    <Document name="CSA S16-14" relPath="Design\SFD-CSA-S16-14.pdf"
+              description="This document describes the details of the steel frame design procedure used by SAP2000 for the CSA S16-14 design code."/>
+    <Document name="CSA S16-09" relPath="Design\SFD-CSA-S16-09.pdf"
+              description="This document describes the details of the steel frame design procedure used by SAP2000 for the CSA S16-09 design code."/>
+    <Document name="Eurocode EN 1993-1-1:2005" relPath="Design\SFD-EN 1993-1-1 2005.pdf"
+              description="This document describes the details of the steel frame design procedure used by SAP2000 for the Eurocode EN 1993-1-1:2005 design code."/>
+    <Document name="Eurocode EN 1993-1-1:2022" relPath="Design\SFD-EN 1993-1-1 2022.pdf"
+              description="This document describes the details of the steel frame design procedure used by CSiBridge for the Eurocode EN 1993-1-1:2022 design code."/>
+    <Document name="IS 800-2007" relPath="Design\SFD-IS-800-2007.pdf"
+              description="This document describes the details of the steel frame design procedure used by SAP2000 for the IS 800-2007 design code."/>
+    <Document name="KBC 2016" relPath="Design\SFD-KBC-2016.pdf"
+              description="This document describes the details of the steel frame design procedure used by SAP2000 for the KBC 2016 design code."/>
+    <Document name="KBC 2009" relPath="Design\SFD-KBC-2009.pdf"
+              description="This document describes the details of the steel frame design procedure used by SAP2000 for the KBC 2009 design code."/>
+    <Document name="Norsok N-004 2013" relPath="Design\SFD-N004-2013.pdf"
+              description="This document describes the details of the steel frame design procedure used by SAP2000 for the Norsok N-004 2013 design code."/>
+    <Document name="NTC 2018" relPath="Design\SFD-NTC-2018.pdf"
+              description="This document describes the details of the steel frame design procedure used by SAP2000 for the NTC 2018 design code."/>
+    <Document name="NTC 2008" relPath="Design\SFD-NTC-2008.pdf"
+              description="This document describes the details of the steel frame design procedure used by SAP2000 for the NTC 2008 design code."/>
+    <Document name="NZS 3404-1997" relPath="Design\SFD-NZS-3404-1997.pdf"
+              description="This document describes the details of the steel frame design procedure used by SAP2000 for the NZS 3404-1997 design code."/>
+    <Document name="SP 16.13330.2017" relPath="Design\SFD-SP-16-13330-2017.pdf"
+              description="This document describes the details of the steel frame design procedure used by SAP2000 for the SP 16.13330.2017 design code."/>
+    <Document name="SP 16.13330.2011" relPath="Design\SFD-SP-16-13330-2011.pdf"
+              description="This document describes the details of the steel frame design procedure used by SAP2000 for the SP 16.13330.2011 design code."/>
+  </Folder>
+  <Folder name="Concrete Frame Design">
+    <Document name="ACI 318-19" relPath="Design\CFD-ACI-318-19.pdf"
+              description="This document describes the details of the concrete frame design procedure used by SAP2000 for the ACI 318-19 design code."/>    
+    <Document name="ACI 318-14" relPath="Design\CFD-ACI-318-14.pdf"
+              description="This document describes the details of the concrete frame design procedure used by SAP2000 for the ACI 318-14 design code."/>
+    <Document name="ACI 318-11" relPath="Design\CFD-ACI-318-11.pdf"
+              description="This document describes the details of the concrete frame design procedure used by SAP2000 for the ACI 318-11 design code."/>
+    <Document name="ACI 318-08" relPath="Design\CFD-ACI-318-08.pdf"
+              description="This document describes the details of the concrete frame design procedure used by SAP2000 for the ACI 318-08 design code."/>
+   <Document name="ACI 350-20" relPath="Design\CFD-ACI-350-2020.pdf"
+              description="This document describes the details of the concrete frame design procedure used by SAP2000 for the ACI 350-2020 design code."/>
+    <Document name="AS 3600-2018" relPath="Design\CFD-AS-3600-2018.pdf"
+              description="This document describes the details of the concrete frame design procedure used by SAP2000 for the AS 3600-2018 design code."/>
+    <Document name="AS 3600-09" relPath="Design\CFD-AS-3600-09.pdf"
+              description="This document describes the details of the concrete frame design procedure used by SAP2000 for the AS 3600-09 design code."/>
+    <Document name="BS 8110-97" relPath="Design\CFD-BS-8110-97.pdf"
+              description="This document describes the details of the concrete frame design procedure used by SAP2000 for the BS 8110-97 design code."/>
+    <Document name="CP 65:99" relPath="Design\CFD-CP-65-99.pdf"
+              description="This document describes the details of the concrete frame design procedure used by SAP2000 for the Singapore CP 65:99 design code."/>
+    <Document name="CSA A23.3-19" relPath="Design\CFD-CSA-A23.3-19.pdf"
+              description="This document describes the details of the concrete frame design procedure used by SAP2000 for the CSA A23.3-19 design code."/>
+    <Document name="CSA A23.3-14" relPath="Design\CFD-CSA-A23.3-14.pdf"
+              description="This document describes the details of the concrete frame design procedure used by SAP2000 for the CSA A23.3-14 design code."/>
+    <Document name="CSA A23.3-04" relPath="Design\CFD-CSA-A23.3-04.pdf"
+              description="This document describes the details of the concrete frame design procedure used by SAP2000 for the CSA A23.3-04 design code."/>
+    <Document name="Eurocode 2-2004" relPath="Design\CFD-EC-2-2004.pdf"
+              description="This document describes the details of the concrete frame design procedure used by SAP2000 for the Eurocode 2-2004 design code."/>
+    <Document name="Hong Kong CP 2013" relPath="Design\CFD-HK-CP-2013.pdf"
+              description="This document describes the details of the concrete frame design procedure used by SAP2000 for the Hong Kong CP 2013 design code."/>
+    <Document name="IS 456-2000" relPath="Design\CFD-IS-456-2000.pdf"
+              description="This document describes the details of the concrete frame design procedure used by SAP2000 for the IS 456-2000 design code."/>
+    <Document name="KBC 2016" relPath="Design\CFD-KBC-2016.pdf"
+              description="This document describes the details of the concrete frame design procedure used by SAP2000 for the KBC 2016 design code."/>
+    <Document name="KBC 2009" relPath="Design\CFD-KBC-2009.pdf"
+              description="This document describes the details of the concrete frame design procedure used by SAP2000 for the KBC 2009 design code."/>
+    <Document name="NTC 2008" relPath="Design\CFD-NTC-2008.pdf"
+              description="This document describes the details of the concrete frame design procedure used by SAP2000 for the NTC 2008 design code."/>
+    <Document name="NZS 3101-2006" relPath="Design\CFD-NZS-3101-2006.pdf"
+              description="This document describes the details of the concrete frame design procedure used by SAP2000 for the NZS 3101-2006 design code."/>
+    <Document name="RCDF 2017" relPath="Design\CFD-RCDF-2017.pdf"
+              description="This document describes the details of the concrete frame design procedure used by SAP2000 for the RCDF 2017 design code."/>
+    <Document name="RCDF 2004" relPath="Design\CFD-RCDF-2004.pdf"
+              description="This document describes the details of the concrete frame design procedure used by SAP2000 for the RCDF 2004 design code."/>
+    <Document name="TS 500-2000(R2018)" relPath="Design\CFD-TS-500-2018.pdf"
+              description="This document describes the details of the concrete frame design procedure used by SAP2000 for the TS 500-2000(R2018) design code."/>
+    <Document name="TS 500-2000" relPath="Design\CFD-TS-500-2000.pdf"
+              description="This document describes the details of the concrete frame design procedure used by SAP2000 for the TS 500-2000 design code."/>
+  </Folder>
+    <Folder name="Concrete Shell Design">
+     <Document name="Eurocode EC2-2004" relPath="Design\CSD-EC-2-2004.pdf"
+              description="This document describes the details of the concrete shell design procedure used by SAP2000 for the Eurocode EC2-2004 design code."/>
+    <Document name="ACI 350-2020" relPath="Design\CSD-ACI-350-2020.pdf"
+              description="This document describes the details of the concrete shell design procedure used by SAP2000 for the Eurocode ACI 350-2020 design code."/>
+  </Folder>
+  <Folder name="Aluminum Frame Design">
+    <Document name="AA 2015" relPath="Design\AFD-AA-2015.pdf"
+              description="This document describes the details of the aluminum frame design procedure used by SAP2000 for the AA 2015 design code."/>
+    <Document name="AA 2020" relPath="Design\AFD-AA-2020.pdf"
+              description="This document describes the details of the aluminum frame design procedure used by SAP2000 for the AA 2020 design code."/>
+    <Document name="Eurocode 2007" relPath="Design\AFD-EC-9-2007.pdf"
+                description="This document describes the details of the aluminum frame design procedure used by SAP2000 for the Eurocode EC 9 2007 design code."/>
+  </Folder>  
+  <Folder name="Cold Formed Steel Frame Design">
+    <Document name="AISI 2016" relPath="Design\CFFD-AISI-2016.pdf"
+                description="This document describes the details of the cold formed steel frame design procedure used by SAP2000 for the AISI 2016 design code."/>
+    <Document name="Eurocode 2006" relPath="Design\CFFD-EC-3 1-3 2006.pdf"
+                description="This document describes the details of the cold formed steel frame design procedure used by SAP2000 for the Eurocode EC 3 1-3 2006 design code."/>    
+  </Folder>  
+  <Folder name="Technical Notes">
+    <Document name="Title Page and Contents" relPath="Technical Notes\Title Page and Contents.pdf"
+              description="Provides copyright information and a table of contents."/>
+    <Document name="Material Stress-Strain Curves" relPath="Technical Notes\S-TN-MAT-001.pdf"
+              description="This technical note describes the material stress-strain curves used in SAP2000."/>
+    <Document name="AISC Direct Analysis Method Practical Guide" relPath="Technical Notes\S-TN-SFD-001.pdf"
+              description="This technical note is a practical how-to guide for using the 2005 AISC Direct Analysis Method (DAM) in SAP2000 analysis and design."/>
+    <Document name="CSI Load Optimizer" relPath="Technical Notes\S-TN-LOP-001.pdf"
+              description="This technical note describes the use of the CSI Load Optimizer tool for determining the optimum application of loads to achieve specified structural response. Examples are included."/>
+    <Document name="Frame Stress Calculation" relPath="Technical Notes\S-TN-FRA-001.pdf"
+              description="This technical note describes the method for calculating stresses in frames for various frame section shapes."/>
+    <Document name="IFC Import and Export" relPath="Technical Notes\S-TN-IFC-001.pdf"
+              description="This technical note describes the import and export of IFC files."/>
+	<Document name="Darwin-Pecknold Concrete Model" relPath="Technical Notes\S-TN-MAT-002.pdf" 
+              description="This technical note describes the Modified Darwin-Pecknold 2-D reinforced concrete material model."/>
+	<Document name="Parametric P-M2-M3 Hinge Model" relPath="Technical Notes\S-TN-HNG-001.pdf" 
+              description="This technical note describes the Parametric P-M2-M3 hinge model, a nonlinear frame hinge model that can couple the behavior in the axial and bending directions."/>
+    <Document name="Material Time-Dependent Properties" relPath="Technical Notes\S-TN-ECS-001.pdf" 
+              description="This technical note describes the time-dependent behavior of certain materials considered during staged-construction analysis."/>
+	<Document name="High-Damping Rubber Isolator Link Property" relPath="Technical Notes\S-TN-LNK-001.pdf" 
+              description="This technical note describes the nonlinear behavior of the high-damping rubber isolator link property."/>
+	<Document name="Sumitomo Viscoelastic Damper Link Property" relPath="Technical Notes\S-TN-LNK-002.pdf" 
+              description="This technical note describes the nonlinear behavior of the Sumitomo Viscoelastic Dampter link property."/>
+    <Document name="Floor Vibration Analysis" relPath="Technical Notes\S-TN-VIB-001.pdf"
+                description="This technical note describes the steel floor vibratoin analysis integrated within the program."/>
+  <Folder name="Wave Loading">
+    <Document name="Wave Load Overview" relPath="Technical Notes\Wave Load\S-TN-WAV-001.pdf"
+                description="This technical note describes the automatic wave loading features in SAP2000. The automatic wave load calculations are based on the requirements presented in the American Petroleum Institute 2000 reference."/>
+    <Document name="Defining Wave Loads" relPath="Technical Notes\Wave Load\S-TN-WAV-002.pdf"
+                description="This technical note describes how to define automatic wave loads. The automatic wave load is a special type of load pattern. It generates loads on the structure resulting from waves, current flow, buoyancy, and wind."/>
+    <Document name="Calculation of Wave Load Values" relPath="Technical Notes\Wave Load\S-TN-WAV-003.pdf"
+                description="This technical note describes the methodology used to calculate the wave load and wave wind load values."/>
+    <Document name="Wave Display Plots and Tables" relPath="Technical Notes\Wave Load\S-TN-WAV-004.pdf"
+                description="This technical note describes the wave display plots and tables that can be viewed while defining a wave load."/>
+  </Folder>
+    <Folder name="Joint Punching Checks">
+      <Document name="Overview of Punching Load Check" relPath="Technical Notes\API Punching Load\S-TN-PUN-001.pdf"
+                description="This technical note describes the tubular steel frame punching load check features in SAP2000. The punching load check is available for multiple design codes."/>
+      <Document name="Punching Load Assignments" relPath="Technical Notes\API Punching Load\S-TN-PUN-002.pdf"
+                description="This technical note describes the punching load assignments that can be viewed and modified."/>
+      <Document name="Interactive Punching Load Check" relPath="Technical Notes\API Punching Load\S-TN-PUN-003.pdf"
+                description="This technical note describes the interactive punching load check that can be performed after a punching load check has been performed."/>
+      <Document name="API RP2A-LRFD 97 Check" relPath="Technical Notes\API Punching Load\S-TN-PUN-004.pdf"
+                description="This technical note describes the methodology used for the punching load check in accordance with API RP2A-LRFD 97."/>
+      <Document name="API RP2A-WSD 2000 Nominal Load Check" relPath="Technical Notes\API Punching Load\S-TN-PUN-005.pdf"
+                description="This technical note describes the methodology used for the punching load check in accordance with API RP2A-WSD 2000 and the nominal load method."/>
+      <Document name="API RP2A-WSD 2000 Punching Shear Check" relPath="Technical Notes\API Punching Load\S-TN-PUN-006.pdf"
+                description="This technical note describes the methodology used for the punching load check in accordance with API RP2A-WSD 2000 and the punching shear method."/>
+      <Document name="Norsok N-004 2004 Check" relPath="Technical Notes\API Punching Load\S-TN-PUN-007.pdf"
+                description="This technical note describes the methodology used for the punching load check in accordance with Norsok N-004 2004."/>
+    </Folder>
+
+  </Folder>
+  <Folder name="Verification">
+	<Document name="SAP2000 Verification Main" relPath="Verification\SAP2000 Verification Main.pdf"
+			        description="Title, Contents, Introduction, Methodology, Conclusions"/>
+  <Document name="Automating the Verification Process" relPath="Verification\Automation.pdf"
+			        description="Describes a procedure developed to automate the verification checking process."/>
+	<Document name="Log" relPath="Verification\Log.pdf"
+			        description="Provides a log of the changes to the verification documents."/>
+	<Folder name="Analysis">
+      <Folder name="Frames">
+        <Document name="1-001 General Loading" relPath="Verification\Analysis\Frames\Problem 1-001.pdf"
+				          description="A three-element frame is subjected to seven load cases with different types of distributed and/or concentrated loads. The resulting displacements at specified joints are compared with independent hand calculated results."/>
+        <Document name="1-002 Temperature Loading" relPath="Verification\Analysis\Frames\Problem 1-002.pdf"
+				          description="The various types of frame temperature loads that can be modeled in SAP2000 are tested in this example using a cantilever beam and a propped cantilever beam. The beam is a 2 inch wide by inch deep rectangular section."/>
+        <Document name="1-003 Distributed and Concentrated Moments" relPath="Verification\Analysis\Frames\Problem 1-003.pdf"
+				          description="This example tests distributed and concentrated moments assigned to frame objects, by applying torsional moments on a shaft. In SAP2000, you can apply distributed (uniform, trapezoidal and triangular) and concentrated moments to frame objects."/>
+        <Document name="1-004 Rotated Local Axes" relPath="Verification\Analysis\Frames\Problem 1-004.pdf"
+				          description="This example tests SAP2000 for various types of loading on a frame element with its local 2 and 3 axes not parallel to the global axes. A W12X106 cantilever beam is used with the local 2 axis rotated 30 degrees from the global Z axis as shown in the figure below. The free end displacements in the global Y and Z directions are compared with independent hand calculations. The W12X106 section properties are read from the SECTIONS8.pro section database provided with SAP2000."/>
+        <Document name="1-005 Displacement Loading" relPath="Verification\Analysis\Frames\Problem 1-005.pdf"
+				          description="Using a portal frame, this example verifies SAP2000 for settlement and rotation of normal supports, skewed supports (settlement only) and spring supports. Note that for spring supports, the grounded end of the spring is displaced or rotated."/>
+        <Document name="1-006 Non-prismatic Sections and Automatic Frames" relPath="Verification\Analysis\Frames\Problem 1-006.pdf"
+				          description="This example tests the SAP2000 non-prismatic frame section property. In SAP2000 the axial (A), torsion (J), weight, and mass properties can vary linearly, and the bending property (I) variation can be linear, parabolic or cubic."/>
+        <Document name="1-007 End Releases" relPath="Verification\Analysis\Frames\Problem 1-007.pdf"
+				          description="The frame object end releases are verified in this example. Three models are used in the example. The models are identical, except for the end releases. Model A has a shear release, model B has an axial release and model C has a moment release."/>
+        <Document name="1-008 Partial Fixity End Releases" relPath="Verification\Analysis\Frames\Problem 1-008.pdf"
+				          description="In the example a cantilever beam is subjected to a uniform load equal to twice its self weight. At the fixed end of the cantilever the frame object is assigned a partial fixity moment (My) spring and a partial fixity shear (Vz) spring. The vertical tip deflection of the cantilever is compared with independent hand calculated results."/>
+        <Document name="1-009 Prestress Applied to Frame Objects" relPath="Verification\Analysis\Frames\Problem 1-009.pdf"
+				          description="The SAP2000 prestress applied to frame objects is verified in this example using a simply supported concrete beam with a parabolic prestressing tendon profile and different eccentricities at each end. The bending moment and deflection at the beam center are compared with independent hand-calculated results."/>
+        <Document name="1-010 End Offsets" relPath="Verification\Analysis\Frames\Problem 1-010.pdf"
+				          description="This example uses a cantilever beam to test the SAP2000 end offsets. In SAP2000, end offsets may be non-rigid, partially rigid, or fully rigid. The rigidity of the offset is specified by a rigid zone factor. This factor specifies the fraction of the end offset length, measured from the frame element end, that is assumed to be infinitely rigid. The remainder of the end offset, if any, is assumed to have the same flexibility as the beam."/>
+        <Document name="1-011 Insertion Point" relPath="Verification\Analysis\Frames\Problem 1-011.pdf"
+				          description="This example uses a cantilever beam to test the SAP2000 frame insertion point. In SAP2000 the frame insertion point is defined by a combination of a cardinal point and joint offsets."/>
+        <Document name="1-012 No Tension and No Compression Frame Objects" relPath="Verification\Analysis\Frames\Problem 1-012.pdf"
+				          description="This example uses a one-bay, one-story braced frame resisting a horizontal load applied at the top of the frame to test the SAP2000 tension and compression limits for frame objects. In SAP2000 both tension and compression limits can be specified for frame objects. If the tension limit for a frame object is specified as 0, then the frame object can resist no tension. Similarly, if the compression limit is specified as 0 then the frame object can resist no compression."/>
+        <Document name="1-013 Simply Supported Beam on Elastic Foundation" relPath="Verification\Analysis\Frames\Problem 1-013.pdf"
+				          description="This example uses a simply supported beam on elastic foundation to test the SAP2000 frame line spring assignment. The beam is 36 inches wide by 36 inches deep, 15 feet long and the soil subgrade modulus is 800 k/ft3. A 500 kip vertical load is applied at the center of the beam and the self weight of the beam is ignored. The moment and deflection at the center of the beam are compared with independent results calculated using formulas presented in Timoshenko 1956."/>
+        <Document name="1-014 Eigenvalue Problem" relPath="Verification\Analysis\Frames\Problem 1-014.pdf"
+				          description="The SAP2000 eigenvalue computations are verified using vibrations of a cantilever beam. This example uses several models of an eight foot long cantilever concrete beam with I22  I33. Each of the models has a different discretization. The first five bending Eigen modes for each model are compared with the independent solution provided in Clough and Penzien 1975."/>
+        <Document name="1-015 Steady State Harmonic Loads" relPath="Verification\Analysis\Frames\Problem 1-015.pdf"
+				          description="Steady state and periodic time history analysis are verified in this example using a fixed-end beam that is subjected to a uniformly distributed load varying harmonically with respect to time. The maximum midpoint deflections from the SAP2000 analyses are compared with independent results published in Paz 1985."/>
+        <Document name="1-016 Tension Stiffening Using P-Delta Analysis" relPath="Verification\Analysis\Frames\Problem 1-016.pdf"
+				          description="The SAP2000 tension stiffening calculation using P-Delta analysis is verified in this example using a tie rod (beam) with a large axial force. In this example a simply supported, 3-inch-square, steel beam has a large axial force and a small transverse uniform load. The deflection in the direction of the transverse load (global Z direction) is reduced because of the stiffening effect of the tension force. The values of the midpoint deflection and bending moment with and without tension stiffening are calculated and compared with independent results derived using formulas presented in Timoshenko 1956."/>
+        <Document name="1-017 Vibration of a String Under Tension" relPath="Verification\Analysis\Frames\Problem 1-017.pdf"
+				          description="A flexible string is attached to two supports and tensioned to 0.5 kips. The first three modes of the tensioned string are calculated and compared with independent results derived using formulas presented in Kreyszig 1983."/>
+        <Document name="1-018 Bending, Shear, and Axial Deformation in a Rigid Frame" relPath="Verification\Analysis\Frames\Problem 1-018.pdf"
+				          description="A one-story, one-bay rigid bent is subjected to a uniform vertical load across the horizontal member. The resulting vertical displacement at the center of the horizontal member is compared with independent hand calculated results. The displacement is calculated in four separate models with bending, shear and axial deformations combined considered in the first model, bending deformations only considered in the second model, shear deformations only considered in the third model and axial deformations only considered in the fourth model."/>
+        <Document name="1-019 Buckling of a Rigid Frame" relPath="Verification\Analysis\Frames\Problem 1-019.pdf"
+				          description="A one-story, one-bay, two-dimensional frame is subjected to an axial force, P, at the top of each column. The buckling load for this configuration is calculated and compared with independent results calculated using formulas derived in Timoshenko and Gere 1961. Several SAP2000 models are used. Each model is identical, except for the discretization of the three frame objects."/>
+        <Document name="1-020 Response Spectrum Analysis of a 2-D Rigid Frame" relPath="Verification\Analysis\Frames\Problem 1-020.pdf"
+				          description="A single-bay, two-story, two-dimensional, reinforced concrete frame is analyzed in this example. The applied loading is a response spectrum using 5% modal damping. The SRSS modal combination technique is used. The building periods, lateral displacements and bending moments in the columns and beams are compared with the independent results presented in Chopra 1995."/>
+        <Document name="1-021 Bathe and Wilson Eigenvalue Problem" relPath="Verification\Analysis\Frames\Problem 1-021.pdf"
+				          description="A ten-bay, nine-story, two-dimensional, fixed base frame structure solved in Bathe and Wilson 1972 is analyzed for the first three eigenvalues. The SAP2000 results are compared with independent results presented in Bathe and Wilson 1981 as well as independent results presented in Peterson 1981."/>
+        <Document name="1-022 2-D Moment Frame with Static and Dynamic Loads" relPath="Verification\Analysis\Frames\Problem 1-022.pdf"
+				          description="This example is a seven-story, two-dimensional, fixed base frame structure subjected to lateral earthquake loads. The lateral earthquake load is modeled in four different ways: as a static lateral load, as a response spectrum, as a modal time history and as a direct integration time history. The results are compared with the results from another computer program presented in the reference by Engineering/Analysis Corporation and Computers/Structures International."/>
+        <Document name="1-023 ASME Eigenvalue Problem" relPath="Verification\Analysis\Frames\Problem 1-023.pdf"
+				          description="A one-story, one-bay in each direction, three-dimensional, fixed-base frame made of 2-inch steel pipe segments and 2.75-inch steel cubes is analyzed for the first 24 modal frequencies using eigenvectors. The frame is Problem No. 1 from the ASME 1972 Program Verification and Qualification Library (reference ASME 1972)."/>
+        <Document name="1-024 Response Spectrum Analysis of a 3-D Moment Frame" relPath="Verification\Analysis\Frames\Problem 1-024.pdf"
+				          description="In this example a two-story, two-bay in each direction, three-dimensional, fixed base frame structure is analyzed using a response spectrum analysis. The modal frequencies and X direction displacement at the story level centers of mass are compared with independent results from another computer program presented in Peterson 1981."/>
+        <Document name="1-025 Response Spectrum Analysis of a 3-D Braced Frame" relPath="Verification\Analysis\Frames\Problem 1-025.pdf"
+				          description="In this example a three-story, L-shaped frame structure is analyzed using a response spectrum analysis. The modal frequencies, center of mass displacement at the roof level and axial forces in several members are compared with independent results from another computer program presented in Peterson 1981."/>
+        <Document name="1-026 Moment and Shear Hinges" relPath="Verification\Analysis\Frames\Problem 1-026.pdf"
+				          description="This example uses a horizontal cantilever beam to test the SAP2000 moment and shear hinges in a static nonlinear analysis. The cantilever beam has a moment (My) hinge and a shear (Vz) hinge at its fixed end. A vertical load, P, is applied to the cantilever and increased until the vertical tip deflection, Uz, equals 2 inches."/>
+        <Document name="1-027 Construction Sequence Loading" relPath="Verification\Analysis\Frames\Problem 1-027.pdf"
+				          description="This example applies construction sequence loading to a three-element frame to test the SAP2000 staged construction capabilities."/>
+        <Document name="1-028 Large Axial Displacements" relPath="Verification\Analysis\Frames\Problem 1-028.pdf"
+				          description="This example uses a three-hinged arch to test static nonlinear analysis with large axial displacements in SAP2000. A concentrated vertical downward load, P, is applied to the center joint of the three-hinge arch. The load P is increased until the vertical downward deflection at the center joint reaches one foot. The resulting vertical support reaction at joint 1 is compared with independent hand calculated results."/>
+        <Document name="1-029 Large Bending Displacements" relPath="Verification\Analysis\Frames\Problem 1-029.pdf"
+				          description="This example uses a fixed base cantilever column to test static nonlinear analysis with large bending displacements in SAP2000. A concentrated moment, M, is applied at the top of the column. The moment M is increased until the rotation at the top of the column is equal to π radians (180 degrees). The resulting vertical and horizontal displacements of the top of the column and the moment required to create the desired deflected shape are compared with independent hand calculated results."/>
+        <Document name="1-030 Moving Loads" relPath="Verification\Analysis\Frames\Problem 1-030.pdf"
+				          description="This example uses a 40-foot-long simple span bridge (beam) to test moving load analysis cases. Moving load analysis cases use defined vehicle loads and defined lanes (rather than the load cases that are used by other analysis types) to calculate the most severe response resulting from vehicle live loads moving along lanes on the structure. In addition to the moving load analysis case, this example also includes a multi-step static analysis for the H20-44 vehicle. This analysis simulates the truck moving across the bridge."/>
+      </Folder>
+      <Folder name="Shells">
+        <Document name="2-001 Patch Test with Prescribed Displacements" relPath="Verification\Analysis\Shells\Problem 2-001.pdf"
+				          description="In this example a rectangular plate with irregularly shaped elements is subjected to prescribed displacements at the edges that theoretically impose a constant stress field over the model. The geometry, properties and loading are as described in MacNeal and Harder 1985. The membrane and plate bending stress components resulting from the prescribed displacements are compared with hand calculated results."/>
+        <Document name="2-002 Straight Beam with Static Loads" relPath="Verification\Analysis\Shells\Problem 2-002.pdf"
+				          description="In this example a straight cantilever beam, modeled with shell elements, is subjected to unit forces at the tip in the three orthogonal directions and unit moments at the tip about the three orthogonal directions, each in a different load case. The tip displacements in the direction of the load are compared with hand calculated results."/>
+        <Document name="2-003 Curved Beam with Static Loads" relPath="Verification\Analysis\Shells\Problem 2-003.pdf"
+				          description="In this example a curved cantilever beam, modeled with shell elements, is subjected to unit forces at the tip in the in-plane and out-of-plane directions, that is, the Y and Z directions, respectively. The in-plane and out-of-plane loads are applied in different load cases. The tip displacements in the direction of the load are compared with independent hand calculated results."/>  
+        <Document name="2-004 Twisted Beam with Static Loads" relPath="Verification\Analysis\Shells\Problem 2-004.pdf"
+				          description="In this example a twisted cantilever beam, modeled with shell elements, is subjected to unit forces at the tip in the in-plane and out-of-plane directions, that is, the Y and Z directions, respectively. The in-plane and out-of-plane loads are applied in different load cases. The tip displacements in the direction of the load are compared with independent hand calculated results."/>
+        <Document name="2-005 Rectangular Plate with Static Loads" relPath="Verification\Analysis\Shells\Problem 2-005.pdf"
+				          description="In this example a rectangular plate, modeled with shell elements, is subjected to an out-of-plane (Z direction) uniform load and an out-of-plane center concentrated load. The uniform and concentrated loads are applied in different load cases. The plate center displacement in the direction of the load is compared with independent hand calculated results for each load case."/>
+        <Document name="2-006 Scordelis-Lo Roof with Static Loads" relPath="Verification\Analysis\Shells\Problem 2-006.pdf"
+				          description="In this example a single span, cylindrical barrel vault roof is analyzed for gravity loads. The vertical deflection at the center of the free edge is compared with published theoretical results. In addition, displacement and bending moment results along the support and along the central section are compared with published results."/>
+        <Document name="2-007 Hemispherical Shell Structure with Static Loads" relPath="Verification\Analysis\Shells\Problem 2-007.pdf"
+				          description="In this example a hemispherical shell structure is analyzed for the effects of four 2 kip edge point loads alternating in sign at 90° intervals around the equator of the hemisphere. The deflections at the locations where the point loads are applied, in the direction of the point loads, are compared with published independent results."/>  
+        <Document name="2-008 Cantilever Plate Eigenvalue Problem" relPath="Verification\Analysis\Shells\Problem 2-008.pdf"
+				          description="In this example a cantilever square plate is analyzed to find the periods of the first five plate-bending modes of vibration. The SAP2000 periods are compared with hand calculated results based on data presented in Harris and Crede 1976."/>
+        <Document name="2-009 Plate on Elastic Foundation" relPath="Verification\Analysis\Shells\Problem 2-009.pdf"
+				          description="In this example an isolated 50 kip point load is acting on a one inch thick infinitely large plate that is supported on an elastic foundation. For this example the infinitely large plate is modeled as 300 inches long by 300 inches wide and meshed 50x50. The point load is applied at the center of the plate. The plate deflection at the point load location is compared with independent hand calculated results that are computed using theory presented in Timoshenko and Woinowsky-Krieger 1959."/>
+        <Document name="2-010 Cylinder with Internal Pressure" relPath="Verification\Analysis\Shells\Problem 2-010.pdf"
+				          description="In this example a cylinder is analyzed for an internal pressure load.  The resulting radial outward displacement, vertical displacement at the top of the cylinder and σ11 stress are compared with hand calculated results based on formulas presented in Roark and Young 1975."/>
+        <Document name="2-011 ASME Cooling Tower Problem with Static Wind Pressure" relPath="Verification\Analysis\Shells\Problem 2-011.pdf"
+				          description="This example is Problem 9 from the ASME 1972 Program Verification and Qualification Library (reference ASME 1972). A three-dimensional, fixed-base cooling tower is analyzed for an asymmetrical wind pressure loading. Radial displacements over the height of the tower are compared with published results."/>  
+        <Document name="2-012 Plate Bending when Shear Deformations are Significant" relPath="Verification\Analysis\Shells\Problem 2-012.pdf"
+				          description="This example is the example shown on page 376 in Roark and Young 1975. It is an annular plate with an inner radius of 1.4 inches, an outer radius of 2 inches and a thickness of 0.5 inch. The plate is simply supported at the inner edge and is loaded with a circular line load at a radius of 1.8 inches. The deflection at the free outer edge is compared with results published in Roark and Young 1975."/>
+        <Document name="2-013 Temperature Load that is Constant Through Shell Thickness" relPath="Verification\Analysis\Shells\Problem 2-013.pdf"
+				          description="In this example a rectangular plate with irregularly shaped elements is subjected to a temperature load that is constant through the thickness of the plate. The geometry and properties for the plate are the same as those described for the patch test in MacNeal and Harder 1985. Joint displacements and stresses resulting from the temperature load are compared with hand calculated results."/>
+        <Document name="2-014 Temperature Gradient Through Shell Thickness" relPath="Verification\Analysis\Shells\Problem 2-014.pdf"
+				          description="This example uses a flat, annular plate to test shell element temperature gradient loading. The applied temperature gradient is linear through the thickness of the shell element. Displacement, rotation and moment results are compared with independent hand calculations based on formulas presented in Roark and Young 1975."/>
+        <Document name="2-015 Orthotropic Plate" relPath="Verification\Analysis\Shells\Problem 2-015.pdf"
+				          description="This example uses a flat, circular plate to test orthotropic plate behavior. The plate has a 48 inch radius, is 2 inches thick and is fixed (clamped) around the perimeter. The plate is meshed 8x16 (radial by tangential). A uniform vertical (out-of-plane) load of 0.2 kips per square inch is applied to the plate. The results for the vertical deflection at the center of the plate and bending moments at selected points on the edge of the plate are compared with independent hand calculated results based on theory presented in Chapter 6 of Ugural 1981. Similar theory is presented in Chapter 11 of Timoshenko and Woinowsky-Krieger 1959."/>  
+        <Document name="2-016 Out-of-Plane Buckling" relPath="Verification\Analysis\Shells\Problem 2-016.pdf"
+				          description="This example uses a flat plate to test out-of-plane buckling of shell elements. The plate is 24 inches long, 24 inches wide and 1 inch thick. Unit shear and bending stresses are applied to the plate edges in two separate load cases. The critical buckling loads calculated by SAP2000 are compared with independent results."/>
+        <Document name="2-017 In-Plane Buckling" relPath="Verification\Analysis\Shells\Problem 2-017.pdf"
+				          description="This example uses a cantilever column to test in-plane buckling of shell elements. The column is 100 inches tall, 12 inches wide and 1 inch thick. Only the Ux, Uz and Ry degrees of freedom are active in the model, thus preventing the column from buckling out-of-plane. A unit concentrated vertical downward load, P, is applied to the top of the column. The buckling load, Pcr, calculated by SAP2000 is compared with an independent hand calculated result."/>
+        <Document name="2-018 Large Axial Displacements" relPath="Verification\Analysis\Shells\Problem 2-018.pdf"
+				          description="This example uses a three-hinged arch to test static nonlinear analysis with large axial displacements in SAP2000. A concentrated vertical downward load, P, is applied to the center joint of the three-hinge arch. The load P is increased until the vertical downward deflection at the center joint reaches 1 foot. The resulting vertical support reaction at joint 1 is compared with independent hand calculated results."/>
+        <Document name="2-019 Large Bending Displacements" relPath="Verification\Analysis\Shells\Problem 2-019.pdf"
+				          description="This example uses a fixed base cantilever column to test static nonlinear analysis with large bending displacements in SAP2000. A concentrated moment, M, is applied at the top of the column equally split between the two top joints. The moment M is increased until the rotation at the top of the column is equal to π radians (180 degrees). The resulting vertical and horizontal displacements of the top of the column and the moment required to create the desired deflected shape are compared with independent hand calculated results."/>  
+        <Document name="2-020 Prestress Applied to Area Objects" relPath="Verification\Analysis\Shells\Problem 2-020.pdf"
+				          description="The SAP2000 prestress applied to area objects is verified in this example using a simply supported concrete beam with a parabolic prestressing tendon profile and different eccentricities at each end. The deflection, and the top and bottom stresses, at the beam center are compared with independent hand-calculated results."/>
+      </Folder>
+      <Folder name="Planes">
+        <Document name="3-001 Patch Test with Prescribed Displacements" relPath="Verification\Analysis\Planes\Problem 3-001.pdf"
+				          description="A rectangular plate with irregularly shaped elements is subjected to prescribed displacements at the edges that theoretically impose a constant stress field over the model. The geometry, properties and loading are as described in MacNeal and Harder 1985."/>
+        <Document name="3-002 Straight Beam with Static Loads" relPath="Verification\Analysis\Planes\Problem 3-002.pdf"
+				          description="A straight cantilever beam, modeled with plane stress elements, is subjected to unit forces at the tip in the X and Y directions and a unit moment at the tip about the Y directions, each in a different load case. The tip displacements in the direction of the load are compared with hand-calculated results."/>
+        <Document name="3-003 Curved Beam with Static Loads" relPath="Verification\Analysis\Planes\Problem 3-003.pdf"
+				          description="A curved cantilever beam, modeled with plane stress elements, is subjected to unit forces at the tip in the in-plane direction, that is, the Y direction. The in-plane and out-of-plane loads are applied in different load cases. The tip displacements in the direction of the load are compared with independent hand-calculated results."/>
+        <Document name="3-004 Thick-Walled Cylinder" relPath="Verification\Analysis\Planes\Problem 3-004.pdf"
+				          description="A thick-walled cylinder is subjected to a 1 ksi internal pressure as suggested in MacNeal and Harder 1985. Both plane strain and plane stress conditions are separately considered."/>
+        <Document name="3-005 Pore Pressure" relPath="Verification\Analysis\Planes\Problem 3-005.pdf"
+				          description="A 40-foot cube of soil is modeled for this example using a plane stress element with an 8x8 mesh. It is restrained vertically at the bottom, and along the sides it is restrained horizontally in a direction normal to the side. The plane element is modeled to be 40 feet thick. The pore pressure loading representing the water is applied using a joint pattern."/>
+      </Folder>
+      <Folder name="Asolids">
+        <Document name="4-001 Soil Supporting Uniformly Loaded Circular Footing" relPath="Verification\Analysis\Asolids\Problem 4-001.pdf"
+				          description="The asolid element is used to study distribution of vertical displacement and vertical stress in the soil beneath a uniformly loaded circular footing. The results from the axisymmetric SAP2000 model are compared with hand-calculated results."/>
+        <Document name="4-002 Thick-Walled Cylinder" relPath="Verification\Analysis\Asolids\Problem 4-002.pdf"
+				          description="A thick-walled cylinder under plane strain conditions is subjected to a 1 ksi internal pressure, as suggested in MacNeal and Harder 1985. A 10-degree segment of the cylinder, 1 inch thick, with a 3-inch inner radius and a 9-inch outer radius, is modeled using a 5x1x1 mesh. The radial displacement and the radial, tangential and longitudinal stress components at the inside face of the cylinder are compared with hand-calculated values."/>
+        <Document name="4-003 Rotating Annular Disk" relPath="Verification\Analysis\Asolids\Problem 4-003.pdf"
+				          description="A homogeneous annular disk rotates about its own axis, with a uniform angular velocity of 200 radians per second. The disk is modeled using a 2x20 mesh of asolid elements, with the incompatible bending modes option. A 10-degree segment of the disk is modeled. The disk has an inner radius of 10 inches, outer radius of 20 inches and is 1 inch thick. The disk is made of steel and its weight density is 0.28 lb/in3."/>
+        <Document name="4-004 Pore Pressure" relPath="Verification\Analysis\Asolids\Problem 4-004.pdf"
+				          description="A 40-foot deep by 40-foot diameter cylinder of soil is modeled for this example using a 4x8 mesh. It is restrained vertically at the bottom, and along the sides it is restrained horizontally in a direction normal to the side. A 15-degree segment of the cylinder is modeled. The pore pressure loading representing the water is applied using a joint pattern."/>
+      </Folder>
+      <Folder name="Solids">
+        <Document name="5-001 Patch Test with Prescribed Displacements" relPath="Verification\Analysis\Solids\Problem 5-001.pdf"
+				          description="A unit cube made up of seven irregularly shaped solid objects is subjected to prescribed edge displacements that theoretically impose a constant stress field over the model. The geometry, properties and loading are as described in MacNeal and Harder 1985. The stress components and internal displacements resulting from the prescribed edge displacements are compared with those presented in MacNeal and Harder 1985."/>
+        <Document name="5-002 Straight Beam with Static Loads" relPath="Verification\Analysis\Solids\Problem 5-002.pdf"
+				          description="A straight cantilever beam, modeled with solid objects, is subjected to unit forces at the tip in the three orthogonal directions and unit moments at the tip about the three orthogonal directions, each in a different load case. The tip displacements in the direction of the load are compared with hand-calculated results."/>
+        <Document name="5-003 Curved Beam with Static Loads" relPath="Verification\Analysis\Solids\Problem 5-003.pdf"
+				          description="A curved cantilever beam, modeled using solid elements with the incompatible bending modes option enabled, is subjected to unit forces at the tip in the in-plane and out-of-plane directions, that is, the Y and Z directions, respectively. The in-plane and out-of-plane loads are applied in different load cases. The tip displacements in the direction of the load are compared with independent hand-calculated results."/>
+        <Document name="5-004 Twisted Beam with Static Loads" relPath="Verification\Analysis\Solids\Problem 5-004.pdf"
+				          description="A twisted cantilever beam, modeled with solid elements, is subjected to unit forces at the tip in the in-plane and out-of-plane directions, that is, the Y and Z directions, respectively. The in-plane and out-of-plane loads are applied in different load cases. The tip displacements in the direction of the load are compared with independent hand-calculated results."/>
+        <Document name="5-005 Rectangular Plate with Static Loads" relPath="Verification\Analysis\Solids\Problem 5-005.pdf"
+				          description="A rectangular plate, modeled with solid elements, is subjected to an out-of-plane (Z direction) uniform load and an out-of-plane center concentrated load. The uniform and concentrated loads are applied in different load cases. The plate center displacement in the direction of the load is compared with independent hand-calculated results for each load case."/>
+        <Document name="5-006 Scordelis-Lo Roof with Static Loads" relPath="Verification\Analysis\Solids\Problem 5-006.pdf"
+				          description="A single span, cylindrical barrel vault roof is analyzed for gravity loads. The vertical deflection at the center of the free edge is compared with published theoretical results. In addition, displacement and bending moment results along the support and along the central section are compared with published results."/>
+        <Document name="5-007 Hemispherical Dome Structure with Static Loads" relPath="Verification\Analysis\Solids\Problem 5-007.pdf"
+				          description="A hemispherical dome structure, modeled using solid objects, is analyzed for the effects of four 2-kip edge point loads alternating in sign at 90° intervals around the equator of the hemisphere. The deflections at the locations where the point loads are applied, in the direction of the point loads, are compared with published independent results."/>
+        <Document name="5-008 Thick-Walled Cylinder" relPath="Verification\Analysis\Solids\Problem 5-008.pdf"
+				          description="A thick-walled cylinder under plane strain conditions is subjected to a 1 ksi internal pressure as suggested in MacNeal and Harder 1985. A 10-degree segment of the cylinder, 1 inch thick, with a 3-inch inner radius and a 9-inch outer radius, is modeled using a 5x1x1 mesh. The radial displacement and the radial, tangential and longitudinal stress components at the inside face of the cylinder are compared with hand-calculated values. Note that radial displacement values are also published in MacNeal and Harder 1985."/>
+        <Document name="5-009 Prestress Applied to Solid Objects" relPath="Verification\Analysis\Solids\Problem 5-009.pdf"
+				          description="The SAP2000 prestress applied to solid objects is verified in this example using a simply supported concrete beam with a parabolic prestressing tendon profile and different eccentricities at each end. The deflection, and the top and bottom stresses, at the beam center are compared with independent hand- calculated results."/>
+        <Document name="5-010 Buckling" relPath="Verification\Analysis\Solids\Problem 5-010.pdf"
+				          description="This example uses a cantilever column to test buckling of solid elements. The column is 100 inches tall, 12 inches wide and 1 inch thick. A unit concentrated vertical downward load, P, is applied to the top of the column. The first mode buckling loads about both the X and Y axes, Pcr, calculated by SAP2000 is compared with an independent hand-calculated result."/>
+        <Document name="5-011 Temperature Load" relPath="Verification\Analysis\Solids\Problem 5-011.pdf"
+				          description="A 10-inch-square plate, 1 inch thick, restrained at the edges, is subjected to a 100° F temperature rise that is constant through the thickness of the plate. A 10x10x1 mesh is used for the plate. Plate stresses resulting from the temperature load are compared with hand-calculated results."/>
+        <Document name="5-012 Plate on Elastic Foundation" relPath="Verification\Analysis\Solids\Problem 5-012.pdf"
+				          description="An isolated 50-kip point load is acting on a one-inch-thick infinitely large plate that is supported on an elastic foundation. For this example the infinitely large plate is modeled as 300 inches long by 300 inches wide and meshed 50x50x1. The point load is applied at the center of the plate. The plate deflection at the point load location is compared with independent hand- calculated results that are computed using theory presented in Timoshenko and Woinowsky-Krieger 1959."/>
+        <Document name="5-013 Pore Pressure" relPath="Verification\Analysis\Solids\Problem 5-013.pdf"
+				          description="A 40-foot cube of soil is modeled for this example using an 8x8x8 solid mesh. It is restrained vertically at the bottom, and along the sides, it is restrained horizontally in a direction normal to the side. The pore pressure loading representing the water is applied using a joint pattern. To test the solid local axes assignment, the local axes in this example are rotated such that the positive local 1 axis is in the same direction as the positive global Z axis."/>
+      </Folder>
+      <Folder name="Links">
+        <Document name="6-001 Linear Link with Ramp Loading" relPath="Verification\Analysis\Links\Problem 6-001.pdf"
+				          description="In this example a ramp load is applied to an undamped single degree of freedom structure. The ramp loading has a finite rise time (ramp time), tr, but remains constant thereafter. The displacements of the structure at two selected times are compared with hand calculated results based on theory presented in Chopra 1995. The output times used for comparison are selected such that one is less than tr and the other is greater than tr."/>
+        <Document name="6-002 Multi-linear Elastic Link" relPath="Verification\Analysis\Links\Problem 6-002.pdf"
+				          description="This example uses a single degree of freedom structure to test the behavior of a multi-linear elastic (no hysteresis) link element. Multi-linear elastic force-deformation characteristics are defined for the link element. A nonlinear static analysis is used to push the link element to a positive 12 inch displacement. Then a second nonlinear analysis case is started from the final conditions of the first analysis case and used to push the link element to a negative 12 inch displacement, a 24 inch push. The link force at the end of each analysis case is compared with the defined link force-deformation characteristics. In addition the entire force-deformation history for each analysis case is graphically compared with the defined link force-deformation characteristics."/>
+        <Document name="6-003 Gap Element" relPath="Verification\Analysis\Links\Problem 6-003.pdf"
+				          description="This example uses a single-bay, single-story rigid frame to test the gap link element. This link element carries compression loads only; it has zero stiffness when subjected to tension. The gap element is paced at the bottom of the right-hand column in the frame. The frame is then loaded with a gravity load P (10 kips) at the center of the beam. Once the full load P is applied, a lateral load V (20 kips) is applied, pushing the frame from right to left. The compression load in the gap element after the full load P has been applied and the uplift at the gap after the full load V has been applied are compared with independent hand calculated results."/>
+        <Document name="6-004 Hook Element" relPath="Verification\Analysis\Links\Problem 6-004.pdf"
+				          description="In this single degree of freedom example a frame element is fixed at one end and connected to a grounded hook element at the other end. The initial opening in the hook is 0.04 inch. A temperature drop of 100° F is applied to the frame element. The displacement at joint 1 and the axial force induced in the link and frame elements by the temperature drop are compared with hand calculated results."/>
+        <Document name="6-005 Damper Element Under Harmonic Loading" relPath="Verification\Analysis\Links\Problem 6-005.pdf"
+				          description="In this single degree of freedom example a spring-mass-damper system is subjected to a harmonic load. The frequency of the harmonic load is chosen to be equal to the frequency of the spring-mass-damper system. The damper is assumed to provide 5% of critical damping. The displacements of the spring-mass-damper system at various arbitrary times and the steady-state deformation of the system are compared with results that are hand calculated using formulas presented in Chopra 1995."/>
+        <Document name="6-006 SUNY Buffalo Damper with Linear Velocity Exponent" relPath="Verification\Analysis\Links\Problem 6-006.pdf"
+				          description="This example comes from Section 5 of Scheller and Constantinou 1999 ('the SUNY Buffalo report'). It is a two-dimensional, three-story moment frame with diagonal fluid viscous dampers that have linear force versus velocity behavior. The model is subjected to horizontal seismic excitation using a scaled version of the S00E component of the 1940 El Centro record (see the section titled 'Earthquake Record' later in this example for more information). The SAP2000 results for modal periods, interstory drift and interstory force-deformation are compared with experimental results obtained using shake table tests. The experimental results are documented in the SUNY Buffalo report."/>
+        <Document name="6-007 SUNY Buffalo Damper with Nonlinear Velocity Exponent" relPath="Verification\Analysis\Links\Problem 6-007.pdf"
+				          description="This example comes from Section 5 of Scheller and Constantinou 1999 ('the SUNY Buffalo report'). It is a two-dimensional, three-story moment frame with diagonal fluid viscous dampers that have nonlinear force versus velocity behavior. The model is subjected to horizontal seismic excitation using a scaled version of the S00E component of the 1940 El Centro record (see the section titled 'Earthquake Record' later in this example for more information). The SAP2000 results for modal periods, interstory drift and interstory force-deformation are compared with experimental results obtained using shake table tests. The experimental results are documented in the SUNY Buffalo report."/>
+        <Document name="6-008 Plastic Wen Link" relPath="Verification\Analysis\Links\Problem 6-008.pdf"
+				          description="This example uses a single degree of freedom structure to test the behavior of a plastic Wen link element. Bilinear force-deformation characteristics are defined for the link element along with an exponent that defines the sharpness of the transition from the initial stiffness to the yielded stiffness. A nonlinear static analysis is used to push the link element to a positive 10 inch displacement. Then a second nonlinear analysis case is started from the final conditions of the first analysis case and used to push the link element to a negative 10 inch displacement, a 20 inch push. The resulting link force at various deformations is compared with the defined link force-deformation characteristics."/>
+        <Document name="6-009 Plastic Kinematic Link" relPath="Verification\Analysis\Links\Problem 6-009.pdf"
+				          description="This example uses a single degree of freedom structure to test the behavior of a plastic kinematic link element. Multi-linear force-deformation characteristics are defined for the link element for both tension and compression behavior. The force-deformation characteristics modeled for tension are different from those modeled for compression. A nonlinear static analysis is used to push the link element to a positive 12 inch displacement. Then, a second nonlinear analysis case is started from the final conditions of the first analysis case and used to push the link element to a negative 12 inch displacement, a 24 inch push. The resulting link force at various deformations is compared with the defined link force-deformation characteristics."/>
+        <Document name="6-010 SUNY Buffalo 8-Story Building with Rubber Isolators" relPath="Verification\Analysis\Links\Problem 6-010.pdf"
+				          description="This example is presented in Section 2, pages 5 through 23, of Scheller and Constantinou 1999 ('the SUNY Buffalo report'). It is an eight-story building that is seismically isolated using rubber bearings. The model is subjected to a recorded pair of scaled horizontal ground acceleration histories from the 1971 San Fernando earthquake. SAP2000 results for superstructure displacements relative to the isolation system, superstructure accelerations, and isolator forces and deformations are compared with results obtained using the computer program 3D-BASIS-ME (see Tsopelas, Constantinou and Reinhorn 1994)."/>
+        <Document name="6-011 SUNY Buffalo 7-Story Build with Friction Pendulum Isolators" relPath="Verification\Analysis\Links\Problem 6-011.pdf"
+				          description="This example is presented in Section 4, pages 43 through 59, of Scheller and Constantinou 1999 ('the SUNY Buffalo report'). It is a seven-story building that is seismically isolated using a friction pendulum isolation system. The model is subjected to a recorded, scaled horizontal ground acceleration history from the 1940 El Centro earthquake. See the section titled 'Earthquake Record' later in this example for more information. The SAP2000 results for base shear versus Level 1 displacement and isolator force-deformation are compared with experimental results obtained using shake table tests."/>
+        <Document name="6-012 Frequency Dependent Link" relPath="Verification\Analysis\Links\Problem 6-012.pdf"
+				          description="This example uses a single degree of freedom structure to test the behavior of a frequency dependent link element. A steady state analysis is performed for various loading frequencies. The resulting link deformations obtained for the various loading frequencies are compared with independent hand calculated results based on theory presented in Chopra 1995."/>
+      </Folder>
+      <Folder name="Cables">
+        <Document name="7-001 Uniform and Temperature Loading" relPath="Verification\Analysis\Cables\Problem 7-001.pdf"
+				          description="Six cables, each with an undeformed length of 100 feet, and each  with a different configuration of supports, are subjected to a 1 kip/ft uniform vertical load (which includes cable self-weight) and a 100° F temperature change. The support reactions resulting from the prescribed uniform and temperature loads are compared with results presented in Peyrot and Goulois, 1979."/>
+        <Document name="7-002 Uniform and Concentrated Loading" relPath="Verification\Analysis\Cables\Problem 7-002.pdf"
+				          description="A suspended cable is subjected to uniform self-weight and concentrated loads. The displacement at the concentrated load point is compared with results presented in Tibert, 1999."/>
+        <Document name="7-003 Prestressed Cable Net" relPath="Verification\Analysis\Cables\Problem 7-003.pdf"
+				          description="A prestressed cable net is subjected to a small uniform self-weight and concentrated loads at each cable intersection point. The displacement at the cable intersection points under the four point loads is compared with results presented in Tibert, 1999."/>
+      </Folder>
+    </Folder>
+    <Folder name="Steel Frame Design">
+        <Document name="AISC 360-22 Example 001" relPath="Verification\Design\Steel Frame\AISC 360-22 Example 001.pdf"
+				        description="This example checks the design flexural strength of a wide flange member, according to AISC 360-22."/>
+	    <Document name="AISC 360-22 Example 002" relPath="Verification\Design\Steel Frame\AISC 360-22 Example 002.pdf"
+				        description="This example checks the demand capacity ratio of a built-up wide flange member under compression, according to AISC 360-22."/>
+        <Document name="AISC 360-22 Example 003" relPath="Verification\Design\Steel Frame\AISC 360-22 Example 003.pdf"
+				        description="This example checks the design flexural strength of a built-up wide flange member under biaxial bending and compression, according to AISC 360-22."/>
+	    <Document name="AISC 360-22 Example 004" relPath="Verification\Design\Steel Frame\AISC 360-22 Example 004.pdf"
+				        description="This example checks the  design shear strength of a wide flange member under flexural loading, according to AISC 360-22."/>
+        <Document name="AISC 360-16 Example 001" relPath="Verification\Design\Steel Frame\AISC 360-16 Example 001.pdf"
+				        description="This example checks the design flexural strength of a wide flange member, according to AISC 360-16."/>
+	    <Document name="AISC 360-16 Example 002" relPath="Verification\Design\Steel Frame\AISC 360-16 Example 002.pdf"
+				        description="This example checks the demand capacity ratio of a built-up wide flange member under compression, according to AISC 360-16."/>
+	    <Document name="AISC 360-10 Example 001" relPath="Verification\Design\Steel Frame\AISC 360-10 Example 001.pdf"
+				        description="This example checks the design flexural strength of a wide flange member, according to AISC 360-10."/>
+	    <Document name="AISC 360-10 Example 002" relPath="Verification\Design\Steel Frame\AISC 360-10 Example 002.pdf"
+				        description="This example checks the demand capacity ratio of a built-up wide flange member under compression, according to AISC 360-10."/>
+	    <Document name="AISC 360-05 Example 001" relPath="Verification\Design\Steel Frame\AISC 360-05 Example 001.pdf"
+				        description="This example checks the design flexural strength of a wide flange member, according to AISC 360-05."/>
+	    <Document name="AISC 360-05 Example 002" relPath="Verification\Design\Steel Frame\AISC 360-05 Example 002.pdf"
+				        description="This example checks the demand capacity ratio of a built-up wide flange member under compression, according to AISC 360-05."/>
+        <Document name="AISC LRFD-93 Example 001" relPath="Verification\Design\Steel Frame\AISC LRFD-93 Example 001.pdf"
+				        description="This example checks the design flexural strength of a wide flange member, according to AISC LRFD-93."/>
+	    <Document name="AISC LRFD-93 Example 002" relPath="Verification\Design\Steel Frame\AISC LRFD-93 Example 002.pdf"
+				        description="This example checks the adequacy of a wide flange member under combined compression and biaxial bending, according to AISC LRFD-93."/>
+	    <Document name="AISC ASD-89 Example 001" relPath="Verification\Design\Steel Frame\AISC ASD-89 Example 001.pdf"
+				        description="This example checks the design flexural strength of a wide flange member, according to AISC ASD-89."/>
+  	    <Document name="AISC ASD-89 Example 002" relPath="Verification\Design\Steel Frame\AISC ASD-89 Example 002.pdf"
+				        description="This example checks the section classification and axial strees of a wide flange member under compression, according to AISC ASD-89."/>
+  	    <Document name="API 4F-2020 Example 001" relPath="Verification\Design\Steel Frame\API 4F-2020 Example 001.pdf"
+				        description="This example checks the section classification and axial strees of a wide flange member in bending, according to API 4F-2020."/>
+  	    <Document name="API 4F-2020 Example 002" relPath="Verification\Design\Steel Frame\API 4F-2020 Example 002.pdf"
+				        description="This example checks the section classification and axial strees of a wide flange member in compression, according to API 4F-2020."/>
+	    <Document name="AS 4100-1998 Example 001" relPath="Verification\Design\Steel Frame\AS 4100-1998 Example 001.pdf"
+				        description="This example checks the axial strengths of a wide flange member under compression, according to AS 4100-1998."/>
+	    <Document name="AS 4100-1998 Example 002" relPath="Verification\Design\Steel Frame\AS 4100-1998 Example 002.pdf"
+				        description="This example checks the bending strengths of a wide flange member under bending, according to AS 4100-1998."/>
+  	    <Document name="AS 4100-1998 Example 003" relPath="Verification\Design\Steel Frame\AS 4100-1998 Example 003.pdf"
+				        description="This example checks the interacting axial and bending strengths of a wide flange member under combined compression and bending, according to AS 4100-1998."/>
+	    <Document name="AS 4100-2020 Example 001" relPath="Verification\Design\Steel Frame\AS 4100-2020 Example 001.pdf"
+				        description="This example checks the axial strengths of a wide flange member under compression, according to AS 4100-2020."/>
+	    <Document name="AS 4100-2020 Example 002" relPath="Verification\Design\Steel Frame\AS 4100-2020 Example 002.pdf"
+				        description="This example checks the bending strengths of a wide flange member under bending, according to AS 4100-2020."/>
+  	    <Document name="AS 4100-2020 Example 003" relPath="Verification\Design\Steel Frame\AS 4100-2020 Example 003.pdf"
+                        description="This example checks the interacting axial and bending strengths of a wide flange member under combined compression and bending, according to AS 4100-2020."/>
+	    <Document name="BS 5950-2000 Example 001" relPath="Verification\Design\Steel Frame\BS 5950-2000 Example 001.pdf"
+				        description="This example checks the moment and shear strengths of a wide flange member under bending, according to BS 5950-2000."/>
+	    <Document name="BS 5950-2000 Example 002" relPath="Verification\Design\Steel Frame\BS 5950-2000 Example 002.pdf"
+				        description="This example checks the axial and moment strengths of a square tube member under compression and bending, according to BS 5950-2000."/>
+        <Document name="CSA S16-19 Example 001" relPath="Verification\Design\Steel Frame\CSA S16-19 Example 001.pdf"
+				        description="This example checks the flexural strength of a wide flange member, according to CSA S16-19."/>
+	    <Document name="CSA S16-19 Example 002" relPath="Verification\Design\Steel Frame\CSA S16-19 Example 002.pdf"
+				        description="This example checks the axial and moment strengths of a wide flange member under compression and bending, according to CSA S16-19."/>
+        <Document name="CSA S16-14 Example 001" relPath="Verification\Design\Steel Frame\CSA S16-14 Example 001.pdf"
+				        description="This example checks the moment and shear strength of a wide flange member, according to CSA S16-14."/>
+	    <Document name="CSA S16-14 Example 002" relPath="Verification\Design\Steel Frame\CSA S16-14 Example 002.pdf"
+				        description="This example checks the axial and moment strengths of a wide flange member under compression and bending, according to CSA S16-14."/>
+	    <Document name="CSA S16-09 Example 001" relPath="Verification\Design\Steel Frame\CSA S16-09 Example 001.pdf"
+				        description="This example checks the moment and shear strength of a wide flange member, according to CSA S16-09."/>
+	    <Document name="CSA S16-09 Example 002" relPath="Verification\Design\Steel Frame\CSA S16-09 Example 002.pdf"
+				        description="This example checks the axial and moment strengths of a wide flange member under compression and bending, according to CSA S16-09."/>
+	    <Document name="EN 3-2022 Example 001" relPath="Verification\Design\Steel Frame\EN 3-2022 Example 001.pdf"
+				        description="This example checks the axial strengths of a wide flange member under combined compression and bending, according to EN 3-2022."/>
+  	    <Document name="EN 3-2022 Example 002" relPath="Verification\Design\Steel Frame\EN 3-2022 Example 002.pdf"
+				        description="This example checks the moment and shear strengths of a wide flange member under bending, according to EN 3-2022."/>
+	    <Document name="EN 3-2022 Example 003" relPath="Verification\Design\Steel Frame\EN 3-2022 Example 003.pdf"
+				        description="This example checks the axial and moment strengths of a wide flange member under combined compression and bending, according to EN 3-2022."/>
+	    <Document name="EN 3-2005 Example 001" relPath="Verification\Design\Steel Frame\EN 3-2005 Example 001.pdf"
+				        description="This example checks the axial strengths of a wide flange member under combined compression and bending, according to EN 3-2005."/>
+  	    <Document name="EN 3-2005 Example 002" relPath="Verification\Design\Steel Frame\EN 3-2005 Example 002.pdf"
+				        description="This example checks the moment and shear strengths of a wide flange member under bending, according to EN 3-2005."/>
+	    <Document name="EN 3-2005 Example 003" relPath="Verification\Design\Steel Frame\EN 3-2005 Example 003.pdf"
+				        description="This example checks the axial and moment strengths of a wide flange member under combined compression and bending, according to EN 3-2005."/>
+	    <Document name="IS 800-2007 Example 001" relPath="Verification\Design\Steel Frame\IS 800-2007 Example 001.pdf"
+				        description="This example checks the axial strengths of a wide flange member under compression, according to IS 800-2007."/>
+  	    <Document name="IS 800-2007 Example 002" relPath="Verification\Design\Steel Frame\IS 800-2007 Example 002.pdf"
+				        description="This example checks the moment and shear strengths of a wide flange member under bending, according to IS 800-2007."/>
+	    <Document name="IS 800-2007 Example 003" relPath="Verification\Design\Steel Frame\IS 800-2007 Example 003.pdf"
+				        description="This example checks the adequacy of a wide flange member under combined compression and biaxial bending, according to IS 800-2007."/>
+	   	<Document name="KBC 2016 Example 001" relPath="Verification\Design\Steel Frame\KBC 2016 Example 001.pdf"
+				        description="This example checks the design flexural strength of a wide flange member, according to KBC 2016."/>
+  	    <Document name="KBC 2016 Example 002" relPath="Verification\Design\Steel Frame\KBC 2016 Example 002.pdf"
+				        description="This example checks the demand capacity ratio of a built-up wide flange member under compression, according to KBC 2016."/>
+        <Document name="KBC 2009 Example 001" relPath="Verification\Design\Steel Frame\KBC 2009 Example 001.pdf"
+				        description="This example checks the design flexural strength of a wide flange member, according to KBC 2009."/>
+  	    <Document name="KBC 2009 Example 002" relPath="Verification\Design\Steel Frame\KBC 2009 Example 002.pdf"
+				        description="This example checks the demand capacity ratio of a built-up wide flange member under compression, according to KBC 2009."/>
+	    <Document name="NTC 2008 Example 001" relPath="Verification\Design\Steel Frame\NTC 2008 Example 001.pdf"
+				        description="This example checks the adequacy of a wide flange member under combined compression and bending, according to NTC 2008."/>
+	    <Document name="NTC 2008 Example 002" relPath="Verification\Design\Steel Frame\NTC 2008 Example 002.pdf"
+				        description="This example checks the adequacy of a wide flange member under combined compression and bending, according to NTC 2008."/>
+  	    <Document name="NTC 2018 Example 001" relPath="Verification\Design\Steel Frame\NTC 2018 Example 001.pdf"
+				        description="This example checks the adequacy of a wide flange member under combined compression and bending, according to NTC 2018."/>
+	    <Document name="NTC 2018 Example 002" relPath="Verification\Design\Steel Frame\NTC 2018 Example 002.pdf"
+				        description="This example checks the adequacy of a wide flange member under combined compression and bending, according to NTC 2018."/>
+	    <Document name="NZS 3404-1997 Example 001" relPath="Verification\Design\Steel Frame\NZS 3404-1997 Example 001.pdf"
+				        description="This example checks the axial strengths of a wide flange member under compression, according to NZS 3404-1997."/>
+	    <Document name="NZS 3404-1997 Example 002" relPath="Verification\Design\Steel Frame\NZS 3404-1997 Example 002.pdf"
+				        description="This example checks the bending strengths of a wide flange member under bending, according to NZS 3404-1997."/>
+	    <Document name="NZS 3404-1997 Example 003" relPath="Verification\Design\Steel Frame\NZS 3404-1997 Example 003.pdf"
+				        description="This example checks the interacting axial and bending strengths of a wide flange member under combined compression and bending, according to NZS 3404-1997."/>
+	</Folder>
+	<Folder name="Concrete Frame Design">
+      <Document name="ACI 318-19 Example 001" relPath="Verification\Design\Concrete Frame\ACI 318-19 Ex001.pdf"
+                description="This example checks the flexural and shear design of a rectangular beam, according to ACI 318-19."/>
+      <Document name="ACI 318-19 Example 002" relPath="Verification\Design\Concrete Frame\ACI 318-19 Ex002.pdf"
+				        description="This example checks the demand capacity ratio of a rectangular column, according to ACI 318-19."/>
+      <Document name="ACI 318-14 Example 001" relPath="Verification\Design\Concrete Frame\ACI 318-14 Ex001.pdf"
+				        description="This example checks the flexural and shear design of a rectangular beam, according to ACI 318-14."/>
+	  <Document name="ACI 318-14 Example 002" relPath="Verification\Design\Concrete Frame\ACI 318-14 Ex002.pdf"
+				        description="This example checks the demand capacity ratio of a rectangular column, according to ACI 318-14."/>
+      <Document name="ACI 318-11 Example 001" relPath="Verification\Design\Concrete Frame\ACI 318-11 Ex001.pdf"
+				        description="This example checks the flexural and shear design of a rectangular beam, according to ACI 318-11."/>
+	  <Document name="ACI 318-11 Example 002" relPath="Verification\Design\Concrete Frame\ACI 318-11 Ex002.pdf"
+				        description="This example checks the demand capacity ratio of a rectangular column, according to ACI 318-11."/>
+	  <Document name="ACI 318-08 Example 001" relPath="Verification\Design\Concrete Frame\ACI 318-08 Ex001.pdf"
+				        description="This example checks the flexural and shear design of a rectangular beam, according to ACI 318-08."/>
+	  <Document name="ACI 318-08 Example 002" relPath="Verification\Design\Concrete Frame\ACI 318-08 Ex002.pdf"
+				        description="This example checks the demand capacity ratio of a rectangular column, according to ACI 318-08."/>
+	  <Document name="AS 3600-2009 Example 001" relPath="Verification\Design\Concrete Frame\AS 3600-2009 Ex001.pdf"
+				        description="This example checks the flexural and shear design of a tee beam, according to AS 3600-09."/>
+	  <Document name="AS 3600-2009 Example 002" relPath="Verification\Design\Concrete Frame\AS 3600-2009 Ex002.pdf"
+				        description="This example checks the demand capacity ratio of a rectangular column, according to AS 3600-09."/>
+	  <Document name="BS 8110-1997 Example 001" relPath="Verification\Design\Concrete Frame\BS 8110-1997 Ex001.pdf"
+				        description="This example checks the flexural and shear design of a rectangular beam, according to BS 8110-97."/>
+	  <Document name="BS 8110-1997 Example 002" relPath="Verification\Design\Concrete Frame\BS 8110-1997 Ex002.pdf"
+				        description="This example checks the demand capacity ratio of a rectangular column, according to BS 8110-97."/>
+      <Document name="CSA A23.3-19 Example 001" relPath="Verification\Design\Concrete Frame\CSA A23.3-19 Ex001.pdf"
+				        description="This example checks the flexural and shear design of a rectangular beam, according to CSA A23.3-19."/>
+	  <Document name="CSA A23.3-19 Example 002" relPath="Verification\Design\Concrete Frame\CSA A23.3-19 Ex002.pdf"
+				        description="This example checks the demand capacity ratio of a rectangular column, according to CSA A23.3-19."/>
+      <Document name="CSA A23.3-14 Example 001" relPath="Verification\Design\Concrete Frame\CSA A23.3-14 Ex001.pdf"
+				        description="This example checks the flexural and shear design of a rectangular beam, according to CSA A23.3-14."/>
+	  <Document name="CSA A23.3-14 Example 002" relPath="Verification\Design\Concrete Frame\CSA A23.3-14 Ex002.pdf"
+				        description="This example checks the demand capacity ratio of a rectangular column, according to CSA A23.3-14."/>
+	  <Document name="CSA A23.3-04 Example 001" relPath="Verification\Design\Concrete Frame\CSA A23.3-04 Ex001.pdf"
+				        description="This example checks the flexural and shear design of a rectangular beam, according to CSA A23.3-04."/>
+	  <Document name="CSA A23.3-04 Example 002" relPath="Verification\Design\Concrete Frame\CSA A23.3-04 Ex002.pdf"
+				        description="This example checks the demand capacity ratio of a rectangular column, according to CSA A23.3-04."/>
+	  <Document name="EN 2-2004 Example 001" relPath="Verification\Design\Concrete Frame\EN 2-2004 Ex001.pdf"
+				        description="This example checks the flexural and shear design of a rectangular beam, according to EN 2-2004."/>
+	  <Document name="EN 2-2004 Example 002" relPath="Verification\Design\Concrete Frame\EN 2-2004 Ex002.pdf"
+				        description="This example checks the demand capacity ratio of a rectangular column, according to EN 2-2004."/>
+	  <Document name="EN 2-2004 Example 003" relPath="Verification\Design\Concrete Frame\EN 2-2004 Ex003.pdf"
+				        description="This example checks the demand capacity ratio of a compression-controlled rectangular column, according to EN 2-2004."/>
+	  <Document name="EN 2-2004 Example 004" relPath="Verification\Design\Concrete Frame\EN 2-2004 Ex004.pdf"
+				        description="This example checks the demand capacity ratio of a compression-controlled rectangular column, according to EN 2-2004."/>
+	  <Document name="IS 456-2000 Example 001" relPath="Verification\Design\Concrete Frame\IS 456-2000 Ex001.pdf"
+				        description="This example checks the flexural and shear design of a rectangular beam, according to IS 456-2000."/>
+	  <Document name="IS 456-2000 Example 002" relPath="Verification\Design\Concrete Frame\IS 456-2000 Ex002.pdf"
+				        description="This example checks the demand capacity ratio of a rectangular column, according to IS 456-2000."/>
+      <Document name="KBC 2016 Example 001" relPath="Verification\Design\Concrete Frame\KBC 2016 Example 001.pdf"
+				        description="This example checks the flexural and shear design of a rectangular beam, according to KBC 2016."/>
+	  <Document name="KBC 2016 Example 002" relPath="Verification\Design\Concrete Frame\KBC 2016 Example 002.pdf"
+				        description="This example checks the demand capacity ratio of a rectangular column, according to KBC 2016."/>
+	  <Document name="KBC 2009 Example 001" relPath="Verification\Design\Concrete Frame\KBC 2009 Example 001.pdf"
+				        description="This example checks the flexural and shear design of a rectangular beam, according to KBC 2009."/>
+	  <Document name="KBC 2009 Example 002" relPath="Verification\Design\Concrete Frame\KBC 2009 Example 002.pdf"
+				        description="This example checks the demand capacity ratio of a rectangular column, according to KBC 2009."/>
+	  <Document name="NTC 2008 Example 001" relPath="Verification\Design\Concrete Frame\NTC 2008 Ex001.pdf"
+				        description="This example checks the flexural and shear design of a rectangular beam, according to NTC 2008."/>
+	  <Document name="NTC 2008 Example 002" relPath="Verification\Design\Concrete Frame\NTC 2008 Ex002.pdf"
+				        description="This example checks the demand capacity ratio of a rectangular column, according to NTC 2008."/>
+	  <Document name="NZS 3101-2006 Example 001" relPath="Verification\Design\Concrete Frame\NZS 3101-2006 Ex001.pdf"
+				        description="This example checks the flexural and shear design of a rectangular beam, according to NZS 3101-2006."/>
+	  <Document name="NZS 3101-2006 Example 002" relPath="Verification\Design\Concrete Frame\NZS 3101-2006 Ex002.pdf"
+				        description="This example checks the demand capacity ratio of a rectangular column, according to NZS 3101-2006."/>
+	  <Document name="RCDF 2004 Example 001" relPath="Verification\Design\Concrete Frame\RCDF 2004 Ex001.pdf"
+				        description="This example checks the flexural and shear design of a rectangular beam, according to RCDF 2004."/>
+	  <Document name="RCDF 2004 Example 002" relPath="Verification\Design\Concrete Frame\RCDF 2004 Ex002.pdf"
+				        description="This example checks the demand capacity ratio of a rectangular column, according to RCDF 2004."/>
+	  <Document name="SS CP 65-1999 Example 001" relPath="Verification\Design\Concrete Frame\SS CP 65-1999 Ex001.pdf"
+				        description="This example checks the flexural and shear design of a rectangular beam, according to SS CP 65-1999."/>
+	  <Document name="SS CP 65-1999 Example 002" relPath="Verification\Design\Concrete Frame\SS CP 65-1999 Ex002.pdf"
+				        description="This example checks the demand capacity ratio of a rectangular column, according to SS CP 65-1999."/>
+	  <Document name="TS 500-2000 Example 001" relPath="Verification\Design\Concrete Frame\TS 500-2000 Ex001.pdf"
+				        description="This example checks the flexural and shear design of a rectangular beam, according to TS 500-2000."/>
+	  <Document name="TS 500-2000 Example 002" relPath="Verification\Design\Concrete Frame\TS 500-2000 Ex002.pdf"
+				        description="This example checks the demand capacity ratio of a rectangular column, according to TS 500-2000."/>
+	</Folder>
+	<Folder name="Aluminum Frame Design">
+    <Document name="AA 2020 Example 001" relPath="Verification\Design\Aluminum Frame\AA 2020 AFD Ex001.pdf"
+				        description="This example checks the design of an I-shaped member under compression, according to AA 2020."/>
+    <Document name="AA 2020 Example 002" relPath="Verification\Design\Aluminum Frame\AA 2020 AFD Ex002.pdf"
+				        description="This example checks the design of an angle member under compression, according to AA 2020."/>
+    <Document name="AA 2020 Example 003" relPath="Verification\Design\Aluminum Frame\AA 2020 AFD Ex003.pdf"
+				        description="This example checks the design of a double angle member under combined compression, bending, and shear, according to AA 2020."/>
+    <Document name="AA 2020 Example 004" relPath="Verification\Design\Aluminum Frame\AA 2020 AFD Ex004.pdf"
+				        description="This example checks the design of a square tube under compression, according to AA 2020."/>
+    <Document name="AA 2020 Example 005" relPath="Verification\Design\Aluminum Frame\AA 2020 AFD Ex005.pdf"
+				        description="This example checks the design of a round tube under compression, according to AA 2020."/>
+    <Document name="AA 2020 Example 006" relPath="Verification\Design\Aluminum Frame\AA 2020 AFD Ex006.pdf"
+				        description="This example checks the design of an I-shaped beam under combined bending and shear, according to AA 2020."/>
+    <Document name="AA 2020 Example 007" relPath="Verification\Design\Aluminum Frame\AA 2020 AFD Ex007.pdf"
+				        description="This example checks the design of a pipe member under combined bending and shear, according to AA 2020."/>
+    <Document name="AA 2020 Example 008" relPath="Verification\Design\Aluminum Frame\AA 2020 AFD Ex008.pdf"
+				        description="This example checks the design of a rectangular bar under bending, according to AA 2020."/>
+    <Document name="AA 2020 Example 009" relPath="Verification\Design\Aluminum Frame\AA 2020 AFD Ex009.pdf"
+				        description="This example checks the design of a rectangular tube under combined bending and shear, according to AA 2020."/>
+    <Document name="AA 2020 Example 010" relPath="Verification\Design\Aluminum Frame\AA 2020 AFD Ex010.pdf"
+				        description="This example checks the design of a channel under bending, according to AA 2020."/>
+    <Document name="AA 2020 Example 011" relPath="Verification\Design\Aluminum Frame\AA 2020 AFD Ex011.pdf"
+				        description="This example checks the design of a tee member under combined compression, bending, and shear, according to AA 2020."/>
+    <Document name="AA 2020 Example 012" relPath="Verification\Design\Aluminum Frame\AA 2020 AFD Ex012.pdf"
+				        description="This example checks the design of a cantilever double channel member under combined bending and shear, according to AA 2020."/>
+    <Document name="AA 2015 Example 001" relPath="Verification\Design\Aluminum Frame\AA 2015 AFD Ex001.pdf"
+				        description="This example checks the design of an I-shaped member under compression, according to AA 2015."/>
+	  <Document name="AA 2015 Example 002" relPath="Verification\Design\Aluminum Frame\AA 2015 AFD Ex002.pdf"
+				        description="This example checks the design of an angle member under compression, according to AA 2015."/>
+	  <Document name="AA 2015 Example 003" relPath="Verification\Design\Aluminum Frame\AA 2015 AFD Ex003.pdf"
+				        description="This example checks the design of a double angle member under combined compression, bending, and shear, according to AA 2015."/>
+	  <Document name="AA 2015 Example 004" relPath="Verification\Design\Aluminum Frame\AA 2015 AFD Ex004.pdf"
+				        description="This example checks the design of a square tube under compression, according to AA 2015."/>
+	  <Document name="AA 2015 Example 005" relPath="Verification\Design\Aluminum Frame\AA 2015 AFD Ex005.pdf"
+				        description="This example checks the design of a round tube under compression, according to AA 2015."/>
+	  <Document name="AA 2015 Example 006" relPath="Verification\Design\Aluminum Frame\AA 2015 AFD Ex006.pdf"
+				        description="This example checks the design of an I-shaped beam under combined bending and shear, according to AA 2015."/>
+	  <Document name="AA 2015 Example 007" relPath="Verification\Design\Aluminum Frame\AA 2015 AFD Ex007.pdf"
+				        description="This example checks the design of a pipe member under combined bending and shear, according to AA 2015."/>
+	  <Document name="AA 2015 Example 008" relPath="Verification\Design\Aluminum Frame\AA 2015 AFD Ex008.pdf"
+				        description="This example checks the design of a rectangular bar under bending, according to AA 2015."/>
+	  <Document name="AA 2015 Example 009" relPath="Verification\Design\Aluminum Frame\AA 2015 AFD Ex009.pdf"
+				        description="This example checks the design of a rectangular tube under combined bending and shear, according to AA 2015."/>
+	  <Document name="AA 2015 Example 010" relPath="Verification\Design\Aluminum Frame\AA 2015 AFD Ex010.pdf"
+				        description="This example checks the design of a channel under bending, according to AA 2015."/>
+	  <Document name="AA 2015 Example 011" relPath="Verification\Design\Aluminum Frame\AA 2015 AFD Ex011.pdf"
+				        description="This example checks the design of a tee member under combined compression, bending, and shear, according to AA 2015."/>
+	  <Document name="AA 2015 Example 012" relPath="Verification\Design\Aluminum Frame\AA 2015 AFD Ex012.pdf"
+				        description="This example checks the design of a cantilever double channel member under combined bending and shear, according to AA 2015."/>
+    <Document name="EC 9 2007 Example 001" relPath="Verification\Design\Aluminum Frame\EC 9 2007 AFD Ex001.pdf"
+				        description="This example checks the design of a Channel member under combined bending, compression and shear, according to EC 9 2007."/>
+    <Document name="EC 9 2007 Example 002" relPath="Verification\Design\Aluminum Frame\EC 9 2007 AFD Ex002.pdf"
+				        description="This example checks the design of an I-shaped member under combined bending, compression and shear, according to EC 9 2007."/>
+    <Document name="EC 9 2007 Example 003" relPath="Verification\Design\Aluminum Frame\EC 9 2007 AFD Ex003.pdf"
+				        description="This example checks the design of a Double channel member under combined compression, bending, and shear, according to EC 9 2007."/>
+    <Document name="EC 9 2007 Example 004" relPath="Verification\Design\Aluminum Frame\EC 9 2007 AFD Ex004.pdf"
+				        description="This example checks the design of a Tee shaped member under combined bending, compression and shear, according to EC 9 2007."/>
+    <Document name="EC 9 2007 Example 005" relPath="Verification\Design\Aluminum Frame\EC 9 2007 AFD Ex005.pdf"
+				        description="This example checks the design of a Double angle section under combined bending, compression and shear, according to EC 9 2007."/>
+    <Document name="EC 9 2007 Example 006" relPath="Verification\Design\Aluminum Frame\EC 9 2007 AFD Ex006.pdf"
+				        description="This example checks the design of a Box shaped member under combined bending, compression and shear, according to EC 9 2007."/>
+    <Document name="EC 9 2007 Example 007" relPath="Verification\Design\Aluminum Frame\EC 9 2007 AFD Ex007.pdf"
+				        description="This example checks the design of a Pipe member under ccombined bending, compression and shear, according to EC 9 2007."/>
+    <Document name="EC 9 2007 Example 008" relPath="Verification\Design\Aluminum Frame\EC 9 2007 AFD Ex008.pdf"
+				        description="This example checks the design of an angle member under combined bending, compression and shear, according to EC 9 2007."/>    
+	</Folder>
+    <Folder name="Cold Formed Steel Frame Design">
+      <Document name="AISI 2016 Example 001" relPath="Verification\Design\Cold Formed Steel Frame\AISI 2016 CFFD Ex001.pdf"
+                  description="This example checks the design of a C section member with lips under compression, bending, and shear according to AISI 2016."/>
+      <Document name="AISI 2016 Example 002" relPath="Verification\Design\Cold Formed Steel Frame\AISI 2016 CFFD Ex002.pdf"
+                  description="This example checks the design of C section member with lips and openings under combined bending and shear according to AISI 2016."/>      
+      <Document name="AISI 2016 Example 003" relPath="Verification\Design\Cold Formed Steel Frame\AISI 2016 CFFD Ex003.pdf"
+                  description="This example checks the design of a C section member with lips and holes under compression, according to AISI 2016 a."/>
+      <Document name="AISI 2016 Example 004" relPath="Verification\Design\Cold Formed Steel Frame\AISI 2016 CFFD Ex004.pdf"
+                  description="This example checks the design of a Zee section member under combined compression, bending, and shear, according to AISI 2016."/>
+      <Document name="AISI 2016 Example 005" relPath="Verification\Design\Cold Formed Steel Frame\AISI 2016 CFFD Ex005.pdf"
+                  description="This example checks the design of an angle section member with lips under combined compression, bending, and shear, according to AISI 2016."/>
+      <Document name="AISI 2016 Example 006" relPath="Verification\Design\Cold Formed Steel Frame\AISI 2016 CFFD Ex006.pdf"
+                  description="This example checks the design of a pipe section under combined compression, bending, and shear, according to AISI 2016."/>
+      <Document name="AISI 2016 Example 007" relPath="Verification\Design\Cold Formed Steel Frame\AISI 2016 CFFD Ex007.pdf"
+                  description="This example checks the design of a Box section under combined compression, bending and shear, according to AISI 2016."/>
+      <Document name="AISI 2016 Example 008" relPath="Verification\Design\Cold Formed Steel Frame\AISI 2016 CFFD Ex008.pdf"
+                  description="This example checks the design of a Hat section under combined compression, bending and shear, according to AISI 2016."/>
+      <Document name="AISI 2016 Example 009" relPath="Verification\Design\Cold Formed Steel Frame\AISI 2016 CFFD Ex009.pdf"
+                  description="This example checks the design of an I section under combined compression, bending, and shear according to AISI 2016."/>
+      <Document name="AISI 2016 Example 010" relPath="Verification\Design\Cold Formed Steel Frame\AISI 2016 CFFD Ex010.pdf"
+                  description="This example checks the design of a Tee section member under combined compression, bending and shear, according to AISI 2016."/>
+      <Document name="EC 3 1-3 2006 Example 001" relPath="Verification\Design\Cold Formed Steel Frame\EC 3 1-3 2006 CFFD Ex001.pdf"
+                  description="This example checks the design of a C section member with lips under combined compression, bending and shear, according to EC 3 1-3 2006."/>
+      <Document name="EC 3 1-3 2006 Example 002" relPath="Verification\Design\Cold Formed Steel Frame\EC 3 1-3 2006 CFFD Ex002.pdf"
+                  description="This example checks the design of an I section member under combined compression, bending and shear, according to EC 3 1-3 2006."/>
+      <Document name="EC 3 1-3 2006 Example 003" relPath="Verification\Design\Cold Formed Steel Frame\EC 3 1-3 2006 CFFD Ex003.pdf"
+                  description="This example checks the design of a box section member under combined compression, bending and shear, according to EC 3 1-3 2006."/>
+      <Document name="EC 3 1-3 2006 Example 004" relPath="Verification\Design\Cold Formed Steel Frame\EC 3 1-3 2006 CFFD Ex004.pdf"
+            description="This example checks the design of a Z section member  with lips under combined compression, bending and shear, according to EC 3 1-3 2006."/>
+      <Document name="EC 3 1-3 2006 Example 005" relPath="Verification\Design\Cold Formed Steel Frame\EC 3 1-3 2006 CFFD Ex005.pdf"
+            description="This example checks the design of a T section member under combined compression, bending and shear, according to EC 3 1-3 2006."/>
+      <Document name="EC 3 1-3 2006 Example 006" relPath="Verification\Design\Cold Formed Steel Frame\EC 3 1-3 2006 CFFD Ex006.pdf"
+            description="This example checks the design of a hat section member with lips under combined compression, bending and shear, according to EC 3 1-3 2006."/>
+      <Document name="EC 3 1-3 2006 Example 007" relPath="Verification\Design\Cold Formed Steel Frame\EC 3 1-3 2006 CFFD Ex007.pdf"
+            description="This example checks the design of an angle section member with lips under combined compression, bending and shear, according to EC 3 1-3 2006."/>
+    </Folder>
+    <Folder name="Concrete Shell Design">
+      <Document name="ACI 350-2020 Example 001" relPath="Verification\Design\Concrete Shell\ACI-350-20 Example 001.pdf"
+            description="This example checks the design of longitudinal and shear reinforcement for concrete shells per the procedures of ACI 350-2020."/>  
+    </Folder>    
+    <Folder name="Floor Vibration Design">
+      <Document name="AISC Design Guide 11 Example 7.1" relPath="Verification\Design\Vibration\AISC-DG11 2ED Ex001.pdf"
+            description="This example checks the design for floor vibrations due to walking excitation of a composite beam floor system with a cantilever according to the procedures of AISC Design Guide 11 Chapter 7."/>  
+    </Folder>
+  </Folder>
+  <Folder name="Licensing Guides">
+    <Document name="Standalone License Guide" relPath="StandaloneKey Guide.pdf" 
+              description="This guide describes how to use the StandaloneKey utility for managing standalone licenses."/>
+    <Document name="Network License Guide" relPath="NetKey Guide.pdf"
+              description="This guide describes how to use the NetKey utility for managing network licenses."/>
+  </Folder>
+</Documents>
