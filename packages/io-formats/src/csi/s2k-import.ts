@@ -486,6 +486,10 @@ export function importS2k(input: string | S2kFile, opts: { name?: string } = {})
   const patRecs = T("LOAD PATTERN DEFINITIONS");
   for (const r of patRecs) {
     const name = f(r, "LoadPat") ?? "";
+    const autoLoad = (f(r, "AutoLoad") ?? "").trim();
+    if (autoLoad && autoLoad.toLowerCase() !== "none") {
+      d.add("error", "automatic_load_unsupported", { method: autoLoad }, { line: r.line, object: name || "?" });
+    }
     const t = (f(r, "DesignType") ?? "").toLowerCase();
     const type: LoadPattern["type"] = t === "dead" ? "dead" : t === "super dead" ? "superDead" : t === "live" || t === "roof live" || t === "reducible live" ? "live" : t === "wind" ? "wind" : t === "quake" || t === "seismic" ? "seismic" : "other";
     if (!["dead", "super dead", "live", "wind", "quake"].includes(t)) d.add("info", "pattern_type_mapped", { from: f(r, "DesignType") ?? "?", to: type }, { line: r.line, object: name });

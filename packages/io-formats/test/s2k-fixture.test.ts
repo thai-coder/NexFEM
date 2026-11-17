@@ -38,6 +38,7 @@ describe("file SAP2000 thật: cú pháp", () => {
     expect(omf.tables.has("PREFERENCES - STEEL DESIGN")).toBe(true);
     expect(s2kTable(omf, "PREFERENCES - STEEL DESIGN").length).toBe(1);
     expect(s2kTable(omf, "FRAME SECTION PROPERTIES 01 - GENERAL").length).toBe(273);
+    expect(s2kTable(omf, "LOAD PATTERN DEFINITIONS").find((row) => row.fields.get("LoadPat") === "W_D-1")?.fields.get("AutoLoad")).toBe("ASCE 7-16");
     expect(s2kTable(omf, "COMBINATION DEFINITIONS").length).toBeGreaterThan(87);
   });
 });
@@ -108,7 +109,9 @@ describe("24061_OMF.s2k (SAP2000 23.1.0, khung phẳng YZ, lb-ft)", () => {
     expect(model.jointLoads[0]!.values[1]).toBeCloseTo(17500 * LB, 9);
     expect(model.jointLoads[1]!.values[1]).toBeCloseTo(25600 * LB, 9);
     expect(model.jointLoads[0]!.values.filter((_, i) => i !== 1)).toEqual([0, 0, 0, 0, 0]);
-    expect(codes(r, "error")).toEqual([]);
+    expect(codes(r, "error")).toEqual(["automatic_load_unsupported"]);
+    expect(diag(r, "automatic_load_unsupported")?.count).toBe(36);
+    expect(model.loadPatterns.every((p) => p.name.length > 0)).toBe(true);
   });
 
   it("tổ hợp lồng nhau (ENV) trỏ tới tổ hợp khác; mọi thành phần trỏ tới trường hợp hoặc tổ hợp có thật", () => {
@@ -264,6 +267,13 @@ describe("bảng lò xo SAP2000 (chưa có file thật để kiểm chứng)", (
 });
 
 describe("bảng tải SAP2000 chưa được nhập", () => {
+  it("không bỏ sót AutoLoad khi không có bảng auto và không báo lỗi khi AutoLoad=None", () => {
+    const withAuto = roofText.replace('END TABLE DATA', 'TABLE:  "LOAD PATTERN DEFINITIONS"\r\n   LoadPat = WIND_EXTRA   DesignType=Wind   SelfWtMult=0   AutoLoad="ASCE 7-16"\r\n   LoadPat = OTHER   DesignType=Other   SelfWtMult=0   AutoLoad=None\r\nEND TABLE DATA');
+    const r = importS2k(withAuto);
+    const error = diag(r, "automatic_load_unsupported");
+    expect(error).toMatchObject({ level: "error", count: 1, params: { method: "ASCE 7-16" }, objects: ["WIND_EXTRA"] });
+    expect(r.model.loadPatterns.some((p) => p.name === "WIND_EXTRA")).toBe(true);
+  });
   it("báo lỗi riêng cho mỗi bảng tải có dữ liệu, không xếp thành thông tin", () => {
     const tables = [
       ['AREA LOADS - UNIFORM TO FRAME', 'Area=1 LoadPat=DEAD UnifLoad=1'],

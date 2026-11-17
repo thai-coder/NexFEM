@@ -182,7 +182,7 @@ Mô hình này đặt hầu hết đối tượng bằng DZ dưới một tầng
 
 ## SAP2000 `.s2k` / `.$2k`
 
-Báo cáo nhập phân loại các bảng tải nút/thanh/diện và tải động đất/gió tự động SAP2000 chưa hỗ trợ là **lỗi**. Khi báo cáo nhập CSI có lỗi, hộp thoại vẫn cho xem và sao chép báo cáo nhưng không mở mô hình; cần sửa nguồn hoặc chờ hỗ trợ. Quy tắc chặn lỗi áp dụng cho cả hai bộ nhập, không trộn thuật toán của ETABS và SAP2000. Các bảng chưa nhận diện ngoài nhóm trên vẫn cần rà soát; không coi bộ phân loại hiện nay là đầy đủ cho mọi tính năng CSI.
+Báo cáo nhập phân loại các bảng tải nút/thanh/diện và tải động đất/gió tự động SAP2000 chưa hỗ trợ là **lỗi**. Các pattern có `AutoLoad` khác `None` cũng báo lỗi kể cả khi file không xuất bảng tự động. Chặn mọi pattern như vậy là chính sách thận trọng, kể cả pattern chưa được case dùng; không coi tải nút có sẵn là thay thế tải tự động. Khi báo cáo nhập CSI có lỗi, hộp thoại vẫn cho xem và sao chép báo cáo nhưng không mở mô hình; cần sửa nguồn hoặc chờ hỗ trợ. Quy tắc chặn lỗi áp dụng cho cả hai bộ nhập, không trộn thuật toán của ETABS và SAP2000. Các bảng chưa nhận diện ngoài nhóm trên vẫn cần rà soát; không coi bộ phân loại hiện nay là đầy đủ cho mọi tính năng CSI.
 
 File thật trong repo: `tests/fixtures/csi/sap2000/` (xem README: nguồn, SHA-256). Cú pháp: mỗi bảng mở bằng `TABLE:  "TÊN"` (một file thật có tiêu đề thiếu dấu ngoặc kép đóng), bản ghi là các cặp `Tên=Giá trị` (giá trị có dấu cách nằm trong ngoặc kép), ` _` cuối dòng nối bản ghi sang dòng sau, kết thúc bằng `END TABLE DATA`.
 

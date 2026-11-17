@@ -728,6 +728,7 @@ export const en: Strings = {
       area_spring_mesh_failed: "Could not split the slab while preserving its area. Area springs were assigned to the corner joints only.",
       section_ignored: "Section \"{section}\" ignored ({records} lines): not used by the analysis model",
       load_table_unsupported: "Load table \"{section}\" was not imported ({records} lines): loads are missing and the model cannot be opened for analysis",
+      automatic_load_unsupported: "Load pattern uses automatic loading {method}, which was not imported or regenerated: the model cannot be opened for analysis",
       no_supports_imported: "The imported model has no supports (for example the file relies on springs, not supported yet): assign supports before analysis",
     },
   },

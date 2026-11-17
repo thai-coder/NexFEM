@@ -113,24 +113,15 @@ test("menu Nhập file: mỗi định dạng một mục riêng, DXF/IFC/Excel �
   await expect(sub.getByRole("menuitem", { name: /DXF/ })).toContainText("GĐ 8");
 });
 
-test("nhập file SAP2000 thật (.s2k): báo cáo rồi mở mô hình", async ({ page }) => {
+test("file SAP2000 thật có tải tự động chưa hỗ trợ: báo cáo và chặn mở", async ({ page }) => {
   await importFixture(page, SAP("24061_OMF.s2k"), "SAP2000 (.s2k, .$2k)…");
   await expect(page.getByTestId("dlg-csiImport")).toContainText("Nhập file SAP2000");
   await expect(page.getByTestId("csi-source")).toContainText("SAP2000 23.1.0");
   await expect(page.getByTestId("csi-source")).toContainText("LB, FT");
-  await expect(page.getByTestId("csi-error")).toHaveCount(0);
+  await expect(page.getByTestId("csi-error")).toContainText("Mẫu tải dùng tải tự động ASCE 7-16");
   await expect(page.getByTestId("csi-info")).toContainText("Góc xoay trục địa phương của thanh được nhập");
-  await page.getByTestId("csi-open").click();
-  const m = await model(page);
-  expect(m.name).toBe("24061_OMF");
-  expect(m.frames.map((f) => f.kind)).toEqual(["column", "column", "beam"]);
-  expect(m.frames.map((f) => f.angle)).toEqual([90, 90, undefined]);
-  expect(m.combos.length).toBe(87);
-  expect(m.jointLoads.length).toBe(2);
-  await expect(page.getByTestId("bottom")).toContainText("Đã nhập 24061_OMF.s2k");
-  // Khung phẳng có gối, góc xoay cột và tải nút: chạy được bộ giải.
-  await page.keyboard.press("F5");
-  await expect(page.getByTestId("bottom")).toContainText("Phân tích xong");
+  await expect(page.getByTestId("csi-open")).toBeDisabled();
+  expect((await model(page)).name).toBe("Toa_nha_A");
 });
 
 test("file SAP2000 25 có mặt None (.2k)", async ({ page }) => {

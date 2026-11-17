@@ -729,6 +729,7 @@ export const vi = {
       area_spring_mesh_failed: "Không chia được tấm mà vẫn bảo toàn diện tích. Lò xo nền được quy về các nút góc.",
       section_ignored: "Bỏ qua phần \"{section}\" ({records} dòng): không dùng cho mô hình phân tích",
       load_table_unsupported: "Không nhập bảng tải \"{section}\" ({records} dòng): mô hình thiếu tải và không thể mở để phân tích",
+      automatic_load_unsupported: "Mẫu tải dùng tải tự động {method} chưa được nhập hoặc tính lại: mô hình không thể mở để phân tích",
       no_supports_imported: "Mô hình không có gối sau khi nhập (ví dụ file dùng lò xo nền chưa hỗ trợ): cần gán gối trước khi phân tích",
     },
   },

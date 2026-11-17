@@ -8,3 +8,10 @@
 - Playwright: đã viết test UI nhưng chưa chạy thành công; browser Playwright thiếu, Chromium hệ thống bị sandbox từ chối socket. CI và nghiệm thu Windows chưa chạy.
 - Bước tiếp: chạy CI trên PR; review độc lập ảnh hưởng việc chặn mở khi có lỗi cho cả ETABS/SAP2000 và kiểm tra các bảng chưa phân loại; chủ dự án nghiệm thu Windows. Sau đó sửa riêng khả năng nhập tải, tiết diện góc và liên kết bán cứng.
 - Không thay đổi solver, không chứng nhận tương đương SAP2000, không khẳng định sai số 1–2%.
+
+## Cập nhật review — 17/11/2026 (UTC+7)
+
+- CI [run 180](https://github.com/thai-coder/NexFEM/actions/runs/44011685326) đạt tại HEAD cũ `b103904`: Rust, typecheck/test, 103 Playwright (gồm test chặn mở), build và test bộ cài Windows tự động. Không thay thế nghiệm thu thực tế.
+- Phát hiện trong review: mẫu `24061_OMF.s2k` có 36 `AutoLoad="ASCE 7-16"` nhưng không có bảng auto tương ứng; HEAD cũ không báo lỗi. Trong đó 24 dòng `LoadPat = ...` bị parser bỏ tên vì có khoảng trắng quanh dấu bằng. Đã xử lý bằng cách báo lỗi mọi AutoLoad khác None ngay ở pattern và chấp nhận khoảng trắng quanh dấu bằng; chính sách thận trọng chặn cả pattern chưa được dùng. Không khẳng định dữ liệu tải tự động đã được nhập.
+- Ở bản sửa mới: 68 test io-formats, 4 test chính sách/i18n, typecheck io-formats/desktop/e2e và build Vite đạt cục bộ. Mô hình 26.2.0 được kiểm kê có 2 AutoLoad và 3 bảng tải chưa hỗ trợ được báo lỗi. Test UI mới cần CI; CI của HEAD cũ không chứng minh HEAD mới đạt.
+- Hành động tiếp: chờ CI HEAD mới, review độc lập và nghiệm thu Windows. Không merge khi chưa có review phù hợp vùng nguy cơ cao.
