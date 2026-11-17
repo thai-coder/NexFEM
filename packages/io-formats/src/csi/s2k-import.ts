@@ -67,6 +67,9 @@ const TABLES_USED = new Set([
   "JOINT LOADS - GROUND DISPLACEMENT",
 ]);
 
+// These tables are display or reporting metadata, not load/analysis input.
+const SAFE_IGNORED_TABLES = new Set(["PROJECT INFORMATION", "OPTIONS - COLORS - DISPLAY", "OPTIONS - COLORS - OUTPUT", "MATERIAL LIST 1 - BY OBJECT TYPE", "MATERIAL LIST 2 - BY SECTION PROPERTY"]);
+
 /** Ngưỡng so đặc trưng tiết diện NexFEM tự tính với giá trị SAP2000 ghi trong file. */
 const PROP_TOL = { A: 0.01, I: 0.01, J: 0.05 } as const;
 
@@ -96,7 +99,7 @@ export function importS2k(input: string | S2kFile, opts: { name?: string } = {})
   if (fmt && f(fmt, "UnitsCurr") && !s2kYes(f(fmt, "UnitsCurr"))) d.add("warning", "units_not_current", {});
   if (!U) {
     d.add("error", unitText ? "unknown_units" : "missing_units", { force: uf ?? "?", length: ul ?? "?" });
-    return { model: emptyModel(opts.name ?? modelName), report: { program, version, units: null, counts, diagnostics: d.list(), mapping: { joints: {}, frames: {}, shells: {} } } };
+    return { model: emptyModel(opts.name ?? modelName), report: { program, version, units: null, counts, diagnostics: d.list(), blocked: true, mapping: { joints: {}, frames: {}, shells: {} } } };
   }
   d.add("info", "unit_conversion", { force: U.force, length: U.length });
   const L = (v: number) => conv.length(U, v);
@@ -522,7 +525,7 @@ export function importS2k(input: string | S2kFile, opts: { name?: string } = {})
       const sf = n(it, "LoadSF");
       if ((f(it, "LoadType") ?? "").toLowerCase() !== "load pattern") d.add("error", "case_item_unsupported", { type: f(it, "LoadType") ?? "?" }, { line: it.line, object: name });
       else if (pat && Number.isFinite(sf)) loads.push({ pattern: pat, factor: sf });
-      else d.add("warning", "case_item_missing", { pattern: f(it, "LoadName") ?? "?" }, { line: it.line, object: name });
+      else d.add("error", "case_item_missing", { pattern: f(it, "LoadName") ?? "?" }, { line: it.line, object: name });
     }
     const id = `lc-${loadCases.length + 1}`;
     loadCases.push({ id, name, type: kind, loads });
@@ -552,7 +555,7 @@ export function importS2k(input: string | S2kFile, opts: { name?: string } = {})
       if (cn === undefined) continue;
       const target = caseByName.get(cn) ?? comboId.get(cn);
       if (target && Number.isFinite(sf)) items.push({ case: target, factor: sf });
-      else d.add("warning", "combo_item_missing", { item: cn }, at);
+      else d.add("error", "combo_item_missing", { item: cn }, at);
     }
     if (head && ["SteelDesign", "ConcDesign", "AlumDesign", "ColdDesign"].some((k) => head.fields.has(k))) d.add("info", "combo_design_ignored", {}, at);
     combos.push({ id: comboId.get(name)!, name, type, items });
@@ -704,13 +707,8 @@ export function importS2k(input: string | S2kFile, opts: { name?: string } = {})
       d.add("error", "springs_not_verified", { section: name, records: recs.length }, { line: file.tableLines.get(name) });
       continue;
     }
-    // Tải không được nhập có thể làm mất lực mà vẫn tạo load pattern/case hợp lệ.
-    // Đây là lỗi, không phải thông tin về bảng metadata bị bỏ qua.
-    if (/^(?:JOINT|POINT|FRAME|AREA|SHELL|SOLID|LINK|CABLE|TENDON) LOADS(?:\s|$)/.test(name) || /^AUTO (?:SEISMIC|WIND)(?:\s|$)/.test(name)) {
-      d.add("error", "load_table_unsupported", { section: name, records: recs.length }, { line: file.tableLines.get(name) });
-      continue;
-    }
-    d.add("info", "section_ignored", { section: name, records: recs.length }, { line: file.tableLines.get(name) });
+    const safe = SAFE_IGNORED_TABLES.has(name);
+    d.add(safe ? "info" : "error", safe ? "section_ignored" : "section_unverified", { section: name, records: recs.length }, { line: file.tableLines.get(name) });
   }
 
   const model = parseModel({
@@ -741,6 +739,7 @@ export function importS2k(input: string | S2kFile, opts: { name?: string } = {})
       units: { force: U.force, length: U.length, temperature: U.temperature },
       counts,
       diagnostics: d.list(),
+      blocked: d.blocked,
       mapping: {
         joints: Object.fromEntries([...jointByName].map(([k, v]) => [k, v.id])),
         frames: Object.fromEntries([...frameByName].map(([k, v]) => [k, split.segments.get(v.id)?.[0]?.id ?? v.id])),

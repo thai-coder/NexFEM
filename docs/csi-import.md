@@ -1,6 +1,6 @@
 # Nhập file văn bản CSI: ETABS `.e2k` và SAP2000 `.s2k`
 
-Cập nhật 14/11/2026. Thuộc mốc **M1 — CSI Text Import MVP** trong [kế hoạch nhập và đối chiếu CSI](https://github.com/thai-coder/NexFEM/blob/main/docs/CSI_IMPORT_VALIDATION_PLAN.md). Cả hai bộ nhập đã kiểm tra trên file thật (ETABS 23.2.0; SAP2000 23.1.0 và 25.3.1). Chưa đối chiếu kết quả phân tích (M2 bị chặn vì chưa có bảng kết quả xuất từ ETABS/SAP2000).
+Cập nhật 17/11/2026. Thuộc mốc **M1 — CSI Text Import MVP** trong [kế hoạch nhập và đối chiếu CSI](https://github.com/thai-coder/NexFEM/blob/main/docs/CSI_IMPORT_VALIDATION_PLAN.md). Cả hai bộ nhập đã kiểm tra trên file thật (ETABS 23.2.0; SAP2000 23.1.0 và 25.3.1). Đã có bảng kết quả SAP2000 để chuẩn bị đối chiếu; chưa chứng minh tương đương kết quả phân tích.
 
 ## Dùng trong app
 
@@ -21,7 +21,9 @@ Chọn file → hộp thoại báo cáo nhập. Báo cáo gồm:
 - mục **Nhập gần đúng / bỏ thuộc tính** (mức `warning`);
 - mục **Ghi chú** (mức `info`): dữ liệu không ảnh hưởng mô hình phân tích tuyến tính.
 
-Mỗi mục ghi số lần gặp và tối đa 20 tên đối tượng trong file nguồn. Người dùng xem báo cáo rồi mới bấm **Mở mô hình đã nhập**. Bấm Huỷ thì mô hình hiện tại không đổi.
+Mỗi mục ghi số lần gặp và tối đa 20 tên đối tượng trong file nguồn. `report.blocked` do `io-formats` đặt khi có lỗi: các consumer phải từ chối dùng model cho phân tích nếu cờ bật. Giao diện cho xem/sao chép báo cáo nhưng chặn mở khi `blocked=true`; bấm Huỷ thì mô hình hiện tại không đổi. Đây không phải bảo vệ bắt buộc ở schema/bộ giải đối với consumer tự ý bỏ qua cờ.
+
+Hai bộ nhập dùng danh sách tường minh: phần đã xử lý và một số phần thông tin thuần túy được phép; phần khác có bản ghi được báo lỗi chưa kiểm chứng. Đây là lựa chọn thận trọng, có thể chặn cả model từng mở được. Không tự coi phần chưa biết là vô hại; cần phân tích từng phần trước khi thêm vào danh sách. Các thuộc tính chưa biết trong mẫu tải ETABS cũng bị chặn. Các phần đã nhận diện vẫn có giới hạn theo báo cáo; không coi cờ không chặn là chứng nhận tính đúng.
 
 ## Mã nguồn
 
@@ -172,7 +174,7 @@ Test: `joint_forces_and_moments_in_global_axes` (bộ giải: công xôn với l
 | Tải tập trung tại nút | 31 | 31 | 8 tại nút đầu thanh; 23 ở điểm riêng nằm trên dầm, đổi thành tải tập trung trên dầm |
 | Trường hợp tải / tổ hợp | 12 / 87 | 12 / 87 | |
 
-Báo cáo nhập file ETABS mẫu **không còn lỗi**. Mô hình dùng lò xo nút thay cho gối, như file gốc. **F5 chạy được** (cân bằng lực đúng ở mọi trường hợp), với cảnh báo 8 bậc tự do mất ổn định không chịu tải được thêm độ cứng rất nhỏ, ví dụ nút 253 theo X (xem "Ổn định hoá cơ cấu"). Kết quả số **chưa dùng được** và **chưa so được với ETABS**:
+Trước khi áp dụng chính sách danh sách cho phép, báo cáo nhập file ETABS mẫu không còn lỗi. Hiện file này bị chặn vì có các phần chưa kiểm chứng. Ở phiên bản cũ mô hình dùng lò xo nút thay cho gối và **F5 chạy được** (cân bằng lực đúng ở mọi trường hợp), với cảnh báo 8 bậc tự do mất ổn định không chịu tải được thêm độ cứng rất nhỏ, ví dụ nút 253 theo X (xem "Ổn định hoá cơ cấu"). Kết quả số **chưa dùng được** và **chưa so được với ETABS**:
 
 - **Tải ngang (WX, WY, EX, EY):** chuyển vị hàng chục tới hàng trăm mét. Theo phương ngang, file gốc chỉ có lò xo nền ngang cực nhỏ (U1 = U2 = 8,68e-5 lb/in³, khoảng 1e-6 lần độ cứng đứng) và không có gối nào.
 - **Tĩnh tải (CDL):** đã sửa bằng cách chia tấm tại nút nằm bên trong (xem "Lò xo nút"). Chân cột C3 (nút 57) giữa móng F17 nay nhận lò xo nền; lún lớn nhất 9,3 cm (trước 40,6 m).
@@ -182,7 +184,7 @@ Mô hình này đặt hầu hết đối tượng bằng DZ dưới một tầng
 
 ## SAP2000 `.s2k` / `.$2k`
 
-Báo cáo nhập phân loại các bảng tải nút/thanh/diện và tải động đất/gió tự động SAP2000 chưa hỗ trợ là **lỗi**. Các pattern có `AutoLoad` khác `None` cũng báo lỗi kể cả khi file không xuất bảng tự động. Chặn mọi pattern như vậy là chính sách thận trọng, kể cả pattern chưa được case dùng; không coi tải nút có sẵn là thay thế tải tự động. Khi báo cáo nhập CSI có lỗi, hộp thoại vẫn cho xem và sao chép báo cáo nhưng không mở mô hình; cần sửa nguồn hoặc chờ hỗ trợ. Quy tắc chặn lỗi áp dụng cho cả hai bộ nhập, không trộn thuật toán của ETABS và SAP2000. Các bảng chưa nhận diện ngoài nhóm trên vẫn cần rà soát; không coi bộ phân loại hiện nay là đầy đủ cho mọi tính năng CSI.
+Báo cáo nhập phân loại các bảng tải nút/thanh/diện và tải động đất/gió tự động SAP2000 chưa hỗ trợ là **lỗi**. Các pattern có `AutoLoad` khác `None` cũng báo lỗi kể cả khi file không xuất bảng tự động. Chặn mọi pattern như vậy là chính sách thận trọng, kể cả pattern chưa được case dùng; không coi tải nút có sẵn là thay thế tải tự động. Khi báo cáo nhập CSI có lỗi, hộp thoại vẫn cho xem và sao chép báo cáo nhưng không mở mô hình; cần sửa nguồn hoặc chờ hỗ trợ. Quy tắc chặn lỗi áp dụng cho cả hai bộ nhập, không trộn thuật toán của ETABS và SAP2000. Các bảng chưa nằm trong danh sách xử lý hoặc danh sách metadata cho phép được báo lỗi chưa kiểm chứng; danh sách này chưa chứng minh mọi thuộc tính trong bảng đã xử lý đều được hỗ trợ.
 
 File thật trong repo: `tests/fixtures/csi/sap2000/` (xem README: nguồn, SHA-256). Cú pháp: mỗi bảng mở bằng `TABLE:  "TÊN"` (một file thật có tiêu đề thiếu dấu ngoặc kép đóng), bản ghi là các cặp `Tên=Giá trị` (giá trị có dấu cách nằm trong ngoặc kép), ` _` cuối dòng nối bản ghi sang dòng sau, kết thúc bằng `END TABLE DATA`.
 
@@ -237,7 +239,7 @@ File OMF là khung phẳng YZ, hai cột xoay 90°: nhờ góc xoay, trục 2 c�
 - `packages/io-formats/test/e2k-fixture.test.ts` (file thật): toàn vẹn byte, số bản ghi theo ghi chú tiếp nhận, đơn vị, tầng, lưới, vật liệu, tiết diện, hướng cột, nhả liên kết, tải, tổ hợp lồng nhau, mã báo cáo, mô hình hợp lệ, nhập hai lần cho cùng kết quả.
 - `packages/io-formats/test/e2k-synthetic.test.ts` (dữ liệu tự tạo, ghi rõ trong file): gối, nhiều tầng, gộp nút, đơn vị lạ, Windows-1252.
 - `apps/desktop/src/services/csiImport.test.ts`: mọi mã báo cáo của cả hai bộ nhập có bản dịch tiếng Việt và tiếng Anh.
-- `tests/e2e/specs/e2k-import.spec.ts`: menu con Nhập file, nhập file ETABS và SAP2000 thật qua menu, kiểm tra báo cáo, mở mô hình, F5 bị chặn vì thiếu gối (ETABS), F5 chạy được (SAP2000 OMF), Huỷ, file `.sdb`, chọn nhầm mục.
+- `tests/e2e/specs/e2k-import.spec.ts`: menu con Nhập file, nhập file ETABS và SAP2000 thật qua menu, kiểm tra báo cáo, kiểm tra chặn khi còn phần chưa kiểm chứng, F5 trên mô hình ETABS tổng hợp được hỗ trợ, Huỷ, file `.sdb`, chọn nhầm mục.
 - `tests/e2e/specs/ui2.spec.ts`: sửa góc xoay trục trong Properties, gán tải tại nút.
 
 ## Việc tiếp theo

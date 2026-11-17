@@ -25,7 +25,7 @@ export function CsiImportDialog({ onClose }: { onClose(): void }) {
   if (!result) return null;
   const { model, report } = result;
   // Không mở mô hình thiếu dữ liệu ảnh hưởng phân tích: xem/sao chép báo cáo và sửa nguồn trước.
-  const { readable, hasImportErrors, canOpen } = csiImportPolicy(result.format, report.units, report.diagnostics);
+  const { readable, hasImportErrors, canOpen } = csiImportPolicy(result.format, report.units, report.blocked);
   const program = result.format === "e2k" ? "ETABS" : result.format === "s2k" || result.format === "sdb" ? "SAP2000" : report.program || "CSI";
   const close = () => {
     clear();

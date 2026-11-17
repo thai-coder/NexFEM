@@ -15,3 +15,11 @@
 - Phát hiện trong review: mẫu `24061_OMF.s2k` có 36 `AutoLoad="ASCE 7-16"` nhưng không có bảng auto tương ứng; HEAD cũ không báo lỗi. Trong đó 24 dòng `LoadPat = ...` bị parser bỏ tên vì có khoảng trắng quanh dấu bằng. Đã xử lý bằng cách báo lỗi mọi AutoLoad khác None ngay ở pattern và chấp nhận khoảng trắng quanh dấu bằng; chính sách thận trọng chặn cả pattern chưa được dùng. Không khẳng định dữ liệu tải tự động đã được nhập.
 - Ở bản sửa mới: 68 test io-formats, 4 test chính sách/i18n, typecheck io-formats/desktop/e2e và build Vite đạt cục bộ. Mô hình 26.2.0 được kiểm kê có 2 AutoLoad và 3 bảng tải chưa hỗ trợ được báo lỗi. Test UI mới cần CI; CI của HEAD cũ không chứng minh HEAD mới đạt.
 - Hành động tiếp: chờ CI HEAD mới, review độc lập và nghiệm thu Windows. Không merge khi chưa có review phù hợp vùng nguy cơ cao.
+
+## Cập nhật 17/11/2026 — danh sách cho phép và cờ chặn
+
+- Phạm vi: yêu cầu tiếp theo của chủ dự án, gồm lỗi tham chiếu thiếu, danh sách cho phép fail-closed, cờ chặn tại io-formats và cùng quy tắc kiểm tra cho ETABS.
+- `case_item_missing` và `combo_item_missing` là lỗi cho cả hai định dạng; ETABS cũng báo lỗi tham chiếu thiếu hệ số. Từng bộ nhập chỉ bỏ qua các phần metadata được ghi rõ trong danh sách cho phép; phần có dữ liệu không được nhận diện thành lỗi `section_unverified`. Thuộc tính load pattern ETABS ngoài tập đã kiểm tra cũng báo lỗi.
+- `report.blocked` được tạo ở io-formats cho mọi đường trả về; giao diện tiêu thụ cờ này. Không phải cơ chế cứng trong schema/bộ giải: consumer tự ý bỏ qua cờ vẫn có thể dùng `model` và phải được sửa riêng nếu tồn tại.
+- Hệ quả có chủ đích: các file thật ETABS mẫu và SAP Roof đang bị chặn vì có các phần chưa kiểm chứng; không xóa/bỏ dữ liệu nguồn, cần kiểm chứng từng bảng để hỗ trợ. Không kết luận file không an toàn hay nguồn sai.
+- Kiểm tra tại cây đang chuẩn bị commit: 76 test io-formats, 11 test desktop, typecheck io-formats/desktop/e2e và build Vite đạt. Test Playwright đã cập nhật, chưa chạy cục bộ do Chromium bị sandbox chặn socket. Chờ CI và review độc lập; không tuyên bố tương đương hoặc 1–2%.

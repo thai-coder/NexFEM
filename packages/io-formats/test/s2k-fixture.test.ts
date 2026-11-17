@@ -109,7 +109,8 @@ describe("24061_OMF.s2k (SAP2000 23.1.0, khung phẳng YZ, lb-ft)", () => {
     expect(model.jointLoads[0]!.values[1]).toBeCloseTo(17500 * LB, 9);
     expect(model.jointLoads[1]!.values[1]).toBeCloseTo(25600 * LB, 9);
     expect(model.jointLoads[0]!.values.filter((_, i) => i !== 1)).toEqual([0, 0, 0, 0, 0]);
-    expect(codes(r, "error")).toEqual(["automatic_load_unsupported"]);
+    expect(codes(r, "error")).toContain("automatic_load_unsupported");
+    expect(report.blocked).toBe(true);
     expect(diag(r, "automatic_load_unsupported")?.count).toBe(36);
     expect(model.loadPatterns.every((p) => p.name.length > 0)).toBe(true);
   });
@@ -164,7 +165,8 @@ describe("Roof_model.2k (SAP2000 25.3.1, kip-ft, mặt None)", () => {
       combos: { source: 18, imported: 18 },
       shellLoads: { source: 16, imported: 16 },
     });
-    expect(codes(r, "error")).toEqual([]);
+    expect(codes(r, "error")).toContain("section_unverified");
+    expect(report.blocked).toBe(true);
   });
 
   it("AutoMesh tại nút (AtJoints=Yes): 7 thanh có nút nằm trên thân được chia thành 14 đoạn", () => {
@@ -267,6 +269,24 @@ describe("bảng lò xo SAP2000 (chưa có file thật để kiểm chứng)", (
 });
 
 describe("bảng tải SAP2000 chưa được nhập", () => {
+  it("mô hình chỉ có các bảng được hỗ trợ và metadata cho phép không bị chặn", () => {
+    const input = ['TABLE:  "PROGRAM CONTROL"', '   ProgramName=SAP2000 CurrUnits="KN, m, C"', 'TABLE:  "JOINT COORDINATES"', '   Joint=1 CoordSys=GLOBAL CoordType=Cartesian XorR=0 Y=0 Z=0', 'TABLE:  "JOINT RESTRAINT ASSIGNMENTS"', '   Joint=1 U1=Yes U2=Yes U3=Yes R1=Yes R2=Yes R3=Yes', 'TABLE:  "PROJECT INFORMATION"', '   Name=Example', 'END TABLE DATA'].join('\n');
+    expect(importS2k(input).report.blocked).toBe(false);
+    expect(importCsi(input).report.blocked).toBe(false);
+  });
+  it("thiếu mẫu tải hoặc thành phần tổ hợp là lỗi chặn ở io-formats", () => {
+    const extra = 'TABLE:  "LOAD CASE DEFINITIONS"\r\n   Case=BADCASE Type=LinStatic\r\nTABLE:  "CASE - STATIC 1 - LOAD ASSIGNMENTS"\r\n   Case=BADCASE LoadType="Load pattern" LoadName=MISSING LoadSF=1\r\nTABLE:  "COMBINATION DEFINITIONS"\r\n   ComboName=BADCOMBO ComboType="Linear Add" CaseName=MISSING_CASE ScaleFactor=1\r\n';
+    const r = importS2k(roofText.replace('END TABLE DATA', extra + 'END TABLE DATA'));
+    expect(r.report.diagnostics).toEqual(expect.arrayContaining([expect.objectContaining({level: 'error', code: 'case_item_missing'}), expect.objectContaining({level: 'error', code: 'combo_item_missing'})]));
+    expect(r.report.blocked).toBe(true);
+  });
+  it("bảng lạ fail closed, chỉ metadata cho phép mới là info", () => {
+    const extra = 'TABLE:  "UNEXPECTED FORCES DATA"\r\n   X=1\r\nTABLE:  "PROJECT INFORMATION"\r\n   Name=Example\r\n';
+    const r = importS2k(roofText.replace('END TABLE DATA', extra + 'END TABLE DATA'));
+    expect(r.report.diagnostics).toContainEqual(expect.objectContaining({level: 'error', code: 'section_unverified', params: {section: 'UNEXPECTED FORCES DATA', records: 1}}));
+    expect(r.report.diagnostics).toContainEqual(expect.objectContaining({level: 'info', code: 'section_ignored', params: expect.objectContaining({section: 'PROJECT INFORMATION'})}));
+    expect(r.report.blocked).toBe(true);
+  });
   it("không bỏ sót AutoLoad khi không có bảng auto và không báo lỗi khi AutoLoad=None", () => {
     const withAuto = roofText.replace('END TABLE DATA', 'TABLE:  "LOAD PATTERN DEFINITIONS"\r\n   LoadPat = WIND_EXTRA   DesignType=Wind   SelfWtMult=0   AutoLoad="ASCE 7-16"\r\n   LoadPat = OTHER   DesignType=Other   SelfWtMult=0   AutoLoad=None\r\nEND TABLE DATA');
     const r = importS2k(withAuto);
@@ -285,7 +305,7 @@ describe("bảng tải SAP2000 chưa được nhập", () => {
     const extra = tables.map(([name, row]) => `TABLE:  "${name}"\r\n   ${row}\r\n`).join('');
     const r = importS2k(roofText.replace('END TABLE DATA', extra + 'END TABLE DATA'));
     for (const [name] of tables) {
-      expect(r.report.diagnostics.find((d) => d.code === 'load_table_unsupported' && d.params.section === name)).toMatchObject({level: 'error', params: {section: name, records: 1}});
+      expect(r.report.diagnostics.find((d) => d.code === 'section_unverified' && d.params.section === name)).toMatchObject({level: 'error', params: {section: name, records: 1}});
       expect(r.report.diagnostics.some((d) => d.code === 'section_ignored' && d.params.section === name)).toBe(false);
     }
   });
@@ -293,7 +313,7 @@ describe("bảng tải SAP2000 chưa được nhập", () => {
   it("bảng rỗng không tạo lỗi; các bảng tải được hỗ trợ không bị báo nhầm", () => {
     const text = roofText.replace('END TABLE DATA', 'TABLE:  "AREA LOADS - UNIFORM TO FRAME"\r\n\r\nEND TABLE DATA');
     const r = importS2k(text);
-    expect(r.report.diagnostics.some((d) => d.code === 'load_table_unsupported')).toBe(false);
+    expect(r.report.diagnostics.some((d) => d.code === 'section_unverified' && d.params.section === 'AREA LOADS - UNIFORM TO FRAME')).toBe(false);
     expect(r.report.counts.shellLoads!.imported).toBeGreaterThan(0);
   });
 });
@@ -305,6 +325,7 @@ describe("nhận diện định dạng", () => {
     expect(r.format).toBe("sdb");
     expect(r.report.diagnostics.map((d) => [d.code, d.params])).toEqual([["format_sdb_binary", { version: "25.3.1" }]]);
     expect(r.model.joints).toEqual([]);
+    expect(r.report.blocked).toBe(true);
   });
 
   it("file .s2k nhập qua importCsiFile như importS2k", () => {
@@ -320,6 +341,8 @@ describe("nhận diện định dạng", () => {
   });
 
   it("file văn bản lạ", () => {
-    expect(importCsi("hello").report.diagnostics.map((d) => d.code)).toEqual(["format_unknown"]);
+    const r = importCsi("hello");
+    expect(r.report.diagnostics.map((d) => d.code)).toEqual(["format_unknown"]);
+    expect(r.report.blocked).toBe(true);
   });
 });

@@ -728,6 +728,8 @@ export const vi = {
       area_spring_interior_nodes: "Tấm có nút nằm bên trong (ví dụ chân cột giữa móng): chia tấm tại các nút đó để quy lò xo nền, như chương trình gốc tự chia tấm; tổng diện tích và độ cứng giữ nguyên",
       area_spring_mesh_failed: "Không chia được tấm mà vẫn bảo toàn diện tích. Lò xo nền được quy về các nút góc.",
       section_ignored: "Bỏ qua phần \"{section}\" ({records} dòng): không dùng cho mô hình phân tích",
+      section_unverified: "Phần \"{section}\" ({records} dòng) chưa được kiểm chứng hoặc chưa hỗ trợ; không thể mở mô hình để phân tích",
+      pattern_property_unsupported: "Thuộc tính mẫu tải {key} chưa được kiểm chứng hoặc chưa hỗ trợ",
       load_table_unsupported: "Không nhập bảng tải \"{section}\" ({records} dòng): mô hình thiếu tải và không thể mở để phân tích",
       automatic_load_unsupported: "Mẫu tải dùng tải tự động {method} chưa được nhập hoặc tính lại: mô hình không thể mở để phân tích",
       no_supports_imported: "Mô hình không có gối sau khi nhập (ví dụ file dùng lò xo nền chưa hỗ trợ): cần gán gối trước khi phân tích",

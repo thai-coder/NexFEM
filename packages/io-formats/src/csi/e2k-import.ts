@@ -43,6 +43,8 @@ export interface E2kImportReport {
   /** Số bản ghi trong file và số đối tượng NexFEM tạo ra, theo loại. */
   counts: Record<string, { source: number; imported: number }>;
   diagnostics: ImportDiagnostic[];
+  /** An import containing blocking errors must not be opened for analysis. */
+  blocked: boolean;
   /** Tên ETABS → id NexFEM. Khoá nút/thanh/sàn có dạng `tên|tầng`. */
   mapping: { joints: Record<string, string>; frames: Record<string, string>; shells: Record<string, string> };
 }
@@ -119,6 +121,9 @@ const SECTIONS_USED = new Set([
   "AREA SPRING PROPERTIES",
 ]);
 
+// Explicitly identified as descriptive output only. Unknown sections fail closed.
+const SAFE_IGNORED_SECTIONS = new Set(["PROJECT INFORMATION", "LOG", "DIMENSION LINES"]);
+
 export function importE2k(input: string | E2kFile, opts: { name?: string } = {}): E2kImportResult {
   const file = typeof input === "string" ? parseE2k(input) : input;
   const d = new Diagnostics();
@@ -156,7 +161,7 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
   if (!u) {
     d.add("error", "missing_units");
     // Không biết đơn vị thì không đổi được số: trả về mô hình trống kèm báo cáo.
-    return { model: emptyImported(opts.name ?? (title || "ETABS")), report: { program, version, units: null, counts, diagnostics: d.list(), mapping: { joints: {}, frames: {}, shells: {} } } };
+    return { model: emptyImported(opts.name ?? (title || "ETABS")), report: { program, version, units: null, counts, diagnostics: d.list(), blocked: true, mapping: { joints: {}, frames: {}, shells: {} } } };
   }
   const U = u;
   d.add("info", "unit_conversion", { force: U.force, length: U.length });
@@ -675,6 +680,9 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
   for (const r of patRecs) {
     const name = r.tokens[1]?.text ?? "";
     const p = new Map(e2kPairs(r, 2));
+    for (const key of p.keys()) {
+      if (key !== "TYPE" && key !== "SELFWEIGHT") d.add("error", "pattern_property_unsupported", { key }, { line: r.line, object: name });
+    }
     const t = (p.get("TYPE")?.text ?? "").toLowerCase();
     const type: LoadPattern["type"] =
       t === "dead" ? "dead" : t === "super dead" ? "superDead" : t === "live" || t === "roof live" || t === "reducible live" ? "live" : t === "wind" ? "wind" : t === "seismic" || t === "quake" ? "seismic" : "other";
@@ -981,15 +989,19 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
     const loads: LoadCase["loads"] = [];
     let pending: string | null = null;
     for (const [k, v] of m.all) {
-      if (k === "LOADPAT") pending = v.text;
+      if (k === "LOADPAT") {
+        if (pending !== null) d.add("error", "case_item_missing", { pattern: pending }, at);
+        pending = v.text;
+      }
       else if (k === "SF" && pending !== null) {
         const pat = patByName.get(pending);
         const sf = e2kNumber(v.text);
         if (pat && Number.isFinite(sf)) loads.push({ pattern: pat, factor: sf });
-        else d.add("warning", "case_item_missing", { pattern: pending }, at);
+        else d.add("error", "case_item_missing", { pattern: pending }, at);
         pending = null;
       }
     }
+    if (pending !== null) d.add("error", "case_item_missing", { pattern: pending }, at);
     const id = `lc-${loadCases.length + 1}`;
     loadCases.push({ id, name, type: kind, loads });
     caseByName.set(name, id);
@@ -1013,15 +1025,19 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
     const items: LoadCombo["items"] = [];
     let ref: { name: string; combo: boolean } | null = null;
     for (const [k, v] of m.all) {
-      if (k === "LOADCASE" || k === "LOADCOMBO") ref = { name: v.text, combo: k === "LOADCOMBO" };
+      if (k === "LOADCASE" || k === "LOADCOMBO") {
+        if (ref) d.add("error", "combo_item_missing", { item: ref.name }, at);
+        ref = { name: v.text, combo: k === "LOADCOMBO" };
+      }
       else if (k === "SF" && ref) {
         const target = ref.combo ? comboId.get(ref.name) : caseByName.get(ref.name);
         const sf = e2kNumber(v.text);
         if (target && Number.isFinite(sf)) items.push({ case: target, factor: sf });
-        else d.add("warning", "combo_item_missing", { item: ref.name }, at);
+        else d.add("error", "combo_item_missing", { item: ref.name }, at);
         ref = null;
       } else if (k === "DESIGN" || k === "COMBOTYPE") d.add("info", "combo_design_ignored", {}, at);
     }
+    if (ref) d.add("error", "combo_item_missing", { item: ref.name }, at);
     combos.push({ id: comboId.get(name)!, name, type, items });
   }
   count("combos", comboRecs.size, combos.length);
@@ -1036,8 +1052,8 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
   const diaphragms = e2kSection(file, "DIAPHRAGM NAMES");
   if (diaphragms.length) d.add("info", "diaphragm_defined", { count: diaphragms.length });
   for (const [name, recs] of file.sections) {
-    if (SECTIONS_USED.has(name) || name.startsWith("STORIES") || !recs.length) continue;
-    d.add("info", "section_ignored", { section: name, records: recs.length }, { line: file.sectionLines.get(name) });
+    if (SECTIONS_USED.has(name) || !recs.length) continue;
+    d.add(SAFE_IGNORED_SECTIONS.has(name) ? "info" : "error", SAFE_IGNORED_SECTIONS.has(name) ? "section_ignored" : "section_unverified", { section: name, records: recs.length }, { line: file.sectionLines.get(name) });
   }
   if (!joints.some((j) => j.restraint?.some(Boolean) || j.springs?.some((k) => k > 0))) d.add("error", "no_supports_imported");
 
@@ -1070,6 +1086,7 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
       units: { force: U.force, length: U.length, temperature: U.temperature },
       counts,
       diagnostics: d.list(),
+      blocked: d.blocked,
       mapping: { joints: mappingJoints, frames: Object.fromEntries([...frameIdByKey].map(([k, id]) => [k, split.segments.get(id)?.[0]?.id ?? id])), shells: Object.fromEntries(shellIdByKey) },
     },
   };
