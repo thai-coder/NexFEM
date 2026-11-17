@@ -263,6 +263,31 @@ describe("bảng lò xo SAP2000 (chưa có file thật để kiểm chứng)", (
   });
 });
 
+describe("bảng tải SAP2000 chưa được nhập", () => {
+  it("báo lỗi riêng cho mỗi bảng tải có dữ liệu, không xếp thành thông tin", () => {
+    const tables = [
+      ['AREA LOADS - UNIFORM TO FRAME', 'Area=1 LoadPat=DEAD UnifLoad=1'],
+      ['AUTO SEISMIC - ASCE 7-22', 'LoadPat=EQX Dir=X'],
+      ['AUTO SEISMIC LOADS TO JOINTS', 'LoadPat=EQX Joint=1 FX=1'],
+      ['AUTO WIND - ASCE 7-22', 'LoadPat=WIND'],
+      ['FRAME LOADS - TEMPERATURE', 'Frame=1 LoadPat=T Temp=5'],
+    ];
+    const extra = tables.map(([name, row]) => `TABLE:  "${name}"\r\n   ${row}\r\n`).join('');
+    const r = importS2k(roofText.replace('END TABLE DATA', extra + 'END TABLE DATA'));
+    for (const [name] of tables) {
+      expect(r.report.diagnostics.find((d) => d.code === 'load_table_unsupported' && d.params.section === name)).toMatchObject({level: 'error', params: {section: name, records: 1}});
+      expect(r.report.diagnostics.some((d) => d.code === 'section_ignored' && d.params.section === name)).toBe(false);
+    }
+  });
+
+  it("bảng rỗng không tạo lỗi; các bảng tải được hỗ trợ không bị báo nhầm", () => {
+    const text = roofText.replace('END TABLE DATA', 'TABLE:  "AREA LOADS - UNIFORM TO FRAME"\r\n\r\nEND TABLE DATA');
+    const r = importS2k(text);
+    expect(r.report.diagnostics.some((d) => d.code === 'load_table_unsupported')).toBe(false);
+    expect(r.report.counts.shellLoads!.imported).toBeGreaterThan(0);
+  });
+});
+
 describe("nhận diện định dạng", () => {
   it("file .sdb nhị phân: báo rõ, không cố đọc", () => {
     expect(detectCsiBinary(sdbBytes)).toEqual({ format: "sdb", version: "25.3.1" });

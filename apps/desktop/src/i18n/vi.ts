@@ -587,6 +587,7 @@ export const vi = {
   csi: {
     title: "Nhập file {program}",
     nothingToOpen: "Không có mô hình để mở từ file này.",
+    importBlocked: "Không thể mở mô hình vì có lỗi nhập ảnh hưởng dữ liệu. Hãy xem báo cáo và sửa file nguồn hoặc chờ tính năng được hỗ trợ.",
     failed: "Không đọc được file: {message}",
     source: "File: {file} · {program} {version} · đơn vị trong file: {units}",
     unitsNote: "Mô hình NexFEM lưu theo kN, m; số liệu đã được đổi đơn vị.",
@@ -727,6 +728,7 @@ export const vi = {
       area_spring_interior_nodes: "Tấm có nút nằm bên trong (ví dụ chân cột giữa móng): chia tấm tại các nút đó để quy lò xo nền, như chương trình gốc tự chia tấm; tổng diện tích và độ cứng giữ nguyên",
       area_spring_mesh_failed: "Không chia được tấm mà vẫn bảo toàn diện tích. Lò xo nền được quy về các nút góc.",
       section_ignored: "Bỏ qua phần \"{section}\" ({records} dòng): không dùng cho mô hình phân tích",
+      load_table_unsupported: "Không nhập bảng tải \"{section}\" ({records} dòng): mô hình thiếu tải và không thể mở để phân tích",
       no_supports_imported: "Mô hình không có gối sau khi nhập (ví dụ file dùng lò xo nền chưa hỗ trợ): cần gán gối trước khi phân tích",
     },
   },

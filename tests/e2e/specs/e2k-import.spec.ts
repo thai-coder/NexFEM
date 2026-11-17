@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { fileURLToPath } from "node:url";
+import { readFileSync } from "node:fs";
 
 const FIXTURE = fileURLToPath(new URL("../../fixtures/csi/etabs/23217_SMFs 3D model_updated v4.e2k", import.meta.url));
 const MOMENT = fileURLToPath(new URL("../../fixtures/csi/synthetic/etabs-interior-moment.e2k", import.meta.url));
@@ -8,13 +9,23 @@ type M = { name: string; frames: { kind: string; label: string; angle?: number }
 const model = (page: Page) => page.evaluate(() => (window as unknown as { __nexfem: { model: { getState(): { model: unknown } } } }).__nexfem.model.getState().model as M);
 
 /** File → Nhập file → mục của chương trình (menu con, mỗi định dạng một mục riêng). */
-async function importFixture(page: Page, file = FIXTURE, item = "ETABS (.e2k)…") {
+async function importFixture(page: Page, file: string | { name: string; mimeType: string; buffer: Buffer } = FIXTURE, item = "ETABS (.e2k)…") {
   await page.getByRole("menuitem", { name: "File", exact: true }).click();
   await page.getByRole("menuitem", { name: "Nhập file" }).click();
   const [chooser] = await Promise.all([page.waitForEvent("filechooser"), page.getByRole("menu", { name: "Nhập file" }).getByRole("menuitem", { name: item }).click()]);
   await chooser.setFiles(file);
   await expect(page.getByTestId("dlg-csiImport")).toBeVisible();
 }
+
+test("SAP2000 bỏ bảng tải: báo lỗi và chặn mở mô hình", async ({ page }) => {
+  const source = readFileSync(SAP("Roof_model.2k"), "utf8");
+  const text = source.replace("END TABLE DATA", 'TABLE:  "AREA LOADS - UNIFORM TO FRAME"\r\n   Area=1 LoadPat=DEAD UnifLoad=1\r\nEND TABLE DATA');
+  await importFixture(page, { name: "unsupported-load.s2k", mimeType: "text/plain", buffer: Buffer.from(text) }, "SAP2000 (.s2k, .$2k)…");
+  await expect(page.getByTestId("csi-error")).toContainText("AREA LOADS - UNIFORM TO FRAME");
+  await expect(page.getByTestId("dlg-csiImport")).toContainText("Không thể mở mô hình vì có lỗi nhập");
+  await expect(page.getByTestId("csi-open")).toBeDisabled();
+  expect((await model(page)).name).toBe("Toa_nha_A");
+});
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => localStorage.clear());

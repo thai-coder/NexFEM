@@ -700,6 +700,12 @@ export function importS2k(input: string | S2kFile, opts: { name?: string } = {})
       d.add("error", "springs_not_verified", { section: name, records: recs.length }, { line: file.tableLines.get(name) });
       continue;
     }
+    // Tải không được nhập có thể làm mất lực mà vẫn tạo load pattern/case hợp lệ.
+    // Đây là lỗi, không phải thông tin về bảng metadata bị bỏ qua.
+    if (/^(?:JOINT|POINT|FRAME|AREA|SHELL|SOLID|LINK|CABLE|TENDON) LOADS(?:\s|$)/.test(name) || /^AUTO (?:SEISMIC|WIND)(?:\s|$)/.test(name)) {
+      d.add("error", "load_table_unsupported", { section: name, records: recs.length }, { line: file.tableLines.get(name) });
+      continue;
+    }
     d.add("info", "section_ignored", { section: name, records: recs.length }, { line: file.tableLines.get(name) });
   }
 
