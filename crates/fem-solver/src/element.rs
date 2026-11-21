@@ -166,6 +166,33 @@ pub fn point_feq(p: V3, a: f64, l: f64) -> [f64; 12] {
     ]
 }
 
+/// Tải tương đương tại nút (cục bộ) của tải phân bố tuyến tính trên đoạn [a, b] (khoảng cách từ đầu i),
+/// cường độ w0 tại a và w1 tại b. Bằng tích phân của `point_feq` với lực w(x)dx: tích hàm dạng (bậc ≤ 3) với tải
+/// bậc 1 có bậc ≤ 4, nên Gauss–Legendre 3 điểm là chính xác.
+pub fn linear_feq(w0: V3, w1: V3, a: f64, b: f64, l: f64) -> [f64; 12] {
+    const G: [(f64, f64); 3] = [
+        (-0.774_596_669_241_483_4, 5.0 / 9.0),
+        (0.0, 8.0 / 9.0),
+        (0.774_596_669_241_483_4, 5.0 / 9.0),
+    ];
+    let (mid, half) = ((a + b) / 2.0, (b - a) / 2.0);
+    let mut out = [0.0; 12];
+    for (xi, wt) in G {
+        let x = mid + half * xi;
+        let s = (x - a) / (b - a);
+        let w = [
+            w0[0] + s * (w1[0] - w0[0]),
+            w0[1] + s * (w1[1] - w0[1]),
+            w0[2] + s * (w1[2] - w0[2]),
+        ];
+        let f = point_feq(w, x, l);
+        for c in 0..12 {
+            out[c] += wt * half * f[c];
+        }
+    }
+    out
+}
+
 /// Ngưng tụ tĩnh các bậc tự do được nhả (`released[k]` = true): trả về k và f đã ngưng tụ,
 /// hàng/cột bị nhả bằng 0.
 pub fn condense(

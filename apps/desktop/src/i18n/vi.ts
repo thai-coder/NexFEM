@@ -216,6 +216,8 @@ export const vi = {
     invalid_diaphragm: "Diaphragm {name}: nút/cao độ/gối hoặc liên kết nhóm không hợp lệ",
     invalid_releases: "Thanh {name}: nhả liên kết cả hai đầu không hợp lệ",
     missing_load_target: "Tải {name}: đối tượng gán tải không tồn tại hoặc vị trí tải sai",
+    invalid_linear_load: "Tải {name}: đoạn tải hình thang không hợp lệ (cần 0 ≤ đầu < cuối ≤ 1 và cường độ hai đầu)",
+    linear_load_with_offsets: "Tải {name}: tải hình thang/từng đoạn trên thanh có vùng cứng chưa được hỗ trợ",
     missing_load_pattern: "{name}: mẫu tải không tồn tại",
     missing_load_case: "Tổ hợp {name}: trường hợp/tổ hợp tham chiếu không tồn tại",
     invalid_combo_cycle: "Tổ hợp {name} tham gia vòng phụ thuộc",

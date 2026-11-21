@@ -847,3 +847,339 @@ mod box_sections {
         assert!((j - 2.0 * 0.01 * 0.19f64.powi(2) * 0.19f64.powi(2) / 0.38).abs() < 1e-15);
     }
 }
+
+// ---------------------------------------------------------------- tải phân bố tuyến tính trên đoạn (kind "linear")
+// docs/plans/FRAME_LOAD_SEGMENTS_PLAN.md, mục 5. Nghiệm đóng đúng cho phần tử Euler–Bernoulli với tải bậc 1.
+
+fn linear(frame: &str, s: f64, e: f64, v0: f64, v1: f64, dir: &str) -> serde_json::Value {
+    json!({"id":format!("ll-{frame}-{s}-{e}"),"frame":frame,"pattern":"p","kind":"linear","direction":dir,
+           "value":v0,"valueEnd":v1,"start":s,"end":e})
+}
+
+fn beam_x(l: f64, ri: [bool; 6], rj: Option<[bool; 6]>, loads: serde_json::Value) -> Model {
+    let mut b = json!({"id":"b","label":"2","x":l,"y":0,"z":0});
+    if let Some(r) = rj {
+        b["restraint"] = json!(r);
+    }
+    model(
+        json!([{"id":"a","label":"1","x":0,"y":0,"z":0,"restraint":ri}, b]),
+        json!([{"id":"f","label":"B1","kind":"beam","i":"a","j":"b","section":"s"}]),
+        loads,
+    )
+}
+
+fn equilibrium(c: &crate::CaseResult) {
+    for k in 0..3 {
+        assert!(
+            (c.applied[k] + c.sum_reactions[k]).abs() < 1e-9 * (1.0 + c.applied[k].abs()),
+            "cân bằng {k}: {:?} {:?}",
+            c.applied,
+            c.sum_reactions
+        );
+    }
+}
+
+#[test]
+fn linear_triangular_load_on_cantilever() {
+    let (l, w): (f64, f64) = (6.0, 5.0);
+    let ei = E * I33;
+    // Tăng từ 0 ở ngàm tới w ở đầu tự do: δ = 11wL⁴/120EI, M ngàm = −wL²/3.
+    let r = run(&beam_x(
+        l,
+        FIX,
+        None,
+        json!([linear("f", 0.0, 1.0, 0.0, w, "gravity")]),
+    ));
+    let c = &r.cases[0];
+    equilibrium(c);
+    assert!(
+        close(
+            c.displacements["b"][2],
+            -11.0 * w * l.powi(4) / (120.0 * ei),
+            1e-9
+        ),
+        "δ = {}",
+        c.displacements["b"][2]
+    );
+    assert!(close(c.reactions["a"][2], w * l / 2.0, 1e-9));
+    assert!(close(c.reactions["a"][4], -w * l * l / 3.0, 1e-9));
+    assert!(close(c.frames["f"].m3[0], -w * l * l / 3.0, 1e-9));
+    // Tại x = L/2: phần tải [L/2, L] có cường độ w/2 → w, hợp lực 3wL/8 tại 5L/9 tính từ mặt cắt… kiểm bằng tích phân:
+    // M(x) = −∫ₓᴸ w t/L (t − x) dt = −w/L (L³/3 − xL²/2 + x³/6).
+    let x = l / 2.0;
+    let mx = -w / l * (l.powi(3) / 3.0 - x * l * l / 2.0 + x.powi(3) / 6.0);
+    assert!(
+        close(c.frames["f"].m3[4], mx, 1e-9),
+        "M(L/2) = {} / {mx}",
+        c.frames["f"].m3[4]
+    );
+    // Giảm từ w ở ngàm về 0: δ = wL⁴/30EI, M ngàm = −wL²/6.
+    let r = run(&beam_x(
+        l,
+        FIX,
+        None,
+        json!([linear("f", 0.0, 1.0, w, 0.0, "gravity")]),
+    ));
+    let c = &r.cases[0];
+    equilibrium(c);
+    assert!(close(
+        c.displacements["b"][2],
+        -w * l.powi(4) / (30.0 * ei),
+        1e-9
+    ));
+    assert!(close(c.frames["f"].m3[0], -w * l * l / 6.0, 1e-9));
+}
+
+#[test]
+fn linear_partial_uniform_load_on_cantilever() {
+    // Ca 135 → 90 kN·m của báo cáo nhập: tải 10 kN/m trên nửa ngoài công xôn 6 m.
+    let (l, w, a): (f64, f64, f64) = (6.0, 10.0, 3.0);
+    let ei = E * I33;
+    let r = run(&beam_x(
+        l,
+        FIX,
+        None,
+        json!([linear("f", a / l, 1.0, w, w, "gravity")]),
+    ));
+    let c = &r.cases[0];
+    equilibrium(c);
+    assert!(
+        close(c.frames["f"].m3[0], -135.0, 1e-9),
+        "M ngàm = {}",
+        c.frames["f"].m3[0]
+    );
+    assert!(close(c.reactions["a"][2], w * (l - a), 1e-9));
+    // δ đầu tự do = w/24EI · (3L⁴ − 4La³ + a⁴).
+    let d = -w / (24.0 * ei) * (3.0 * l.powi(4) - 4.0 * l * a.powi(3) + a.powi(4));
+    assert!(
+        close(c.displacements["b"][2], d, 1e-9),
+        "δ = {} / {d}",
+        c.displacements["b"][2]
+    );
+    // Mặt cắt trong đoạn không tải: M tuyến tính; trong đoạn tải: M = −w(L − x)²/2.
+    let ff = &c.frames["f"];
+    assert!(close(
+        ff.m3[2],
+        -w * (l - a) * ((l + a) / 2.0 - ff.x[2]),
+        1e-9
+    ));
+    assert!(close(ff.m3[4], -w * (l - a).powi(2) / 2.0, 1e-9));
+    assert!(close(ff.m3[6], -w * (l - ff.x[6]).powi(2) / 2.0, 1e-9));
+}
+
+#[test]
+fn linear_partial_load_on_simply_supported_beam() {
+    let (l, w): (f64, f64) = (6.0, 4.0);
+    let (a, b) = (1.5, 4.5);
+    let r = run(&beam_x(
+        l,
+        PIN,
+        Some(ROLLER),
+        json!([linear("f", a / l, b / l, w, w, "gravity")]),
+    ));
+    let c = &r.cases[0];
+    equilibrium(c);
+    let ri = w * (b - a) * (l - (a + b) / 2.0) / l;
+    assert!(close(c.reactions["a"][2], ri, 1e-9));
+    assert!(close(c.reactions["b"][2], w * (b - a) - ri, 1e-9));
+    let ff = &c.frames["f"];
+    assert!(close(ff.m3[2], ri * 1.5, 1e-9)); // x = 1.5 = a
+    assert!(close(ff.m3[4], ri * 3.0 - w * 1.5 * 0.75, 1e-9)); // giữa nhịp
+    assert!(ff.m3[8].abs() < 1e-9);
+    // Lực cắt đổi dốc đúng tại a và b: V tại hai trạm ngoài đoạn tải bằng phản lực.
+    assert!(close(ff.v2[1].abs(), ri, 1e-9));
+}
+
+#[test]
+fn linear_trapezoid_on_fixed_fixed_beam() {
+    // w0 = 2 tại i → w1 = 8 tại j: tổng của tải đều w0 và tam giác Δ = 6 tăng về j.
+    // M_i = w0L²/12 + ΔL²/30, M_j = w0L²/12 + ΔL²/20; R_i = w0L/2 + 3ΔL/20, R_j = w0L/2 + 7ΔL/20.
+    let (l, w0, w1): (f64, f64, f64) = (6.0, 2.0, 8.0);
+    let dw = w1 - w0;
+    let r = run(&beam_x(
+        l,
+        FIX,
+        Some(FIX),
+        json!([linear("f", 0.0, 1.0, w0, w1, "gravity")]),
+    ));
+    let c = &r.cases[0];
+    equilibrium(c);
+    let (mi, mj) = (
+        w0 * l * l / 12.0 + dw * l * l / 30.0,
+        w0 * l * l / 12.0 + dw * l * l / 20.0,
+    );
+    assert!(close(
+        c.reactions["a"][2],
+        w0 * l / 2.0 + 3.0 * dw * l / 20.0,
+        1e-9
+    ));
+    assert!(close(
+        c.reactions["b"][2],
+        w0 * l / 2.0 + 7.0 * dw * l / 20.0,
+        1e-9
+    ));
+    assert!(
+        close(c.reactions["a"][4], -mi, 1e-9),
+        "My_i = {}",
+        c.reactions["a"][4]
+    );
+    assert!(
+        close(c.reactions["b"][4], mj, 1e-9),
+        "My_j = {}",
+        c.reactions["b"][4]
+    );
+    assert!(close(c.frames["f"].m3[0], -mi, 1e-9));
+    assert!(close(*c.frames["f"].m3.last().unwrap(), -mj, 1e-9));
+}
+
+#[test]
+fn linear_full_span_constant_equals_distributed_in_every_direction() {
+    // Thanh xiên, có góc xoay trục địa phương, tải theo mọi phương: linear(0..1, w, w) phải trùng distributed(w).
+    for dir in [
+        "gravity", "globalX", "globalY", "globalZ", "localX", "local2", "local3",
+    ] {
+        let mk = |load: serde_json::Value| {
+            let mut m = model(
+                json!([{"id":"a","label":"1","x":0,"y":0,"z":0,"restraint":FIX},{"id":"b","label":"2","x":3,"y":2,"z":4,"restraint":FIX}]),
+                json!([{"id":"f","label":"B1","kind":"brace","i":"a","j":"b","section":"s","angle":30}]),
+                json!([load]),
+            );
+            m.frames[0].angle = Some(30.0);
+            run(&m)
+        };
+        let lin = mk(linear("f", 0.0, 1.0, 3.0, 3.0, dir));
+        let uni = mk(
+            json!({"id":"u","frame":"f","pattern":"p","kind":"distributed","direction":dir,"value":3.0}),
+        );
+        let (a, b) = (&lin.cases[0], &uni.cases[0]);
+        equilibrium(a);
+        for j in ["a", "b"] {
+            for k in 0..6 {
+                let (x, y) = (a.reactions[j][k], b.reactions[j][k]);
+                assert!(
+                    (x - y).abs() <= 1e-9 * (1.0 + y.abs()),
+                    "{dir} phản lực {j}[{k}]: {x} / {y}"
+                );
+            }
+        }
+        let (fa, fb) = (&a.frames["f"], &b.frames["f"]);
+        for (va, vb) in [
+            (&fa.m2, &fb.m2),
+            (&fa.m3, &fb.m3),
+            (&fa.v2, &fb.v2),
+            (&fa.v3, &fb.v3),
+            (&fa.p, &fb.p),
+            (&fa.t, &fb.t),
+        ] {
+            for (x, y) in va.iter().zip(vb.iter()) {
+                assert!(
+                    (x - y).abs() <= 1e-9 * (1.0 + y.abs()),
+                    "{dir} nội lực: {x} / {y}"
+                );
+            }
+        }
+    }
+}
+
+#[test]
+fn linear_load_with_released_end_matches_pinned_support() {
+    // Ngàm ở i; đầu j nhả M2, M3 (giữ T) trên gối ngàm ≡ gối khớp không nhả. Tải tam giác tăng về j.
+    let (l, w): (f64, f64) = (6.0, 5.0);
+    let load = json!([linear("f", 0.1, 0.9, 1.0, w, "gravity")]);
+    let mut released = beam_x(l, FIX, Some(FIX), load.clone());
+    released.frames[0].releases = serde_json::from_value(
+        json!({"i":[false,false,false,false,false,false],"j":[false,false,false,false,true,true]}),
+    )
+    .unwrap();
+    let pinned = beam_x(l, FIX, Some(PIN), load);
+    let (a, b) = (run(&released), run(&pinned));
+    let (ca, cb) = (&a.cases[0], &b.cases[0]);
+    equilibrium(ca);
+    assert!(close(ca.reactions["a"][2], cb.reactions["a"][2], 1e-9));
+    assert!(close(ca.reactions["a"][4], cb.reactions["a"][4], 1e-9));
+    assert!(
+        ca.frames["f"].m3.last().unwrap().abs() < 1e-9,
+        "M3 tại đầu nhả = 0"
+    );
+    for (x, y) in ca.frames["f"].m3.iter().zip(cb.frames["f"].m3.iter()) {
+        assert!((x - y).abs() < 1e-9 * (1.0 + y.abs()));
+    }
+}
+
+#[test]
+fn linear_load_cut_across_two_segments_equals_one_frame() {
+    // Dầm đơn giản 6 m, tải 2 → 8 kN/m trên [0,25; 0,9]. Chia tại x = 3: đoạn 1 nhận [0,5; 1] của nó với 2 → w(3),
+    // đoạn 2 nhận [0; 0,8] với w(3) → 8. Phản lực và góc xoay hai đầu phải trùng thanh liền.
+    let (l, w0, w1, s, e): (f64, f64, f64, f64, f64) = (6.0, 2.0, 8.0, 0.25, 0.9);
+    let one = run(&beam_x(
+        l,
+        PIN,
+        Some(ROLLER),
+        json!([linear("f", s, e, w0, w1, "gravity")]),
+    ));
+    let wm = w0 + (w1 - w0) * (3.0 - s * l) / ((e - s) * l);
+    let two = run(&model(
+        json!([{"id":"a","label":"1","x":0,"y":0,"z":0,"restraint":PIN},{"id":"m","label":"m","x":3,"y":0,"z":0},
+               {"id":"b","label":"2","x":l,"y":0,"z":0,"restraint":ROLLER}]),
+        json!([{"id":"f1","label":"B1-1","kind":"beam","i":"a","j":"m","section":"s"},
+               {"id":"f2","label":"B1-2","kind":"beam","i":"m","j":"b","section":"s"}]),
+        json!([
+            linear("f1", 0.5, 1.0, w0, wm, "gravity"),
+            linear("f2", 0.0, 0.8, wm, w1, "gravity")
+        ]),
+    ));
+    let (c1, c2) = (&one.cases[0], &two.cases[0]);
+    equilibrium(c2);
+    for j in ["a", "b"] {
+        assert!(close(c2.reactions[j][2], c1.reactions[j][2], 1e-9));
+        assert!(close(c2.displacements[j][4], c1.displacements[j][4], 1e-9));
+    }
+    assert!(
+        close(c2.frames["f1"].m3[8], c1.frames["f"].m3[4], 1e-9),
+        "M giữa nhịp"
+    );
+}
+
+#[test]
+fn linear_load_scales_in_combos_and_rejects_bad_input() {
+    let (l, w): (f64, f64) = (6.0, 5.0);
+    let r = run(&beam_x(
+        l,
+        FIX,
+        None,
+        json!([linear("f", 0.2, 0.7, w, 2.0 * w, "globalY")]),
+    ));
+    assert!(close(
+        r.cases[1].displacements["b"][1],
+        1.5 * r.cases[0].displacements["b"][1],
+        1e-12
+    ));
+    // Đoạn ngược, đoạn rỗng, thiếu cường độ cuối, loại tải lạ: lỗi rõ, không hiểu thành tải đều.
+    for bad in [
+        linear("f", 0.7, 0.2, w, w, "gravity"),
+        linear("f", 0.5, 0.5, w, w, "gravity"),
+        json!({"id":"x","frame":"f","pattern":"p","kind":"linear","direction":"gravity","value":w,"start":0.0,"end":1.0}),
+        json!({"id":"x","frame":"f","pattern":"p","kind":"trapezoid","direction":"gravity","value":w}),
+    ] {
+        let err = analyze(
+            &beam_x(l, FIX, None, json!([bad.clone()])),
+            &Options::default(),
+        )
+        .err();
+        assert!(
+            err.is_some_and(|e| e.code == "invalid_frame_load"),
+            "phải từ chối {bad}"
+        );
+    }
+    // Tải linear trên thanh có vùng cứng: chưa hỗ trợ (PR D), báo lỗi.
+    let mut m = beam_x(
+        l,
+        FIX,
+        None,
+        json!([linear("f", 0.0, 1.0, w, w, "gravity")]),
+    );
+    m.frames[0].offsets = Some(fem_core::FrameOffsets { i: 0.3, j: 0.0 });
+    assert!(analyze(&m, &Options::default())
+        .err()
+        .is_some_and(|e| e.code == "invalid_frame_load"));
+}

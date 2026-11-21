@@ -215,6 +215,8 @@ export const en: Strings = {
     invalid_diaphragm: "Diaphragm {name}: invalid joints, elevation, restraints or membership",
     invalid_releases: "Frame {name} has invalid releases at both ends",
     missing_load_target: "Load {name}: target missing or load position invalid",
+    invalid_linear_load: "Load {name}: invalid trapezoidal load segment (needs 0 ≤ start < end ≤ 1 and both intensities)",
+    linear_load_with_offsets: "Load {name}: trapezoidal/partial loads on frames with rigid end offsets are not supported yet",
     missing_load_pattern: "{name}: missing load pattern",
     missing_load_case: "Combination {name}: missing case/combination",
     invalid_combo_cycle: "Combination {name} has a circular dependency",

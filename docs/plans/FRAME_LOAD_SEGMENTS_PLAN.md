@@ -1,6 +1,6 @@
 # Kế hoạch: tải phân bố từng đoạn và hình thang trên thanh (`FrameLoad`)
 
-**Trạng thái:** ĐỀ XUẤT, chờ chủ dự án chốt các quyết định ở mục 3. Chưa có mã.
+**Trạng thái:** ĐÃ CHỐT D1–D3 và yêu cầu R1 (21/11/2026). PR A: mã xong, **chờ review chéo** (Claude, nhánh `claude/festive-ritchie-e8hzpu`; xem checkpoint cuối tài liệu).
 **Nơi điều phối chung:** [issue #22](https://github.com/thai-coder/NexFEM/issues/22). Mọi tác tử AI nhận việc, báo tiến độ và hỏi ở issue đó; tài liệu này là đặc tả.
 **Cập nhật:** 21/11/2026 (UTC+7).
 
@@ -26,7 +26,18 @@ Mục tiêu: biểu diễn **chính xác** tải phân bố tuyến tính trên 
 | Giao diện | `apps/desktop/src/dialogs/AssignDialogs.tsx`, `panels/properties/Properties.tsx`, `packages/viewer/src/viewer.ts` (vẽ tải), `packages/model-core/src/reports.ts`, `assign.ts`, `commands.ts`, i18n | thêm lựa chọn, nhập liệu và hình vẽ |
 | Truyền tải sàn | `analysis.rs` (tải sàn → thanh biên theo quy tắc 45°, dưới dạng tải đều tương đương) | **ngoài phạm vi** (xem mục 7) |
 
-## 3. Quyết định cần chủ dự án chốt trước khi viết mã
+## 3. Quyết định của chủ dự án
+
+**Đã chốt 21/11/2026:** đồng ý D1, D2, D3 như đề xuất dưới đây. Về `schemaVersion`: **giữ 1**. Thay đổi chỉ thêm (file cũ vẫn mở được, không cần chuyển đổi); bản cũ gặp `kind: "linear"` sẽ từ chối file vì giá trị enum lạ, không đọc sai. Tăng lên 2 thì mọi file cũ phải qua bước chuyển đổi mà không được gì thêm.
+
+**R1 (yêu cầu của chủ dự án): tải gắn theo thanh.** Tải lưu theo `frame` (id thanh) và vị trí **tương đối** (`start`, `end`, `at`), nên:
+- dời nút (`joint.move`) hoặc kéo dài thanh: tải đi theo, giữ vị trí tương đối (như `RelDist` của CSI; vị trí tuyệt đối đổi theo chiều dài mới);
+- sao chép/nhân bản (`replicate`: tịnh tiến, đối xứng, sang tầng) với tuỳ chọn sao chép tải: tải `linear` được chép đủ trường; với đối xứng, đầu i/j của thanh mới là ảnh của i/j cũ nên vị trí tương đối giữ nguyên;
+- lệnh dời/chia thanh trong tương lai (chưa có): dời phải giữ tải; chia phải cắt tải theo đoạn (dùng chung hàm cắt với bộ nhập, đặt trong `model-core`, không trong `io-formats`);
+- xoá thanh: xoá tải của nó (đã có).
+Mỗi điểm trên có test trong PR A (lệnh) hoặc PR C (giao diện).
+
+Đề xuất ban đầu:
 
 **D1. Hình dạng schema.** Đề xuất: thêm `kind: "linear"` với `start`, `end` (tương đối 0..1, `start < end`), `value` (cường độ tại `start`) và `valueEnd` (cường độ tại `end`). Giữ `distributed` như cũ.
 - Vì sao không thêm trường tuỳ chọn vào `distributed`: bản NexFEM cũ đọc file mới sẽ bỏ qua trường lạ và **âm thầm** coi là tải đều cả nhịp. Với `kind` mới, schema zod cũ từ chối file nên lỗi lộ ra.
@@ -42,7 +53,7 @@ Theo `docs/WORK_ROUTING.md`: schema và bộ giải là vùng nguy cơ cao (mô 
 
 | PR | Phạm vi | Phụ thuộc | Nguy cơ | Xong khi |
 | --- | --- | --- | --- | --- |
-| **A. Schema + bộ giải** | `schema.ts`, `model.schema.json` sinh lại, `model.rs` (từ chối `kind` lạ), `validation.ts` + kiểm tra Rust, `MemberLoad::Linear`, FEF, `stations()`, benchmark giải tích | D1, D2 | cao | mọi benchmark ở mục 5 đạt với sai số làm tròn; `cargo test`, `pnpm test` xanh; review chéo |
+| **A. Schema + bộ giải** | R1 cho các lệnh hiện có (dời nút, nhân bản, xoá) + hàm cắt tải theo đoạn trong `model-core`; `schema.ts`, `model.schema.json` sinh lại, `model.rs` (từ chối `kind` lạ), `validation.ts` + kiểm tra Rust, `MemberLoad::Linear`, FEF, `stations()`, benchmark giải tích | D1, D2 | cao | mọi benchmark ở mục 5 đạt với sai số làm tròn; `cargo test`, `pnpm test` xanh; review chéo |
 | **B. Bộ nhập CSI** | `s2k-import.ts`, `e2k-import.ts` tạo `linear`; `remapFrameLoads` cắt theo đoạn; bỏ lỗi `line_load_not_uniform` cho dạng đã hỗ trợ; nhiều bản ghi TRAPF nối tiếp trên một thanh | A đã merge | cao | test fixture: tổng lực và mômen tĩnh của tải nhập trùng với nguồn; file ETABS thật mở được không cần biến thể dẫn xuất; e2e mở + F5 |
 | **C. Giao diện** | Gán tải, Properties, vẽ hình thang, báo cáo, lệnh + Undo, i18n, e2e | A đã merge (có thể song song với B) | vừa | e2e gán, sửa, Undo, vẽ và giải một tải hình thang |
 | **D. (tuỳ chọn) Offset đầu thanh** | sửa gốc vị trí tải khi có vùng cứng, nếu D2 chọn chiều dài nút–nút | A | cao | benchmark thanh có offset; ghi thay đổi kết quả |
@@ -92,3 +103,18 @@ Thêm ca vào `tests/benchmarks/csi/generate-cases.mjs` khi PR B có đường n
 4. **Review chéo** bởi tác tử khác (mô hình khác càng tốt) trước khi merge. Người review ghi kết quả vào PR và tóm tắt trên issue.
 5. Câu hỏi thuộc quyền chủ dự án (D1–D3, thay đổi kết quả mô hình cũ) hỏi trên issue, không tự quyết.
 6. Khi PR merge: đánh dấu mục trong checklist của issue và cập nhật mục "Trạng thái" ở đầu tài liệu này.
+
+## Checkpoint — PR A (21/11/2026, UTC+7)
+
+- Trạng thái: REVIEW. Nhánh `claude/festive-ritchie-e8hzpu` (đã chứa PR #21 và `b7c5c80`). Người viết: Claude. Cần tác tử khác review.
+- Đã làm:
+  - Schema TS `kind: "linear"` + `start`, `end`, `valueEnd`; `model.schema.json` sinh lại; `schemaVersion` giữ 1. `checkModel`: `invalid_linear_load`, `linear_load_with_offsets`.
+  - Rust: `FrameLoad` thêm trường; bộ giải **từ chối `kind` lạ** (trước đây coi là tải đều), kiểm tra đoạn/cường độ, từ chối `linear` trên thanh có vùng cứng (chờ PR D); `MemberLoad::Linear`, `linear_feq` (Gauss 3 điểm trên `point_feq`, chính xác), nội lực tại trạm theo công thức đóng, cộng hợp lực vào kiểm tra cân bằng.
+  - 8 benchmark Rust (`crates/fem-solver/src/benchmarks.rs`, tiền tố `linear_`): tam giác hai chiều trên công xôn, tải một đoạn (ca 135 kN·m), dầm đơn giản tải một đoạn, hình thang trên dầm hai đầu ngàm, `linear` đều ≡ `distributed` theo 7 phương trên thanh xiên có góc xoay, đầu nhả ≡ gối khớp, cắt qua hai đoạn ≡ thanh liền, tổ hợp và đầu vào sai. Kiểm chứng đột biến: đổi Gauss 3 → 2 điểm hoặc sai công thức mômen tại trạm làm hỏng 3/8 test.
+  - R1: `loadOnSegment` (model-core) cắt tải theo đoạn, giữ hợp lực và mômen tĩnh (test); `remapFrameLoads` của bộ nhập dùng hàm này. Nhân bản giữ **góc xoay và vùng cứng** của thanh (trước đây mất, làm tải theo trục địa phương đổi phương); test dời nút, nhân bản tịnh tiến/đối xứng/sang tầng, tắt chép tải, Undo.
+  - Khung nhìn vẽ tải `linear` thành hình thang (tối thiểu, để không vẽ nhầm thành tải tập trung; giao diện đầy đủ ở PR C, chưa có e2e cho hình vẽ này).
+- Kiểm thử cục bộ: `cargo test` fem-core/fem-solver (47), clippy fem-*, `pnpm typecheck`, `pnpm test` (model-core 95, io-formats 104, viewer 21, desktop 13), build desktop có WASM, Playwright 105/105. CI chưa chạy cho commit này.
+- Chưa làm / câu hỏi mở:
+  - Bộ nhập vẫn báo `line_load_not_uniform` (PR B sẽ đổi sang tạo `linear`).
+  - **Hỏi chủ dự án:** khi nhân bản **đối xứng**, tải theo phương tổng thể (ví dụ `globalX`) và góc xoay trục địa phương hiện được chép nguyên, không lật theo gương. Có cần lật không? Chưa tìm tài liệu CSI để đối chiếu.
+  - Chưa có lệnh dời thanh hay chia thanh trong giao diện; khi có phải dùng `loadOnSegment`.

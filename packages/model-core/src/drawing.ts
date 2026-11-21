@@ -117,7 +117,10 @@ function addShell(d: Model, kind: Shell["kind"], points: P3[], section: string, 
   return id;
 }
 
-function addFrameRaw(d: Model, f: { kind: Frame["kind"]; i: string; j: string; section: string; story?: string | undefined; releases?: Frame["releases"] }): string | null {
+function addFrameRaw(
+  d: Model,
+  f: { kind: Frame["kind"]; i: string; j: string; section: string; story?: string | undefined; releases?: Frame["releases"]; offsets?: Frame["offsets"]; angle?: Frame["angle"] },
+): string | null {
   if (f.i === f.j) return null;
   if (d.frames.some((x) => (x.i === f.i && x.j === f.j) || (x.i === f.j && x.j === f.i))) return null;
   const label = nextLabel(
@@ -125,7 +128,7 @@ function addFrameRaw(d: Model, f: { kind: Frame["kind"]; i: string; j: string; s
     FRAME_PREFIX[f.kind],
   );
   const id = `f-${label}-${d.frames.length}`;
-  d.frames.push({ id, label, kind: f.kind, i: f.i, j: f.j, section: f.section, ...(f.story ? { story: f.story } : {}), ...(f.releases ? { releases: f.releases } : {}) });
+  d.frames.push({ id, label, kind: f.kind, i: f.i, j: f.j, section: f.section, ...(f.story ? { story: f.story } : {}), ...(f.releases ? { releases: f.releases } : {}), ...(f.offsets ? { offsets: { ...f.offsets } } : {}), ...(f.angle !== undefined ? { angle: f.angle } : {}) });
   return id;
 }
 
@@ -257,7 +260,8 @@ export const drawingCommands = {
             continue;
           }
           const story = c.story(f.story);
-          const id = addFrameRaw(d, { kind: f.kind, i: findOrAddJoint(d, a1, story), j: findOrAddJoint(d, b1, story), section: f.section, story, releases: f.releases });
+          // Giữ góc xoay trục địa phương và vùng cứng: tải theo trục địa phương (local2/local3) và vị trí tải đi theo thanh (R1).
+          const id = addFrameRaw(d, { kind: f.kind, i: findOrAddJoint(d, a1, story), j: findOrAddJoint(d, b1, story), section: f.section, story, releases: f.releases, offsets: f.offsets, angle: f.angle });
           if (!id) {
             skipped++;
             continue;
