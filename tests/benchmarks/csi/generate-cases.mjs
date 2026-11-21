@@ -20,6 +20,7 @@ const E = 2.0e8;
 const B = 0.2;
 const H = 0.4;
 const EI = (E * B * H ** 3) / 12;
+const EI22 = (E * H * B ** 3) / 12;
 const L = 6;
 
 const header = (name) => `File ${name}.$2k was saved on m/d/yy at h:mm:ss
@@ -48,10 +49,10 @@ const FIXED = [1, 1, 1, 1, 1, 1];
 const PINNED = [1, 1, 1, 1, 0, 0]; // giữ thêm xoắn quanh trục dầm
 const ROLLER = [0, 1, 1, 1, 0, 0];
 const sections = (ids) => ids.map((i) => `Frame=${i}   AutoSelect=N.A.   AnalSect=R200X400   MatProp=Default`);
-const patterns = (n) =>
-  table("LOAD PATTERN DEFINITIONS", [`LoadPat=${n}   DesignType=Other   SelfWtMult=0`]) +
-  table("LOAD CASE DEFINITIONS", [`Case=${n}   Type=LinStatic   InitialCond=Zero   RunCase=Yes`]) +
-  table("CASE - STATIC 1 - LOAD ASSIGNMENTS", [`Case=${n}   LoadType="Load pattern"   LoadName=${n}   LoadSF=1`]);
+const patterns = (...names) =>
+  table("LOAD PATTERN DEFINITIONS", names.map((n) => `LoadPat=${n}   DesignType=Other   SelfWtMult=0`)) +
+  table("LOAD CASE DEFINITIONS", names.map((n) => `Case=${n}   Type=LinStatic   InitialCond=Zero   RunCase=Yes`)) +
+  table("CASE - STATIC 1 - LOAD ASSIGNMENTS", names.map((n) => `Case=${n}   LoadType="Load pattern"   LoadName=${n}   LoadSF=1`));
 // Như file SAP2000 thật: ghi cả RelDist và AbsDist (AbsDistB = chiều dài thanh).
 const udl = (f, p, w, len = L) =>
   `Frame=${f}   LoadPat=${p}   CoordSys=GLOBAL   Type=Force   Dir=Gravity   DistType=RelDist   RelDistA=0   RelDistB=1   AbsDistA=0   AbsDistB=${len}   FOverLA=${w}   FOverLB=${w}`;
@@ -76,15 +77,18 @@ const add = (id, description, basis, classification, body, metrics, limitations 
   const P = 10;
   add(
     "cantilever-tip-load",
-    "Công xôn L = 6 m, lực tập trung P = 10 kN hướng xuống tại đầu tự do (tải nút).",
-    "δ = PL³/3EI; θy = PL²/2EI (θy = −dw/dx); phản lực Fz = P; mômen ngàm My = −PL (cân bằng tĩnh: tải gây +PL quanh Y); M3(x) = −P(L−x).",
+    "Công xôn L = 6 m dọc +X. Hai ca độc lập đặt 10 kN tại đầu tự do: P theo −Z, PY theo +Y.",
+    "P: Uz = −PL³/(3EI33), θy = PL²/(2EI33), Fz = P, My = −PL, M3(x) = −P(L−x). " +
+      "PY: Uy = PL³/(3EI22), θz = PL²/(2EI22), Fy = −P, Mz = −PL. " +
+      "Trục địa phương 2 = +Z và 3 = −Y, nên nội lực NexFEM trên mặt cắt dương là M2(x) = P(L−x) và V3(x) = −P.",
     "analytic-exact",
     tableSet(
       [joint(1, 0, 0, 0), joint(2, L, 0, 0)],
       [frame(1, 1, 2)],
       [restraint(1, ...FIXED)],
       [1],
-      patterns("P") + table("JOINT LOADS - FORCE", [jointForce(2, "P", 0, 0, -P)]),
+      table("FRAME OUTPUT STATION ASSIGNMENTS", ["Frame=1   StationType=MinNumSta   MinNumSta=3   AddAtElmInt=Yes   AddAtPtLoad=Yes"]) +
+        patterns("P", "PY") + table("JOINT LOADS - FORCE", [jointForce(2, "P", 0, 0, -P), jointForce(2, "PY", 0, P, 0)]),
     ),
     [
       disp("P", "2", "U3", (-P * L ** 3) / (3 * EI)),
@@ -94,6 +98,14 @@ const add = (id, description, basis, classification, body, metrics, limitations 
       mom("P", "1", 0, -P * L),
       mom("P", "1", L / 2, (-P * L) / 2),
       mom("P", "1", L, 0),
+      disp("PY", "2", "U2", (P * L ** 3) / (3 * EI22)),
+      disp("PY", "2", "R3", (P * L ** 2) / (2 * EI22)),
+      reac("PY", "1", "F2", -P),
+      reac("PY", "1", "M3", -P * L),
+      m("PY", "frameForce", "1@x=0", "M2", P * L, ABS_F, REL),
+      m("PY", "frameForce", `1@x=${L / 2}`, "M2", (P * L) / 2, ABS_F, REL),
+      m("PY", "frameForce", `1@x=${L}`, "M2", 0, ABS_F, REL),
+      m("PY", "frameForce", `1@x=${L / 2}`, "V3", -P, ABS_F, REL),
     ],
   );
 }

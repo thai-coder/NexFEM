@@ -266,4 +266,12 @@ File OMF là khung phẳng YZ, hai cột xoay 90°: nhờ góc xoay, trục 2 c�
 
 ## Đối chiếu giải tích (M2, phần không cần kết quả CSI)
 
-`pnpm --filter @nexfem/io-formats test` chạy `test/csi-benchmarks.test.ts`: nhập các file `.s2k` nhỏ trong `tests/benchmarks/csi/cases/`, giải bằng `crates/fem-solver` (ví dụ `solve`, gọi qua `cargo run`) và so với nghiệm đóng bằng `scripts/validation/compare-csi.mjs`, dung sai riêng từng chỉ số. Báo cáo: [`docs/validation/CSI_BENCHMARK_REPORT.md`](validation/CSI_BENCHMARK_REPORT.md). File đầu vào là **tổng hợp** (dựng theo cú pháp file SAP2000 thật) và giá trị chuẩn là **công thức**, nên kết quả này **không** chứng minh tương đương ETABS/SAP2000. Cập nhật ca: sửa `tests/benchmarks/csi/generate-cases.mjs`, chạy lại, rồi đặt `CSI_BENCH_REPORT` để ghi lại báo cáo.
+`pnpm --filter @nexfem/io-formats test` biên dịch chương trình `solve` của `fem-solver` một lần bằng Cargo. Bộ test nhập các file `.s2k` tổng hợp, chạy bộ giải và dùng `scripts/validation/compare-csi.mjs` để so với nghiệm giải tích theo dung sai riêng từng chỉ số. Xem [báo cáo kiểm thử](validation/CSI_BENCHMARK_REPORT.md). Khi sửa ca trong `tests/benchmarks/csi/generate-cases.mjs`, chạy lại bộ sinh và đặt `CSI_BENCH_REPORT` thành đường dẫn tuyệt đối khi chạy test để ghi báo cáo.
+
+### Thu bảng kết quả SAP2000 cho công xôn
+
+1. Nhập [mẫu công xôn 6 m](../tests/benchmarks/csi/cases/cantilever-tip-load.s2k) vào SAP2000 và chạy hai ca tĩnh tuyến tính `P` (−Z) và `PY` (+Y). Kiểm tra thanh 1 đi từ nút 1 đến 2 theo +X, trục 2 là +Z và trục 3 là −Y. Hai ca dùng lực nút 10 kN và hệ số tự trọng bằng 0.
+2. Xuất mô hình đã phân tích dưới dạng `.s2k` hoặc `.$2k`. Giữ tiết diện và các đặc trưng AS2, AS3, hướng i→j, trục địa phương và tùy chọn phân tích trong bản xuất hoặc ghi kèm.
+3. Xuất bảng `Joint Displacements`, `Joint Reactions` và `Element Forces - Frames` ở cả hai ca dưới dạng CSV hoặc Excel. Giữ mã đối tượng, `Output Case`, `Station`, các thành phần có dấu và đơn vị gốc. Lấy station tại 0, 3 và 6 m tính từ đầu i. Ghi phiên bản SAP2000 cùng bộ file. [Hướng dẫn xuất bảng của CSI](https://docs.csiamerica.com/help-files/sap/Database_Tables/Choose_Tables_For_Form.htm)
+
+Bộ dữ liệu này sẽ dùng để kiểm tra phép đổi dấu và đơn vị, rồi lập tham chiếu CSI có nguồn gốc riêng. Trạng thái thu thập nằm trong [manifest benchmark CSI](../tests/benchmarks/csi/manifest.json).

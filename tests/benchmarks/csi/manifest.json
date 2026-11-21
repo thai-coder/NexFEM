@@ -10,9 +10,31 @@
       "cases": "tests/benchmarks/csi/cases/*.reference.json",
       "report": "docs/validation/CSI_BENCHMARK_REPORT.md",
       "note": "Not CSI evidence: inputs are hand-written from real SAP2000 grammar, references are closed-form."
+    },
+    {
+      "id": "csi-published-examples-01",
+      "status": "active",
+      "kind": "published CSI tables, reconstructed NexFEM model inputs",
+      "runner": "packages/io-formats/test/csi-benchmarks.test.ts",
+      "cases": "tests/benchmarks/csi/published/*.reference.json",
+      "report": "docs/validation/CSI_EXAMPLES_01_REPORT.md",
+      "note": "Covers only the quantities printed in the selected tables. Original model exports and version-identified CSI result exports are pending."
     }
   ],
   "fixtures": [
+    {
+      "schema": 1,
+      "id": "sap2000-cantilever-tip-load",
+      "source": { "program": "SAP2000" },
+      "modelSeed": "tests/benchmarks/csi/cases/cantilever-tip-load.s2k",
+      "status": "reference-results-pending",
+      "supportedComparisons": [],
+      "missing": [
+        "SAP2000 version and matching model export",
+        "independent joint displacement, joint reaction and frame force tables for P and PY",
+        "section shear areas, local axes and I/J direction from the analyzed model"
+      ]
+    },
     {
       "schema": 1,
       "id": "etabs-23.2.0-owner-e2k",

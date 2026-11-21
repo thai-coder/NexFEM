@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "id": "ExampleSAP2000 01",
+  "description": "Khung ba thanh, bảy ca tải. So chuyển vị nút với bảng công bố ở trang 3.",
+  "file": "ExampleSAP2000 01.json",
+  "basis": "Published CSI verification table",
+  "classification": "csi-published",
+  "limitations": [
+    "Dựng trực tiếp từ hình trang 1–2. Hệ số nhân A = 1000 theo bài SAP2000. Bỏ biến dạng cắt.",
+    "Ca 1 gán 0,15 kip/ft theo khối lượng hình học gốc, tránh trọng lượng bị nhân theo A.",
+    "Ca 4 quy tải chiếu sang tải trên chiều dài thanh. Ca 6 dùng lực nút tương đương, chỉ đối chiếu chuyển vị nút."
+  ],
+  "source": {
+    "program": "SAP2000",
+    "version": "Software Verification Rev. 0 (program version not specified)",
+    "url": "https://github.com/thai-coder/NexFEM/blob/4f162a715d4d60ad63b23a85862160bba09d0568/manual/SAP2000%2026/Manuals/Verification/Analysis/Frames/Problem%201-001.pdf"
+  },
+  "units": {
+    "force": "kN",
+    "length": "m"
+  },
+  "metrics": [
+    {
+      "case": "1",
+      "kind": "displacement",
+      "object": "3",
+      "component": "U3",
+      "value": -0.000670306,
+      "absTolerance": 1.27e-07,
+      "relTolerance": 0
+    },
+    {
+      "case": "2",
+      "kind": "displacement",
+      "object": "3",
+      "component": "U3",
+      "value": 0.001599184,
+      "absTolerance": 1.27e-07,
+      "relTolerance": 0
+    },
+    {
+      "case": "3",
+      "kind": "displacement",
+      "object": "3",
+      "component": "U3",
+      "value": 0.001599184,
+      "absTolerance": 1.27e-07,
+      "relTolerance": 0
+    },
+    {
+      "case": "4",
+      "kind": "displacement",
+      "object": "3",
+      "component": "U3",
+      "value": -0.00752602,
+      "absTolerance": 1.27e-07,
+      "relTolerance": 0
+    },
+    {
+      "case": "5",
+      "kind": "displacement",
+      "object": "2",
+      "component": "U1",
+      "value": 0.0079375,
+      "absTolerance": 1.27e-07,
+      "relTolerance": 0
+    },
+    {
+      "case": "6",
+      "kind": "displacement",
+      "object": "2",
+      "component": "U1",
+      "value": 0.0029352239999999997,
+      "absTolerance": 1.27e-07,
+      "relTolerance": 0
+    },
+    {
+      "case": "7",
+      "kind": "displacement",
+      "object": "2",
+      "component": "U1",
+      "value": 0.000165354,
+      "absTolerance": 1.27e-07,
+      "relTolerance": 0
+    }
+  ]
+}

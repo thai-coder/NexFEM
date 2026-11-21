@@ -1,0 +1,341 @@
+{
+  "schemaVersion": 1,
+  "name": "ExampleEtabs 01",
+  "units": {
+    "force": "kN",
+    "length": "m",
+    "temperature": "C"
+  },
+  "designCodes": {},
+  "grids": [],
+  "stories": [],
+  "materials": [
+    {
+      "id": "mat",
+      "name": "Elastic material",
+      "type": "other",
+      "E": 20684271.879505083,
+      "nu": 0.2,
+      "gamma": 0
+    }
+  ],
+  "frameSections": [
+    {
+      "id": "Beam 12x30",
+      "name": "Beam 12x30",
+      "material": "mat",
+      "geometry": {
+        "shape": "general",
+        "b": 0.30479999999999996,
+        "h": 0.762,
+        "A": 232257.6,
+        "I33": 0.011238248491199998,
+        "I22": 0.0017981197585919997,
+        "J": 0.011238248491199998
+      }
+    },
+    {
+      "id": "Column 12x24",
+      "name": "Column 12x24",
+      "material": "mat",
+      "geometry": {
+        "shape": "general",
+        "b": 0.30479999999999996,
+        "h": 0.6095999999999999,
+        "A": 185806.08,
+        "I33": 0.005753983227494399,
+        "I22": 0.0014384958068735998,
+        "J": 0.005753983227494399
+      }
+    }
+  ],
+  "shellSections": [],
+  "joints": [
+    {
+      "id": "b1",
+      "label": "b1",
+      "x": 0.0,
+      "y": 0,
+      "z": 0.0,
+      "restraint": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "id": "t1",
+      "label": "t1",
+      "x": 0.0,
+      "y": 0,
+      "z": 3.048,
+      "restraint": [
+        false,
+        true,
+        false,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "id": "b2",
+      "label": "b2",
+      "x": 5.486400000000001,
+      "y": 0,
+      "z": 0.0,
+      "restraint": [
+        true,
+        true,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "id": "t2",
+      "label": "t2",
+      "x": 5.486400000000001,
+      "y": 0,
+      "z": 3.048,
+      "restraint": [
+        false,
+        true,
+        false,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "id": "b3",
+      "label": "b3",
+      "x": 10.972800000000001,
+      "y": 0,
+      "z": 0.0,
+      "restraint": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "id": "t3",
+      "label": "t3",
+      "x": 10.972800000000001,
+      "y": 0,
+      "z": 3.048,
+      "restraint": [
+        false,
+        true,
+        false,
+        true,
+        false,
+        true
+      ]
+    }
+  ],
+  "frames": [
+    {
+      "id": "C1",
+      "label": "C1",
+      "kind": "column",
+      "i": "b1",
+      "j": "t1",
+      "section": "Column 12x24"
+    },
+    {
+      "id": "C2",
+      "label": "C2",
+      "kind": "column",
+      "i": "b2",
+      "j": "t2",
+      "section": "Column 12x24"
+    },
+    {
+      "id": "C3",
+      "label": "C3",
+      "kind": "column",
+      "i": "b3",
+      "j": "t3",
+      "section": "Column 12x24"
+    },
+    {
+      "id": "B1",
+      "label": "B1",
+      "kind": "beam",
+      "i": "t1",
+      "j": "t2",
+      "section": "Beam 12x30",
+      "releases": {
+        "i": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          true
+        ],
+        "j": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      }
+    },
+    {
+      "id": "B2",
+      "label": "B2",
+      "kind": "beam",
+      "i": "t2",
+      "j": "t3",
+      "section": "Beam 12x30",
+      "releases": {
+        "i": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "j": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          true
+        ]
+      }
+    }
+  ],
+  "shells": [],
+  "loadPatterns": [
+    {
+      "id": "I",
+      "name": "I",
+      "type": "other",
+      "selfWeight": 0
+    },
+    {
+      "id": "II",
+      "name": "II",
+      "type": "other",
+      "selfWeight": 0
+    }
+  ],
+  "loadCases": [
+    {
+      "id": "I",
+      "name": "I",
+      "type": "linearStatic",
+      "loads": [
+        {
+          "pattern": "I",
+          "factor": 1
+        }
+      ]
+    },
+    {
+      "id": "II",
+      "name": "II",
+      "type": "linearStatic",
+      "loads": [
+        {
+          "pattern": "II",
+          "factor": 1
+        }
+      ]
+    }
+  ],
+  "combos": [],
+  "frameLoads": [
+    {
+      "id": "fl-1",
+      "frame": "B1",
+      "pattern": "I",
+      "kind": "point",
+      "direction": "gravity",
+      "value": 444.82216152604997,
+      "at": 0.5
+    },
+    {
+      "id": "fl-2",
+      "frame": "B1",
+      "pattern": "II",
+      "kind": "distributed",
+      "direction": "gravity",
+      "value": 145.93902937206363
+    },
+    {
+      "id": "fl-3",
+      "frame": "B2",
+      "pattern": "I",
+      "kind": "point",
+      "direction": "gravity",
+      "value": 444.82216152604997,
+      "at": 0.5
+    },
+    {
+      "id": "fl-4",
+      "frame": "B2",
+      "pattern": "II",
+      "kind": "distributed",
+      "direction": "gravity",
+      "value": 145.93902937206363
+    }
+  ],
+  "shellLoads": [],
+  "jointLoads": [
+    {
+      "id": "jl-1",
+      "joint": "t1",
+      "pattern": "I",
+      "values": [
+        0.0,
+        0,
+        -222.41108076302498,
+        0,
+        0.0,
+        0
+      ]
+    },
+    {
+      "id": "jl-2",
+      "joint": "t2",
+      "pattern": "I",
+      "values": [
+        0.0,
+        0,
+        -444.82216152604997,
+        0,
+        0.0,
+        0
+      ]
+    },
+    {
+      "id": "jl-3",
+      "joint": "t3",
+      "pattern": "I",
+      "values": [
+        0.0,
+        0,
+        -222.41108076302498,
+        0,
+        0.0,
+        0
+      ]
+    }
+  ]
+}

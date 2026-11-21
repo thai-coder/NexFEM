@@ -9,7 +9,7 @@ Sinh tự động bởi `packages/io-formats/test/csi-benchmarks.test.ts` (đặ
 | Ca | Phân loại | Chỉ số | Đạt | Cân bằng tải−phản lực |
 |---|---|---|---|---|
 | `cantilever-hinge-span` | analytic-exact | 9/9 | ✔ | 1.4e-14 |
-| `cantilever-tip-load` | analytic-exact | 7/7 | ✔ | 1.4e-14 |
+| `cantilever-tip-load` | analytic-exact | 15/15 | ✔ | 1.4e-14 |
 | `fixed-fixed-midspan-point` | analytic-exact | 7/7 | ✔ | 3.6e-15 |
 | `portal-lateral` | analytic-approximate | 5/5 | ✔ | 8.2e-14 |
 | `simply-supported-udl` | analytic-exact | 7/7 | ✔ | 0.0e+0 |
@@ -19,8 +19,9 @@ Sinh tự động bởi `packages/io-formats/test/csi-benchmarks.test.ts` (đặ
 ## Chưa so sánh được (`not comparable`)
 
 - Kết quả ETABS/SAP2000 thật (chuyển vị, phản lực, nội lực): chưa có bảng xuất độc lập → chặn.
-- Dấu quy ước nội lực của CSI (V2, M3 theo từng chương trình): chưa đối chiếu; ở đây chỉ kiểm tra quy ước NexFEM (M3 > 0 căng thớ dưới).
-- Sàn/vách (shell), diaphragm cứng, P-Delta, dao động, biến dạng cắt, offset đầu thanh: bộ giải hiện tại không có → không so sánh, không đánh dấu đạt.
+- Quy ước dấu nội lực CSI còn chờ đối chiếu. Ca công xôn kiểm tra M2 và M3 theo trục địa phương của NexFEM.
+- Sàn/vách (shell), diaphragm cứng, P-Delta, dao động và offset đầu thanh nằm ngoài phạm vi bộ benchmark này.
+- NexFEM tính biến dạng cắt khi tiết diện có `shearAreas`. Các ca ở đây dùng dầm Euler–Bernoulli; khi so với CSI, cần đối chiếu diện tích chịu cắt AS2/AS3 trước khi đặt dung sai chuyển vị.
 - Đường nhập `.e2k`: chưa có ca giải tích ETABS ở bộ này (cú pháp `POINTASSIGN RESTRAINT` chưa có trong file ETABS thật).
 
 ## cantilever-hinge-span
@@ -43,9 +44,9 @@ Hai nhịp 6 m: thanh 1 ngàm tại nút 1, thanh 2 có nhả mômen M3 ở đ�
 
 ## cantilever-tip-load
 
-Công xôn L = 6 m, lực tập trung P = 10 kN hướng xuống tại đầu tự do (tải nút).
+Công xôn L = 6 m dọc +X. Hai ca độc lập đặt 10 kN tại đầu tự do: P theo −Z, PY theo +Y.
 
-- Cơ sở: δ = PL³/3EI; θy = PL²/2EI (θy = −dw/dx); phản lực Fz = P; mômen ngàm My = −PL (cân bằng tĩnh: tải gây +PL quanh Y); M3(x) = −P(L−x).
+- Cơ sở: P: Uz = −PL³/(3EI33), θy = PL²/(2EI33), Fz = P, My = −PL, M3(x) = −P(L−x). PY: Uy = PL³/(3EI22), θz = PL²/(2EI22), Fy = −P, Mz = −PL. Trục địa phương 2 = +Z và 3 = −Y, nên nội lực NexFEM trên mặt cắt dương là M2(x) = P(L−x) và V3(x) = −P.
 
 | Chỉ số | Chuẩn | NexFEM | Sai số tuyệt đối | Sai số tương đối | Cho phép | |
 |---|---|---|---|---|---|---|
@@ -56,6 +57,14 @@ Công xôn L = 6 m, lực tập trung P = 10 kN hướng xuống tại đầu t�
 | frameForce · 1@x=0 · M3 | -60 | -60 | 5.684e-14 | 9.5e-16 | 6.000e-5 | ✔ |
 | frameForce · 1@x=3 · M3 | -30 | -30 | 1.421e-14 | 4.7e-16 | 3.000e-5 | ✔ |
 | frameForce · 1@x=6 · M3 | 0 | -2.842e-14 | 2.842e-14 | — | 1.000e-8 | ✔ |
+| displacement · 2 · U2 | 0.0135 | 0.0135 | 1.388e-17 | 1.0e-15 | 1.350e-8 | ✔ |
+| displacement · 2 · R3 | 0.003375 | 0.003375 | 3.036e-18 | 9.0e-16 | 3.375e-9 | ✔ |
+| reaction · 1 · F2 | -10 | -10 | 1.421e-14 | 1.4e-15 | 1.000e-5 | ✔ |
+| reaction · 1 · M3 | -60 | -60 | 5.684e-14 | 9.5e-16 | 6.000e-5 | ✔ |
+| frameForce · 1@x=0 · M2 | 60 | 60 | 5.684e-14 | 9.5e-16 | 6.000e-5 | ✔ |
+| frameForce · 1@x=3 · M2 | 30 | 30 | 1.421e-14 | 4.7e-16 | 3.000e-5 | ✔ |
+| frameForce · 1@x=6 · M2 | 0 | 2.842e-14 | 2.842e-14 | — | 1.000e-8 | ✔ |
+| frameForce · 1@x=3 · V3 | -10 | -10 | 1.421e-14 | 1.4e-15 | 1.000e-5 | ✔ |
 
 ## fixed-fixed-midspan-point
 
