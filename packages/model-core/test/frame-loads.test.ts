@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CommandStack, checkModel, loadOnSegment, parseModel, sampleModel, type FrameLoad, type Model } from "../src/index.ts";
+import { CommandStack, checkModel, frameAxes, loadOnSegment, parseModel, sampleModel, type FrameLoad, type Model } from "../src/index.ts";
 
 /** Tải `linear` (hình thang/từng đoạn) và R1: tải gắn theo thanh (docs/plans/FRAME_LOAD_SEGMENTS_PLAN.md). */
 const BEAM = "bx-0-0-1";
@@ -104,9 +104,10 @@ describe("R1: tải gắn theo thanh", () => {
         expect(copies).toHaveLength(1);
         const { id: _i, frame: _f, ...rest } = copies[0]!;
         const { id: _i2, frame: _f2, ...want } = trap;
+        // Tải trọng lực không đổi qua gương; vị trí tương đối giữ nguyên ở mọi chế độ.
         expect(rest).toEqual(want);
-        // Góc xoay trục địa phương đi theo thanh, để tải theo trục địa phương giữ đúng phương.
-        expect(s.model.frames.find((f) => f.id === id)!.angle).toBe(30);
+        // Góc xoay đi theo thanh (đối xứng: tính lại, kiểm ở test riêng bên dưới).
+        if (options.mode !== "mirror") expect(s.model.frames.find((f) => f.id === id)!.angle).toBe(30);
       }
       expect(s.model.frameLoads.find((l) => l.id === trap.id)).toEqual(trap);
       s.undo();
@@ -117,5 +118,84 @@ describe("R1: tải gắn theo thanh", () => {
     const s = new CommandStack(withLoad());
     s.execute("objects.replicate", { ids: [BEAM], options: { mode: "linear", dx: 0, dy: 1, dz: 0, count: 1 }, copyLoads: false });
     expect(s.model.frameLoads).toEqual([trap]);
+  });
+});
+
+describe("nhân bản đối xứng: lật theo gương", () => {
+  type V = [number, number, number];
+  const pts = (m: Model, id: string): [V, V] => {
+    const f = m.frames.find((x) => x.id === id)!;
+    const p = (j: string): V => {
+      const q = m.joints.find((x) => x.id === j)!;
+      return [q.x, q.y, q.z];
+    };
+    return [p(f.i), p(f.j)];
+  };
+  /** Vectơ tải theo hệ tổng thể (giống fem-solver: gravity = −Z, local theo trục có góc xoay). */
+  const vec = (m: Model, l: FrameLoad): V => {
+    const f = m.frames.find((x) => x.id === l.frame)!;
+    const [a, b] = pts(m, f.id);
+    const [e1, e2, e3] = frameAxes(a, b, f.angle ?? 0);
+    const v = l.value;
+    const by: Record<string, V> = {
+      gravity: [0, 0, -v], globalX: [v, 0, 0], globalY: [0, v, 0], globalZ: [0, 0, v],
+      localX: e1.map((c) => c * v) as V, local2: e2.map((c) => c * v) as V, local3: e3.map((c) => c * v) as V,
+    };
+    return by[l.direction]!;
+  };
+  const dirs = ["gravity", "globalX", "globalY", "globalZ", "localX", "local2", "local3"] as const;
+  for (const axis of ["x", "y"] as const) {
+    for (const angle of [undefined, 30, -75]) {
+      it(`gương ${axis}, góc ${angle ?? "mặc định"}: tải của bản sao là ảnh gương của tải gốc (dầm, cột, giằng)`, () => {
+        const m = sampleModel();
+        const flip = (v: V): V => (axis === "x" ? [-v[0], v[1], v[2]] : [v[0], -v[1], v[2]]);
+        // Một dầm theo X, một dầm theo Y, một cột và một giằng xiên ở tầng 1.
+        const beamX = m.frames.find((f) => f.kind === "beam" && f.story === "story-1" && Math.abs(pts(m, f.id)[0][1] - pts(m, f.id)[1][1]) < 1e-9)!;
+        const beamY = m.frames.find((f) => f.kind === "beam" && f.story === "story-1" && Math.abs(pts(m, f.id)[0][0] - pts(m, f.id)[1][0]) < 1e-9)!;
+        const col = m.frames.find((f) => f.kind === "column" && f.story === "story-1")!;
+        const s0 = new CommandStack(m);
+        s0.execute("frame.add", { kind: "brace", from: pts(m, col.id)[0], to: pts(m, beamX.id)[1], section: col.section, story: "story-1" });
+        const brace = s0.model.frames.at(-1)!;
+        const model = structuredClone(s0.model);
+        // Bản sao được tạo theo thứ tự thanh trong mô hình.
+        const ids = model.frames.map((f) => f.id).filter((id) => [beamX.id, beamY.id, col.id, brace.id].includes(id));
+        for (const id of ids) {
+          if (angle !== undefined) model.frames.find((f) => f.id === id)!.angle = angle;
+          for (const dir of dirs) model.frameLoads.push({ id: `${id}-${dir}`, frame: id, pattern: "lp-dl", kind: "linear", direction: dir, value: 3, valueEnd: 5, start: 0.1, end: 0.8 });
+        }
+        const s = new CommandStack(model);
+        const r = s.execute("objects.replicate", { ids, options: { mode: "mirror", axis, value: 50 } }).result as { created: string[] };
+        expect(r.created).toHaveLength(4);
+        const after = s.model;
+        r.created.forEach((nid, k) => {
+          // i, j của bản sao là ảnh gương của i, j gốc.
+          const [a, b] = pts(after, ids[k]!);
+          const [na, nb] = pts(after, nid);
+          const img = (p: V): V => (axis === "x" ? [100 - p[0], p[1], p[2]] : [p[0], 100 - p[1], p[2]]);
+          expect(na.map((c, i) => c - img(a)[i]!).every((x) => Math.abs(x) < 1e-9)).toBe(true);
+          expect(nb.map((c, i) => c - img(b)[i]!).every((x) => Math.abs(x) < 1e-9)).toBe(true);
+          for (const dir of dirs) {
+            const src = after.frameLoads.find((l) => l.id === `${ids[k]}-${dir}`)!;
+            const cp = after.frameLoads.find((l) => l.frame === nid && l.direction === dir)!;
+            const want = flip(vec(after, src));
+            const got = vec(after, cp);
+            for (let c = 0; c < 3; c++) expect(got[c], `${dir}[${c}]`).toBeCloseTo(want[c]!, 9);
+            expect(cp.start).toBe(src.start);
+            expect(cp.end).toBe(src.end);
+            expect(Math.abs(cp.valueEnd!)).toBe(5);
+          }
+        });
+      });
+    }
+  }
+  it("tải sàn local3 đổi dấu (pháp tuyến đảo qua gương); trọng lực giữ nguyên", () => {
+    const m = sampleModel();
+    const slab = m.shells.find((x) => x.kind === "slab")!;
+    m.shellLoads.push({ id: "q3", shell: slab.id, pattern: "lp-dl", direction: "local3", value: 2 }, { id: "qg", shell: slab.id, pattern: "lp-dl", direction: "gravity", value: 2 });
+    const s = new CommandStack(m);
+    const r = s.execute("objects.replicate", { ids: [slab.id], options: { mode: "mirror", axis: "y", value: 50 } }).result as { created: string[] };
+    const copies = s.model.shellLoads.filter((l) => l.shell === r.created[0]);
+    expect(copies.find((l) => l.id.startsWith("q3-"))!.value).toBe(-2);
+    expect(copies.find((l) => l.id.startsWith("qg-"))!.value).toBe(2);
   });
 });

@@ -32,7 +32,7 @@ Mục tiêu: biểu diễn **chính xác** tải phân bố tuyến tính trên 
 
 **R1 (yêu cầu của chủ dự án): tải gắn theo thanh.** Tải lưu theo `frame` (id thanh) và vị trí **tương đối** (`start`, `end`, `at`), nên:
 - dời nút (`joint.move`) hoặc kéo dài thanh: tải đi theo, giữ vị trí tương đối (như `RelDist` của CSI; vị trí tuyệt đối đổi theo chiều dài mới);
-- sao chép/nhân bản (`replicate`: tịnh tiến, đối xứng, sang tầng) với tuỳ chọn sao chép tải: tải `linear` được chép đủ trường; với đối xứng, đầu i/j của thanh mới là ảnh của i/j cũ nên vị trí tương đối giữ nguyên;
+- sao chép/nhân bản (`replicate`: tịnh tiến, đối xứng, sang tầng) với tuỳ chọn sao chép tải: tải `linear` được chép đủ trường; với đối xứng, đầu i/j của thanh mới là ảnh của i/j cũ nên vị trí tương đối giữ nguyên, và tải được **lật theo gương** (quyết định 21/11/2026: góc xoay tính lại, thành phần tổng thể vuông góc mặt gương và tải `local3` đổi dấu);
 - lệnh dời/chia thanh trong tương lai (chưa có): dời phải giữ tải; chia phải cắt tải theo đoạn (dùng chung hàm cắt với bộ nhập, đặt trong `model-core`, không trong `io-formats`);
 - xoá thanh: xoá tải của nó (đã có).
 Mỗi điểm trên có test trong PR A (lệnh) hoặc PR C (giao diện).
@@ -116,5 +116,5 @@ Thêm ca vào `tests/benchmarks/csi/generate-cases.mjs` khi PR B có đường n
 - Kiểm thử cục bộ: `cargo test` fem-core/fem-solver (47), clippy fem-*, `pnpm typecheck`, `pnpm test` (model-core 95, io-formats 104, viewer 21, desktop 13), build desktop có WASM, Playwright 105/105. CI chưa chạy cho commit này.
 - Chưa làm / câu hỏi mở:
   - Bộ nhập vẫn báo `line_load_not_uniform` (PR B sẽ đổi sang tạo `linear`).
-  - **Hỏi chủ dự án:** khi nhân bản **đối xứng**, tải theo phương tổng thể (ví dụ `globalX`) và góc xoay trục địa phương hiện được chép nguyên, không lật theo gương. Có cần lật không? Chưa tìm tài liệu CSI để đối chiếu.
+  - ~~Hỏi chủ dự án về nhân bản đối xứng~~ → **Đã chốt 21/11/2026: lật theo gương.** Đã làm: góc xoay của bản sao tính lại để trục 2 là ảnh gương của trục 2 gốc (cột đứng qua gương X thành 180°); tải `globalX` (gương X) / `globalY` (gương Y) đổi dấu; tải `local3` của thanh và của sàn đổi dấu (phép đối xứng đảo chiều tích có hướng, nên trục 3/pháp tuyến của bản sao ngược với ảnh gương). Test kiểm vectơ tải tổng thể của bản sao bằng ảnh gương của tải gốc cho dầm X, dầm Y, cột, giằng xiên, 7 phương, góc mặc định/30°/−75°, gương X và Y; hai đột biến (bỏ lật `local3`, bỏ tính lại góc) đều làm hỏng test.
   - Chưa có lệnh dời thanh hay chia thanh trong giao diện; khi có phải dùng `loadOnSegment`.

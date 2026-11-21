@@ -132,6 +132,50 @@ function addFrameRaw(
   return id;
 }
 
+// ---------------------------------------------------------------- nhân bản đối xứng: lật theo gương (quyết định chủ dự án 21/11/2026)
+type V3 = [number, number, number];
+const cross3 = (a: V3, b: V3): V3 => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+const dot3 = (a: V3, b: V3) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+/** Trục địa phương của thanh, giống hệt `local_axes` trong crates/fem-solver/src/element.rs. */
+export function frameAxes(a: P3, b: P3, angleDeg = 0): [V3, V3, V3] {
+  const d: V3 = [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
+  const l = Math.hypot(...d);
+  const e1: V3 = [d[0] / l, d[1] / l, d[2] / l];
+  let e2: V3;
+  if (Math.abs(e1[2]) > 1 - 1e-6) e2 = [1, 0, 0];
+  else {
+    const p: V3 = [-e1[0] * e1[2], -e1[1] * e1[2], 1 - e1[2] * e1[2]];
+    const n = Math.hypot(...p);
+    e2 = [p[0] / n, p[1] / n, p[2] / n];
+  }
+  let e3 = cross3(e1, e2);
+  if (angleDeg) {
+    const t = (angleDeg * Math.PI) / 180;
+    const [c, s] = [Math.cos(t), Math.sin(t)];
+    e2 = [c * e2[0] + s * e3[0], c * e2[1] + s * e3[1], c * e2[2] + s * e3[2]];
+    e3 = cross3(e1, e2);
+  }
+  return [e1, e2, e3];
+}
+/**
+ * Góc xoay của bản sao đối xứng: trục 2 của bản sao là ảnh gương của trục 2 thanh gốc. Phép đối xứng đảo chiều tích có
+ * hướng, nên trục 3 của bản sao ngược với ảnh gương của trục 3 gốc (tải `local3` phải đổi dấu, xem `mirrorLoad`).
+ */
+function mirroredAngle(src: [P3, P3], dst: [P3, P3], angle: number | undefined, flip: (v: V3) => V3): number | undefined {
+  const target = flip(frameAxes(src[0], src[1], angle ?? 0)[1]);
+  const [, e2, e3] = frameAxes(dst[0], dst[1], 0);
+  let deg = (Math.atan2(dot3(target, e3), dot3(target, e2)) * 180) / Math.PI;
+  deg = Number(deg.toFixed(9));
+  if (Math.abs(deg) < 1e-9) return angle === undefined ? undefined : 0;
+  return deg === -180 ? 180 : deg;
+}
+/** Ảnh gương của tải: thành phần tổng thể vuông góc mặt gương và tải theo trục 3 địa phương (thanh hoặc pháp tuyến sàn) đổi dấu. */
+function mirrorLoad<T extends { direction: string; value: number; valueEnd?: number | undefined }>(l: T, axis: "x" | "y"): T {
+  const flips = l.direction === "local3" || (axis === "x" && l.direction === "globalX") || (axis === "y" && l.direction === "globalY");
+  if (!flips) return l;
+  return { ...l, value: -l.value, ...(l.valueEnd !== undefined ? { valueEnd: -l.valueEnd } : {}) };
+}
+
 const ReplicateMode = z.discriminatedUnion("mode", [
   z.object({ mode: z.literal("linear"), dx: z.number(), dy: z.number(), dz: z.number(), count: z.number().int().min(1).max(200) }),
   z.object({ mode: z.literal("mirror"), axis: z.enum(["x", "y"]), value: z.number() }),
@@ -261,14 +305,19 @@ export const drawingCommands = {
           }
           const story = c.story(f.story);
           // Giữ góc xoay trục địa phương và vùng cứng: tải theo trục địa phương (local2/local3) và vị trí tải đi theo thanh (R1).
-          const id = addFrameRaw(d, { kind: f.kind, i: findOrAddJoint(d, a1, story), j: findOrAddJoint(d, b1, story), section: f.section, story, releases: f.releases, offsets: f.offsets, angle: f.angle });
+          // Đối xứng: góc xoay tính lại để trục 2 là ảnh gương của trục 2 gốc.
+          const angle = o.mode === "mirror" ? mirroredAngle([pt(f.i), pt(f.j)], [a1, b1], f.angle, (v) => (o.axis === "x" ? [-v[0], v[1], v[2]] : [v[0], -v[1], v[2]])) : f.angle;
+          const id = addFrameRaw(d, { kind: f.kind, i: findOrAddJoint(d, a1, story), j: findOrAddJoint(d, b1, story), section: f.section, story, releases: f.releases, offsets: f.offsets, angle });
           if (!id) {
             skipped++;
             continue;
           }
           created.push(id);
           if (a.copyLoads) {
-            for (const l of d.frameLoads.filter((x) => x.frame === f.id)) d.frameLoads.push({ ...l, id: `${l.id}-r${created.length}`, frame: id });
+            for (const l of d.frameLoads.filter((x) => x.frame === f.id)) {
+              const copy = { ...l, id: `${l.id}-r${created.length}`, frame: id };
+              d.frameLoads.push(o.mode === "mirror" ? mirrorLoad(copy, o.axis) : copy);
+            }
           }
         }
         for (const s of shells) {
@@ -281,7 +330,11 @@ export const drawingCommands = {
             const id = addShell(d, s.kind, pts as P3[], s.section, c.story(s.story));
             created.push(id);
             if (a.copyLoads) {
-              for (const l of d.shellLoads.filter((x) => x.shell === s.id)) d.shellLoads.push({ ...l, id: `${l.id}-r${created.length}`, shell: id });
+              for (const l of d.shellLoads.filter((x) => x.shell === s.id)) {
+                const copy = { ...l, id: `${l.id}-r${created.length}`, shell: id };
+                // Thứ tự đỉnh giữ nguyên qua gương nên pháp tuyến sàn đảo: tải local3 đổi dấu để giữ phương thật.
+                d.shellLoads.push(o.mode === "mirror" ? mirrorLoad(copy, o.axis) : copy);
+              }
             }
           } catch (e) {
             if (e instanceof CommandError && e.code === "duplicate") skipped++;
