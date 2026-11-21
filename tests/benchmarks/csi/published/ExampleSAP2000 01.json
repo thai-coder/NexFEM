@@ -1,0 +1,400 @@
+{
+  "schemaVersion": 1,
+  "name": "ExampleSAP2000 01",
+  "units": {
+    "force": "kN",
+    "length": "m",
+    "temperature": "C"
+  },
+  "designCodes": {},
+  "grids": [],
+  "stories": [],
+  "materials": [
+    {
+      "id": "mat",
+      "name": "Elastic material",
+      "type": "other",
+      "E": 24821126.2554061,
+      "nu": 0.2,
+      "gamma": 0
+    }
+  ],
+  "frameSections": [
+    {
+      "id": "12x12, axial modifier 1000",
+      "name": "12x12, axial modifier 1000",
+      "material": "mat",
+      "geometry": {
+        "shape": "general",
+        "b": 0.30479999999999996,
+        "h": 0.30479999999999996,
+        "A": 92.90304,
+        "I33": 0.0007192479034367999,
+        "I22": 0.0007192479034367999,
+        "J": 0.0007192479034367999
+      }
+    }
+  ],
+  "shellSections": [],
+  "joints": [
+    {
+      "id": "1",
+      "label": "1",
+      "x": 0.0,
+      "y": 0,
+      "z": 0.0,
+      "restraint": [
+        true,
+        true,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "id": "2",
+      "label": "2",
+      "x": 0.0,
+      "y": 0,
+      "z": 3.048,
+      "restraint": [
+        false,
+        true,
+        false,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "id": "3",
+      "label": "3",
+      "x": 2.4384,
+      "y": 0,
+      "z": 4.8768,
+      "restraint": [
+        true,
+        true,
+        false,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "id": "4",
+      "label": "4",
+      "x": -1.2192,
+      "y": 0,
+      "z": 3.048,
+      "restraint": [
+        false,
+        true,
+        false,
+        true,
+        false,
+        true
+      ]
+    }
+  ],
+  "frames": [
+    {
+      "id": "F1",
+      "label": "F1",
+      "kind": "column",
+      "i": "1",
+      "j": "2",
+      "section": "12x12, axial modifier 1000"
+    },
+    {
+      "id": "F2",
+      "label": "F2",
+      "kind": "brace",
+      "i": "2",
+      "j": "3",
+      "section": "12x12, axial modifier 1000"
+    },
+    {
+      "id": "F3",
+      "label": "F3",
+      "kind": "beam",
+      "i": "4",
+      "j": "2",
+      "section": "12x12, axial modifier 1000"
+    }
+  ],
+  "shells": [],
+  "loadPatterns": [
+    {
+      "id": "1",
+      "name": "1",
+      "type": "other",
+      "selfWeight": 0
+    },
+    {
+      "id": "2",
+      "name": "2",
+      "type": "other",
+      "selfWeight": 0
+    },
+    {
+      "id": "3",
+      "name": "3",
+      "type": "other",
+      "selfWeight": 0
+    },
+    {
+      "id": "4",
+      "name": "4",
+      "type": "other",
+      "selfWeight": 0
+    },
+    {
+      "id": "5",
+      "name": "5",
+      "type": "other",
+      "selfWeight": 0
+    },
+    {
+      "id": "6",
+      "name": "6",
+      "type": "other",
+      "selfWeight": 0
+    },
+    {
+      "id": "7",
+      "name": "7",
+      "type": "other",
+      "selfWeight": 0
+    }
+  ],
+  "loadCases": [
+    {
+      "id": "1",
+      "name": "1",
+      "type": "linearStatic",
+      "loads": [
+        {
+          "pattern": "1",
+          "factor": 1
+        }
+      ]
+    },
+    {
+      "id": "2",
+      "name": "2",
+      "type": "linearStatic",
+      "loads": [
+        {
+          "pattern": "2",
+          "factor": 1
+        }
+      ]
+    },
+    {
+      "id": "3",
+      "name": "3",
+      "type": "linearStatic",
+      "loads": [
+        {
+          "pattern": "3",
+          "factor": 1
+        }
+      ]
+    },
+    {
+      "id": "4",
+      "name": "4",
+      "type": "linearStatic",
+      "loads": [
+        {
+          "pattern": "4",
+          "factor": 1
+        }
+      ]
+    },
+    {
+      "id": "5",
+      "name": "5",
+      "type": "linearStatic",
+      "loads": [
+        {
+          "pattern": "5",
+          "factor": 1
+        }
+      ]
+    },
+    {
+      "id": "6",
+      "name": "6",
+      "type": "linearStatic",
+      "loads": [
+        {
+          "pattern": "6",
+          "factor": 1
+        }
+      ]
+    },
+    {
+      "id": "7",
+      "name": "7",
+      "type": "linearStatic",
+      "loads": [
+        {
+          "pattern": "7",
+          "factor": 1
+        }
+      ]
+    }
+  ],
+  "combos": [],
+  "frameLoads": [
+    {
+      "id": "fl-1",
+      "frame": "F1",
+      "pattern": "1",
+      "kind": "distributed",
+      "direction": "gravity",
+      "value": 2.1890854405809543
+    },
+    {
+      "id": "fl-2",
+      "frame": "F2",
+      "pattern": "1",
+      "kind": "distributed",
+      "direction": "gravity",
+      "value": 2.1890854405809543
+    },
+    {
+      "id": "fl-3",
+      "frame": "F3",
+      "pattern": "1",
+      "kind": "distributed",
+      "direction": "gravity",
+      "value": 2.1890854405809543
+    },
+    {
+      "id": "fl-4",
+      "frame": "F3",
+      "pattern": "2",
+      "kind": "distributed",
+      "direction": "gravity",
+      "value": 26.269025286971456
+    },
+    {
+      "id": "fl-5",
+      "frame": "F2",
+      "pattern": "4",
+      "kind": "distributed",
+      "direction": "gravity",
+      "value": 23.35024469953018
+    },
+    {
+      "id": "fl-6",
+      "frame": "F1",
+      "pattern": "5",
+      "kind": "distributed",
+      "direction": "local2",
+      "value": 29.187805874412724
+    },
+    {
+      "id": "fl-7",
+      "frame": "F2",
+      "pattern": "5",
+      "kind": "distributed",
+      "direction": "local2",
+      "value": -29.187805874412724
+    },
+    {
+      "id": "fl-8",
+      "frame": "F2",
+      "pattern": "7",
+      "kind": "point",
+      "direction": "local2",
+      "value": -66.7233242289075,
+      "at": 0.5
+    }
+  ],
+  "shellLoads": [],
+  "jointLoads": [
+    {
+      "id": "jl-1",
+      "joint": "4",
+      "pattern": "2",
+      "values": [
+        0.0,
+        0,
+        -44.482216152605,
+        0,
+        0.0,
+        0
+      ]
+    },
+    {
+      "id": "jl-2",
+      "joint": "2",
+      "pattern": "3",
+      "values": [
+        0.0,
+        0,
+        -76.5094117824806,
+        0,
+        -73.75649638922818,
+        0
+      ]
+    },
+    {
+      "id": "jl-3",
+      "joint": "1",
+      "pattern": "6",
+      "values": [
+        18.041986871496587,
+        0,
+        0.0,
+        0,
+        8.460303997587937,
+        0
+      ]
+    },
+    {
+      "id": "jl-4",
+      "joint": "2",
+      "pattern": "6",
+      "values": [
+        12.490606295651482,
+        0,
+        0.0,
+        0,
+        -7.050253331323282,
+        0
+      ]
+    },
+    {
+      "id": "jl-5",
+      "joint": "2",
+      "pattern": "6",
+      "values": [
+        3.497369762782415,
+        0,
+        -4.663159683709887,
+        0,
+        2.5380911992763817,
+        0
+      ]
+    },
+    {
+      "id": "jl-6",
+      "joint": "3",
+      "pattern": "6",
+      "values": [
+        1.4988727554781778,
+        0,
+        -1.9984970073042374,
+        0,
+        -1.6920607995175876,
+        0
+      ]
+    }
+  ]
+}

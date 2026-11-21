@@ -1,0 +1,158 @@
+{
+  "schema": 1,
+  "id": "cantilever-tip-load",
+  "description": "Công xôn L = 6 m dọc +X. Hai ca độc lập đặt 10 kN tại đầu tự do: P theo −Z, PY theo +Y.",
+  "file": "cantilever-tip-load.s2k",
+  "provenance": {
+    "input": "synthetic: SAP2000 text tables written by hand from the grammar of real SAP2000 files in tests/fixtures/csi/sap2000; NOT exported from SAP2000",
+    "reference": "closed-form analytic solution; NOT ETABS/SAP2000 results"
+  },
+  "basis": "P: Uz = −PL³/(3EI33), θy = PL²/(2EI33), Fz = P, My = −PL, M3(x) = −P(L−x). PY: Uy = PL³/(3EI22), θz = PL²/(2EI22), Fy = −P, Mz = −PL. Trục địa phương 2 = +Z và 3 = −Y, nên nội lực NexFEM trên mặt cắt dương là M2(x) = P(L−x) và V3(x) = −P.",
+  "classification": "analytic-exact",
+  "limitations": [],
+  "source": {
+    "program": "analytic",
+    "version": "closed-form"
+  },
+  "units": {
+    "force": "kN",
+    "length": "m"
+  },
+  "metrics": [
+    {
+      "case": "P",
+      "kind": "displacement",
+      "object": "2",
+      "component": "U3",
+      "value": -0.0033749999999999995,
+      "absTol": 1e-10,
+      "relTol": 0.000001
+    },
+    {
+      "case": "P",
+      "kind": "displacement",
+      "object": "2",
+      "component": "R2",
+      "value": 0.0008437499999999999,
+      "absTol": 1e-10,
+      "relTol": 0.000001
+    },
+    {
+      "case": "P",
+      "kind": "reaction",
+      "object": "1",
+      "component": "F3",
+      "value": 10,
+      "absTol": 1e-8,
+      "relTol": 0.000001
+    },
+    {
+      "case": "P",
+      "kind": "reaction",
+      "object": "1",
+      "component": "M2",
+      "value": -60,
+      "absTol": 1e-8,
+      "relTol": 0.000001
+    },
+    {
+      "case": "P",
+      "kind": "frameForce",
+      "object": "1@x=0",
+      "component": "M3",
+      "value": -60,
+      "absTol": 1e-8,
+      "relTol": 0.000001
+    },
+    {
+      "case": "P",
+      "kind": "frameForce",
+      "object": "1@x=3",
+      "component": "M3",
+      "value": -30,
+      "absTol": 1e-8,
+      "relTol": 0.000001
+    },
+    {
+      "case": "P",
+      "kind": "frameForce",
+      "object": "1@x=6",
+      "component": "M3",
+      "value": 0,
+      "absTol": 1e-8,
+      "relTol": 0.000001
+    },
+    {
+      "case": "PY",
+      "kind": "displacement",
+      "object": "2",
+      "component": "U2",
+      "value": 0.013499999999999998,
+      "absTol": 1e-10,
+      "relTol": 0.000001
+    },
+    {
+      "case": "PY",
+      "kind": "displacement",
+      "object": "2",
+      "component": "R3",
+      "value": 0.0033749999999999995,
+      "absTol": 1e-10,
+      "relTol": 0.000001
+    },
+    {
+      "case": "PY",
+      "kind": "reaction",
+      "object": "1",
+      "component": "F2",
+      "value": -10,
+      "absTol": 1e-8,
+      "relTol": 0.000001
+    },
+    {
+      "case": "PY",
+      "kind": "reaction",
+      "object": "1",
+      "component": "M3",
+      "value": -60,
+      "absTol": 1e-8,
+      "relTol": 0.000001
+    },
+    {
+      "case": "PY",
+      "kind": "frameForce",
+      "object": "1@x=0",
+      "component": "M2",
+      "value": 60,
+      "absTol": 1e-8,
+      "relTol": 0.000001
+    },
+    {
+      "case": "PY",
+      "kind": "frameForce",
+      "object": "1@x=3",
+      "component": "M2",
+      "value": 30,
+      "absTol": 1e-8,
+      "relTol": 0.000001
+    },
+    {
+      "case": "PY",
+      "kind": "frameForce",
+      "object": "1@x=6",
+      "component": "M2",
+      "value": 0,
+      "absTol": 1e-8,
+      "relTol": 0.000001
+    },
+    {
+      "case": "PY",
+      "kind": "frameForce",
+      "object": "1@x=3",
+      "component": "V3",
+      "value": -10,
+      "absTol": 1e-8,
+      "relTol": 0.000001
+    }
+  ]
+}

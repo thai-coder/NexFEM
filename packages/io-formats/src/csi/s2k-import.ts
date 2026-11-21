@@ -65,7 +65,40 @@ const TABLES_USED = new Set([
   "AREA LOADS - UNIFORM",
   "JOINT LOADS - FORCE",
   "JOINT LOADS - GROUND DISPLACEMENT",
+  "PREFERENCES - DIMENSIONAL",
 ]);
+
+/**
+ * Bảng không ảnh hưởng mô hình phân tích tĩnh tuyến tính khung, bỏ qua ở mức thông tin. Mọi bảng khác chưa đọc mà có dữ liệu
+ * là lỗi (fail closed). Gồm: mô tả/hiển thị, thiết kế, nhóm, trạm xuất kết quả, hàm thời gian/phổ (chỉ dùng cho trường hợp
+ * động, vốn đã bị chặn), nguồn khối lượng và tham số modal (không dùng cho tĩnh tuyến tính), và định nghĩa thuộc tính chỉ có
+ * tác dụng khi được gán: phép gán/đối tượng dùng chúng nằm ở bảng khác và bị chặn ở đó (ví dụ tải tự động sóng qua AutoLoad,
+ * phần tử solid, cáp ứng lực trước, mẫu nút).
+ */
+const SAFE_IGNORED_TABLES = new Set([
+  "PROJECT INFORMATION",
+  "OPTIONS - COLORS - DISPLAY",
+  "OPTIONS - COLORS - OUTPUT",
+  "MATERIAL LIST 1 - BY OBJECT TYPE",
+  "MATERIAL LIST 2 - BY SECTION PROPERTY",
+  "FRAME DESIGN PROCEDURES",
+  "AREA SECTION PROPERTY DESIGN PARAMETERS",
+  "REBAR SIZES",
+  "GROUPS 1 - DEFINITIONS",
+  "FRAME OUTPUT STATION ASSIGNMENTS",
+  "CASE - MODAL 1 - GENERAL",
+  "MASS SOURCE",
+  "JOINT PATTERN DEFINITIONS",
+  "AUTO WAVE 3 - WAVE CHARACTERISTICS - GENERAL",
+  "SOLID PROPERTY DEFINITIONS",
+  "MATERIAL PROPERTIES 03F - TENDON DATA",
+  "MATERIAL PROPERTIES 03J - COUPLED NONLINEAR VON MISES DATA",
+  "MATERIAL PROPERTIES 06 - DAMPING PARAMETERS",
+  "MATERIAL PROPERTIES 09 - ACCEPTANCE CRITERIA",
+  "FRAME SECTION PROPERTIES 13 - TIME DEPENDENT",
+  "AREA SECTION PROPERTY - TIME DEPENDENT",
+]);
+const SAFE_IGNORED_PREFIX = [/^PREFERENCES - .*DESIGN\b/, /^OVERWRITES - .*DESIGN\b/, /^FUNCTION - /];
 
 /** Ngưỡng so đặc trưng tiết diện NexFEM tự tính với giá trị SAP2000 ghi trong file. */
 const PROP_TOL = { A: 0.01, I: 0.01, J: 0.05 } as const;
@@ -96,7 +129,7 @@ export function importS2k(input: string | S2kFile, opts: { name?: string } = {})
   if (fmt && f(fmt, "UnitsCurr") && !s2kYes(f(fmt, "UnitsCurr"))) d.add("warning", "units_not_current", {});
   if (!U) {
     d.add("error", unitText ? "unknown_units" : "missing_units", { force: uf ?? "?", length: ul ?? "?" });
-    return { model: emptyModel(opts.name ?? modelName), report: { program, version, units: null, counts, diagnostics: d.list(), mapping: { joints: {}, frames: {}, shells: {} } } };
+    return { model: emptyModel(opts.name ?? modelName), report: { program, version, units: null, counts, diagnostics: d.list(), blocked: true, mapping: { joints: {}, frames: {}, shells: {} } } };
   }
   d.add("info", "unit_conversion", { force: U.force, length: U.length });
   const L = (v: number) => conv.length(U, v);
@@ -486,10 +519,15 @@ export function importS2k(input: string | S2kFile, opts: { name?: string } = {})
   const patRecs = T("LOAD PATTERN DEFINITIONS");
   for (const r of patRecs) {
     const name = f(r, "LoadPat") ?? "";
+    const autoLoad = (f(r, "AutoLoad") ?? "").trim();
+    if (autoLoad && autoLoad.toLowerCase() !== "none") {
+      d.add("error", "automatic_load_unsupported", { method: autoLoad }, { line: r.line, object: name || "?" });
+    }
     const t = (f(r, "DesignType") ?? "").toLowerCase();
     const type: LoadPattern["type"] = t === "dead" ? "dead" : t === "super dead" ? "superDead" : t === "live" || t === "roof live" || t === "reducible live" ? "live" : t === "wind" ? "wind" : t === "quake" || t === "seismic" ? "seismic" : "other";
     if (!["dead", "super dead", "live", "wind", "quake"].includes(t)) d.add("info", "pattern_type_mapped", { from: f(r, "DesignType") ?? "?", to: type }, { line: r.line, object: name });
-    const sw = n(r, "SelfWtMult");
+    const sw = r.fields.has("SelfWtMult") ? n(r, "SelfWtMult") : 0;
+    if (!Number.isFinite(sw) || sw < 0) d.add("error", "pattern_selfweight_invalid", { value: f(r, "SelfWtMult") ?? "?" }, { line: r.line, object: name });
     const id = `lp-${patterns.length + 1}`;
     patterns.push({ id, name, type, selfWeight: Number.isFinite(sw) && sw >= 0 ? sw : 0 });
     patByName.set(name, id);
@@ -518,7 +556,7 @@ export function importS2k(input: string | S2kFile, opts: { name?: string } = {})
       const sf = n(it, "LoadSF");
       if ((f(it, "LoadType") ?? "").toLowerCase() !== "load pattern") d.add("error", "case_item_unsupported", { type: f(it, "LoadType") ?? "?" }, { line: it.line, object: name });
       else if (pat && Number.isFinite(sf)) loads.push({ pattern: pat, factor: sf });
-      else d.add("warning", "case_item_missing", { pattern: f(it, "LoadName") ?? "?" }, { line: it.line, object: name });
+      else d.add("error", "case_item_missing", { pattern: f(it, "LoadName") ?? "?" }, { line: it.line, object: name });
     }
     const id = `lc-${loadCases.length + 1}`;
     loadCases.push({ id, name, type: kind, loads });
@@ -548,7 +586,7 @@ export function importS2k(input: string | S2kFile, opts: { name?: string } = {})
       if (cn === undefined) continue;
       const target = caseByName.get(cn) ?? comboId.get(cn);
       if (target && Number.isFinite(sf)) items.push({ case: target, factor: sf });
-      else d.add("warning", "combo_item_missing", { item: cn }, at);
+      else d.add("error", "combo_item_missing", { item: cn }, at);
     }
     if (head && ["SteelDesign", "ConcDesign", "AlumDesign", "ColdDesign"].some((k) => head.fields.has(k))) d.add("info", "combo_design_ignored", {}, at);
     combos.push({ id: comboId.get(name)!, name, type, items });
@@ -567,6 +605,24 @@ export function importS2k(input: string | S2kFile, opts: { name?: string } = {})
     return DIRS[dir] ?? null;
   };
   const frameLoads: FrameLoad[] = [];
+  // Bộ nhập dùng toạ độ tương đối RelDist. SAP2000 ghi cả RelDist và AbsDist; với DistType=AbsDist thì AbsDist là gốc,
+  // nên chỉ chấp nhận khi hai cột khớp nhau theo chiều dài thanh. DistType lạ thì từ chối.
+  const jointById = new Map(joints.map((j) => [j.id, j]));
+  const relDistOk = (r: S2kRecord, ra: string, rb: string, aa: string, ab: string, frame: Frame | undefined): boolean => {
+    const t = (f(r, "DistType") ?? "RelDist").toLowerCase();
+    if (t === "reldist") return true;
+    if (t !== "absdist" || !frame) return false;
+    const pi = jointById.get(frame.i);
+    const pj = jointById.get(frame.j);
+    if (!pi || !pj) return false;
+    const len = Math.hypot(pj.x - pi.x, pj.y - pi.y, pj.z - pi.z);
+    const tolAbs = Math.max(1e-6, 1e-6 * len);
+    return [[ra, aa], [rb, ab]].every(([rk, ak]) => {
+      const rel = n(r, rk!);
+      const abs = n(r, ak!);
+      return Number.isFinite(rel) && Number.isFinite(abs) && Math.abs(L(abs) - rel * len) <= tolAbs;
+    });
+  };
   const distRecs = T("FRAME LOADS - DISTRIBUTED");
   for (const r of distRecs) {
     const frame = frameByName.get(f(r, "Frame") ?? "");
@@ -577,7 +633,7 @@ export function importS2k(input: string | S2kFile, opts: { name?: string } = {})
       d.add("error", "load_target_missing", { kind: "frame" }, at);
       continue;
     }
-    if ((f(r, "Type") ?? "Force").toLowerCase() !== "force" || !dir) {
+    if ((f(r, "Type") ?? "Force").toLowerCase() !== "force" || !dir || !relDistOk(r, "RelDistA", "RelDistB", "AbsDistA", "AbsDistB", frame)) {
       d.add("error", "line_load_unsupported", { type: f(r, "Type") ?? "?", dir: f(r, "Dir") ?? "?" }, at);
       continue;
     }
@@ -590,9 +646,13 @@ export function importS2k(input: string | S2kFile, opts: { name?: string } = {})
       d.add("error", "line_load_unsupported", { type: f(r, "DistType") ?? "?", dir: f(r, "Dir") ?? "?" }, at);
       continue;
     }
-    const w = ((wa + wb) / 2) * (b - a);
-    if (wa !== wb || a > 1e-9 || b < 1 - 1e-9) d.add("warning", "line_load_approximated", {}, at);
-    frameLoads.push({ id: `fl-${frameLoads.length + 1}`, frame: frame.id, pattern: pat, kind: "distributed", direction: dir, value: conv.forcePerLength(U, w) });
+    // NexFEM chỉ có tải đều suốt chiều dài. Đổi tải hình thang hoặc trên một đoạn thành tải đều thì giữ hợp lực nhưng sai
+    // vị trí (mômen có thể lệch hàng chục %), nên không nhập và chặn mở mô hình.
+    if (wa !== wb || a > 1e-9 || b < 1 - 1e-9) {
+      d.add("error", "line_load_not_uniform", {}, at);
+      continue;
+    }
+    frameLoads.push({ id: `fl-${frameLoads.length + 1}`, frame: frame.id, pattern: pat, kind: "distributed", direction: dir, value: conv.forcePerLength(U, wa) });
   }
   const pointRecs = T("FRAME LOADS - POINT");
   for (const r of pointRecs) {
@@ -606,7 +666,7 @@ export function importS2k(input: string | S2kFile, opts: { name?: string } = {})
       d.add("error", "load_target_missing", { kind: "frame" }, at);
       continue;
     }
-    if ((f(r, "Type") ?? "Force").toLowerCase() !== "force" || !dir || !(rel >= 0 && rel <= 1) || !Number.isFinite(force)) {
+    if ((f(r, "Type") ?? "Force").toLowerCase() !== "force" || !dir || !(rel >= 0 && rel <= 1) || !Number.isFinite(force) || !relDistOk(r, "RelDist", "RelDist", "AbsDist", "AbsDist", frame)) {
       d.add("error", "line_load_unsupported", { type: f(r, "Type") ?? "?", dir: f(r, "Dir") ?? "?" }, at);
       continue;
     }
@@ -693,6 +753,14 @@ export function importS2k(input: string | S2kFile, opts: { name?: string } = {})
   for (const r of T("JOINT LOADS - GROUND DISPLACEMENT")) d.add("error", "ground_displacement_unsupported", { pattern: f(r, "LoadPat") ?? "?" }, { line: r.line, object: f(r, "Joint") ?? "?" });
 
   // ------------------------------------------------------------------ bảng bỏ qua
+  /** Bảng chỉ an toàn khi giữ giá trị mặc định; khác mặc định thì đổi kết quả nên chặn. */
+  function conditionallySafe(name: string, recs: S2kRecord[]): boolean {
+    const isNone = (v: string | undefined) => v === undefined || v === "" || /^(none|no)$/i.test(v);
+    if (name === "ANALYSIS OPTIONS") return recs.every((r) => isNone(f(r, "StiffCase")) && isNone(f(r, "GeomMod")));
+    if (name === "FRAME LOAD TRANSFER OPTIONS") return recs.every((r) => s2kYes(f(r, "Transfer")));
+    if (name === "AUTO COMBINATION OPTION DATA 01 - GENERAL") return recs.every((r) => !s2kYes(f(r, "AutoGen")));
+    return false;
+  }
   for (const [name, recs] of file.tables) {
     if (TABLES_USED.has(name) || !recs.length) continue;
     // Lò xo ảnh hưởng trực tiếp tới phân tích; chưa có file SAP2000 thật có lò xo để kiểm chứng cú pháp, nên báo lỗi thay vì ghi chú.
@@ -700,7 +768,13 @@ export function importS2k(input: string | S2kFile, opts: { name?: string } = {})
       d.add("error", "springs_not_verified", { section: name, records: recs.length }, { line: file.tableLines.get(name) });
       continue;
     }
-    d.add("info", "section_ignored", { section: name, records: recs.length }, { line: file.tableLines.get(name) });
+    // Bảng tải chưa đọc: báo rõ là thiếu tải (vẫn là lỗi như mọi bảng chưa kiểm chứng).
+    if (/\bLOADS\b/.test(name)) {
+      d.add("error", "load_table_unsupported", { section: name, records: recs.length }, { line: file.tableLines.get(name) });
+      continue;
+    }
+    const safe = SAFE_IGNORED_TABLES.has(name) || SAFE_IGNORED_PREFIX.some((re) => re.test(name)) || conditionallySafe(name, recs);
+    d.add(safe ? "info" : "error", safe ? "section_ignored" : "section_unverified", { section: name, records: recs.length }, { line: file.tableLines.get(name) });
   }
 
   const model = parseModel({
@@ -731,6 +805,7 @@ export function importS2k(input: string | S2kFile, opts: { name?: string } = {})
       units: { force: U.force, length: U.length, temperature: U.temperature },
       counts,
       diagnostics: d.list(),
+      blocked: d.blocked,
       mapping: {
         joints: Object.fromEntries([...jointByName].map(([k, v]) => [k, v.id])),
         frames: Object.fromEntries([...frameByName].map(([k, v]) => [k, split.segments.get(v.id)?.[0]?.id ?? v.id])),

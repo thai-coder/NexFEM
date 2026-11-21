@@ -4,3 +4,4 @@
 *.icns binary
 # Fixture CSI giữ nguyên từng byte (CRLF, ký tự không ASCII): không chuẩn hoá xuống dòng.
 tests/fixtures/csi/** -text
+tests/benchmarks/csi/cases/** -text

@@ -95,8 +95,38 @@ describe("nhập dữ liệu tự tạo", () => {
   });
 });
 
+describe("đầu vào ETABS chưa kiểm chứng", () => {
+  it("thuộc tính mẫu tải chưa kiểm chứng không bị bỏ âm thầm", () => {
+    const r = importE2k(SMALL.replace('$ END OF MODEL FILE', '$ LOAD PATTERNS\n  LOADPATTERN "W" TYPE "Wind" SELFWEIGHT 0 AUTO "ASCE"\n$ END OF MODEL FILE'));
+    expect(r.report.diagnostics).toContainEqual(expect.objectContaining({level:'error',code:'pattern_property_unsupported',params:{key:'AUTO'}}));
+    expect(r.report.blocked).toBe(true);
+  });
+  it("thiếu mẫu tải và thành phần tổ hợp tạo lỗi chặn", () => {
+    const extra = ['$ LOAD CASES', '  LOADCASE "C" TYPE "Linear Static" LOADPAT "MISSING" SF 1', '$ LOAD COMBINATIONS', '  LOADCOMBO "CO" TYPE "Linear Add" LOADCASE "MISSING_CASE" SF 1', '$ END OF MODEL FILE'].join('\n');
+    const r = importE2k(SMALL.replace('$ END OF MODEL FILE', extra));
+    expect(r.report.diagnostics).toEqual(expect.arrayContaining([expect.objectContaining({level:'error',code:'case_item_missing'}), expect.objectContaining({level:'error',code:'combo_item_missing'})]));
+    expect(r.report.blocked).toBe(true);
+  });
+  it("thiếu hệ số không được bỏ qua tham chiếu", () => {
+    const extra = ['$ LOAD CASES', '  LOADCASE "C" TYPE "Linear Static" LOADPAT "MISSING"', '$ LOAD COMBINATIONS', '  LOADCOMBO "CO" TYPE "Linear Add" LOADCASE "MISSING_CASE"', '$ END OF MODEL FILE'].join('\n');
+    const r = importE2k(SMALL.replace('$ END OF MODEL FILE', extra));
+    expect(r.report.diagnostics).toEqual(expect.arrayContaining([expect.objectContaining({level:'error',code:'case_item_missing'}), expect.objectContaining({level:'error',code:'combo_item_missing'})]));
+  });
+  it("phần chưa biết chặn; metadata cho phép không chặn", () => {
+    const r = importE2k(SMALL.replace('$ END OF MODEL FILE', '$ UNEXPECTED FORCES DATA\n  VALUE 1\n$ PROJECT INFORMATION\n  INFO "x"\n$ END OF MODEL FILE'));
+    expect(r.report.diagnostics).toContainEqual(expect.objectContaining({level:'error',code:'section_unverified',params:{section:'UNEXPECTED FORCES DATA',records:1}}));
+    expect(r.report.diagnostics).toContainEqual(expect.objectContaining({level:'info',code:'section_ignored',params:{section:'PROJECT INFORMATION',records:1}}));
+    expect(r.report.blocked).toBe(true);
+  });
+});
+
 describe("mô men ETABS tại điểm riêng nằm giữa thanh", () => {
   const input = readFileSync(new URL("../../../tests/fixtures/csi/synthetic/etabs-interior-moment.e2k", import.meta.url), "utf8");
+
+  it("file được hỗ trợ không bị chặn và metadata cho phép giữ trạng thái không chặn", () => {
+    expect(importE2k(input).report.blocked).toBe(false);
+    expect(importE2k(input.replace('$ END OF MODEL FILE', '$ PROJECT INFORMATION\n  INFO "x"\n$ END OF MODEL FILE')).report.blocked).toBe(false);
+  });
 
   it("tạo một nút dùng chung, chuyển đủ thành phần tải và giữ nhả tại đầu ngoài", () => {
     const source = input

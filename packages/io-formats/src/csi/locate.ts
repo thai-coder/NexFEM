@@ -1,4 +1,4 @@
-import type { Frame, Joint } from "@nexfem/model-core";
+import { loadOnSegment, type Frame, type FrameLoad, type Joint } from "@nexfem/model-core";
 
 /**
  * Tìm chỗ đặt tải tập trung theo toạ độ cho điểm CSI không phải đầu thanh/sàn nào đã nhập.
@@ -157,22 +157,30 @@ export function splitFramesAtJoints(
   return { frames: out, segments, hostOf };
 }
 
-/** Chuyển tải của thanh gốc sang các đoạn: tải đều chép cho mọi đoạn; tải tập trung vào đoạn chứa vị trí, đổi lại vị trí tương đối. */
-export function remapFrameLoads<T extends { id: string; frame: string; kind: "distributed" | "point"; at?: number }>(loads: readonly T[], segments: ReadonlyMap<string, FrameSegment[]>): T[] {
-  const out: T[] = [];
+/**
+ * Chuyển tải của thanh gốc sang các đoạn bằng `loadOnSegment` của model-core (dùng chung với lệnh chia thanh):
+ * tải đều chép cho mọi đoạn; tải tập trung vào đoạn chứa vị trí; tải `linear` cắt theo đoạn và nội suy cường độ.
+ */
+export function remapFrameLoads(loads: readonly FrameLoad[], segments: ReadonlyMap<string, FrameSegment[]>): FrameLoad[] {
+  const out: FrameLoad[] = [];
   for (const l of loads) {
     const segs = segments.get(l.frame);
     if (!segs) {
       out.push(l);
       continue;
     }
-    if (l.kind === "distributed") {
-      segs.forEach((s, k) => out.push({ ...l, id: `${l.id}-${k + 1}`, frame: s.id }));
+    if (l.kind === "point") {
+      // Điểm ngoài mọi đoạn (sai số làm tròn): đoạn cuối, như trước.
+      const at = l.at ?? 0.5;
+      const s = segs.find((x) => at >= x.t0 - 1e-12 && at <= x.t1 + 1e-12) ?? segs[segs.length - 1]!;
+      const part = loadOnSegment({ ...l, at: Math.min(s.t1, Math.max(s.t0, at)) }, s.t0, s.t1)!;
+      out.push({ ...part, id: l.id, frame: s.id, at: Number(part.at!.toPrecision(12)) });
       continue;
     }
-    const at = l.at ?? 0.5;
-    const s = segs.find((x) => at >= x.t0 - 1e-12 && at <= x.t1 + 1e-12) ?? segs[segs.length - 1]!;
-    out.push({ ...l, frame: s.id, at: Math.min(1, Math.max(0, Number(((at - s.t0) / (s.t1 - s.t0)).toPrecision(12)))) });
+    segs.forEach((s, k) => {
+      const part = loadOnSegment(l, s.t0, s.t1);
+      if (part) out.push({ ...part, id: `${l.id}-${k + 1}`, frame: s.id });
+    });
   }
   return out;
 }

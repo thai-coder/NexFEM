@@ -3,8 +3,9 @@ import { useState } from "react";
 import { Modal } from "../components/Modal.tsx";
 import { useT, type T as Strings } from "../i18n/index.ts";
 import { confirmDiscardAsync } from "../services/files.ts";
+import { openCsiImport } from "../services/csiImport.ts";
+import { csiImportPolicy } from "../services/csiImportPolicy.ts";
 import { useCsiImport } from "../stores/csiImport.ts";
-import { useModel } from "../stores/model.ts";
 import { useUi } from "../stores/ui.ts";
 
 /** Nội dung một thông báo nhập theo ngôn ngữ giao diện; mã chưa dịch thì hiện nguyên mã và tham số. */
@@ -23,8 +24,8 @@ export function CsiImportDialog({ onClose }: { onClose(): void }) {
   const [open, setOpen] = useState<Record<string, boolean>>({ error: true, warning: true, info: false });
   if (!result) return null;
   const { model, report } = result;
-  // Chỉ mở được khi là file văn bản ETABS/SAP2000 đọc được đơn vị; file nhị phân và định dạng lạ chỉ xem báo cáo.
-  const canOpen = (result.format === "e2k" || result.format === "s2k") && report.units !== null;
+  // Không mở mô hình thiếu dữ liệu ảnh hưởng phân tích: xem/sao chép báo cáo và sửa nguồn trước.
+  const { readable, hasImportErrors, canOpen } = csiImportPolicy(result);
   const program = result.format === "e2k" ? "ETABS" : result.format === "s2k" || result.format === "sdb" ? "SAP2000" : report.program || "CSI";
   const close = () => {
     clear();
@@ -44,7 +45,7 @@ export function CsiImportDialog({ onClose }: { onClose(): void }) {
       testId="dlg-csiImport"
       footer={
         <>
-          <div className="modal-error">{canOpen ? T.fmt(C.notEquivalent, { program }) : C.nothingToOpen}</div>
+          <div className="modal-error">{canOpen ? T.fmt(C.notEquivalent, { program }) : readable && hasImportErrors ? C.importBlocked : C.nothingToOpen}</div>
           <button className="btn" onClick={() => void navigator.clipboard?.writeText(textReport())} data-testid="csi-copy">
             {C.copy}
           </button>
@@ -57,7 +58,7 @@ export function CsiImportDialog({ onClose }: { onClose(): void }) {
             data-testid="csi-open"
             onClick={async () => {
               if (!(await confirmDiscardAsync())) return;
-              useModel.getState().reset(model, null);
+              if (!openCsiImport(result)) return;
               useUi.getState().log("success", T.fmt(C.opened, { file: fileName ?? "", joints: model.joints.length, frames: model.frames.length, shells: model.shells.length }));
               useUi.getState().set({ zoomSeq: useUi.getState().zoomSeq + 1, zoomAll: true });
               close();
