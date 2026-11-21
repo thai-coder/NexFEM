@@ -1,6 +1,6 @@
 # Nhập file văn bản CSI: ETABS `.e2k` và SAP2000 `.s2k`
 
-Cập nhật 14/11/2026. Thuộc mốc **M1 — CSI Text Import MVP** trong [kế hoạch nhập và đối chiếu CSI](https://github.com/thai-coder/NexFEM/blob/main/docs/CSI_IMPORT_VALIDATION_PLAN.md). Cả hai bộ nhập đã kiểm tra trên file thật (ETABS 23.2.0; SAP2000 23.1.0 và 25.3.1). Chưa đối chiếu kết quả phân tích (M2 bị chặn vì chưa có bảng kết quả xuất từ ETABS/SAP2000).
+Cập nhật 17/11/2026. Thuộc mốc **M1 — CSI Text Import MVP** trong [kế hoạch nhập và đối chiếu CSI](https://github.com/thai-coder/NexFEM/blob/main/docs/CSI_IMPORT_VALIDATION_PLAN.md). Cả hai bộ nhập đã kiểm tra trên file thật (ETABS 23.2.0; SAP2000 23.1.0 và 25.3.1). Đã có bảng kết quả SAP2000 để chuẩn bị đối chiếu; chưa chứng minh tương đương kết quả phân tích.
 
 ## Dùng trong app
 
@@ -21,7 +21,9 @@ Chọn file → hộp thoại báo cáo nhập. Báo cáo gồm:
 - mục **Nhập gần đúng / bỏ thuộc tính** (mức `warning`);
 - mục **Ghi chú** (mức `info`): dữ liệu không ảnh hưởng mô hình phân tích tuyến tính.
 
-Mỗi mục ghi số lần gặp và tối đa 20 tên đối tượng trong file nguồn. Người dùng xem báo cáo rồi mới bấm **Mở mô hình đã nhập**. Bấm Huỷ thì mô hình hiện tại không đổi.
+Mỗi mục ghi số lần gặp và tối đa 20 tên đối tượng trong file nguồn. `report.blocked` do `io-formats` đặt khi có lỗi: các consumer phải từ chối dùng model cho phân tích nếu cờ bật. Giao diện cho xem/sao chép báo cáo nhưng chặn mở khi `blocked=true`; bấm Huỷ thì mô hình hiện tại không đổi. Đây không phải bảo vệ bắt buộc ở schema/bộ giải đối với consumer tự ý bỏ qua cờ.
+
+Hai bộ nhập dùng danh sách tường minh: phần đã xử lý và một số phần thông tin thuần túy được phép; phần khác có bản ghi được báo lỗi chưa kiểm chứng. Đây là lựa chọn thận trọng, có thể chặn cả model từng mở được. Không tự coi phần chưa biết là vô hại; cần phân tích từng phần trước khi thêm vào danh sách. Các thuộc tính chưa biết trong mẫu tải ETABS cũng bị chặn. Các phần đã nhận diện vẫn có giới hạn theo báo cáo; không coi cờ không chặn là chứng nhận tính đúng.
 
 ## Mã nguồn
 
@@ -61,7 +63,7 @@ Cột "File mẫu" cho biết cú pháp đã có trong file ETABS 23.2.0 thật 
 | `LOADPATTERN` TYPE, SELFWEIGHT | mẫu tải | có |
 | `LOADCASE` Linear Static (LOADPAT/SF), Modal | trường hợp tải | có |
 | `COMBO` Linear Add / Envelope / SRSS / Absolute Add, LOADCASE và LOADCOMBO | tổ hợp (kể cả lồng nhau) | Linear Add |
-| `LINELOAD` UNIFF; TRAPF, phương GRAV, X, Y, Z, 1 | tải đều; hình thang đổi thành tải đều giữ hợp lực (cảnh báo) | GRAV |
+| `LINELOAD` UNIFF; TRAPF đều suốt chiều dài, phương GRAV, X, Y, Z, 1 | tải đều. TRAPF không đều hoặc trên một đoạn: **lỗi, chặn mở** (đổi thành tải đều sẽ sai vị trí tải; NexFEM chưa có tải phân bố từng đoạn). Khoá lạ (ví dụ `CSYS`) trên `LINELOAD`/`AREALOAD`/`POINTLOAD`: lỗi | GRAV (9 tải TRAPF một đoạn trong file mẫu bị chặn) |
 | `LINELOAD` phương 2, 3 (trục địa phương) | tải theo trục 2, 3 của NexFEM (cùng quy ước CSI, ghi chú: chưa có file thật có loại tải này) | chưa |
 | `LINEASSIGN` ANG | góc xoay trục địa phương `Frame.angle` | 34 cột ANG 90 |
 | `AREALOAD` UNIFF GRAV/Z | tải sàn | GRAV |
@@ -168,11 +170,11 @@ Test: `joint_forces_and_moments_in_global_axes` (bộ giải: công xôn với l
 | Tiết diện thanh | 305 | 305 | 8 chữ L, 3 General |
 | Sàn | 29 | 29 | 21 sàn móng có lò xo nền: quy về lò xo nút |
 | Nút có lò xo | | 108 | tổng Kz = k_dọc_thanh·ΣL + k_nền·ΣA (test kiểm tra) |
-| Tải thanh / tải sàn | 24 / 16 | 24 / 16 | 9 tải hình thang đổi thành tải đều |
+| Tải thanh / tải sàn | 24 / 16 | 15 / 16 | 9 tải TRAPF một đoạn không nhập: lỗi, mô hình bị chặn mở |
 | Tải tập trung tại nút | 31 | 31 | 8 tại nút đầu thanh; 23 ở điểm riêng nằm trên dầm, đổi thành tải tập trung trên dầm |
 | Trường hợp tải / tổ hợp | 12 / 87 | 12 / 87 | |
 
-Báo cáo nhập file ETABS mẫu **không còn lỗi**. Mô hình dùng lò xo nút thay cho gối, như file gốc. **F5 chạy được** (cân bằng lực đúng ở mọi trường hợp), với cảnh báo 8 bậc tự do mất ổn định không chịu tải được thêm độ cứng rất nhỏ, ví dụ nút 253 theo X (xem "Ổn định hoá cơ cấu"). Kết quả số **chưa dùng được** và **chưa so được với ETABS**:
+Trước khi áp dụng chính sách danh sách cho phép, báo cáo nhập file ETABS mẫu không còn lỗi. Hiện file này bị chặn vì có các phần chưa kiểm chứng. Ở phiên bản cũ mô hình dùng lò xo nút thay cho gối và **F5 chạy được** (cân bằng lực đúng ở mọi trường hợp), với cảnh báo 8 bậc tự do mất ổn định không chịu tải được thêm độ cứng rất nhỏ, ví dụ nút 253 theo X (xem "Ổn định hoá cơ cấu"). Kết quả số **chưa dùng được** và **chưa so được với ETABS**:
 
 - **Tải ngang (WX, WY, EX, EY):** chuyển vị hàng chục tới hàng trăm mét. Theo phương ngang, file gốc chỉ có lò xo nền ngang cực nhỏ (U1 = U2 = 8,68e-5 lb/in³, khoảng 1e-6 lần độ cứng đứng) và không có gối nào.
 - **Tĩnh tải (CDL):** đã sửa bằng cách chia tấm tại nút nằm bên trong (xem "Lò xo nút"). Chân cột C3 (nút 57) giữa móng F17 nay nhận lò xo nền; lún lớn nhất 9,3 cm (trước 40,6 m).
@@ -181,6 +183,23 @@ Báo cáo nhập file ETABS mẫu **không còn lỗi**. Mô hình dùng lò xo 
 Mô hình này đặt hầu hết đối tượng bằng DZ dưới một tầng duy nhất (Story1, cao 12 in), nên mặt bằng của tầng chỉ thấy những gì nằm đúng cao độ tầng. Xem bằng khung nhìn 3D hoặc mặt đứng.
 
 ## SAP2000 `.s2k` / `.$2k`
+
+Báo cáo nhập phân loại các bảng tải nút/thanh/diện và tải động đất/gió tự động SAP2000 chưa hỗ trợ là **lỗi**. Các pattern có `AutoLoad` khác `None` cũng báo lỗi kể cả khi file không xuất bảng tự động. Chặn mọi pattern như vậy là chính sách thận trọng, kể cả pattern chưa được case dùng; không coi tải nút có sẵn là thay thế tải tự động. Khi báo cáo nhập CSI có lỗi, hộp thoại vẫn cho xem và sao chép báo cáo nhưng không mở mô hình; cần sửa nguồn hoặc chờ hỗ trợ. Quy tắc chặn lỗi áp dụng cho cả hai bộ nhập, không trộn thuật toán của ETABS và SAP2000. Các bảng chưa nằm trong danh sách xử lý hoặc danh sách metadata cho phép được báo lỗi chưa kiểm chứng; danh sách này chưa chứng minh mọi thuộc tính trong bảng đã xử lý đều được hỗ trợ.
+
+### Danh sách cho phép (bảng/phần chưa đọc nhưng không chặn)
+
+Mọi bảng `.s2k` / phần `.e2k` chưa đọc mà có dữ liệu là **lỗi** (fail closed), trừ các nhóm sau, bỏ qua ở mức thông tin vì không ảnh hưởng mô hình phân tích tĩnh tuyến tính khung:
+
+- mô tả, hiển thị, nhật ký; thiết kế (`PREFERENCES - … DESIGN`, `OVERWRITES - … DESIGN`, `… DESIGN PREFERENCES/OVERWRITES`, `FRAME DESIGN PROCEDURES`, cốt thép, dải sàn); nhóm; trạm xuất kết quả;
+- hàm phổ/lịch sử thời gian (chỉ dùng cho trường hợp động, vốn bị chặn), nguồn khối lượng và tham số modal (không dùng cho tĩnh tuyến tính);
+- định nghĩa chỉ có tác dụng khi được gán (vật liệu cáp, giảm chấn, tiêu chí chấp nhận, thuộc tính phụ thuộc thời gian, solid, link, panel zone, đặc trưng sóng): phép gán/đối tượng dùng chúng nằm ở bảng khác và bị chặn ở đó (ví dụ `AutoLoad`, `POINTASSIGN PANELZONE`, `LINE` kiểu link);
+- bảng chỉ an toàn khi giữ mặc định: `ANALYSIS OPTIONS` (`StiffCase`, `GeomMod` = None), `FRAME LOAD TRANSFER OPTIONS` (mọi `Transfer=Yes`), `AUTO COMBINATION OPTION DATA 01` (`AutoGen` khác Yes). Khác mặc định thì chặn.
+
+Bảng có tên chứa `LOADS` mà chưa đọc báo `load_table_unsupported` (thiếu tải). Vẫn chặn trên file mẫu: `Roof_model.2k` (`AREA AUTO MESH ASSIGNMENTS`, `AREA EDGE CONSTRAINT ASSIGNMENTS`), `24061_OMF.s2k` (36 `AutoLoad`), ETABS 23.2.0 (9 tải TRAPF một đoạn). Test e2e mở và giải dùng biến thể dẫn xuất tạo lúc chạy (bỏ 9 tải đó; đặt `AutoLoad=None`), không ghi ra repo và không tương đương mô hình gốc.
+
+Mô hình chỉ vào mô hình phân tích qua `openCsiImport` (`apps/desktop/src/services/csiImport.ts`), hàm này kiểm tra lại `report.blocked` chứ không chỉ dựa vào nút bấm. Consumer khác của `io-formats` (API/MCP sau này) phải tôn trọng `report.blocked`.
+
+Trường `Tên = Giá trị` có khoảng trắng quanh `=` được đọc; giá trị không ngoặc kép không được tự nó là `Tên=…`, để trường rỗng (`Notes= AutoLoad="ASCE 7-16"`) không nuốt trường kế tiếp.
 
 File thật trong repo: `tests/fixtures/csi/sap2000/` (xem README: nguồn, SHA-256). Cú pháp: mỗi bảng mở bằng `TABLE:  "TÊN"` (một file thật có tiêu đề thiếu dấu ngoặc kép đóng), bản ghi là các cặp `Tên=Giá trị` (giá trị có dấu cách nằm trong ngoặc kép), ` _` cuối dòng nối bản ghi sang dòng sau, kết thúc bằng `END TABLE DATA`.
 
@@ -204,7 +223,7 @@ File thật trong repo: `tests/fixtures/csi/sap2000/` (xem README: nguồn, SHA-
 | Mặt tiết diện `None` | sàn không trọng lượng; tải chia về thanh/nút biên (ghi chú) | có |
 | `LOAD PATTERN DEFINITIONS`, `LOAD CASE DEFINITIONS` (LinStatic, LinModal), `CASE - STATIC 1` | mẫu tải, trường hợp tải | có |
 | `COMBINATION DEFINITIONS` (Linear Add, Envelope, SRSS, Absolute Add; lồng nhau) | tổ hợp | có |
-| `FRAME LOADS - DISTRIBUTED` (Force; Gravity, X, Y, Z; Local 1, 2, 3) | tải đều; hình thang đổi thành tải đều giữ hợp lực (cảnh báo) | Gravity |
+| `FRAME LOADS - DISTRIBUTED` (Force; Gravity, X, Y, Z; Local 1, 2, 3) | tải đều suốt chiều dài. Hình thang hoặc một đoạn: **lỗi, chặn mở**. `DistType=AbsDist` chỉ nhận khi `AbsDist` khớp `RelDist` theo chiều dài thanh | Gravity |
 | `FRAME LOADS - POINT` | tải tập trung trên thanh tại `RelDist` | Gravity |
 | `AREA LOADS - UNIFORM` (Gravity, Z, Local 3) | tải sàn | Gravity, Local 3 |
 | `JOINT LOADS - FORCE` (GLOBAL: F1..F3, M1..M3) | tải nút `jointLoads`; hệ khác GLOBAL: lỗi | có |
@@ -235,7 +254,7 @@ File OMF là khung phẳng YZ, hai cột xoay 90°: nhờ góc xoay, trục 2 c�
 - `packages/io-formats/test/e2k-fixture.test.ts` (file thật): toàn vẹn byte, số bản ghi theo ghi chú tiếp nhận, đơn vị, tầng, lưới, vật liệu, tiết diện, hướng cột, nhả liên kết, tải, tổ hợp lồng nhau, mã báo cáo, mô hình hợp lệ, nhập hai lần cho cùng kết quả.
 - `packages/io-formats/test/e2k-synthetic.test.ts` (dữ liệu tự tạo, ghi rõ trong file): gối, nhiều tầng, gộp nút, đơn vị lạ, Windows-1252.
 - `apps/desktop/src/services/csiImport.test.ts`: mọi mã báo cáo của cả hai bộ nhập có bản dịch tiếng Việt và tiếng Anh.
-- `tests/e2e/specs/e2k-import.spec.ts`: menu con Nhập file, nhập file ETABS và SAP2000 thật qua menu, kiểm tra báo cáo, mở mô hình, F5 bị chặn vì thiếu gối (ETABS), F5 chạy được (SAP2000 OMF), Huỷ, file `.sdb`, chọn nhầm mục.
+- `tests/e2e/specs/e2k-import.spec.ts`: menu con Nhập file, nhập file ETABS và SAP2000 thật qua menu, kiểm tra báo cáo, kiểm tra chặn khi còn phần chưa kiểm chứng, F5 trên mô hình ETABS tổng hợp được hỗ trợ, Huỷ, file `.sdb`, chọn nhầm mục.
 - `tests/e2e/specs/ui2.spec.ts`: sửa góc xoay trục trong Properties, gán tải tại nút.
 
 ## Việc tiếp theo
@@ -244,3 +263,15 @@ File OMF là khung phẳng YZ, hai cột xoay 90°: nhờ góc xoay, trục 2 c�
 2. Phần tử nền đàn hồi cho thanh/sàn (thay cho quy lò xo về nút); lò xo SAP2000 khi có file thật; lò xo chỉ chịu nén (phân tích phi tuyến).
 3. Nhập mô men gán trực tiếp trên thanh và mô men tại điểm riêng của SAP2000.
 4. Đối chiếu kết quả (M2) khi có bảng chuyển vị, phản lực, nội lực xuất từ ETABS/SAP2000.
+
+## Đối chiếu giải tích (M2, phần không cần kết quả CSI)
+
+`pnpm --filter @nexfem/io-formats test` biên dịch chương trình `solve` của `fem-solver` một lần bằng Cargo. Bộ test nhập các file `.s2k` tổng hợp, chạy bộ giải và dùng `scripts/validation/compare-csi.mjs` để so với nghiệm giải tích theo dung sai riêng từng chỉ số. Xem [báo cáo kiểm thử](validation/CSI_BENCHMARK_REPORT.md). Khi sửa ca trong `tests/benchmarks/csi/generate-cases.mjs`, chạy lại bộ sinh và đặt `CSI_BENCH_REPORT` thành đường dẫn tuyệt đối khi chạy test để ghi báo cáo.
+
+### Thu bảng kết quả SAP2000 cho công xôn
+
+1. Nhập [mẫu công xôn 6 m](../tests/benchmarks/csi/cases/cantilever-tip-load.s2k) vào SAP2000 và chạy hai ca tĩnh tuyến tính `P` (−Z) và `PY` (+Y). Kiểm tra thanh 1 đi từ nút 1 đến 2 theo +X, trục 2 là +Z và trục 3 là −Y. Hai ca dùng lực nút 10 kN và hệ số tự trọng bằng 0.
+2. Xuất mô hình đã phân tích dưới dạng `.s2k` hoặc `.$2k`. Giữ tiết diện và các đặc trưng AS2, AS3, hướng i→j, trục địa phương và tùy chọn phân tích trong bản xuất hoặc ghi kèm.
+3. Xuất bảng `Joint Displacements`, `Joint Reactions` và `Element Forces - Frames` ở cả hai ca dưới dạng CSV hoặc Excel. Giữ mã đối tượng, `Output Case`, `Station`, các thành phần có dấu và đơn vị gốc. Lấy station tại 0, 3 và 6 m tính từ đầu i. Ghi phiên bản SAP2000 cùng bộ file. [Hướng dẫn xuất bảng của CSI](https://docs.csiamerica.com/help-files/sap/Database_Tables/Choose_Tables_For_Form.htm)
+
+Bộ dữ liệu này sẽ dùng để kiểm tra phép đổi dấu và đơn vị, rồi lập tham chiếu CSI có nguồn gốc riêng. Trạng thái thu thập nằm trong [manifest benchmark CSI](../tests/benchmarks/csi/manifest.json).

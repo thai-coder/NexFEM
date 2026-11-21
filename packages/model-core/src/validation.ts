@@ -19,6 +19,8 @@ export interface ModelMessage {
     | "invalid_section"
     | "invalid_releases"
     | "missing_load_target"
+    | "invalid_linear_load"
+    | "linear_load_with_offsets"
     | "missing_load_pattern"
     | "missing_load_case"
     | "invalid_combo_cycle"
@@ -82,6 +84,7 @@ export function checkModel(model: Model): ModelMessage[] {
 
   // Không được chạy solver với tải hoặc load case tham chiếu tới ID đã xoá/đổi.
   const frames = new Set(model.frames.map((x) => x.id));
+  const frameById = new Map(model.frames.map((x) => [x.id, x]));
   const shells = new Set(model.shells.map((x) => x.id));
   for (const load of model.frameLoads) {
     if (!frames.has(load.frame))
@@ -90,6 +93,12 @@ export function checkModel(model: Model): ModelMessage[] {
       out.push({ level: "error", code: "missing_load_pattern", objects: [load.id], params: { name: load.id } });
     if (load.kind === "point" && (load.at === undefined || load.at < 0 || load.at > 1))
       out.push({ level: "error", code: "missing_load_target", objects: [load.id], params: { name: load.id } });
+    if (load.kind === "linear" && !linearLoadValid(load))
+      out.push({ level: "error", code: "invalid_linear_load", objects: [load.id], params: { name: load.id } });
+    // Quy ước vị trí khi thanh có vùng cứng (nút–nút như CSI) làm ở PR D của kế hoạch; tới lúc đó không nhận.
+    const host = frameById.get(load.frame);
+    if (load.kind === "linear" && host?.offsets && (host.offsets.i > 0 || host.offsets.j > 0))
+      out.push({ level: "error", code: "linear_load_with_offsets", objects: [load.id], params: { name: load.id } });
   }
   for (const load of model.shellLoads) {
     if (!shells.has(load.shell))
@@ -169,4 +178,14 @@ export function checkModel(model: Model): ModelMessage[] {
     if (!usedSections.has(s.id)) out.push({ level: "info", code: "unused_section", objects: [s.id], params: { name: s.name } });
   }
   return out;
+}
+
+/** Tải `linear` hợp lệ: 0 ≤ start < end ≤ 1 và có cường độ hai đầu hữu hạn. */
+export function linearLoadValid(l: { start?: number; end?: number; value: number; valueEnd?: number }): boolean {
+  const { start, end, valueEnd } = l;
+  return (
+    start !== undefined && end !== undefined && valueEnd !== undefined &&
+    Number.isFinite(start) && Number.isFinite(end) && Number.isFinite(l.value) && Number.isFinite(valueEnd) &&
+    start >= 0 && end <= 1 && end - start > 1e-9
+  );
 }

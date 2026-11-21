@@ -318,6 +318,13 @@ pub struct FrameLoad {
     pub value: f64,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub at: Option<f64>,
+    /// `linear`: vị trí tương đối đầu/cuối đoạn tải và cường độ tại cuối đoạn (`value` là cường độ tại đầu đoạn).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end: Option<f64>,
+    #[serde(rename = "valueEnd", default, skip_serializing_if = "Option::is_none")]
+    pub value_end: Option<f64>,
 }
 
 /// Tải tại nút: [Fx, Fy, Fz] (kN) và [Mx, My, Mz] (kN·m) theo hệ toạ độ tổng thể.

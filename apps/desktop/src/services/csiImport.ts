@@ -1,6 +1,8 @@
-import { importCsiFile, type CsiExpected } from "@nexfem/io-formats";
+import { importCsiFile, type CsiExpected, type CsiImportResult } from "@nexfem/io-formats";
 import { t } from "../i18n/index.ts";
 import { useCsiImport } from "../stores/csiImport.ts";
+import { useModel } from "../stores/model.ts";
+import { csiImportPolicy } from "./csiImportPolicy.ts";
 import { useUi } from "../stores/ui.ts";
 
 /** Đuôi file cho hộp chọn file của từng mục trong menu "Nhập file". File nhị phân (.edb, .sdb) vẫn chọn được để báo cách xuất file văn bản. */
@@ -37,4 +39,17 @@ export function importCsiFromPicker(expected: CsiExpected): Promise<boolean> {
     document.body.appendChild(input);
     input.click();
   });
+}
+
+/**
+ * Đường duy nhất đưa mô hình nhập từ CSI vào mô hình phân tích. Kiểm tra lại chính sách tại đây (không chỉ ở nút bấm),
+ * để mọi nơi gọi đều không mở được kết quả nhập bị chặn (`report.blocked`) hay file không đọc được đơn vị.
+ */
+export function openCsiImport(result: CsiImportResult): boolean {
+  if (!csiImportPolicy(result).canOpen) {
+    useUi.getState().log("error", t().csi.importBlocked);
+    return false;
+  }
+  useModel.getState().reset(result.model, null);
+  return true;
 }

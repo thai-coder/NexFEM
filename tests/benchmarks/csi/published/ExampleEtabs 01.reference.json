@@ -1,0 +1,203 @@
+{
+  "schema": 1,
+  "id": "ExampleEtabs 01",
+  "description": "Khung phẳng hai nhịp, hai ca tải đứng. So lực cắt và mô men dầm B1 với Bảng 1-1, trang 2–3.",
+  "file": "ExampleEtabs 01.json",
+  "basis": "Published CSI verification table",
+  "classification": "csi-published",
+  "limitations": [
+    "Dựng trực tiếp từ Hình 1-1. Hệ số nhân A = 10⁶ xấp xỉ giả thiết bỏ biến dạng dọc trục của bài ETABS.",
+    "Các giá trị V2 ở giữa nhịp ca I dùng phía sau điểm đặt lực theo hướng I → J."
+  ],
+  "source": {
+    "program": "ETABS",
+    "version": "Software Verification Rev. 0 (program version not specified)",
+    "url": "https://github.com/thai-coder/NexFEM/blob/4f162a715d4d60ad63b23a85862160bba09d0568/manual/ETABS%2023/Manuals/Verification/Analysis/Example%2001.pdf"
+  },
+  "units": {
+    "force": "kN",
+    "length": "m"
+  },
+  "metrics": [
+    {
+      "case": "I",
+      "kind": "frameForce",
+      "object": "B1@x=0.0",
+      "component": "M3",
+      "value": 0.0,
+      "absTolerance": 0.0005649241451380835,
+      "relTolerance": 0
+    },
+    {
+      "case": "I",
+      "kind": "frameForce",
+      "object": "B1@x=0.0",
+      "component": "V2",
+      "value": -139.00692547689061,
+      "absTolerance": 0.022241108076302498,
+      "relTolerance": 0
+    },
+    {
+      "case": "I",
+      "kind": "frameForce",
+      "object": "B1@x=1.3716000000000002",
+      "component": "M3",
+      "value": 190.66189898410317,
+      "absTolerance": 0.0005649241451380835,
+      "relTolerance": 0
+    },
+    {
+      "case": "I",
+      "kind": "frameForce",
+      "object": "B1@x=1.3716000000000002",
+      "component": "V2",
+      "value": -139.00692547689061,
+      "absTolerance": 0.022241108076302498,
+      "relTolerance": 0
+    },
+    {
+      "case": "I",
+      "kind": "frameForce",
+      "object": "B1@x=2.7432000000000003",
+      "component": "M3",
+      "value": 381.32379796820635,
+      "absTolerance": 0.0005649241451380835,
+      "relTolerance": 0
+    },
+    {
+      "case": "I",
+      "kind": "frameForce",
+      "object": "B1@x=2.7432000000000003",
+      "component": "V2",
+      "value": 305.81523604915935,
+      "absTolerance": 0.022241108076302498,
+      "relTolerance": 0
+    },
+    {
+      "case": "I",
+      "kind": "frameForce",
+      "object": "B1@x=4.114800000000001",
+      "component": "M3",
+      "value": -38.13237979682063,
+      "absTolerance": 0.0005649241451380835,
+      "relTolerance": 0
+    },
+    {
+      "case": "I",
+      "kind": "frameForce",
+      "object": "B1@x=4.114800000000001",
+      "component": "V2",
+      "value": 305.81523604915935,
+      "absTolerance": 0.022241108076302498,
+      "relTolerance": 0
+    },
+    {
+      "case": "I",
+      "kind": "frameForce",
+      "object": "B1@x=5.486400000000001",
+      "component": "M3",
+      "value": -457.58855756184755,
+      "absTolerance": 0.0005649241451380835,
+      "relTolerance": 0
+    },
+    {
+      "case": "I",
+      "kind": "frameForce",
+      "object": "B1@x=5.486400000000001",
+      "component": "V2",
+      "value": 305.81523604915935,
+      "absTolerance": 0.022241108076302498,
+      "relTolerance": 0
+    },
+    {
+      "case": "II",
+      "kind": "frameForce",
+      "object": "B1@x=0.0",
+      "component": "M3",
+      "value": 0.0,
+      "absTolerance": 0.0005649241451380835,
+      "relTolerance": 0
+    },
+    {
+      "case": "II",
+      "kind": "frameForce",
+      "object": "B1@x=0.0",
+      "component": "V2",
+      "value": -300.25495903008374,
+      "absTolerance": 0.022241108076302498,
+      "relTolerance": 0
+    },
+    {
+      "case": "II",
+      "kind": "frameForce",
+      "object": "B1@x=1.3716000000000002",
+      "component": "M3",
+      "value": 274.5531345371086,
+      "absTolerance": 0.0005649241451380835,
+      "relTolerance": 0
+    },
+    {
+      "case": "II",
+      "kind": "frameForce",
+      "object": "B1@x=1.3716000000000002",
+      "component": "V2",
+      "value": -100.08498634336124,
+      "absTolerance": 0.022241108076302498,
+      "relTolerance": 0
+    },
+    {
+      "case": "II",
+      "kind": "frameForce",
+      "object": "B1@x=2.7432000000000003",
+      "component": "M3",
+      "value": 274.5531345371086,
+      "absTolerance": 0.0005649241451380835,
+      "relTolerance": 0
+    },
+    {
+      "case": "II",
+      "kind": "frameForce",
+      "object": "B1@x=2.7432000000000003",
+      "component": "V2",
+      "value": 100.08498634336124,
+      "absTolerance": 0.022241108076302498,
+      "relTolerance": 0
+    },
+    {
+      "case": "II",
+      "kind": "frameForce",
+      "object": "B1@x=4.114800000000001",
+      "component": "M3",
+      "value": 0.0,
+      "absTolerance": 0.0005649241451380835,
+      "relTolerance": 0
+    },
+    {
+      "case": "II",
+      "kind": "frameForce",
+      "object": "B1@x=4.114800000000001",
+      "component": "V2",
+      "value": 300.25495903008374,
+      "absTolerance": 0.022241108076302498,
+      "relTolerance": 0
+    },
+    {
+      "case": "II",
+      "kind": "frameForce",
+      "object": "B1@x=5.486400000000001",
+      "component": "M3",
+      "value": -549.1062690742172,
+      "absTolerance": 0.0005649241451380835,
+      "relTolerance": 0
+    },
+    {
+      "case": "II",
+      "kind": "frameForce",
+      "object": "B1@x=5.486400000000001",
+      "component": "V2",
+      "value": 500.4249317168062,
+      "absTolerance": 0.022241108076302498,
+      "relTolerance": 0
+    }
+  ]
+}

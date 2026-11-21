@@ -814,7 +814,10 @@ export class StructureViewer {
     const pos: number[] = [];
     const frames = new Map(vis.frames.map((f) => [f.id, f]));
     const loads = m.frameLoads.filter((l) => l.pattern === pattern && frames.has(l.frame));
-    const maxQ = Math.max(1e-9, ...loads.filter((l) => l.kind === "distributed").map((l) => Math.abs(l.value)));
+    const maxQ = Math.max(
+      1e-9,
+      ...loads.filter((l) => l.kind === "distributed" || l.kind === "linear").flatMap((l) => [Math.abs(l.value), Math.abs(l.valueEnd ?? l.value)]),
+    );
     const maxP = Math.max(1e-9, ...loads.filter((l) => l.kind === "point").map((l) => Math.abs(l.value)));
     const dirOf = (dir: string, value: number, axis: THREE.Vector3, angle = 0): THREE.Vector3 => {
       const s = Math.sign(value) || 1;
@@ -870,6 +873,28 @@ export class StructureViewer {
         for (let k = 0; k <= 5; k++) arrow(A.clone().lerp(B, k / 5), d, len);
         const mid = offA.clone().lerp(offB, 0.5);
         this.#valueLabel(`${toDisplay(l.value, "forcePerLength", u).toFixed(2)}`, mid);
+      } else if (l.kind === "linear") {
+        // Hình thang trên đoạn [start, end]: mũi tên dài theo cường độ tại từng điểm, đường bao nối hai đầu.
+        const s = l.start ?? 0;
+        const e = l.end ?? 1;
+        const v1 = l.valueEnd ?? l.value;
+        const lenAt = (v: number) => 0.15 + 0.85 * (Math.abs(v) / maxQ);
+        const P = (t: number) => A.clone().lerp(B, t);
+        const n = Math.max(2, Math.round(10 * (e - s)));
+        let prev: THREE.Vector3 | null = null;
+        for (let k = 0; k <= n; k++) {
+          const t = s + ((e - s) * k) / n;
+          const v = l.value + ((v1 - l.value) * k) / n;
+          const dk = dirOf(l.direction, v === 0 ? l.value || v1 : v, axis, f.angle ?? 0);
+          const len = lenAt(v);
+          const tail = P(t).addScaledVector(dk, -len);
+          if (Math.abs(v) > 1e-12) arrow(P(t), dk, len);
+          if (prev) pos.push(prev.x, prev.y, prev.z, tail.x, tail.y, tail.z);
+          prev = tail;
+        }
+        const label = (v: number, t: number) => this.#valueLabel(`${toDisplay(v, "forcePerLength", u).toFixed(2)}`, P(t).addScaledVector(d, -lenAt(v) - 0.25));
+        label(l.value, s);
+        if (v1 !== l.value) label(v1, e);
       } else {
         const len = 0.5 + 1.0 * (Math.abs(l.value) / maxP);
         const tip = A.clone().lerp(B, l.at ?? 0.5);
