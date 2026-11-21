@@ -1,0 +1,554 @@
+{
+  "sourceSha256": "60ee53086250bd226acf10c5ae7cdefee138ea49da83ef10dcdc4df1a528a013",
+  "program": "SAP2000",
+  "version": "26.2.0",
+  "sourceUnits": {
+    "force": "KIP",
+    "length": "IN",
+    "temperature": "F"
+  },
+  "import": {
+    "blocked": true,
+    "counts": {
+      "materials": {
+        "source": 5,
+        "imported": 5
+      },
+      "frameSections": {
+        "source": 17,
+        "imported": 16
+      },
+      "joints": {
+        "source": 3573,
+        "imported": 3573
+      },
+      "frames": {
+        "source": 2447,
+        "imported": 2407
+      },
+      "shells": {
+        "source": 77,
+        "imported": 77
+      },
+      "shellSections": {
+        "source": 1,
+        "imported": 1
+      },
+      "loadPatterns": {
+        "source": 4,
+        "imported": 4
+      },
+      "loadCases": {
+        "source": 5,
+        "imported": 5
+      },
+      "combos": {
+        "source": 0,
+        "imported": 0
+      },
+      "frameLoads": {
+        "source": 0,
+        "imported": 0
+      },
+      "shellLoads": {
+        "source": 24,
+        "imported": 24
+      },
+      "pointLoads": {
+        "source": 0,
+        "imported": 0
+      }
+    },
+    "frameSegments": 5263,
+    "assignedFrameLoads": 0,
+    "assignedJointLoads": 0,
+    "diagnostics": [
+      {
+        "level": "error",
+        "code": "section_unsupported",
+        "params": {
+          "shape": "Angle"
+        },
+        "count": 1,
+        "lines": [
+          176
+        ]
+      },
+      {
+        "level": "error",
+        "code": "partial_fixity_unsupported",
+        "params": {},
+        "count": 3765,
+        "lines": [
+          19232,
+          19232,
+          19233,
+          19233,
+          19234,
+          19234,
+          19235,
+          19235,
+          19236,
+          19236,
+          19236,
+          19236,
+          19238,
+          19238,
+          19238,
+          19238,
+          19239,
+          19239,
+          19240,
+          19240
+        ]
+      },
+      {
+        "level": "error",
+        "code": "frame_section_unavailable",
+        "params": {
+          "section": "L90X90X6"
+        },
+        "count": 40,
+        "lines": [
+          13486,
+          13487,
+          13488,
+          13489,
+          13490,
+          13491,
+          13492,
+          13493,
+          13494,
+          13495,
+          13496,
+          13497,
+          13498,
+          13499,
+          13500,
+          13501,
+          13502,
+          13503,
+          13504,
+          13505
+        ]
+      },
+      {
+        "level": "error",
+        "code": "automatic_load_unsupported",
+        "params": {
+          "method": "ASCE 7-22"
+        },
+        "count": 2,
+        "lines": [
+          284,
+          285
+        ]
+      },
+      {
+        "level": "error",
+        "code": "section_unverified",
+        "params": {
+          "section": "GENERAL REFERENCE LINE 01 - GENERAL",
+          "records": 1
+        },
+        "count": 1,
+        "lines": [
+          39
+        ]
+      },
+      {
+        "level": "error",
+        "code": "section_unverified",
+        "params": {
+          "section": "GENERAL REFERENCE LINE 02 - PLAN POINTS",
+          "records": 2
+        },
+        "count": 1,
+        "lines": [
+          42
+        ]
+      },
+      {
+        "level": "error",
+        "code": "section_unverified",
+        "params": {
+          "section": "GENERAL REFERENCE LINE 03 - ELEVATION POINTS",
+          "records": 2
+        },
+        "count": 1,
+        "lines": [
+          46
+        ]
+      },
+      {
+        "level": "error",
+        "code": "section_unverified",
+        "params": {
+          "section": "GENERAL REFERENCE LINE 04 - DISCRETIZED COORDINATES",
+          "records": 2
+        },
+        "count": 1,
+        "lines": [
+          50
+        ]
+      },
+      {
+        "level": "error",
+        "code": "section_unverified",
+        "params": {
+          "section": "MATERIAL PROPERTIES 03E - REBAR DATA",
+          "records": 1
+        },
+        "count": 1,
+        "lines": [
+          75
+        ]
+      },
+      {
+        "level": "error",
+        "code": "section_unverified",
+        "params": {
+          "section": "LINK PROPERTY DEFINITIONS 01 - GENERAL",
+          "records": 2
+        },
+        "count": 1,
+        "lines": [
+          214
+        ]
+      },
+      {
+        "level": "error",
+        "code": "section_unverified",
+        "params": {
+          "section": "LINK PROPERTY DEFINITIONS 02 - LINEAR",
+          "records": 22
+        },
+        "count": 1,
+        "lines": [
+          218
+        ]
+      },
+      {
+        "level": "error",
+        "code": "section_unverified",
+        "params": {
+          "section": "AUTO SEISMIC - ASCE 7-22",
+          "records": 2
+        },
+        "count": 1,
+        "lines": [
+          287
+        ]
+      },
+      {
+        "level": "error",
+        "code": "load_table_unsupported",
+        "params": {
+          "section": "AUTO SEISMIC LOADS TO JOINTS",
+          "records": 7800
+        },
+        "count": 1,
+        "lines": [
+          293
+        ]
+      },
+      {
+        "level": "error",
+        "code": "section_unverified",
+        "params": {
+          "section": "AUTO COMBINATION OPTION DATA 01 - GENERAL",
+          "records": 1
+        },
+        "count": 1,
+        "lines": [
+          8098
+        ]
+      },
+      {
+        "level": "error",
+        "code": "section_unverified",
+        "params": {
+          "section": "AUTO COMBINATION OPTION DATA 02 - USER DATA",
+          "records": 6
+        },
+        "count": 1,
+        "lines": [
+          8101
+        ]
+      },
+      {
+        "level": "error",
+        "code": "section_unverified",
+        "params": {
+          "section": "GROUPS 3 - MASSES AND WEIGHTS",
+          "records": 1
+        },
+        "count": 1,
+        "lines": [
+          8131
+        ]
+      },
+      {
+        "level": "error",
+        "code": "section_unverified",
+        "params": {
+          "section": "AREA AUTO MESH ASSIGNMENTS",
+          "records": 77
+        },
+        "count": 1,
+        "lines": [
+          43926
+        ]
+      },
+      {
+        "level": "error",
+        "code": "load_table_unsupported",
+        "params": {
+          "section": "AREA LOADS - UNIFORM TO FRAME",
+          "records": 124
+        },
+        "count": 1,
+        "lines": [
+          44031
+        ]
+      },
+      {
+        "level": "warning",
+        "code": "partial_fixity_as_pinned",
+        "params": {},
+        "count": 4503,
+        "lines": [
+          19232,
+          19232,
+          19233,
+          19233,
+          19234,
+          19234,
+          19235,
+          19235,
+          19237,
+          19237,
+          19237,
+          19237,
+          19239,
+          19239,
+          19240,
+          19240,
+          19241,
+          19241,
+          19242,
+          19242
+        ]
+      },
+      {
+        "level": "warning",
+        "code": "frame_cardinal_ignored",
+        "params": {
+          "point": "8"
+        },
+        "count": 1238,
+        "lines": [
+          11735,
+          11736,
+          11737,
+          11738,
+          11742,
+          11743,
+          11744,
+          11745,
+          11746,
+          11747,
+          11748,
+          11749,
+          11750,
+          11751,
+          11752,
+          11753,
+          11754,
+          11755,
+          11757,
+          11758
+        ]
+      },
+      {
+        "level": "warning",
+        "code": "section_props_differ",
+        "params": {},
+        "count": 7,
+        "lines": []
+      }
+    ]
+  },
+  "sourceCounts": {
+    "areaElementsInExport": 1015,
+    "linkProperties": 2,
+    "linkConnectivityRows": 0
+  },
+  "level1": {
+    "source": {
+      "program": "SAP2000",
+      "version": "26.2.0"
+    },
+    "units": {
+      "force": "kip"
+    },
+    "totals": {
+      "pass": 10,
+      "fail": 2,
+      "missing": 0,
+      "unexpected": 0
+    },
+    "passed": false,
+    "rows": [
+      {
+        "key": "DEAD|force-balance|base|GlobalFX",
+        "status": "pass",
+        "reference": -4.82e-12,
+        "actual": 0,
+        "absError": 4.82e-12,
+        "relativeError": 1,
+        "allowed": 0.0005
+      },
+      {
+        "key": "DEAD|force-balance|base|GlobalFY",
+        "status": "pass",
+        "reference": 9.712e-13,
+        "actual": 0,
+        "absError": 9.712e-13,
+        "relativeError": 1,
+        "allowed": 0.0005
+      },
+      {
+        "key": "DEAD|force-balance|base|GlobalFZ",
+        "status": "fail",
+        "reference": 846.915,
+        "actual": 847.0959441728021,
+        "absError": 0.18094417280212838,
+        "relativeError": 0.00021365092459352874,
+        "allowed": 0.0005
+      },
+      {
+        "key": "LIVE|force-balance|base|GlobalFX",
+        "status": "pass",
+        "reference": -9.694e-12,
+        "actual": 0,
+        "absError": 9.694e-12,
+        "relativeError": 1,
+        "allowed": 0.0005
+      },
+      {
+        "key": "LIVE|force-balance|base|GlobalFY",
+        "status": "pass",
+        "reference": 3.46e-12,
+        "actual": 0,
+        "absError": 3.46e-12,
+        "relativeError": 1,
+        "allowed": 0.0005
+      },
+      {
+        "key": "LIVE|force-balance|base|GlobalFZ",
+        "status": "fail",
+        "reference": 984.497,
+        "actual": 984.8597436460993,
+        "absError": 0.36274364609937493,
+        "relativeError": 0.0003684558166245046,
+        "allowed": 0.0005
+      },
+      {
+        "key": "EQX|force-balance|base|GlobalFX",
+        "status": "pass",
+        "reference": -490.247,
+        "actual": -490.2467120073586,
+        "absError": 0.00028799264140388914,
+        "relativeError": 5.87443964784872e-7,
+        "allowed": 0.0005
+      },
+      {
+        "key": "EQX|force-balance|base|GlobalFY",
+        "status": "pass",
+        "reference": 4.256e-10,
+        "actual": 0,
+        "absError": 4.256e-10,
+        "relativeError": 1,
+        "allowed": 0.0005
+      },
+      {
+        "key": "EQX|force-balance|base|GlobalFZ",
+        "status": "pass",
+        "reference": 3.556e-12,
+        "actual": 0,
+        "absError": 3.556e-12,
+        "relativeError": 1,
+        "allowed": 0.0005
+      },
+      {
+        "key": "EQY|force-balance|base|GlobalFX",
+        "status": "pass",
+        "reference": 2.743e-11,
+        "actual": 0,
+        "absError": 2.743e-11,
+        "relativeError": 1,
+        "allowed": 0.0005
+      },
+      {
+        "key": "EQY|force-balance|base|GlobalFY",
+        "status": "pass",
+        "reference": -490.247,
+        "actual": -490.2467120073586,
+        "absError": 0.00028799264140388914,
+        "relativeError": 5.87443964784872e-7,
+        "allowed": 0.0005
+      },
+      {
+        "key": "EQY|force-balance|base|GlobalFZ",
+        "status": "pass",
+        "reference": 7.098e-11,
+        "actual": 0,
+        "absError": 7.098e-11,
+        "relativeError": 1,
+        "allowed": 0.0005
+      }
+    ],
+    "scope": "SAP2000 source load ledger against independent SAP2000 export; no NexFEM solver",
+    "gravityComponentsKip": {
+      "DEAD": {
+        "selfWeightKip": 355.2722765585486,
+        "AREA LOADS - UNIFORM": 206.79866531375188,
+        "AREA LOADS - UNIFORM TO FRAME": 285.0250023005018
+      },
+      "LIVE": {
+        "selfWeightKip": 0,
+        "AREA LOADS - UNIFORM": 414.80973904509614,
+        "AREA LOADS - UNIFORM TO FRAME": 570.0500046010036
+      }
+    }
+  },
+  "level2": {
+    "status": "not comparable",
+    "explicitSeismic": {
+      "EQX": {
+        "rows": 3900,
+        "mappedRows": 3263,
+        "unmappedRows": 637,
+        "unmappedNonzeroRows": 637,
+        "unmappedForceKip": [
+          72.37795063532096,
+          0,
+          0
+        ]
+      },
+      "EQY": {
+        "rows": 3900,
+        "mappedRows": 3263,
+        "unmappedRows": 637,
+        "unmappedNonzeroRows": 637,
+        "unmappedForceKip": [
+          0,
+          72.37795063532096,
+          0
+        ]
+      }
+    },
+    "solverExecuted": false
+  }
+}

@@ -1,0 +1,187 @@
+{
+  "sourceCommit": "f2df3ae400910a3a07d693d620133ae0b2fd5924",
+  "tables": {
+    "Base Reactions": {
+      "path": "Analyze.Sap2000/excel/Base Reactions.xlsx",
+      "sha256": "b956de64066308caf0df4855edf75b5e3d43f0f88519b8618eb962baba3b6be8",
+      "sheet": "Base Reactions",
+      "csv": "base-reactions.csv",
+      "units": {
+        "OutputCase": "Text",
+        "CaseType": "Text",
+        "StepType": "Text",
+        "StepNum": "Unitless",
+        "GlobalFX": "Kip",
+        "GlobalFY": "Kip",
+        "GlobalFZ": "Kip",
+        "GlobalMX": "Kip-in",
+        "GlobalMY": "Kip-in",
+        "GlobalMZ": "Kip-in",
+        "GlobalX": "in",
+        "GlobalY": "in",
+        "GlobalZ": "in",
+        "XCentroidFX": "in",
+        "YCentroidFX": "in",
+        "ZCentroidFX": "in",
+        "XCentroidFY": "in",
+        "YCentroidFY": "in",
+        "ZCentroidFY": "in",
+        "XCentroidFZ": "in",
+        "YCentroidFZ": "in",
+        "ZCentroidFZ": "in"
+      },
+      "rowsByCase": {
+        "DEAD": 1,
+        "MODAL": 12,
+        "LIVE": 1,
+        "EQX": 1,
+        "EQY": 1
+      }
+    },
+    "Auto Seismic Loads To Joints": {
+      "path": "Analyze.Sap2000/excel/Auto Seismic Loads To Joints.xlsx",
+      "sha256": "79281a09be2a77b04060a3a49f211641c049fb25b8f36583db3d696483fe4e6d",
+      "sheet": "Auto Seismic Loads To Joints",
+      "csv": "auto-seismic-loads-to-joints.csv",
+      "units": {
+        "LoadPat": "Text",
+        "AutoLdType": "Text",
+        "JointElem": "Text",
+        "Joint": "Text",
+        "FX": "Kip",
+        "FY": "Kip",
+        "FZ": "Kip",
+        "MX": "Kip-in",
+        "MY": "Kip-in",
+        "MZ": "Kip-in",
+        "X": "in",
+        "Y": "in",
+        "Z": "in"
+      },
+      "rowsByCase": {
+        "EQX": 3900,
+        "EQY": 3900
+      }
+    },
+    "Joint Displacements": {
+      "path": "Analyze.Sap2000/excel/Joint Displacements.xlsx",
+      "sha256": "6884048ba7708f7eddd42210ed43542a5d1a54b42fb839812a2d9e52975ecceb",
+      "sheet": "Joint Displacements",
+      "csv": "joint-displacements.csv",
+      "units": {
+        "Joint": "Text",
+        "OutputCase": "Text",
+        "CaseType": "Text",
+        "StepType": "Text",
+        "StepNum": "Unitless",
+        "U1": "in",
+        "U2": "in",
+        "U3": "in",
+        "R1": "Radians",
+        "R2": "Radians",
+        "R3": "Radians"
+      },
+      "rowsByCase": {
+        "DEAD": 4210,
+        "MODAL": 50520,
+        "LIVE": 4210,
+        "EQX": 4210,
+        "EQY": 4210
+      }
+    },
+    "Joint Reactions": {
+      "path": "Analyze.Sap2000/excel/Joint Reactions.xlsx",
+      "sha256": "79133e985c355f289dcbd6596b719e390df4856f9655321f7e4a8dfbe304a38a",
+      "sheet": "Joint Reactions",
+      "csv": "joint-reactions.csv",
+      "units": {
+        "Joint": "Text",
+        "OutputCase": "Text",
+        "CaseType": "Text",
+        "StepType": "Text",
+        "StepNum": "Unitless",
+        "F1": "Kip",
+        "F2": "Kip",
+        "F3": "Kip",
+        "M1": "Kip-in",
+        "M2": "Kip-in",
+        "M3": "Kip-in"
+      },
+      "rowsByCase": {
+        "DEAD": 310,
+        "MODAL": 3720,
+        "LIVE": 310,
+        "EQX": 310,
+        "EQY": 310
+      }
+    },
+    "Element Forces - Frames": {
+      "path": "Analyze.Sap2000/excel/Element Forces - Frames.xlsx",
+      "sha256": "2c31ea642497cd22a7a3d72c076084cdf737ddaa7242d018a0813c56401d48bb",
+      "sheet": "Element Forces - Frames",
+      "csv": "element-forces-frames.csv",
+      "units": {
+        "Frame": "Text",
+        "Station": "in",
+        "OutputCase": "Text",
+        "CaseType": "Text",
+        "StepType": "Text",
+        "StepNum": "Unitless",
+        "P": "Kip",
+        "V2": "Kip",
+        "V3": "Kip",
+        "T": "Kip-in",
+        "M2": "Kip-in",
+        "M3": "Kip-in",
+        "FrameElem": "Text",
+        "ElemStation": "in"
+      },
+      "rowsByCase": {
+        "DEAD": 18310,
+        "MODAL": 219720,
+        "LIVE": 18310,
+        "EQX": 18310,
+        "EQY": 18310
+      }
+    },
+    "Objects And Elements - Areas": {
+      "path": "Analyze.Sap2000/excel/Objects And Elements - Areas.xlsx",
+      "sha256": "7df3d27419c90ca16f5a4b50e376de702c7bc862d67a3a8fb7815d09f3537cea",
+      "sheet": "Objects And Elements - Areas",
+      "csv": "objects-and-elements-areas.csv",
+      "units": {
+        "AreaElem": "Text",
+        "AreaObject": "Text",
+        "ElemJt1": "Text",
+        "ElemJt2": "Text",
+        "ElemJt3": "Text",
+        "ElemJt4": "Text"
+      },
+      "rowsByCase": {
+        "all": 1015
+      }
+    }
+  },
+  "staticBaseReactionsKip": {
+    "DEAD": {
+      "GlobalFX": -4.82e-12,
+      "GlobalFY": 9.712e-13,
+      "GlobalFZ": 846.915
+    },
+    "LIVE": {
+      "GlobalFX": -9.694e-12,
+      "GlobalFY": 3.46e-12,
+      "GlobalFZ": 984.497
+    },
+    "EQX": {
+      "GlobalFX": -490.247,
+      "GlobalFY": 4.256e-10,
+      "GlobalFZ": 3.556e-12
+    },
+    "EQY": {
+      "GlobalFX": 2.743e-11,
+      "GlobalFY": -490.247,
+      "GlobalFZ": 7.098e-11
+    }
+  }
+}
