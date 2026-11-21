@@ -1,6 +1,8 @@
 # Bàn giao công việc giữa ChatGPT, Codex và Claude
 
-Đọc [PROJECT_STATUS.md](../PROJECT_STATUS.md) để tìm PR hoặc nhánh làm việc. Đối chiếu commit và CI hiện tại trước khi tiếp tục. Khi có chênh lệch, dùng bằng chứng mới nhất đã xác minh và giữ các chỉnh sửa đang có.
+Đọc chỉ mục [PROJECT_STATUS.md](../PROJECT_STATUS.md) để tìm nhiệm vụ, rồi mở đúng một file checkpoint của nhiệm vụ đó trong [docs/checkpoints/](checkpoints/README.md). Đối chiếu commit và CI hiện tại trước khi tiếp tục.
+
+**Mỗi nhiệm vụ một file checkpoint, chỉ người làm nhiệm vụ đó sửa.** `PROJECT_STATUS.md` được sinh bằng `python3 scripts/checkpoint_index.py`; không sửa tay. Quy tắc đặt tên và phần đầu file: [docs/checkpoints/README.md](checkpoints/README.md). Khi có chênh lệch, dùng bằng chứng mới nhất đã xác minh và giữ các chỉnh sửa đang có.
 
 ## Khi nào ghi checkpoint
 
@@ -12,12 +14,14 @@ Giới hạn cứng có thể kết thúc phiên mà không báo trước. Check
 
 ## Lưu và kiểm tra khả năng khôi phục
 
-- Ưu tiên mục **Checkpoint** trong mô tả PR do phiên làm việc quản lý, hoặc tệp Markdown trên nhánh công việc mà người nhận có quyền đọc. Nếu chưa có PR và có quyền đẩy nhánh, lưu checkpoint cùng thay đổi thuộc nhiệm vụ trên nhánh làm việc. Ghi rõ phần nào còn chưa lưu và người nhận có thể lấy ở đâu.
+- Ghi vào file `docs/checkpoints/<id>.md` của nhiệm vụ (id = tên nhánh, đổi `/` thành `-`), rồi chạy `python3 scripts/checkpoint_index.py`. Có thể chép tóm tắt vào mục **Checkpoint** trong mô tả PR. Không ghi nối vào checkpoint của nhiệm vụ khác; người review ghi nhận xét trong PR hoặc trong file riêng có `parent:`. Nếu chưa có PR và có quyền đẩy nhánh, lưu checkpoint cùng thay đổi thuộc nhiệm vụ trên nhánh làm việc. Ghi rõ phần nào còn chưa lưu và người nhận có thể lấy ở đâu.
 - Xem lại thay đổi đã stage, chưa stage và file mới trước khi tạo commit. Chỉ đưa vào nhánh phần thuộc nhiệm vụ và có quyền chia sẻ. Giữ nguyên thay đổi của người khác. Nếu không thể lưu từ xa, ghi rõ giới hạn truy cập, vị trí bản cục bộ và phần nào có thể mất khi đổi workspace.
 - Đọc lại checkpoint tại nơi đã lưu. Ghi link chính xác để người nhận mở được. Với repo công khai, chỉ đưa thông tin đã được phép chia sẻ. Loại bỏ bí mật, tài liệu riêng và log chứa dữ liệu nhạy cảm.
 - Nếu công cụ ghi tệp hoặc GitHub không còn truy cập được, đưa bản checkpoint ngắn vào tin nhắn cuối trong khả năng còn lại. Nêu rõ phần mã nào chưa có đường dẫn khôi phục.
 
 ## Mẫu checkpoint
+
+Bản đầy đủ, kèm phần đầu file cho chỉ mục: [docs/checkpoints/_TEMPLATE.md](checkpoints/_TEMPLATE.md).
 
 ```markdown
 ## Checkpoint — <mã hoặc tên nhiệm vụ>

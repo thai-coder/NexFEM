@@ -2,7 +2,7 @@
 
 ## Bàn giao giữa các phiên
 
-Đọc [PROJECT_STATUS.md](PROJECT_STATUS.md) và [quy trình bàn giao](docs/HANDOFF.md) khi bắt đầu hoặc tiếp tục nhiệm vụ. Ghi checkpoint sau mỗi mốc có thể tiếp tục và ngay khi có dấu hiệu sắp chạm giới hạn. Nếu đang dở khi phải dừng, lưu trạng thái `PAUSED`, nơi khôi phục mã và hành động đầu tiên cho phiên sau.
+Đọc chỉ mục [PROJECT_STATUS.md](PROJECT_STATUS.md), mở đúng file checkpoint của nhiệm vụ trong [docs/checkpoints/](docs/checkpoints/README.md), và đọc [quy trình bàn giao](docs/HANDOFF.md) khi bắt đầu hoặc tiếp tục nhiệm vụ. Mỗi nhiệm vụ một file checkpoint; chỉ sửa file của nhiệm vụ mình; `PROJECT_STATUS.md` sinh bằng `python3 scripts/checkpoint_index.py`, không sửa tay. Ghi checkpoint sau mỗi mốc có thể tiếp tục và ngay khi có dấu hiệu sắp chạm giới hạn. Nếu đang dở khi phải dừng, lưu trạng thái `PAUSED`, nơi khôi phục mã và hành động đầu tiên cho phiên sau.
 
 ## Owner-approved decision — 2026-11-09
 
