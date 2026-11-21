@@ -17,7 +17,8 @@ TABLES = {
     "Objects And Elements - Areas": "7df3d27419c90ca16f5a4b50e376de702c7bc862d67a3a8fb7815d09f3537cea",
 }
 BASE = ("GlobalFX", "GlobalFY", "GlobalFZ")
-CASES = {"DEAD", "LIVE", "EQX", "EQY"}
+BASE_MOMENTS = ("GlobalMX", "GlobalMY", "GlobalMZ")
+BASE_ORIGIN = ("GlobalX", "GlobalY", "GlobalZ")
 
 
 def main():
@@ -26,7 +27,13 @@ def main():
     parser.add_argument("out", type=Path)
     args = parser.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
-    manifest = {"sourceCommit": SOURCE, "tables": {}, "staticBaseReactionsKip": {}}
+    manifest = {
+        "sourceCommit": SOURCE,
+        "tables": {},
+        "staticBaseReactionsKip": {},
+        "staticBaseMoments": {},
+        "baseReactionModes": {},
+    }
 
     for name, expected in TABLES.items():
         source = args.excel / f"{name}.xlsx"
@@ -47,8 +54,9 @@ def main():
                                 if key in columns), None)
             csv_name = f"{name.lower().replace(' ', '-').replace('---', '-')}.csv"
             if name == "Base Reactions":
-                if any(units[columns.index(key)] != "Kip" for key in BASE):
-                    raise ValueError("Base reaction force units must be Kip")
+                for keys, unit in ((BASE, "Kip"), (BASE_MOMENTS, "Kip-in"), (BASE_ORIGIN, "in")):
+                    if any(units[columns.index(key)] != unit for key in keys):
+                        raise ValueError(f"Expected {unit} for {keys}")
             with (args.out / csv_name).open("w", encoding="utf-8", newline="") as stream:
                 writer = csv.writer(stream, lineterminator="\n")
                 writer.writerow(columns)
@@ -58,11 +66,24 @@ def main():
                     case = row[case_column] if case_column is not None else "all"
                     counts[case] = counts.get(case, 0) + 1
                     writer.writerow(row)
-                    if name == "Base Reactions" and case in CASES:
-                        if row[columns.index("CaseType")] != "LinStatic" or case in manifest["staticBaseReactionsKip"]:
+                    if name != "Base Reactions":
+                        continue
+                    case_type = row[columns.index("CaseType")]
+                    if case_type == "LinStatic":
+                        if case in manifest["staticBaseReactionsKip"]:
                             raise ValueError(f"Expected one linear-static base reaction for {case}")
                         manifest["staticBaseReactionsKip"][case] = dict(zip(
                             BASE, (row[columns.index(key)] for key in BASE)))
+                        manifest["staticBaseMoments"][case] = {
+                            "momentKipIn": [row[columns.index(key)] for key in BASE_MOMENTS],
+                            "originIn": [row[columns.index(key)] for key in BASE_ORIGIN],
+                        }
+                    if case_type == "LinModal":
+                        mode = row[columns.index("StepNum")]
+                        modes = manifest["baseReactionModes"].setdefault(case, [])
+                        if row[columns.index("StepType")] != "Mode" or mode in modes:
+                            raise ValueError(f"Unexpected modal result row for {case}")
+                        modes.append(mode)
             manifest["tables"][name] = {
                 "path": f"Analyze.Sap2000/excel/{source.name}", "sha256": actual, "sheet": name,
                 "csv": csv_name, "units": dict(zip(columns, units)), "rowsByCase": counts,
@@ -70,8 +91,6 @@ def main():
         finally:
             workbook.close()
 
-    if manifest["staticBaseReactionsKip"].keys() != CASES:
-        raise ValueError("Missing linear-static base reactions")
     (args.out / "reference.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
 
 

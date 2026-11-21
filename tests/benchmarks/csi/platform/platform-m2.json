@@ -7,6 +7,178 @@
     "length": "IN",
     "temperature": "F"
   },
+  "coverage": {
+    "patterns": [
+      {
+        "name": "DEAD",
+        "type": "Dead",
+        "selfWeight": 1
+      },
+      {
+        "name": "LIVE",
+        "type": "Live",
+        "selfWeight": 0
+      },
+      {
+        "name": "EQX",
+        "type": "Quake",
+        "selfWeight": 0
+      },
+      {
+        "name": "EQY",
+        "type": "Quake",
+        "selfWeight": 0
+      }
+    ],
+    "cases": [
+      {
+        "name": "DEAD",
+        "type": "LinStatic",
+        "assignments": [
+          {
+            "pattern": "DEAD",
+            "factor": 1
+          }
+        ],
+        "rowsByTable": {
+          "Base Reactions": 1,
+          "Joint Displacements": 4210,
+          "Joint Reactions": 310,
+          "Element Forces - Frames": 18310
+        },
+        "modeNumbers": [],
+        "sourceForceBalance": "compared",
+        "sourceMomentBalance": "not reconstructed",
+        "solverComparison": "not comparable"
+      },
+      {
+        "name": "MODAL",
+        "type": "LinModal",
+        "assignments": [],
+        "rowsByTable": {
+          "Base Reactions": 12,
+          "Joint Displacements": 50520,
+          "Joint Reactions": 3720,
+          "Element Forces - Frames": 219720
+        },
+        "modeNumbers": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+        ],
+        "sourceForceBalance": "not applicable",
+        "sourceMomentBalance": "not applicable",
+        "solverComparison": "not comparable"
+      },
+      {
+        "name": "LIVE",
+        "type": "LinStatic",
+        "assignments": [
+          {
+            "pattern": "LIVE",
+            "factor": 1
+          }
+        ],
+        "rowsByTable": {
+          "Base Reactions": 1,
+          "Joint Displacements": 4210,
+          "Joint Reactions": 310,
+          "Element Forces - Frames": 18310
+        },
+        "modeNumbers": [],
+        "sourceForceBalance": "compared",
+        "sourceMomentBalance": "not reconstructed",
+        "solverComparison": "not comparable"
+      },
+      {
+        "name": "EQX",
+        "type": "LinStatic",
+        "assignments": [
+          {
+            "pattern": "EQX",
+            "factor": 1
+          }
+        ],
+        "rowsByTable": {
+          "Base Reactions": 1,
+          "Joint Displacements": 4210,
+          "Joint Reactions": 310,
+          "Element Forces - Frames": 18310
+        },
+        "modeNumbers": [],
+        "sourceForceBalance": "compared",
+        "sourceMomentBalance": "compared",
+        "solverComparison": "not comparable"
+      },
+      {
+        "name": "EQY",
+        "type": "LinStatic",
+        "assignments": [
+          {
+            "pattern": "EQY",
+            "factor": 1
+          }
+        ],
+        "rowsByTable": {
+          "Base Reactions": 1,
+          "Joint Displacements": 4210,
+          "Joint Reactions": 310,
+          "Element Forces - Frames": 18310
+        },
+        "modeNumbers": [],
+        "sourceForceBalance": "compared",
+        "sourceMomentBalance": "compared",
+        "solverComparison": "not comparable"
+      }
+    ],
+    "combinations": {
+      "explicitNames": [],
+      "automaticDesignTypes": [
+        "Steel"
+      ],
+      "automaticInputs": [
+        {
+          "designType": "Steel",
+          "limitState": "Strength",
+          "case": "DEAD"
+        },
+        {
+          "designType": "Steel",
+          "limitState": "Strength",
+          "case": "LIVE"
+        },
+        {
+          "designType": "Steel",
+          "limitState": "Strength",
+          "case": "EQX"
+        },
+        {
+          "designType": "Steel",
+          "limitState": "Strength",
+          "case": "EQY"
+        },
+        {
+          "designType": "Steel",
+          "limitState": "Deflection",
+          "case": "DEAD"
+        },
+        {
+          "designType": "Steel",
+          "limitState": "Deflection",
+          "case": "LIVE"
+        }
+      ]
+    }
+  },
   "import": {
     "blocked": true,
     "counts": {
@@ -522,6 +694,78 @@
         "AREA LOADS - UNIFORM TO FRAME": 570.0500046010036
       }
     }
+  },
+  "seismicMomentBalance": {
+    "source": {
+      "program": "SAP2000",
+      "version": "26.2.0"
+    },
+    "units": {
+      "moment": "kip-in"
+    },
+    "totals": {
+      "pass": 5,
+      "fail": 1,
+      "missing": 0,
+      "unexpected": 0
+    },
+    "passed": false,
+    "rows": [
+      {
+        "key": "EQX|moment-balance|base|GlobalMX",
+        "status": "pass",
+        "reference": -1.908e-8,
+        "actual": 0,
+        "absError": 1.908e-8,
+        "relativeError": 1,
+        "allowed": 0.0005
+      },
+      {
+        "key": "EQX|moment-balance|base|GlobalMY",
+        "status": "pass",
+        "reference": -90588.033,
+        "actual": -90588.03265796775,
+        "absError": 0.00034203224640805274,
+        "relativeError": 3.775689073721832e-9,
+        "allowed": 0.0005
+      },
+      {
+        "key": "EQX|moment-balance|base|GlobalMZ",
+        "status": "pass",
+        "reference": 2826280.012,
+        "actual": 2826280.0123630087,
+        "absError": 0.0003630085848271847,
+        "relativeError": 1.2844041754033557e-10,
+        "allowed": 0.0005
+      },
+      {
+        "key": "EQY|moment-balance|base|GlobalMX",
+        "status": "pass",
+        "reference": 90588.033,
+        "actual": 90588.03265796775,
+        "absError": 0.00034203224640805274,
+        "relativeError": 3.775689073721832e-9,
+        "allowed": 0.0005
+      },
+      {
+        "key": "EQY|moment-balance|base|GlobalMY",
+        "status": "pass",
+        "reference": -2.158e-7,
+        "actual": 0,
+        "absError": 2.158e-7,
+        "relativeError": 1,
+        "allowed": 0.0005
+      },
+      {
+        "key": "EQY|moment-balance|base|GlobalMZ",
+        "status": "fail",
+        "reference": -1880011.17,
+        "actual": -1880011.1737813798,
+        "absError": 0.0037813798990100622,
+        "relativeError": 2.01136033623144e-9,
+        "allowed": 0.0005
+      }
+    ]
   },
   "level2": {
     "status": "not comparable",

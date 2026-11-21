@@ -4,7 +4,7 @@ Benchmark trên mô hình [Platform 2nd use](https://github.com/thai-coder/NexFE
 
 ## Mức 1 — Cân bằng tải nguồn với phản lực đáy SAP2000
 
-Với DEAD/LIVE, lấy tự trọng từ `MATERIAL LIST 1 - BY OBJECT TYPE` nhân hệ số pattern, cộng áp lực trọng lực nhân `AreaArea` của từng gán uniform và uniform-to-frame. Đây là sổ cái tải theo diện tích hình học. Diện tích hữu hiệu và phép phân tải thực tế của SAP2000 chưa được kiểm chứng. Với EQX/EQY, cộng từng tải nút tường minh trong S2K trên toàn bộ nút phân tích, gồm các nút lưới không có ID object. Bốn case tĩnh đều dùng pattern cùng tên với hệ số 1. Quy ước so sánh là `phản lực dự kiến = -tổng tải` trong hệ toàn cục, chỉ kiểm tra lực, không tính mô men đáy.
+Với DEAD/LIVE, lấy tự trọng từ `MATERIAL LIST 1 - BY OBJECT TYPE` nhân hệ số pattern, cộng áp lực trọng lực nhân `AreaArea` của từng gán uniform và uniform-to-frame. Đây là sổ cái tải theo diện tích hình học. Diện tích hữu hiệu và phép phân tải thực tế của SAP2000 chưa được kiểm chứng. Với EQX/EQY, cộng từng tải nút tường minh trong S2K trên toàn bộ nút phân tích, gồm các nút lưới không có ID object. Bốn case tĩnh đều dùng pattern cùng tên với hệ số 1. Quy ước so sánh lực là `phản lực dự kiến = -tổng tải` trong hệ toàn cục.
 
 | Case | Thành phần | Phản lực dự kiến (kip) | SAP2000 (kip) | Chênh tuyệt đối (kip) | Chênh tương đối | Kết quả |
 |---|---|---:|---:|---:|---:|---|
@@ -14,6 +14,41 @@ Với DEAD/LIVE, lấy tự trọng từ `MATERIAL LIST 1 - BY OBJECT TYPE` nhâ
 | EQY | FY | −490,246712 | −490,247 | 0,000288 | 0,0000587% | Khớp trong dung sai |
 
 Dùng dung sai tuyệt đối **0,0005 kip**, bằng nửa bước 0,001 kip của các thành phần phản lực chính trong bản xuất. Không cộng dung sai tương đối. Áp cùng ngưỡng tuyệt đối để kiểm các thành phần gần 0, nơi phần trăm do chia cho nhiễu số không có ý nghĩa thực tế. Tám thành phần phụ đều nằm trong ngưỡng. Ngưỡng này dùng để đối chiếu số liệu xuất, không dùng làm ngưỡng nghiệm thu chuyển vị/nội lực. [Kết quả đủ 12 thành phần](../../tests/benchmarks/csi/platform/platform-m2.json)
+
+| Nguồn tải đứng | DEAD (kip) | LIVE (kip) |
+|---|---:|---:|
+| Tự trọng | 355,272277 | 0 |
+| Uniform trên diện, 12 gán mỗi case | 206,798665 | 414,809739 |
+| Uniform-to-frame, 62 gán mỗi case | 285,025002 | 570,050005 |
+
+Trên cùng 62 area, các gán uniform-to-frame là tải theo một phương, có áp lực LIVE đúng gấp đôi DEAD và chiếm khoảng 58% tải LIVE trong sổ cái. Sai khác LIVE cũng gần gấp đôi DEAD. Nếu giả định toàn bộ sai khác đến từ nhóm gán này, diện tích hữu hiệu thiếu tương đương khoảng 8,66 ft² theo DEAD và 8,68 ft² theo LIVE. Dùng hai trị số để khoanh vùng khi xuất tải phân xuống thanh. Để kiểm tra sai khác lực đứng, cần đối chiếu tải được SAP2000 phân xuống thanh và diện tích hữu hiệu của các gán tải, đồng thời xác nhận file S2K và bảng kết quả xuất từ cùng mô hình và lần chạy. [CSI — Area Loads Uniform to Frame](https://docs.csiamerica.com/help-files/sap/Menus/Assign/Area_Loads/Area_Loads_Uniform_to_Frame_%28Shell%29.htm)
+
+Với EQX/EQY, đối chiếu thêm mô men phản lực tại điểm tham chiếu của bảng Base Reactions bằng tổng âm của `M + (r - r₀) × F`. Năm trong sáu thành phần nằm trong dung sai đối chiếu **0,0005 kip·in**. EQY MZ tính được **−1.880.011,173781 kip·in**, SAP2000 xuất **−1.880.011,170 kip·in**, chênh **0,003781 kip·in**. Giữ sai khác này để kiểm tra nguồn. Mô men của DEAD/LIVE chưa tái dựng vì chưa xác nhận vị trí hợp lực tự trọng và phân tải thực tế.
+
+## Kiểm kê ca tải và tổ hợp
+
+Bộ chạy lấy danh sách ca từ S2K và xác minh danh sách ở cả bốn bảng kết quả. Nếu tên ca giữa S2K và một bảng kết quả khác nhau, bộ chạy báo lỗi kiểm kê. Mỗi bảng bao phủ năm ca sau, gồm cả 12 mode của MODAL.
+
+| Ca | Phản lực đáy | Chuyển vị nút | Phản lực nút | Nội lực thanh |
+|---|---:|---:|---:|---:|
+| DEAD, LIVE, EQX, EQY (mỗi ca) | 1 | 4.210 | 310 | 18.310 |
+| MODAL (12 mode) | 12 | 50.520 | 3.720 | 219.720 |
+
+Platform bật tổ hợp thép tự động. Cấu hình nguồn liệt kê DEAD/LIVE/EQX/EQY cho Strength và DEAD/LIVE cho Deflection. S2K có 0 tên tổ hợp tường minh và bốn bảng kết quả có 0 hàng theo tổ hợp. Khi đối chiếu tổ hợp cần lấy chính xác loại tổ hợp, tên thành phần và hệ số do SAP2000 dùng, kèm kết quả xuất theo tên tổ hợp. [CSI — Load Combinations](https://docs.csiamerica.com/help-files/sap/Menus/Define/Load_Combination/Load_Combination.htm)
+
+### Các mô hình tham chiếu ngoài Platform
+
+Chạy importer trên ba file thật trong kho, có SHA-256 khớp với fixture. Bảng dưới ghi ca khai báo và tổ hợp đọc được. Các ca có tên nhưng chưa có gán tải sau nhập cần đối chiếu đầu vào trước khi dùng làm benchmark. Hiện ba mẫu này chưa có bảng kết quả CSI độc lập đi kèm trong bộ dữ liệu đã kiểm tra.
+
+| Mẫu | Pattern / case / combo | Các ca ngoài động đất | Điểm cần xác minh |
+|---|---:|---|---|
+| SAP2000 23.1.0 — 24061 OMF | 53 / 12 / 87 | CDL, SDL, LL, LLR, WX, WY, S, R, H, MODAL | WY có lực nút và tải thanh. WX, EX, S, R, H có tên case nhưng không có gán lực hay tự trọng sau nhập. Có 36 pattern gió/động đất tự động ASCE 7-16 bị chặn. Tổ hợp gồm 85 Linear Add và 2 Envelope. |
+| SAP2000 25.3.1 — Roof | 5 / 6 / 18 | CDL, SDL, Lr, Wu, Wd, MODAL | Wu/Wd có 4 gán áp lực mỗi chiều theo trục local 3 trên area tiết diện None. Cần xác minh dấu, đường truyền tải và phản lực trước khi dùng làm benchmark gió. Tổ hợp gồm 16 Linear Add và 2 Envelope. |
+| ETABS 23.2.0 — 23217 SMFs | 11 / 12 / 87 | CDL, SDL, LL, Lr, WX, WY, S, R, H, Modal | WX có tải thanh, WY có lực nút. S, R, H có tên case nhưng chưa có gán lực hay tự trọng sau nhập. Importer ở nhánh đã kiểm tra chặn 9 bản ghi tải biến thiên trên thanh. Tổ hợp gồm 83 Linear Add và 4 Envelope. |
+
+Tên case và phân loại pattern là hai trường riêng. Ví dụ `S` có loại nguồn Snow, còn `R` và `H` ở hai mẫu OMF và SMFs có loại Other. Giữ nguyên tên cho tới khi có định nghĩa tải. [Mẫu SAP2000](../../tests/fixtures/csi/sap2000/README.md) · [Mẫu ETABS](../../tests/fixtures/csi/etabs/README.md)
+
+Đợt kiểm chứng tiếp theo dùng OMF cho tự trọng, tĩnh tải bổ sung, hoạt tải sàn/mái và tổ hợp Linear Add/Envelope, và Roof cho áp lực gió lên/xuống. Mỗi mẫu cần xuất định nghĩa case/combo, gán tải, Base Reactions, Joint Displacements, Joint Reactions và Element Forces - Frames theo từng ca và tổ hợp. Cần mẫu có tải khác 0 cho tuyết, mưa/đọng nước nếu áp dụng, tải ngang đất/nước, tải nhiệt, lún/chuyển vị cưỡng bức và tải di động khi các nhóm này nằm trong phạm vi. Các nhóm này hiện chưa có benchmark M2 từ dữ liệu đã kiểm tra. Modal, phổ phản ứng và lịch sử thời gian cần phép kiểm riêng theo mode hoặc bước thời gian.
 
 ## Báo cáo nhập
 
