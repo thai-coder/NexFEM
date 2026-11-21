@@ -52,8 +52,9 @@ const patterns = (n) =>
   table("LOAD PATTERN DEFINITIONS", [`LoadPat=${n}   DesignType=Other   SelfWtMult=0`]) +
   table("LOAD CASE DEFINITIONS", [`Case=${n}   Type=LinStatic   InitialCond=Zero   RunCase=Yes`]) +
   table("CASE - STATIC 1 - LOAD ASSIGNMENTS", [`Case=${n}   LoadType="Load pattern"   LoadName=${n}   LoadSF=1`]);
-const udl = (f, p, w) =>
-  `Frame=${f}   LoadPat=${p}   CoordSys=GLOBAL   Type=Force   Dir=Gravity   DistType=RelDist   RelDistA=0   RelDistB=1   AbsDistA=0   AbsDistB=0   FOverLA=${w}   FOverLB=${w}`;
+// Như file SAP2000 thật: ghi cả RelDist và AbsDist (AbsDistB = chiều dài thanh).
+const udl = (f, p, w, len = L) =>
+  `Frame=${f}   LoadPat=${p}   CoordSys=GLOBAL   Type=Force   Dir=Gravity   DistType=RelDist   RelDistA=0   RelDistB=1   AbsDistA=0   AbsDistB=${len}   FOverLA=${w}   FOverLB=${w}`;
 const jointForce = (id, p, f1, f2, f3) => `Joint=${id}   LoadPat=${p}   CoordSys=GLOBAL   F1=${f1}   F2=${f2}   F3=${f3}   M1=0   M2=0   M3=0`;
 
 /** metric(case, kind, object, component, value, absTol, relTol) */
@@ -203,7 +204,8 @@ function tableSet(joints, frames, restraints, sectionFrames, rest) {
 }
 
 for (const c of cases) {
-  const text = (header(c.id) + c.body).replace(/\n/g, "\r\n");
+  // File SAP2000 thật kết thúc bằng dòng END TABLE DATA.
+  const text = (header(c.id) + c.body + "END TABLE DATA\n").replace(/\n/g, "\r\n");
   writeFileSync(join(out, `${c.id}.s2k`), text);
   const ref = {
     schema: 1,

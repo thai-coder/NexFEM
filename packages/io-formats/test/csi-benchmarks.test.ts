@@ -10,7 +10,7 @@
 import { spawnSync } from "node:child_process";
 import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import { decodeE2k, importS2k } from "../src/index.ts";
 // @ts-expect-error: tập lệnh .mjs không có kiểu
 import { compareNormalized } from "../../../scripts/validation/compare-csi.mjs";
@@ -80,6 +80,12 @@ const refs: Reference[] = readdirSync(casesDir).filter((f) => f.endsWith(".refer
 const done: Array<{ ref: Reference; cmp: Comparison; equilibrium: number }> = [];
 
 describe("đối chiếu giải tích: nhập .s2k → bộ giải", () => {
+  // Biên dịch bộ giải một lần (lần đầu trên CI có thể mất vài chục giây), để từng ca không vượt thời gian chờ.
+  beforeAll(() => {
+    const p = spawnSync("cargo", ["build", "-q", "--release", "-p", "fem-solver", "--example", "solve"], { cwd: root, encoding: "utf8" });
+    if (p.status !== 0) throw new Error(`không biên dịch được bộ giải: ${p.stderr}`);
+  }, 600_000);
+
   it("có ít nhất 5 ca", () => expect(refs.length).toBeGreaterThanOrEqual(5));
 
   for (const ref of refs) {

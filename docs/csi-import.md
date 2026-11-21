@@ -63,7 +63,7 @@ Cột "File mẫu" cho biết cú pháp đã có trong file ETABS 23.2.0 thật 
 | `LOADPATTERN` TYPE, SELFWEIGHT | mẫu tải | có |
 | `LOADCASE` Linear Static (LOADPAT/SF), Modal | trường hợp tải | có |
 | `COMBO` Linear Add / Envelope / SRSS / Absolute Add, LOADCASE và LOADCOMBO | tổ hợp (kể cả lồng nhau) | Linear Add |
-| `LINELOAD` UNIFF; TRAPF, phương GRAV, X, Y, Z, 1 | tải đều; hình thang đổi thành tải đều giữ hợp lực (cảnh báo) | GRAV |
+| `LINELOAD` UNIFF; TRAPF đều suốt chiều dài, phương GRAV, X, Y, Z, 1 | tải đều. TRAPF không đều hoặc trên một đoạn: **lỗi, chặn mở** (đổi thành tải đều sẽ sai vị trí tải; NexFEM chưa có tải phân bố từng đoạn). Khoá lạ (ví dụ `CSYS`) trên `LINELOAD`/`AREALOAD`/`POINTLOAD`: lỗi | GRAV (9 tải TRAPF một đoạn trong file mẫu bị chặn) |
 | `LINELOAD` phương 2, 3 (trục địa phương) | tải theo trục 2, 3 của NexFEM (cùng quy ước CSI, ghi chú: chưa có file thật có loại tải này) | chưa |
 | `LINEASSIGN` ANG | góc xoay trục địa phương `Frame.angle` | 34 cột ANG 90 |
 | `AREALOAD` UNIFF GRAV/Z | tải sàn | GRAV |
@@ -170,7 +170,7 @@ Test: `joint_forces_and_moments_in_global_axes` (bộ giải: công xôn với l
 | Tiết diện thanh | 305 | 305 | 8 chữ L, 3 General |
 | Sàn | 29 | 29 | 21 sàn móng có lò xo nền: quy về lò xo nút |
 | Nút có lò xo | | 108 | tổng Kz = k_dọc_thanh·ΣL + k_nền·ΣA (test kiểm tra) |
-| Tải thanh / tải sàn | 24 / 16 | 24 / 16 | 9 tải hình thang đổi thành tải đều |
+| Tải thanh / tải sàn | 24 / 16 | 15 / 16 | 9 tải TRAPF một đoạn không nhập: lỗi, mô hình bị chặn mở |
 | Tải tập trung tại nút | 31 | 31 | 8 tại nút đầu thanh; 23 ở điểm riêng nằm trên dầm, đổi thành tải tập trung trên dầm |
 | Trường hợp tải / tổ hợp | 12 / 87 | 12 / 87 | |
 
@@ -185,6 +185,21 @@ Mô hình này đặt hầu hết đối tượng bằng DZ dưới một tầng
 ## SAP2000 `.s2k` / `.$2k`
 
 Báo cáo nhập phân loại các bảng tải nút/thanh/diện và tải động đất/gió tự động SAP2000 chưa hỗ trợ là **lỗi**. Các pattern có `AutoLoad` khác `None` cũng báo lỗi kể cả khi file không xuất bảng tự động. Chặn mọi pattern như vậy là chính sách thận trọng, kể cả pattern chưa được case dùng; không coi tải nút có sẵn là thay thế tải tự động. Khi báo cáo nhập CSI có lỗi, hộp thoại vẫn cho xem và sao chép báo cáo nhưng không mở mô hình; cần sửa nguồn hoặc chờ hỗ trợ. Quy tắc chặn lỗi áp dụng cho cả hai bộ nhập, không trộn thuật toán của ETABS và SAP2000. Các bảng chưa nằm trong danh sách xử lý hoặc danh sách metadata cho phép được báo lỗi chưa kiểm chứng; danh sách này chưa chứng minh mọi thuộc tính trong bảng đã xử lý đều được hỗ trợ.
+
+### Danh sách cho phép (bảng/phần chưa đọc nhưng không chặn)
+
+Mọi bảng `.s2k` / phần `.e2k` chưa đọc mà có dữ liệu là **lỗi** (fail closed), trừ các nhóm sau, bỏ qua ở mức thông tin vì không ảnh hưởng mô hình phân tích tĩnh tuyến tính khung:
+
+- mô tả, hiển thị, nhật ký; thiết kế (`PREFERENCES - … DESIGN`, `OVERWRITES - … DESIGN`, `… DESIGN PREFERENCES/OVERWRITES`, `FRAME DESIGN PROCEDURES`, cốt thép, dải sàn); nhóm; trạm xuất kết quả;
+- hàm phổ/lịch sử thời gian (chỉ dùng cho trường hợp động, vốn bị chặn), nguồn khối lượng và tham số modal (không dùng cho tĩnh tuyến tính);
+- định nghĩa chỉ có tác dụng khi được gán (vật liệu cáp, giảm chấn, tiêu chí chấp nhận, thuộc tính phụ thuộc thời gian, solid, link, panel zone, đặc trưng sóng): phép gán/đối tượng dùng chúng nằm ở bảng khác và bị chặn ở đó (ví dụ `AutoLoad`, `POINTASSIGN PANELZONE`, `LINE` kiểu link);
+- bảng chỉ an toàn khi giữ mặc định: `ANALYSIS OPTIONS` (`StiffCase`, `GeomMod` = None), `FRAME LOAD TRANSFER OPTIONS` (mọi `Transfer=Yes`), `AUTO COMBINATION OPTION DATA 01` (`AutoGen` khác Yes). Khác mặc định thì chặn.
+
+Bảng có tên chứa `LOADS` mà chưa đọc báo `load_table_unsupported` (thiếu tải). Vẫn chặn trên file mẫu: `Roof_model.2k` (`AREA AUTO MESH ASSIGNMENTS`, `AREA EDGE CONSTRAINT ASSIGNMENTS`), `24061_OMF.s2k` (36 `AutoLoad`), ETABS 23.2.0 (9 tải TRAPF một đoạn). Test e2e mở và giải dùng biến thể dẫn xuất tạo lúc chạy (bỏ 9 tải đó; đặt `AutoLoad=None`), không ghi ra repo và không tương đương mô hình gốc.
+
+Mô hình chỉ vào mô hình phân tích qua `openCsiImport` (`apps/desktop/src/services/csiImport.ts`), hàm này kiểm tra lại `report.blocked` chứ không chỉ dựa vào nút bấm. Consumer khác của `io-formats` (API/MCP sau này) phải tôn trọng `report.blocked`.
+
+Trường `Tên = Giá trị` có khoảng trắng quanh `=` được đọc; giá trị không ngoặc kép không được tự nó là `Tên=…`, để trường rỗng (`Notes= AutoLoad="ASCE 7-16"`) không nuốt trường kế tiếp.
 
 File thật trong repo: `tests/fixtures/csi/sap2000/` (xem README: nguồn, SHA-256). Cú pháp: mỗi bảng mở bằng `TABLE:  "TÊN"` (một file thật có tiêu đề thiếu dấu ngoặc kép đóng), bản ghi là các cặp `Tên=Giá trị` (giá trị có dấu cách nằm trong ngoặc kép), ` _` cuối dòng nối bản ghi sang dòng sau, kết thúc bằng `END TABLE DATA`.
 
@@ -208,7 +223,7 @@ File thật trong repo: `tests/fixtures/csi/sap2000/` (xem README: nguồn, SHA-
 | Mặt tiết diện `None` | sàn không trọng lượng; tải chia về thanh/nút biên (ghi chú) | có |
 | `LOAD PATTERN DEFINITIONS`, `LOAD CASE DEFINITIONS` (LinStatic, LinModal), `CASE - STATIC 1` | mẫu tải, trường hợp tải | có |
 | `COMBINATION DEFINITIONS` (Linear Add, Envelope, SRSS, Absolute Add; lồng nhau) | tổ hợp | có |
-| `FRAME LOADS - DISTRIBUTED` (Force; Gravity, X, Y, Z; Local 1, 2, 3) | tải đều; hình thang đổi thành tải đều giữ hợp lực (cảnh báo) | Gravity |
+| `FRAME LOADS - DISTRIBUTED` (Force; Gravity, X, Y, Z; Local 1, 2, 3) | tải đều suốt chiều dài. Hình thang hoặc một đoạn: **lỗi, chặn mở**. `DistType=AbsDist` chỉ nhận khi `AbsDist` khớp `RelDist` theo chiều dài thanh | Gravity |
 | `FRAME LOADS - POINT` | tải tập trung trên thanh tại `RelDist` | Gravity |
 | `AREA LOADS - UNIFORM` (Gravity, Z, Local 3) | tải sàn | Gravity, Local 3 |
 | `JOINT LOADS - FORCE` (GLOBAL: F1..F3, M1..M3) | tải nút `jointLoads`; hệ khác GLOBAL: lỗi | có |

@@ -42,7 +42,7 @@ test("nhập file ETABS thật: báo cáo số lượng và phần không nhập
   await expect(counts.locator("tr", { hasText: "Tải tập trung tại nút" })).toHaveText(/31\s*31/);
   const errors = page.getByTestId("csi-error");
   await expect(page.getByTestId("csi-warning")).toContainText("đổi thành tải tập trung trên thanh");
-  await expect(errors).toContainText("chưa được kiểm chứng hoặc chưa hỗ trợ");
+  await expect(errors).toContainText("Tải hình thang hoặc trên một đoạn thanh chưa hỗ trợ");
   await expect(page.getByTestId("csi-open")).toBeDisabled();
   await expect(page.getByTestId("csi-info")).toContainText("Chia 87 thanh thành 287 đoạn");
   await expect(page.getByTestId("csi-warning")).toContainText("Lò xo nền dưới sàn quy về lò xo nút");
@@ -50,6 +50,45 @@ test("nhập file ETABS thật: báo cáo số lượng và phần không nhập
   await expect(page.getByTestId("csi-info")).toContainText("Góc xoay trục địa phương của thanh được nhập");
   // Chưa mở: mô hình hiện tại không đổi.
   expect((await model(page)).name).toBe("Toa_nha_A");
+});
+
+/**
+ * Biến thể DẪN XUẤT của file ETABS thật (không ghi ra repo): bỏ 9 tải hình thang/một đoạn mà NexFEM chưa biểu diễn được,
+ * để kiểm tra đường nhập → mở → giải trên mô hình thật. Mô hình này thiếu 9 tải đó nên KHÔNG tương đương mô hình ETABS.
+ */
+function etabsWithoutPartialLoads() {
+  const lines = readFileSync(FIXTURE, "latin1").split("\r\n");
+  const partial = (l: string) => {
+    const m = /LINELOAD .*TYPE "TRAPF".*FSTART (\S+)\s+FEND (\S+)\s+RDSTART (\S+)\s+RDEND (\S+)/.exec(l);
+    return !!m && (m[1] !== m[2] || Number(m[3]) > 1e-9 || Number(m[4]) < 1 - 1e-9);
+  };
+  const kept = lines.filter((l) => !partial(l));
+  expect(lines.length - kept.length).toBe(9);
+  return { name: "23217_SMFs 3D model_updated v4.e2k", mimeType: "text/plain", buffer: Buffer.from(kept.join("\r\n"), "latin1") };
+}
+
+test("mở mô hình ETABS thật (bỏ tải không đều); lò xo làm gối; F5 chạy được, cơ cấu không chịu tải được ổn định hoá có cảnh báo", async ({ page }) => {
+  await importFixture(page, etabsWithoutPartialLoads());
+  await expect(page.getByTestId("csi-error")).toHaveCount(0);
+  await page.getByTestId("csi-open").click();
+  await expect(page.getByTestId("dlg-csiImport")).toHaveCount(0);
+  const m = await model(page);
+  expect(m.name).toBe("23217_SMFs 3D model_updated v4");
+  const host = (label: string) => label.replace(/-\d+$/, "");
+  expect(new Set(m.frames.filter((f) => f.kind === "beam").map((f) => host(f.label))).size).toBe(244);
+  expect(new Set(m.frames.filter((f) => f.kind === "column").map((f) => host(f.label))).size).toBe(54);
+  expect(m.frames.filter((f) => f.kind === "brace").length).toBe(24);
+  expect(m.shells.length).toBe(29);
+  expect(m.combos.length).toBe(87);
+  expect(m.jointLoads.length).toBe(8);
+  expect(m.frameLoads.filter((l) => l.kind === "point").length).toBe(23);
+  await expect(page.getByTestId("bottom")).toContainText("Đã nhập 23217_SMFs 3D model_updated v4.e2k");
+  await page.keyboard.press("F5");
+  // Nút 253 chỉ nối các thanh khớp nằm trong mặt phẳng x = const: không có gì giữ theo X (sàn cứng D1 có định nghĩa nhưng
+  // không gán). Bậc tự do đó không chịu tải nên được thêm độ cứng rất nhỏ, có cảnh báo liệt kê nút.
+  await expect(page.getByTestId("bottom")).toContainText("Phân tích xong", { timeout: 60_000 });
+  await expect(page.getByTestId("bottom")).toContainText("253 Ux");
+  await expect(page.getByTestId("bottom")).toContainText("không có ý nghĩa");
 });
 
 test("ETABS thiếu mẫu tải: lỗi ở báo cáo và không mở mô hình", async ({ page }) => {
@@ -108,6 +147,27 @@ test("file SAP2000 thật có tải tự động chưa hỗ trợ: báo cáo và
   await expect(page.getByTestId("csi-info")).toContainText("Góc xoay trục địa phương của thanh được nhập");
   await expect(page.getByTestId("csi-open")).toBeDisabled();
   expect((await model(page)).name).toBe("Toa_nha_A");
+});
+
+test("mở mô hình SAP2000 thật (tải tự động đặt về None); F5 chạy được", async ({ page }) => {
+  // Biến thể DẪN XUẤT (không ghi ra repo): 36 mẫu tải AutoLoad="ASCE 7-16" đổi thành None để kiểm tra đường nhập → mở → giải.
+  // Tải tự động của SAP2000 không có trong mô hình này, nên KHÔNG tương đương mô hình SAP2000.
+  const source = readFileSync(SAP("24061_OMF.s2k"), "utf8");
+  const text = source.replaceAll('AutoLoad="ASCE 7-16"', "AutoLoad=None");
+  expect(text).not.toBe(source);
+  await importFixture(page, { name: "24061_OMF.s2k", mimeType: "text/plain", buffer: Buffer.from(text, "utf8") }, "SAP2000 (.s2k, .$2k)…");
+  await expect(page.getByTestId("csi-error")).toHaveCount(0);
+  await page.getByTestId("csi-open").click();
+  const m = await model(page);
+  expect(m.name).toBe("24061_OMF");
+  expect(m.frames.map((f) => f.kind)).toEqual(["column", "column", "beam"]);
+  expect(m.frames.map((f) => f.angle)).toEqual([90, 90, undefined]);
+  expect(m.combos.length).toBe(87);
+  expect(m.jointLoads.length).toBe(2);
+  await expect(page.getByTestId("bottom")).toContainText("Đã nhập 24061_OMF.s2k");
+  // Khung phẳng có gối, góc xoay cột và tải nút: chạy được bộ giải.
+  await page.keyboard.press("F5");
+  await expect(page.getByTestId("bottom")).toContainText("Phân tích xong");
 });
 
 test("SAP2000 25 có bảng chưa được kiểm chứng: chặn mở", async ({ page }) => {

@@ -121,8 +121,37 @@ const SECTIONS_USED = new Set([
   "AREA SPRING PROPERTIES",
 ]);
 
-// Explicitly identified as descriptive output only. Unknown sections fail closed.
-const SAFE_IGNORED_SECTIONS = new Set(["PROJECT INFORMATION", "LOG", "DIMENSION LINES"]);
+/**
+ * Phần không ảnh hưởng mô hình phân tích tĩnh tuyến tính khung, bỏ qua ở mức thông tin. Mọi phần khác chưa đọc mà có dữ liệu
+ * là lỗi (fail closed). Gồm: mô tả/hiển thị, thiết kế (thép, bê tông, cốt thép, dải sàn), nhóm, hàm thời gian/phổ (chỉ dùng
+ * cho trường hợp động, vốn đã bị chặn), nguồn khối lượng (chỉ dùng cho modal/động), và các định nghĩa thuộc tính chỉ có
+ * tác dụng khi được gán: phép gán hoặc đối tượng dùng chúng nằm ở phần khác và bị chặn ở đó (ví dụ LINE kiểu LINK,
+ * POINTASSIGN PANELZONE).
+ */
+const SAFE_IGNORED_SECTIONS = new Set([
+  "PROJECT INFORMATION",
+  "LOG",
+  "DIMENSION LINES",
+  "STEEL DESIGN PREFERENCES",
+  "STEEL DESIGN OVERWRITES",
+  "CONCRETE DESIGN PREFERENCES",
+  "CONCRETE DESIGN OVERWRITES",
+  "COMPOSITE DESIGN PREFERENCES",
+  "REBAR DEFINITIONS",
+  "CONCRETE SECTIONS",
+  "STRIP GEOMETRY",
+  "GROUPS",
+  "FUNCTIONS",
+  "MASS SOURCE",
+  "PIER/SPANDREL NAMES",
+  "TENDON SECTIONS",
+  "LINK PROPERTIES",
+  "PANEL ZONE PROPERTIES",
+]);
+/** Tuỳ chọn và ghi đè thiết kế (thép, bê tông, sàn, vách, cột liên hợp…): không dùng cho phân tích. */
+const SAFE_IGNORED_SECTION_PATTERNS = [/\bDESIGN (?:PREFERENCES|OVERWRITES)\b/];
+const LINE_LOAD_KEYS = new Set(["TYPE", "DIR", "LC", "FVAL", "FSTART", "FEND", "RDSTART", "RDEND"]);
+const AREA_LOAD_KEYS = new Set(["TYPE", "DIR", "LC", "FVAL"]);
 
 export function importE2k(input: string | E2kFile, opts: { name?: string } = {}): E2kImportResult {
   const file = typeof input === "string" ? parseE2k(input) : input;
@@ -379,12 +408,13 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
         const dofs = ["UX", "UY", "UZ", "RX", "RY", "RZ"];
         const parts = v.text.toUpperCase().split(/\s+/).filter(Boolean);
         const bad = parts.filter((x) => !dofs.includes(x));
-        if (bad.length) d.add("warning", "restraint_unknown", { value: v.text }, at);
+        if (bad.length) d.add("error", "restraint_unknown", { value: v.text }, at);
         const st = storyIndex.get(stName);
         if (st === undefined) continue;
         const jk = useJoint(pt, st, at);
         if (jk) restraintOf.set(jk, dofs.map((x) => parts.includes(x)) as [boolean, boolean, boolean, boolean, boolean, boolean]);
-      } else d.add(k === "SPRINGPROP" || k === "DIAPH" || k === "DIAPHRAGM" ? "error" : "warning", "point_assign_unsupported", { key: k }, at);
+        // Gán khác tại nút (lò xo, sàn cứng, panel zone, khối lượng…) có thể đổi độ cứng hoặc tải: chặn thay vì bỏ qua.
+      } else d.add("error", "point_assign_unsupported", { key: k }, at);
     }
   }
 
@@ -516,7 +546,7 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
         else d.add("error", "frame_spring_unsupported", { spring: v.text }, at);
       } else if (k === "LIMITCOMPRESSION" || k === "LIMITTENSION") d.add("warning", "frame_limit_ignored", { key: k }, at);
       else if (k === "PARFIXM3I" || k === "PARFIXM3J" || k === "PARFIXM2I" || k === "PARFIXM2J") d.add("warning", "frame_partial_fixity_ignored", {}, at);
-      else d.add("warning", "frame_key_unsupported", { key: k }, at);
+      else d.add("error", "frame_key_unsupported", { key: k }, at);
     }
     if ((str(m, "AUTOMESH") ?? "").toUpperCase() === "YES") autoMeshKeys.add(key);
     pendingFrames.push({ key, frame, iKey, jKey });
@@ -687,7 +717,8 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
     const type: LoadPattern["type"] =
       t === "dead" ? "dead" : t === "super dead" ? "superDead" : t === "live" || t === "roof live" || t === "reducible live" ? "live" : t === "wind" ? "wind" : t === "seismic" || t === "quake" ? "seismic" : "other";
     if (t !== "dead" && t !== "super dead" && t !== "live" && t !== "wind" && t !== "seismic") d.add("info", "pattern_type_mapped", { from: p.get("TYPE")?.text ?? "?", to: type }, { line: r.line, object: name });
-    const sw = e2kNumber(p.get("SELFWEIGHT")?.text);
+    const sw = p.has("SELFWEIGHT") ? e2kNumber(p.get("SELFWEIGHT")!.text) : 0;
+    if (!Number.isFinite(sw) || sw < 0) d.add("error", "pattern_selfweight_invalid", { value: p.get("SELFWEIGHT")?.text ?? "?" }, { line: r.line, object: name });
     const id = `lp-${patterns.length + 1}`;
     patterns.push({ id, name, type, selfWeight: Number.isFinite(sw) && sw >= 0 ? sw : 0 });
     patByName.set(name, id);
@@ -721,7 +752,11 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
       d.add("error", "load_target_missing", { kind: "joint" }, at);
       continue;
     }
-    for (const k of p.keys()) if (k !== "TYPE" && k !== "LC" && !(PL_KEYS as readonly string[]).includes(k)) d.add("warning", "point_load_key_unsupported", { key: k }, at);
+    const unknownKey = [...p.keys()].find((k) => k !== "TYPE" && k !== "LC" && !(PL_KEYS as readonly string[]).includes(k));
+    if (unknownKey) {
+      d.add("error", "load_key_unsupported", { key: unknownKey }, at);
+      continue;
+    }
     const raw = PL_KEYS.map((k) => (p.has(k) ? e2kNumber(p.get(k)!.text) : 0));
     if (raw.some((v) => !Number.isFinite(v))) {
       d.add("error", "point_load_type_unsupported", { type }, at);
@@ -883,6 +918,12 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
       d.add("error", "load_target_missing", { kind: "frame" }, at);
       continue;
     }
+    // Khoá lạ (ví dụ hệ toạ độ CSYS) có thể đổi phương hoặc vị trí tải: không đoán, chặn.
+    const unknownKey = [...p.keys()].find((k) => !LINE_LOAD_KEYS.has(k));
+    if (unknownKey) {
+      d.add("error", "load_key_unsupported", { key: unknownKey }, at);
+      continue;
+    }
     if (!dir) {
       d.add("error", "line_load_unsupported", { type, dir: p.get("DIR")?.text ?? "?" }, at);
       continue;
@@ -899,9 +940,13 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
         d.add("error", "line_load_unsupported", { type, dir: p.get("DIR")?.text ?? "?" }, at);
         continue;
       }
-      // NexFEM chỉ có tải đều suốt chiều dài: giữ nguyên tổng lực (hợp lực) của tải hình thang trên đoạn [rs, re].
-      w = ((fs + fe) / 2) * (re - rs);
-      if (fs !== fe || rs > 1e-9 || re < 1 - 1e-9) d.add("warning", "line_load_approximated", {}, at);
+      // NexFEM chỉ có tải đều suốt chiều dài. Tải hình thang hoặc trên một đoạn mà đổi thành tải đều thì giữ hợp lực
+      // nhưng sai vị trí (mômen có thể lệch hàng chục %), nên không nhập và chặn mở mô hình.
+      if (fs !== fe || rs > 1e-9 || re < 1 - 1e-9) {
+        d.add("error", "line_load_not_uniform", {}, at);
+        continue;
+      }
+      w = fs;
     } else {
       d.add("error", "line_load_unsupported", { type, dir: p.get("DIR")?.text ?? "?" }, at);
       continue;
@@ -929,6 +974,11 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
     const v = e2kNumber(p.get("FVAL")?.text);
     if (!shell || !pat) {
       d.add("error", "load_target_missing", { kind: "area" }, at);
+      continue;
+    }
+    const unknownKey = [...p.keys()].find((k) => !AREA_LOAD_KEYS.has(k));
+    if (unknownKey) {
+      d.add("error", "load_key_unsupported", { key: unknownKey }, at);
       continue;
     }
     if (type !== "UNIFF" || (dirRaw !== "GRAV" && dirRaw !== "Z") || !Number.isFinite(v)) {
@@ -1053,7 +1103,8 @@ export function importE2k(input: string | E2kFile, opts: { name?: string } = {})
   if (diaphragms.length) d.add("info", "diaphragm_defined", { count: diaphragms.length });
   for (const [name, recs] of file.sections) {
     if (SECTIONS_USED.has(name) || !recs.length) continue;
-    d.add(SAFE_IGNORED_SECTIONS.has(name) ? "info" : "error", SAFE_IGNORED_SECTIONS.has(name) ? "section_ignored" : "section_unverified", { section: name, records: recs.length }, { line: file.sectionLines.get(name) });
+    const safe = SAFE_IGNORED_SECTIONS.has(name) || SAFE_IGNORED_SECTION_PATTERNS.some((re) => re.test(name));
+    d.add(safe ? "info" : "error", safe ? "section_ignored" : "section_unverified", { section: name, records: recs.length }, { line: file.sectionLines.get(name) });
   }
   if (!joints.some((j) => j.restraint?.some(Boolean) || j.springs?.some((k) => k > 0))) d.add("error", "no_supports_imported");
 

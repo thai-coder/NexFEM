@@ -23,3 +23,14 @@
 - `report.blocked` được tạo ở io-formats cho mọi đường trả về; giao diện tiêu thụ cờ này. Không phải cơ chế cứng trong schema/bộ giải: consumer tự ý bỏ qua cờ vẫn có thể dùng `model` và phải được sửa riêng nếu tồn tại.
 - Hệ quả có chủ đích: các file thật ETABS mẫu và SAP Roof đang bị chặn vì có các phần chưa kiểm chứng; không xóa/bỏ dữ liệu nguồn, cần kiểm chứng từng bảng để hỗ trợ. Không kết luận file không an toàn hay nguồn sai.
 - Kiểm tra tại cây đang chuẩn bị commit: 76 test io-formats, 11 test desktop, typecheck io-formats/desktop/e2e và build Vite đạt. Test Playwright đã cập nhật, chưa chạy cục bộ do Chromium bị sandbox chặn socket. Chờ CI và review độc lập; không tuyên bố tương đương hoặc 1–2%.
+
+## Sửa theo review độc lập — 21/11/2026
+
+- Nhánh `claude/festive-ritchie-e8hzpu` (gộp `e0799a8` của PR #21, rồi sửa trên đó).
+- 1. Tải hình thang/một đoạn (`.s2k` `FRAME LOADS - DISTRIBUTED`, `.e2k` `LINELOAD TRAPF`): lỗi `line_load_not_uniform`, không nhập, chặn mở. Trước đây đổi thành tải đều cả nhịp (giữ hợp lực, sai vị trí; ví dụ tính tay mômen ngàm 135 → 90 kN·m). `DistType=AbsDist` chỉ nhận khi khớp `RelDist`; `SelfWtMult`/`SELFWEIGHT` âm hoặc lỗi: chặn. Khoá lạ trên tải ETABS (`CSYS`…) và mọi `POINTASSIGN` khác `RESTRAINT`, khoá `LINEASSIGN` lạ: lỗi.
+- 2. Parser `.s2k`: trường rỗng không nuốt trường kế tiếp (đã kiểm chứng ngược: regex cũ làm hỏng 2 test).
+- 3. Danh sách cho phép thu hẹp chặn về dữ liệu ảnh hưởng phân tích (xem `docs/csi-import.md`, mục "Danh sách cho phép"). File mẫu còn bị chặn: Roof (2 bảng chia lưới/ràng buộc mép sàn), 24061 (36 AutoLoad), ETABS (9 tải TRAPF một đoạn).
+- 4. Khôi phục e2e mở + F5 trên ETABS và SAP2000 thật bằng biến thể dẫn xuất lúc chạy (không tương đương mô hình gốc).
+- 5. `openCsiImport` kiểm tra lại chính sách trước khi đưa mô hình vào phân tích.
+- Kiểm thử cục bộ: io-formats 102/102, desktop 13/13, typecheck io-formats/desktop, build desktop (có WASM), Playwright 105/105.
+- Chưa làm: nghiệm thu Windows; đối chiếu kết quả FEM với SAP2000/ETABS; không khẳng định sai số 1–2%. Vẫn là cảnh báo (có thể đổi kết quả, cần quyết định riêng): bỏ hệ số hiệu chỉnh độ cứng, điều kiện đầu khác Zero, liên kết nửa cứng coi như ngàm/khớp, điểm chèn, đoạn lệch đầu thanh.

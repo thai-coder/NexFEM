@@ -22,7 +22,11 @@ export interface S2kFile {
   savedPath: string;
 }
 
-const FIELD = /([A-Za-z_][A-Za-z0-9_]*)\s*=\s*("([^"]*)"|\S+)/g;
+/**
+ * `Tên=Giá trị`, cho phép dấu cách/tab quanh `=` (`LoadPat = W1` có trong file SAP2000 26.2). Giá trị không ngoặc kép không
+ * được tự nó là `Tên=…`: nếu không, trường rỗng như `Notes= AutoLoad="ASCE 7-16"` sẽ nuốt trường kế tiếp.
+ */
+const FIELD = /(?<![A-Za-z0-9_])([A-Za-z_][A-Za-z0-9_]*)[ \t]*=[ \t]*("([^"]*)"|(?![A-Za-z_][A-Za-z0-9_]*[ \t]*=)\S+)/g;
 
 /** Tách các cặp `Tên=Giá trị` trong một bản ghi đã nối dòng. */
 export function s2kFields(text: string): Map<string, string> {

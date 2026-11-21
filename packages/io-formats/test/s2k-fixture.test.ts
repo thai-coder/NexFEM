@@ -305,7 +305,10 @@ describe("bảng tải SAP2000 chưa được nhập", () => {
     const extra = tables.map(([name, row]) => `TABLE:  "${name}"\r\n   ${row}\r\n`).join('');
     const r = importS2k(roofText.replace('END TABLE DATA', extra + 'END TABLE DATA'));
     for (const [name] of tables) {
-      expect(r.report.diagnostics.find((d) => d.code === 'section_unverified' && d.params.section === name)).toMatchObject({level: 'error', params: {section: name, records: 1}});
+      const d = r.report.diagnostics.find((x) => (x.code === 'section_unverified' || x.code === 'load_table_unsupported') && x.params.section === name);
+      expect(d).toMatchObject({ level: 'error', params: { section: name, records: 1 } });
+      // Bảng tải được gọi đúng tên là thiếu tải.
+      if (/LOADS/.test(name!)) expect(d!.code).toBe('load_table_unsupported');
       expect(r.report.diagnostics.some((d) => d.code === 'section_ignored' && d.params.section === name)).toBe(false);
     }
   });

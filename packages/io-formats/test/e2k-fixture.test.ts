@@ -165,16 +165,20 @@ describe("file mẫu ETABS 23.2.0: nhập vào NexFEM", () => {
     expect(diag("shell_section_unsupported")[0]!.objects).toEqual(["Deck1"]);
   });
 
-  it("tải: mẫu, tải thanh (hình thang giữ hợp lực), tải sàn, tải tập trung tại nút", () => {
+  it("tải: mẫu, tải thanh (hình thang/một đoạn bị chặn, không đổi thành tải đều), tải sàn, tải tập trung tại nút", () => {
     expect(model.loadPatterns.map((p) => p.name)).toEqual(["CDL", "SDL", "LL", "Lr", "WX", "WY", "EX", "EY", "S", "R", "H"]);
     expect(model.loadPatterns[0]!.selfWeight).toBe(1);
     const ids = (label: string) => new Set(model.frames.filter((f) => host(f.label) === label).map((f) => f.id));
     const load = (label: string) => model.frameLoads.find((l) => ids(label).has(l.frame))!;
     expect(load("B93").value).toBeCloseTo((29.75 * LB) / IN, 9);
-    expect(load("B2").value).toBeCloseTo((21.25 * (0.9916667 - 0.008333334) * LB) / IN, 9);
-    // 24 tải phân bố trên thanh gốc; thanh bị chia nhận tải trên mọi đoạn.
-    expect(model.frameLoads.filter((l) => l.kind === "distributed").length).toBe(60);
-    expect(total("line_load_approximated")).toBe(9);
+    // B2: TRAPF trên [0,0083; 0,9917] không phủ suốt chiều dài. Đổi thành tải đều thì sai vị trí, nên không nhập và báo lỗi.
+    expect(model.frameLoads.some((l) => ids("B2").has(l.frame))).toBe(false);
+    expect(diag("line_load_not_uniform")[0]!.objects).toContain("B2@Story1");
+    expect(total("line_load_not_uniform")).toBe(9);
+    expect(total("line_load_approximated")).toBe(0);
+    expect(report.blocked).toBe(true);
+    // Tải phân bố đều suốt chiều dài còn lại (thanh bị chia nhận tải trên mọi đoạn): 60 trước đây, trừ các đoạn của 9 tải bị chặn.
+    expect(model.frameLoads.filter((l) => l.kind === "distributed").length).toBe(37);
     // 0,6944444 psi = 100 psf ≈ 4,788 kN/m².
     expect(model.shellLoads[0]!.value).toBeCloseTo(4.788, 3);
     expect(model.shellLoads.length).toBe(16);
@@ -217,7 +221,9 @@ describe("file mẫu ETABS 23.2.0: nhập vào NexFEM", () => {
     expect(new Set(rotated.map((f) => host(f.label))).size).toBe(34);
     expect(rotated.every((f) => f.kind === "column" && f.angle === 90)).toBe(true);
     expect(total("frame_cardinal_ignored")).toBe(60);
-    expect(codesAt("error")).toContain("section_unverified");
+    // Mọi phần chưa đọc của file mẫu đều thuộc danh sách thiết kế/hiển thị/định nghĩa an toàn; chỉ tải không đều còn chặn.
+    expect(codesAt("error")).toEqual(["line_load_not_uniform"]);
+    expect(report.diagnostics.filter((d) => d.code === "section_ignored").map((d) => d.params.section)).toContain("STEEL DESIGN OVERWRITES");
     expect(report.blocked).toBe(true);
   });
 
