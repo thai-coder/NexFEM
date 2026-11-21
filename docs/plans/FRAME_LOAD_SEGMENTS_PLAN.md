@@ -1,7 +1,7 @@
 # Kế hoạch: tải phân bố từng đoạn và hình thang trên thanh (`FrameLoad`)
 
 **Trạng thái:** ĐỀ XUẤT, chờ chủ dự án chốt các quyết định ở mục 3. Chưa có mã.
-**Nơi điều phối chung:** GitHub issue "Tải phân bố từng đoạn / hình thang trên thanh" (link ghi trong `PROJECT_STATUS.md` khi tạo). Mọi tác tử AI nhận việc, báo tiến độ và hỏi ở issue đó; tài liệu này là đặc tả.
+**Nơi điều phối chung:** [issue #22](https://github.com/thai-coder/NexFEM/issues/22). Mọi tác tử AI nhận việc, báo tiến độ và hỏi ở issue đó; tài liệu này là đặc tả.
 **Cập nhật:** 21/11/2026 (UTC+7).
 
 ## 1. Vì sao
