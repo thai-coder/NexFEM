@@ -217,7 +217,8 @@ describe("file mẫu ETABS 23.2.0: nhập vào NexFEM", () => {
     expect(new Set(rotated.map((f) => host(f.label))).size).toBe(34);
     expect(rotated.every((f) => f.kind === "column" && f.angle === 90)).toBe(true);
     expect(total("frame_cardinal_ignored")).toBe(60);
-    expect(codesAt("error")).toEqual([]);
+    expect(codesAt("error")).toContain("section_unverified");
+    expect(report.blocked).toBe(true);
   });
 
   it("lò xo dọc dầm móng và lò xo nền dưới móng quy về lò xo nút, bảo toàn tổng độ cứng; mô hình có gối", () => {

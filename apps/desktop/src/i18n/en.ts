@@ -586,6 +586,7 @@ export const en: Strings = {
   csi: {
     title: "Import {program} file",
     nothingToOpen: "There is no model to open from this file.",
+    importBlocked: "The model cannot be opened because the import has data errors. Review the report and correct the source file or wait for support.",
     failed: "Could not read the file: {message}",
     source: "File: {file} · {program} {version} · file units: {units}",
     unitsNote: "NexFEM stores the model in kN and m; values have been converted.",
@@ -726,6 +727,10 @@ export const en: Strings = {
       area_spring_interior_nodes: "Slab with joints inside it (for example a column base inside a footing): split at those joints to lump the area spring, as the source program meshes the slab; total area and stiffness unchanged",
       area_spring_mesh_failed: "Could not split the slab while preserving its area. Area springs were assigned to the corner joints only.",
       section_ignored: "Section \"{section}\" ignored ({records} lines): not used by the analysis model",
+      section_unverified: "Section \"{section}\" ({records} lines) is unverified or unsupported; the model cannot be opened for analysis",
+      pattern_property_unsupported: "Load pattern property {key} is unverified or unsupported",
+      load_table_unsupported: "Load table \"{section}\" was not imported ({records} lines): loads are missing and the model cannot be opened for analysis",
+      automatic_load_unsupported: "Load pattern uses automatic loading {method}, which was not imported or regenerated: the model cannot be opened for analysis",
       no_supports_imported: "The imported model has no supports (for example the file relies on springs, not supported yet): assign supports before analysis",
     },
   },

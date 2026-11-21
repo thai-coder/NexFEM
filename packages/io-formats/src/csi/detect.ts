@@ -49,7 +49,7 @@ const one = (level: ImportDiagnostic["level"], code: string, params: ImportDiagn
 
 function failed(format: CsiFormat, program: string, version: string, diagnostic: ImportDiagnostic): CsiImportResult {
   const empty = importE2k("");
-  return { format, model: empty.model, report: { program, version, units: null, counts: {}, mapping: { joints: {}, frames: {}, shells: {} }, diagnostics: [diagnostic] } };
+  return { format, model: empty.model, report: { program, version, units: null, counts: {}, mapping: { joints: {}, frames: {}, shells: {} }, diagnostics: [diagnostic], blocked: true } };
 }
 
 /**
