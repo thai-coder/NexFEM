@@ -11,6 +11,8 @@ export type BottomTab = "console" | "messages" | "tables" | "log";
 
 export type DialogKind =
   | "about"
+  | "helpGuide"
+  | "documentation"
   | "shortcuts"
   | "newModel"
   | "closeModel"

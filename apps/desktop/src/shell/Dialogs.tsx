@@ -2,6 +2,7 @@ import { REPORT_KINDS, type ReportKind } from "@nexfem/model-core";
 import { COMMANDS } from "../commands/app.ts";
 import { FrameSectionsDialog, LoadsDialog, MaterialsDialog, ShellSectionsDialog } from "../dialogs/DefinitionDialogs.tsx";
 import { GridStoryDialog } from "../dialogs/GridStoryDialog.tsx";
+import { HelpDialog } from "../dialogs/HelpDialog.tsx";
 import { NewModelDialog } from "../dialogs/NewModelDialog.tsx";
 import { CloseModelDialog } from "../dialogs/CloseModelDialog.tsx";
 import { PreferencesDialog } from "../dialogs/PreferencesDialog.tsx";
@@ -34,6 +35,9 @@ export function Dialogs() {
   if (!dialog) return null;
   const close = () => set({ dialog: null });
   switch (dialog.kind) {
+    case "helpGuide":
+    case "documentation":
+      return <HelpDialog key={dialog.kind} page={dialog.kind} onClose={close} />;
     case "newModel":
       return <NewModelDialog onClose={close} />;
     case "closeModel":

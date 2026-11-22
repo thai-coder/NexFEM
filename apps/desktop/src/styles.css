@@ -1083,6 +1083,12 @@ select:disabled {
   margin-top: 14px;
 }
 
+.help-dialog li + li {
+  margin-top: 0.5rem;
+}
+.help-dialog button {
+  white-space: normal;
+}
 .shortcut-table {
   border-collapse: collapse;
   width: 100%;
