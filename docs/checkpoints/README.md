@@ -25,6 +25,8 @@ branch: claude/frame-load-linear    # tuỳ chọn
 pr: 19                              # tuỳ chọn, chỉ ghi số
 parent: claude-frame-load-linear    # tuỳ chọn, cho file review hoặc nhiệm vụ con
 session: https://claude.ai/code/session_…  # nên có: link hoặc ID phiên AI đang giữ nhiệm vụ
+next: Review PR #19                 # bắt buộc khi chưa DONE: việc tiếp theo, một dòng
+assign: Codex (mạnh nhất, High)     # bắt buộc khi chưa DONE: giao cho ai, mô hình nào
 ---
 ```
 

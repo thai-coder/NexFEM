@@ -20,6 +20,21 @@ Tên tác giả git không phân biệt được các mô hình AI: commit của
 3. **Trước khi bắt đầu**, chạy `python3 scripts/checkpoint_index.py --latest`. Lệnh này fetch mọi nhánh và liệt kê nhánh có commit mới nhất, kèm trailer phiên của commit đầu nhánh. Dòng ghi "không có trailer phiên" là commit của người hoặc của phiên chưa theo quy tắc này. Chỉ mục `PROJECT_STATUS.md` chỉ thấy checkpoint đã vào `main`, nên luôn đối chiếu với lệnh này.
 4. **Nhận nhiệm vụ trước khi làm:** đẩy checkpoint `IN_PROGRESS` có `session` ngay đầu phiên (bước 1 bên dưới). Nếu nhiệm vụ đã có checkpoint `IN_PROGRESS` của phiên khác, hoặc nhánh của nhiệm vụ vừa có commit mới, không làm chồng: hỏi chủ dự án hoặc nhận tiếp bằng cách ghi rõ phiên cũ đã dừng.
 
+## Kết thúc mỗi lần chạy: thời gian và việc giao tiếp
+
+Chủ dự án cần biết giao việc tiếp theo cho mô hình nào. Vì vậy **mỗi lần chạy, kể cả lần chỉ trả lời câu hỏi, kết thúc bằng khối sau** trong tin nhắn cuối:
+
+```markdown
+**Bàn giao — <YYYY-MM-DD HH:MM> (UTC+7)**
+- Phiên: <Claude | Codex | ChatGPT> (<mô hình>), <link hoặc ID phiên>
+- Đã làm: <một hai dòng; nhánh, commit, PR>
+- Việc tiếp theo: <một việc cụ thể>
+- Giao cho: <Claude | Codex | ChatGPT | Chủ dự án> (<mức mô hình>) — <lý do, theo docs/WORK_ROUTING.md trên nhánh ứng dụng>
+- Chờ chủ dự án: <quyết định hoặc nghiệm thu, nếu có>
+```
+
+Nếu lần chạy thay đổi nhiệm vụ, ghi cùng nội dung vào `next` và `assign` trong checkpoint, rồi sinh lại chỉ mục. Mục **Việc tiếp theo và giao cho ai** ở đầu `PROJECT_STATUS.md` gom các việc này cho mọi nhiệm vụ chưa `DONE`. Chọn người làm theo nguy cơ: vùng nguy cơ cao (bộ giải, schema, nhập CSI) dùng mô hình mạnh nhất, và người review phải khác người viết.
+
 ## Khi nào ghi checkpoint
 
 1. Khi bắt đầu nhiệm vụ nhiều bước, ghi phạm vi, nhánh gốc và việc làm đầu tiên.

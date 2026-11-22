@@ -24,7 +24,7 @@ INDEX = ROOT / "PROJECT_STATUS.md"
 
 STATUSES = ["IN_PROGRESS", "PAUSED", "BLOCKED", "REVIEW", "DONE"]
 REQUIRED = ["id", "title", "status", "owner", "updated"]
-OPTIONAL = ["branch", "pr", "parent", "session"]
+OPTIONAL = ["branch", "pr", "parent", "session", "next", "assign"]
 ID_RE = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 SKIP = {"README.md", "_TEMPLATE.md"}
 
@@ -61,6 +61,10 @@ def parse(path: Path) -> tuple[dict[str, str], list[str]]:
         errors.append(f"{path.name}: id chỉ dùng a-z, 0-9 và '-'")
     if meta.get("status") and meta["status"] not in STATUSES:
         errors.append(f"{path.name}: status phải là một trong {', '.join(STATUSES)}")
+    if meta.get("status") in STATUSES and meta["status"] != "DONE":
+        for key in ("next", "assign"):
+            if not meta.get(key):
+                errors.append(f"{path.name}: nhiệm vụ chưa DONE phải có '{key}' (việc tiếp theo / giao cho ai)")
     if meta.get("updated") and parse_updated(meta["updated"]) is None:
         errors.append(
             f"{path.name}: updated phải có dạng YYYY-MM-DDTHH:MM+07:00 (hoặc YYYY-MM-DD cho checkpoint cũ)"
@@ -120,6 +124,15 @@ def render(entries: list[dict[str, str]]) -> str:
             f"— {last['status']} — {who} — {utc(last['updated'])}.",
             "",
         ]
+    pending = [e for e in entries if e["status"] != "DONE"]
+    if pending:
+        out += ["## Việc tiếp theo và giao cho ai", ""]
+        for e in pending:
+            out.append(
+                f"- **{cell(e['assign'])}** — {cell(e['next'])} "
+                f"([{e['id']}](docs/checkpoints/{e['id']}.md), {e['status']}, cập nhật {utc(e['updated'])})"
+            )
+        out += ["", "## Tất cả nhiệm vụ", ""]
     out += [
         "Chỉ mục chỉ thấy checkpoint đã vào `main`. Để biết phiên nào đẩy commit gần nhất trên mọi nhánh, "
         "chạy `python3 scripts/checkpoint_index.py --latest`.",

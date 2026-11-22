@@ -6,6 +6,8 @@ owner: Claude
 branch: claude/festive-ritchie-e8hzpu
 pr: 19
 updated: 2026-11-21
+next: Review độc lập PR #19 (nhập CSI và bộ giải, vùng nguy cơ cao), rồi chủ dự án merge
+assign: Codex (mô hình mạnh nhất, High)
 ---
 
 ## Checkpoint — PR #19

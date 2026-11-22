@@ -5,6 +5,8 @@ status: IN_PROGRESS
 owner: <Claude | Codex | ChatGPT | người>
 updated: YYYY-MM-DDTHH:MM+07:00
 session: <link hoặc ID của phiên AI đang giữ nhiệm vụ>
+next: <việc tiếp theo, một dòng>
+assign: <Claude | Codex | ChatGPT | Chủ dự án> (<mức mô hình, ví dụ mạnh nhất · High>)
 branch: <nhánh công việc>
 pr: <số PR, bỏ dòng nếu chưa có>
 ---

@@ -6,6 +6,8 @@ owner: Codex
 branch: codex/csi-help-and-analysis-modes
 pr: 20
 updated: 2026-11-16
+next: Review PR #20 (Help và tài liệu, giao diện) rồi merge
+assign: Claude (tầm trung)
 ---
 
 ## Checkpoint — Help và tài liệu ETABS/SAP2000 (PR #20)

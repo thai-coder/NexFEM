@@ -5,6 +5,8 @@ status: REVIEW
 owner: Claude
 branch: claude/etab-sap2000-connection-vts58p
 updated: 2026-11-14
+next: Nghiệm thu trên Windows: nhập .e2k/.s2k, góc xoay trục, tải nút
+assign: Chủ dự án
 ---
 ## Checkpoint — Nhập file CSI, góc xoay trục, tải nút (14/11/2026)
 

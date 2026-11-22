@@ -6,6 +6,8 @@ owner: Codex
 branch: codex/sap-critical-load-warnings
 pr: 21
 updated: 2026-11-21
+next: PR #19 đã chứa toàn bộ PR #21 (e0799a8): merge #19 rồi đóng #21, hoặc merge #21 trước
+assign: Chủ dự án
 ---
 
 ## Checkpoint — cảnh báo tải SAP2000 (PR #21)
