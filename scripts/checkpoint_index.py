@@ -2,8 +2,10 @@
 """Generate PROJECT_STATUS.md from the front matter of docs/checkpoints/*.md.
 
 Usage:
-  python3 scripts/checkpoint_index.py          # rewrite PROJECT_STATUS.md
-  python3 scripts/checkpoint_index.py --check  # exit 1 if it is stale or a header is invalid
+  python3 scripts/checkpoint_index.py           # rewrite PROJECT_STATUS.md
+  python3 scripts/checkpoint_index.py --check   # exit 1 if it is stale or a header is invalid
+  python3 scripts/checkpoint_index.py --latest  # fetch, then list the most recently pushed
+                                                # branches with the agent/session that pushed them
 
 Standard library only. Do not edit PROJECT_STATUS.md by hand: when it conflicts in a
 merge or rebase, run this script and stage the result.
@@ -11,8 +13,9 @@ merge or rebase, run this script and stage the result.
 from __future__ import annotations
 
 import re
+import subprocess
 import sys
-from datetime import date
+from datetime import date, datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -21,7 +24,7 @@ INDEX = ROOT / "PROJECT_STATUS.md"
 
 STATUSES = ["IN_PROGRESS", "PAUSED", "BLOCKED", "REVIEW", "DONE"]
 REQUIRED = ["id", "title", "status", "owner", "updated"]
-OPTIONAL = ["branch", "pr", "parent"]
+OPTIONAL = ["branch", "pr", "parent", "session"]
 ID_RE = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 SKIP = {"README.md", "_TEMPLATE.md"}
 
@@ -58,14 +61,33 @@ def parse(path: Path) -> tuple[dict[str, str], list[str]]:
         errors.append(f"{path.name}: id chỉ dùng a-z, 0-9 và '-'")
     if meta.get("status") and meta["status"] not in STATUSES:
         errors.append(f"{path.name}: status phải là một trong {', '.join(STATUSES)}")
-    if meta.get("updated"):
-        try:
-            date.fromisoformat(meta["updated"])
-        except ValueError:
-            errors.append(f"{path.name}: updated phải có dạng YYYY-MM-DD")
+    if meta.get("updated") and parse_updated(meta["updated"]) is None:
+        errors.append(
+            f"{path.name}: updated phải có dạng YYYY-MM-DDTHH:MM+07:00 (hoặc YYYY-MM-DD cho checkpoint cũ)"
+        )
     if meta.get("pr") and not re.fullmatch(r"\d+", meta["pr"]):
         errors.append(f"{path.name}: pr chỉ ghi số PR, ví dụ 19")
     return meta, errors
+
+
+def parse_updated(value: str) -> datetime | None:
+    """Timestamp with an explicit offset, or a bare date (legacy) read as 00:00 UTC."""
+    if re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
+        try:
+            return datetime.combine(date.fromisoformat(value), datetime.min.time(), timezone.utc)
+        except ValueError:
+            return None
+    try:
+        dt = datetime.fromisoformat(value)
+    except ValueError:
+        return None
+    return dt.astimezone(timezone.utc) if dt.tzinfo else None
+
+
+def utc(value: str) -> str:
+    if re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
+        return value
+    return parse_updated(value).strftime("%Y-%m-%d %H:%M UTC")
 
 
 def cell(value: str) -> str:
@@ -75,7 +97,8 @@ def cell(value: str) -> str:
 def render(entries: list[dict[str, str]]) -> str:
     order = {s: i for i, s in enumerate(STATUSES)}
     entries = sorted(entries, key=lambda e: e["id"])
-    entries.sort(key=lambda e: e["updated"], reverse=True)
+    entries.sort(key=lambda e: parse_updated(e["updated"]), reverse=True)
+    last = entries[0] if entries else None
     entries.sort(key=lambda e: order[e["status"]] == order["DONE"])
 
     out = [
@@ -88,6 +111,18 @@ def render(entries: list[dict[str, str]]) -> str:
         "Quy trình: [docs/HANDOFF.md](docs/HANDOFF.md).",
         "",
         "Nếu file này xung đột khi merge hoặc rebase: chạy `python3 scripts/checkpoint_index.py` rồi stage lại.",
+        "",
+    ]
+    if last:
+        who = cell(last["owner"]) + (f", phiên {cell(last['session'])}" if last.get("session") else "")
+        out += [
+            f"**Checkpoint cập nhật gần nhất:** [{last['id']}](docs/checkpoints/{last['id']}.md) "
+            f"— {last['status']} — {who} — {utc(last['updated'])}.",
+            "",
+        ]
+    out += [
+        "Chỉ mục chỉ thấy checkpoint đã vào `main`. Để biết phiên nào đẩy commit gần nhất trên mọi nhánh, "
+        "chạy `python3 scripts/checkpoint_index.py --latest`.",
         "",
         "| Nhiệm vụ | Trạng thái | Người làm | Nhánh | PR | Cập nhật | Tóm tắt |",
         "|---|---|---|---|---|---|---|",
@@ -104,13 +139,48 @@ def render(entries: list[dict[str, str]]) -> str:
         if e.get("parent"):
             title += f" (thuộc `{e['parent']}`)"
         out.append(
-            f"| {link} | {e['status']} | {cell(e['owner'])} | {branch} | {pr} | {e['updated']} | {cell(title)} |"
+            f"| {link} | {e['status']} | {cell(e['owner'])} | {branch} | {pr} | {utc(e['updated'])} | {cell(title)} |"
         )
     out.append("")
     return "\n".join(out)
 
 
+AGENT_TRAILERS = re.compile(r"^(Agent|[\w-]*-Session|Co-Authored-By):\s*(.+)$", re.I | re.M)
+
+
+def git(*args: str) -> str:
+    return subprocess.run(
+        ["git", *args], cwd=ROOT, check=True, capture_output=True, text=True
+    ).stdout
+
+
+def latest(limit: int) -> int:
+    """List the most recently committed remote branches and who/which session pushed them."""
+    try:
+        git("fetch", "--quiet", "--prune", "origin", "+refs/heads/*:refs/remotes/origin/*")
+    except subprocess.CalledProcessError as exc:
+        print(f"Không fetch được origin, dùng dữ liệu cục bộ: {exc.stderr.strip()}", file=sys.stderr)
+    refs = git(
+        "for-each-ref", "--sort=-committerdate", f"--count={limit}", "refs/remotes/origin",
+        "--format=%(refname:short)%09%(objectname:short)%09%(committerdate:iso-strict)",
+    ).splitlines()
+    print("Nhánh mới nhất trước (giờ commit, UTC). Phiên lấy từ trailer Agent / *-Session của commit đầu nhánh.\n")
+    for line in refs:
+        ref, sha, when = line.split("\t")
+        if ref in ("origin", "origin/HEAD"):
+            continue
+        body = git("log", "-1", "--format=%an%x00%s%x00%B", sha)
+        author, subject, message = body.split("\x00", 2)
+        tags = [f"{k}: {v.strip()}" for k, v in AGENT_TRAILERS.findall(message)]
+        stamp = datetime.fromisoformat(when).astimezone(timezone.utc).strftime("%Y-%m-%d %H:%M")
+        agent = "; ".join(tags) if tags else f"không có trailer phiên (tác giả git: {author})"
+        print(f"{stamp}  {ref.removeprefix('origin/')}  {sha}\n    {subject}\n    {agent}")
+    return 0
+
+
 def main(argv: list[str]) -> int:
+    if "--latest" in argv:
+        return latest(12)
     check = "--check" in argv
     entries: list[dict[str, str]] = []
     errors: list[str] = []

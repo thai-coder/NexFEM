@@ -3,7 +3,8 @@ id: <tên-nhánh-đổi-dấu-gạch-chéo-thành-gạch-ngang>
 title: <tên nhiệm vụ, một dòng>
 status: IN_PROGRESS
 owner: <Claude | Codex | ChatGPT | người>
-updated: YYYY-MM-DD
+updated: YYYY-MM-DDTHH:MM+07:00
+session: <link hoặc ID của phiên AI đang giữ nhiệm vụ>
 branch: <nhánh công việc>
 pr: <số PR, bỏ dòng nếu chưa có>
 ---

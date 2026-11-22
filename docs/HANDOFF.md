@@ -4,6 +4,22 @@
 
 **Mỗi nhiệm vụ một file checkpoint, chỉ người làm nhiệm vụ đó sửa.** `PROJECT_STATUS.md` được sinh bằng `python3 scripts/checkpoint_index.py`; không sửa tay. Quy tắc đặt tên và phần đầu file: [docs/checkpoints/README.md](checkpoints/README.md). Khi có chênh lệch, dùng bằng chứng mới nhất đã xác minh và giữ các chỉnh sửa đang có.
 
+## Xác định phiên hoạt động cuối
+
+Tên tác giả git không phân biệt được các mô hình AI: commit của Codex hiện mang tên chủ dự án. Vì vậy mỗi phiên phải tự ghi dấu.
+
+1. **Mọi commit do AI tạo có trailer** ở cuối thông điệp commit:
+
+   ```text
+   Agent: <Codex | Claude | ChatGPT> (<tên mô hình>)
+   Agent-Session: <link hoặc ID của phiên>
+   ```
+
+   Claude Code đã tự thêm `Claude-Session:`; trailer này cũng được nhận.
+2. **Checkpoint ghi giờ và phiên:** `updated` có giờ và múi giờ (ví dụ `2026-11-22T09:30+07:00`), `session` là link hoặc ID phiên.
+3. **Trước khi bắt đầu**, chạy `python3 scripts/checkpoint_index.py --latest`. Lệnh này fetch mọi nhánh và liệt kê nhánh có commit mới nhất, kèm trailer phiên của commit đầu nhánh. Dòng ghi "không có trailer phiên" là commit của người hoặc của phiên chưa theo quy tắc này. Chỉ mục `PROJECT_STATUS.md` chỉ thấy checkpoint đã vào `main`, nên luôn đối chiếu với lệnh này.
+4. **Nhận nhiệm vụ trước khi làm:** đẩy checkpoint `IN_PROGRESS` có `session` ngay đầu phiên (bước 1 bên dưới). Nếu nhiệm vụ đã có checkpoint `IN_PROGRESS` của phiên khác, hoặc nhánh của nhiệm vụ vừa có commit mới, không làm chồng: hỏi chủ dự án hoặc nhận tiếp bằng cách ghi rõ phiên cũ đã dừng.
+
 ## Khi nào ghi checkpoint
 
 1. Khi bắt đầu nhiệm vụ nhiều bước, ghi phạm vi, nhánh gốc và việc làm đầu tiên.

@@ -6,6 +6,10 @@ Mỗi nhiệm vụ có một file checkpoint riêng trong [docs/checkpoints/](do
 
 Nếu file này xung đột khi merge hoặc rebase: chạy `python3 scripts/checkpoint_index.py` rồi stage lại.
 
+**Checkpoint cập nhật gần nhất:** [claude-festive-ritchie-e8hzpu](docs/checkpoints/claude-festive-ritchie-e8hzpu.md) — REVIEW — Claude — 2026-11-21.
+
+Chỉ mục chỉ thấy checkpoint đã vào `main`. Để biết phiên nào đẩy commit gần nhất trên mọi nhánh, chạy `python3 scripts/checkpoint_index.py --latest`.
+
 | Nhiệm vụ | Trạng thái | Người làm | Nhánh | PR | Cập nhật | Tóm tắt |
 |---|---|---|---|---|---|---|
 | [claude-festive-ritchie-e8hzpu](docs/checkpoints/claude-festive-ritchie-e8hzpu.md) | REVIEW | Claude | `claude/festive-ritchie-e8hzpu` | [#19](https://github.com/thai-coder/NexFEM/pull/19) | 2026-11-21 | Benchmark giải tích SAP2000 → bộ giải; sửa review PR #21; tải thanh hình thang |

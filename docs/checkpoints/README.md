@@ -20,11 +20,12 @@ id: claude-frame-load-linear        # bắt buộc, trùng tên file
 title: Tải thanh hình thang/một đoạn  # bắt buộc, một dòng
 status: IN_PROGRESS                 # bắt buộc: IN_PROGRESS | PAUSED | BLOCKED | REVIEW | DONE
 owner: Claude                       # bắt buộc: người/mô hình đang giữ nhiệm vụ
-updated: 2026-11-21                 # bắt buộc, YYYY-MM-DD
+updated: 2026-11-22T09:30+07:00     # bắt buộc, có giờ và múi giờ (checkpoint cũ được giữ YYYY-MM-DD)
 branch: claude/frame-load-linear    # tuỳ chọn
 pr: 19                              # tuỳ chọn, chỉ ghi số
 parent: claude-frame-load-linear    # tuỳ chọn, cho file review hoặc nhiệm vụ con
+session: https://claude.ai/code/session_…  # nên có: link hoặc ID phiên AI đang giữ nhiệm vụ
 ---
 ```
 
-Phần thân theo [mẫu checkpoint](_TEMPLATE.md). Kiểm tra cục bộ: `python3 scripts/checkpoint_index.py --check`. CI trên `main` chạy cùng lệnh này.
+Phần thân theo [mẫu checkpoint](_TEMPLATE.md). Xem cách xác định phiên hoạt động cuối trong [HANDOFF](../HANDOFF.md#xác-định-phiên-hoạt-động-cuối). Kiểm tra cục bộ: `python3 scripts/checkpoint_index.py --check`. CI trên `main` chạy cùng lệnh này.
