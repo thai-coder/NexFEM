@@ -1,0 +1,391 @@
+{
+  "sourceSha256": "60ee53086250bd226acf10c5ae7cdefee138ea49da83ef10dcdc4df1a528a013",
+  "program": "SAP2000",
+  "version": "26.2.0",
+  "units": {
+    "force": "KIP",
+    "length": "IN",
+    "temperature": "F"
+  },
+  "counts": {
+    "materials": {
+      "source": 5,
+      "imported": 5
+    },
+    "frameSections": {
+      "source": 17,
+      "imported": 16
+    },
+    "joints": {
+      "source": 3573,
+      "imported": 3573
+    },
+    "frames": {
+      "source": 2447,
+      "imported": 2407
+    },
+    "shells": {
+      "source": 77,
+      "imported": 77
+    },
+    "shellSections": {
+      "source": 1,
+      "imported": 1
+    },
+    "loadPatterns": {
+      "source": 4,
+      "imported": 4
+    },
+    "loadCases": {
+      "source": 5,
+      "imported": 5
+    },
+    "combos": {
+      "source": 0,
+      "imported": 0
+    },
+    "frameLoads": {
+      "source": 0,
+      "imported": 0
+    },
+    "shellLoads": {
+      "source": 24,
+      "imported": 24
+    },
+    "pointLoads": {
+      "source": 0,
+      "imported": 0
+    }
+  },
+  "finalCounts": {
+    "joints": 3573,
+    "frames": 5263,
+    "shells": 77,
+    "frameSections": 16,
+    "shellSections": 1,
+    "loadPatterns": 4,
+    "loadCases": 5,
+    "combos": 0,
+    "frameLoads": 0,
+    "shellLoads": 24,
+    "jointLoads": 0
+  },
+  "coordinateCheck": {
+    "matched": 3573,
+    "missing": 0,
+    "maxCoordinateErrorM": 4.999947122996673e-10
+  },
+  "restraintCheck": {
+    "matched": 310,
+    "mismatch": 0,
+    "missing": 0
+  },
+  "loadPatterns": [
+    {
+      "name": "DEAD",
+      "type": "dead",
+      "selfWeight": 1
+    },
+    {
+      "name": "LIVE",
+      "type": "live",
+      "selfWeight": 0
+    },
+    {
+      "name": "EQX",
+      "type": "seismic",
+      "selfWeight": 0
+    },
+    {
+      "name": "EQY",
+      "type": "seismic",
+      "selfWeight": 0
+    }
+  ],
+  "loadCases": [
+    {
+      "name": "DEAD",
+      "type": "linearStatic",
+      "loads": [
+        {
+          "pattern": "DEAD",
+          "factor": 1
+        }
+      ]
+    },
+    {
+      "name": "MODAL",
+      "type": "modal",
+      "loads": []
+    },
+    {
+      "name": "LIVE",
+      "type": "linearStatic",
+      "loads": [
+        {
+          "pattern": "LIVE",
+          "factor": 1
+        }
+      ]
+    },
+    {
+      "name": "EQX",
+      "type": "linearStatic",
+      "loads": [
+        {
+          "pattern": "EQX",
+          "factor": 1
+        }
+      ]
+    },
+    {
+      "name": "EQY",
+      "type": "linearStatic",
+      "loads": [
+        {
+          "pattern": "EQY",
+          "factor": 1
+        }
+      ]
+    }
+  ],
+  "diagnostics": {
+    "error:section_unsupported": 1,
+    "error:partial_fixity_unsupported": 3765,
+    "error:frame_section_unavailable": 40,
+    "warning:partial_fixity_as_pinned": 4503,
+    "warning:frame_cardinal_ignored": 1238,
+    "warning:section_props_differ": 7,
+    "info:program": 1,
+    "info:unit_conversion": 1,
+    "info:stories_from_grid": 1,
+    "info:material_type_other": 1,
+    "info:material_nu_default": 2,
+    "info:frame_angle_imported": 325,
+    "info:section_props_checked": 1,
+    "info:section_shear_areas": 1,
+    "info:frames_split": 1,
+    "info:section_ignored": 49
+  },
+  "ignoredTables": [
+    {
+      "section": "ANALYSIS OPTIONS",
+      "records": 1
+    },
+    {
+      "section": "GENERAL REFERENCE LINE 01 - GENERAL",
+      "records": 1
+    },
+    {
+      "section": "GENERAL REFERENCE LINE 02 - PLAN POINTS",
+      "records": 2
+    },
+    {
+      "section": "GENERAL REFERENCE LINE 03 - ELEVATION POINTS",
+      "records": 2
+    },
+    {
+      "section": "GENERAL REFERENCE LINE 04 - DISCRETIZED COORDINATES",
+      "records": 2
+    },
+    {
+      "section": "MATERIAL PROPERTIES 03E - REBAR DATA",
+      "records": 1
+    },
+    {
+      "section": "MATERIAL PROPERTIES 03F - TENDON DATA",
+      "records": 1
+    },
+    {
+      "section": "MATERIAL PROPERTIES 03J - COUPLED NONLINEAR VON MISES DATA",
+      "records": 4
+    },
+    {
+      "section": "MATERIAL PROPERTIES 06 - DAMPING PARAMETERS",
+      "records": 5
+    },
+    {
+      "section": "MATERIAL PROPERTIES 09 - ACCEPTANCE CRITERIA",
+      "records": 5
+    },
+    {
+      "section": "FRAME SECTION PROPERTIES 13 - TIME DEPENDENT",
+      "records": 17
+    },
+    {
+      "section": "AREA SECTION PROPERTY DESIGN PARAMETERS",
+      "records": 1
+    },
+    {
+      "section": "AREA SECTION PROPERTY - TIME DEPENDENT",
+      "records": 1
+    },
+    {
+      "section": "SOLID PROPERTY DEFINITIONS",
+      "records": 1
+    },
+    {
+      "section": "LINK PROPERTY DEFINITIONS 01 - GENERAL",
+      "records": 2
+    },
+    {
+      "section": "LINK PROPERTY DEFINITIONS 02 - LINEAR",
+      "records": 22
+    },
+    {
+      "section": "REBAR SIZES",
+      "records": 37
+    },
+    {
+      "section": "AUTO SEISMIC - ASCE 7-22",
+      "records": 2
+    },
+    {
+      "section": "AUTO SEISMIC LOADS TO JOINTS",
+      "records": 7800
+    },
+    {
+      "section": "AUTO WAVE 3 - WAVE CHARACTERISTICS - GENERAL",
+      "records": 1
+    },
+    {
+      "section": "AUTO COMBINATION OPTION DATA 01 - GENERAL",
+      "records": 1
+    },
+    {
+      "section": "AUTO COMBINATION OPTION DATA 02 - USER DATA",
+      "records": 6
+    },
+    {
+      "section": "FUNCTION - RESPONSE SPECTRUM - USER",
+      "records": 2
+    },
+    {
+      "section": "FUNCTION - TIME HISTORY - USER",
+      "records": 5
+    },
+    {
+      "section": "FUNCTION - POWER SPECTRAL DENSITY - USER",
+      "records": 2
+    },
+    {
+      "section": "FUNCTION - STEADY STATE - USER",
+      "records": 2
+    },
+    {
+      "section": "GROUPS 1 - DEFINITIONS",
+      "records": 1
+    },
+    {
+      "section": "GROUPS 3 - MASSES AND WEIGHTS",
+      "records": 1
+    },
+    {
+      "section": "JOINT PATTERN DEFINITIONS",
+      "records": 1
+    },
+    {
+      "section": "MASS SOURCE",
+      "records": 1
+    },
+    {
+      "section": "FUNCTION - PLOT FUNCTIONS",
+      "records": 1
+    },
+    {
+      "section": "CASE - MODAL 1 - GENERAL",
+      "records": 1
+    },
+    {
+      "section": "FRAME OUTPUT STATION ASSIGNMENTS",
+      "records": 2447
+    },
+    {
+      "section": "FRAME LOAD TRANSFER OPTIONS",
+      "records": 2447
+    },
+    {
+      "section": "FRAME DESIGN PROCEDURES",
+      "records": 2447
+    },
+    {
+      "section": "OVERWRITES - STEEL DESIGN - AISC 360-22",
+      "records": 2447
+    },
+    {
+      "section": "AREA AUTO MESH ASSIGNMENTS",
+      "records": 77
+    },
+    {
+      "section": "AREA LOADS - UNIFORM TO FRAME",
+      "records": 124
+    },
+    {
+      "section": "PREFERENCES - DIMENSIONAL",
+      "records": 1
+    },
+    {
+      "section": "PREFERENCES - STEEL DESIGN - AISC 360-22",
+      "records": 1
+    },
+    {
+      "section": "PREFERENCES - CONCRETE DESIGN - ACI 318-19",
+      "records": 1
+    },
+    {
+      "section": "PREFERENCES - CONCRETE SHELL DESIGN - EUROCODE 2-2004",
+      "records": 1
+    },
+    {
+      "section": "PREFERENCES - ALUMINUM DESIGN - AA 2015",
+      "records": 1
+    },
+    {
+      "section": "PREFERENCES - COLD FORMED DESIGN - AISI-16",
+      "records": 1
+    },
+    {
+      "section": "OPTIONS - COLORS - DISPLAY",
+      "records": 3
+    },
+    {
+      "section": "OPTIONS - COLORS - OUTPUT",
+      "records": 3
+    },
+    {
+      "section": "PROJECT INFORMATION",
+      "records": 13
+    },
+    {
+      "section": "MATERIAL LIST 1 - BY OBJECT TYPE",
+      "records": 3
+    },
+    {
+      "section": "MATERIAL LIST 2 - BY SECTION PROPERTY",
+      "records": 18
+    }
+  ],
+  "selectedSourceTableCounts": {
+    "AREA LOADS - UNIFORM TO FRAME": 124,
+    "FRAME LOAD TRANSFER OPTIONS": 2447,
+    "AUTO SEISMIC - ASCE 7-22": 2,
+    "AUTO SEISMIC LOADS TO JOINTS": 7800,
+    "MASS SOURCE": 1,
+    "CASE - MODAL 1 - GENERAL": 1,
+    "AREA AUTO MESH ASSIGNMENTS": 77
+  },
+  "sectionPropertyDifferences": [
+    "HM 244x175x7x11 (A -0.64 %, I -0.65 %, J +27.62 %)",
+    "HN 198x99x4.5x7 (A -0.73 %, I -0.83 %, J +35.58 %)",
+    "HN 248x124x5x8 (A -0.62 %, I -0.71 %, J +28.73 %)",
+    "HN 298x149x5.5x8 (A -0.67 %, I -0.80 %, J +35.49 %)",
+    "HN 346x174x6x9 (A -0.52 %, I -0.63 %, J +25.31 %)",
+    "HN100X50X5X7 (A 0.00 %, I +0.00 %, J +8.21 %)",
+    "HN150X75X5X7 (A -0.00 %, I +0.00 %, J +5.26 %)"
+  ],
+  "mappingFrame1": "f-1-1",
+  "notes": [
+    "Counts describe data, not solver equivalence. frame count in report precedes splitting.",
+    "Coordinate and restraint comparisons reuse the project parser; not an independent format validation."
+  ]
+}

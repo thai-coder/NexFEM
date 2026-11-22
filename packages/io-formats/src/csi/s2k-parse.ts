@@ -22,7 +22,7 @@ export interface S2kFile {
   savedPath: string;
 }
 
-const FIELD = /([A-Za-z_][A-Za-z0-9_]*)=("([^"]*)"|\S+)/g;
+const FIELD = /([A-Za-z_][A-Za-z0-9_]*)\s*=\s*("([^"]*)"|\S+)/g;
 
 /** Tách các cặp `Tên=Giá trị` trong một bản ghi đã nối dòng. */
 export function s2kFields(text: string): Map<string, string> {
