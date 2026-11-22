@@ -1,0 +1,24 @@
+name: checkpoint-index
+
+on:
+  pull_request:
+    paths:
+      - "PROJECT_STATUS.md"
+      - "docs/checkpoints/**"
+      - "scripts/checkpoint_index.py"
+  push:
+    branches: [main]
+    paths:
+      - "PROJECT_STATUS.md"
+      - "docs/checkpoints/**"
+      - "scripts/checkpoint_index.py"
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/checkpoint_index.py --check
