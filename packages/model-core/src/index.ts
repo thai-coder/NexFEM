@@ -8,6 +8,7 @@ export * from "./steel-library.ts";
 export * from "./reports.ts";
 export * from "./commands.ts";
 export * from "./validation.ts";
+export * from "./frame-loads.ts";
 export * from "./definitions.ts";
 export * from "./project.ts";
 export * from "./drawing.ts";

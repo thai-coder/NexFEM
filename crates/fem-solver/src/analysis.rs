@@ -213,6 +213,8 @@ enum MemberLoad {
     Uniform(V3),
     /// Lực tập trung (cục bộ, kN) tại khoảng cách a từ đầu i.
     Point(V3, f64),
+    /// Tải phân bố tuyến tính (cục bộ, kN/m): w0 tại a, w1 tại b (khoảng cách từ đầu i, a < b).
+    Linear { w0: V3, w1: V3, a: f64, b: f64 },
 }
 
 struct Elem {
@@ -274,6 +276,54 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
                 ),
                 vec![load.id.clone()],
             ));
+        }
+        // Loại tải lạ phải bị từ chối: trước đây mọi loại khác "point" bị hiểu là tải đều cả thanh.
+        if !matches!(load.kind.as_str(), "distributed" | "point" | "linear") {
+            return Err(AnalysisError::new(
+                "invalid_frame_load",
+                format!(
+                    "Tải thanh {}: loại tải {} không được hỗ trợ",
+                    load.id, load.kind
+                ),
+                vec![load.id.clone()],
+            ));
+        }
+        if load.kind == "linear" {
+            let ok = match (load.start, load.end, load.value_end) {
+                (Some(s), Some(e), Some(v)) => {
+                    s.is_finite()
+                        && e.is_finite()
+                        && v.is_finite()
+                        && load.value.is_finite()
+                        && s >= 0.0
+                        && e <= 1.0
+                        && e - s > 1e-9
+                }
+                _ => false,
+            };
+            if !ok {
+                return Err(AnalysisError::new(
+                    "invalid_frame_load",
+                    format!(
+                        "Tải hình thang {} có đoạn hoặc cường độ không hợp lệ",
+                        load.id
+                    ),
+                    vec![load.id.clone()],
+                ));
+            }
+            // Quy ước vị trí khi thanh có vùng cứng làm ở PR D (docs/plans/FRAME_LOAD_SEGMENTS_PLAN.md).
+            if let Some(f) = model.frames.iter().find(|f| f.id == load.frame) {
+                if f.offsets.as_ref().is_some_and(|o| o.i > 0.0 || o.j > 0.0) {
+                    return Err(AnalysisError::new(
+                        "invalid_frame_load",
+                        format!(
+                            "Tải hình thang {} trên thanh có vùng cứng chưa được hỗ trợ",
+                            load.id
+                        ),
+                        vec![load.id.clone()],
+                    ));
+                }
+            }
         }
         if load.kind == "point" && !load.at.is_some_and(|a| (0.0..=1.0).contains(&a)) {
             return Err(AnalysisError::new(
@@ -842,20 +892,28 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
                 ));
             };
             let e = &elems[ei];
-            let v = fl.value;
-            let w = match fl.direction.as_str() {
-                "gravity" => to_local3(&e.ax, [0.0, 0.0, -v]),
-                "globalX" => to_local3(&e.ax, [v, 0.0, 0.0]),
-                "globalY" => to_local3(&e.ax, [0.0, v, 0.0]),
-                "globalZ" => to_local3(&e.ax, [0.0, 0.0, v]),
-                "localX" => [v, 0.0, 0.0],
-                "local2" => [0.0, v, 0.0],
-                _ => [0.0, 0.0, v],
+            let dir = |v: f64| -> V3 {
+                match fl.direction.as_str() {
+                    "gravity" => to_local3(&e.ax, [0.0, 0.0, -v]),
+                    "globalX" => to_local3(&e.ax, [v, 0.0, 0.0]),
+                    "globalY" => to_local3(&e.ax, [0.0, v, 0.0]),
+                    "globalZ" => to_local3(&e.ax, [0.0, 0.0, v]),
+                    "localX" => [v, 0.0, 0.0],
+                    "local2" => [0.0, v, 0.0],
+                    _ => [0.0, 0.0, v],
+                }
             };
-            let ml = if fl.kind == "point" {
-                MemberLoad::Point(w, fl.at.unwrap_or(0.5) * e.l)
-            } else {
-                MemberLoad::Uniform(w)
+            let w = dir(fl.value);
+            let ml = match fl.kind.as_str() {
+                "point" => MemberLoad::Point(w, fl.at.unwrap_or(0.5) * e.l),
+                // Đã kiểm tra ở trên: có start/end/valueEnd và thanh không có vùng cứng (e.l = chiều dài nút–nút).
+                "linear" => MemberLoad::Linear {
+                    w0: w,
+                    w1: dir(fl.value_end.unwrap_or(fl.value)),
+                    a: fl.start.unwrap_or(0.0) * e.l,
+                    b: fl.end.unwrap_or(1.0) * e.l,
+                },
+                _ => MemberLoad::Uniform(w),
             };
             pl.member.entry(ei).or_default().push(ml);
         }
@@ -1018,6 +1076,10 @@ pub fn analyze(model: &Model, opts: &Options) -> Result<Results, AnalysisError> 
                 let (f, total) = match ml {
                     MemberLoad::Uniform(w) => (uniform_feq(*w, e.l), scale(*w, e.l)),
                     MemberLoad::Point(p, a) => (point_feq(*p, *a, e.l), *p),
+                    MemberLoad::Linear { w0, w1, a, b } => (
+                        linear_feq(*w0, *w1, *a, *b, e.l),
+                        scale([w0[0] + w1[0], w0[1] + w1[1], w0[2] + w1[2]], (b - a) / 2.0),
+                    ),
                 };
                 for c in 0..12 {
                     feq[c] += fac * f[c];
@@ -1370,6 +1432,26 @@ fn stations(f: &[f64; 12], loads: &[(f64, &MemberLoad)], l: f64, n: usize) -> Fr
                     }
                     msum[1] += fac * w[2] * x * x / 2.0;
                     msum[2] -= fac * w[1] * x * x / 2.0;
+                }
+                MemberLoad::Linear { w0, w1, a, b } => {
+                    if x > *a {
+                        // Phần tải trên [a, c], c = min(x, b); w(t) = w0 + k (t − a). Với u = t − a, s = c − a, d = x − a:
+                        // ∫w = w0 s + k s²/2;  ∫w (x − t) = w0 (d s − s²/2) + k (d s²/2 − s³/3).
+                        let s = x.min(*b) - a;
+                        let d = x - a;
+                        let len = b - a;
+                        for c in 0..3 {
+                            let k = (w1[c] - w0[c]) / len;
+                            let f = w0[c] * s + k * s * s / 2.0;
+                            fsum[c] += fac * f;
+                        }
+                        let mom = |c: usize| {
+                            let k = (w1[c] - w0[c]) / len;
+                            w0[c] * (d * s - s * s / 2.0) + k * (d * s * s / 2.0 - s * s * s / 3.0)
+                        };
+                        msum[1] += fac * mom(2);
+                        msum[2] -= fac * mom(1);
+                    }
                 }
                 MemberLoad::Point(p, a) => {
                     if *a <= x + 1e-12 {
