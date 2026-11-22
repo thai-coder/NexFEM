@@ -1,0 +1,104 @@
+{
+  "schema": 1,
+  "id": "cantilever-hinge-span",
+  "description": "Hai nhịp 6 m: thanh 1 ngàm tại nút 1, thanh 2 có nhả mômen M3 ở đầu I (khớp tại nút 2), gối khớp tại nút 3; tải đều w = 5 kN/m cả hai thanh.",
+  "file": "cantilever-hinge-span.s2k",
+  "provenance": {
+    "input": "synthetic: SAP2000 text tables written by hand from the grammar of real SAP2000 files in tests/fixtures/csi/sap2000; NOT exported from SAP2000",
+    "reference": "closed-form analytic solution; NOT ETABS/SAP2000 results"
+  },
+  "basis": "Tĩnh định: thanh 2 là dầm đơn giản (phản lực wL/2 truyền xuống đầu thanh 1). Fz(1) = 1.5wL; M ngàm = −wL²; δ(2) = −(wL⁴/8EI + (wL/2)L³/3EI) = −7wL⁴/24EI; θy(2) = 5wL³/12EI; θy(3) = −wL³/3EI; M3 khớp = 0; M3 giữa thanh 2 = wL²/8.",
+  "classification": "analytic-exact",
+  "limitations": [],
+  "source": {
+    "program": "analytic",
+    "version": "closed-form"
+  },
+  "units": {
+    "force": "kN",
+    "length": "m"
+  },
+  "metrics": [
+    {
+      "case": "W",
+      "kind": "displacement",
+      "object": "2",
+      "component": "U3",
+      "value": -0.008859375,
+      "absTol": 1e-10,
+      "relTol": 0.000001
+    },
+    {
+      "case": "W",
+      "kind": "displacement",
+      "object": "2",
+      "component": "R2",
+      "value": 0.0021093749999999997,
+      "absTol": 1e-10,
+      "relTol": 0.000001
+    },
+    {
+      "case": "W",
+      "kind": "displacement",
+      "object": "3",
+      "component": "R2",
+      "value": -0.0016874999999999998,
+      "absTol": 1e-10,
+      "relTol": 0.000001
+    },
+    {
+      "case": "W",
+      "kind": "reaction",
+      "object": "1",
+      "component": "F3",
+      "value": 45,
+      "absTol": 1e-8,
+      "relTol": 0.000001
+    },
+    {
+      "case": "W",
+      "kind": "reaction",
+      "object": "1",
+      "component": "M2",
+      "value": -180,
+      "absTol": 1e-8,
+      "relTol": 0.000001
+    },
+    {
+      "case": "W",
+      "kind": "reaction",
+      "object": "3",
+      "component": "F3",
+      "value": 15,
+      "absTol": 1e-8,
+      "relTol": 0.000001
+    },
+    {
+      "case": "W",
+      "kind": "frameForce",
+      "object": "1@x=0",
+      "component": "M3",
+      "value": -180,
+      "absTol": 1e-8,
+      "relTol": 0.000001
+    },
+    {
+      "case": "W",
+      "kind": "frameForce",
+      "object": "2@x=0",
+      "component": "M3",
+      "value": 0,
+      "absTol": 1e-8,
+      "relTol": 0.000001
+    },
+    {
+      "case": "W",
+      "kind": "frameForce",
+      "object": "2@x=3",
+      "component": "M3",
+      "value": 22.5,
+      "absTol": 1e-8,
+      "relTol": 0.000001
+    }
+  ]
+}

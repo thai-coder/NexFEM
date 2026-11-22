@@ -178,12 +178,23 @@ export const FrameLoadSchema = z.object({
   id: Id,
   frame: Id,
   pattern: Id,
-  kind: z.enum(["distributed", "point"]),
+  /**
+   * `distributed`: tải đều trên cả chiều dài. `point`: tập trung tại `at`.
+   * `linear`: tải phân bố tuyến tính trên đoạn [`start`, `end`], cường độ `value` tại `start` và `valueEnd` tại `end`
+   * (tải hình thang, tam giác, hoặc tải đều trên một đoạn). Vị trí là tương đối theo thanh, nên tải đi theo thanh
+   * khi dời nút hoặc nhân bản (docs/plans/FRAME_LOAD_SEGMENTS_PLAN.md, R1).
+   */
+  kind: z.enum(["distributed", "point", "linear"]),
   direction: z.enum(["gravity", "localX", "local2", "local3", "globalX", "globalY", "globalZ"]),
-  /** Giá trị tải (kN/m với phân bố, kN với tập trung). */
+  /** Giá trị tải (kN/m với phân bố, kN với tập trung); với `linear` là cường độ tại `start`. */
   value: Num,
   /** Vị trí tương đối 0..1 cho tải tập trung. */
   at: Num.min(0).max(1).optional(),
+  /** `linear`: vị trí tương đối đầu và cuối đoạn tải, 0 ≤ start < end ≤ 1. */
+  start: Num.min(0).max(1).optional(),
+  end: Num.min(0).max(1).optional(),
+  /** `linear`: cường độ tại `end` (kN/m). */
+  valueEnd: Num.optional(),
 });
 
 export const ShellLoadSchema = z.object({

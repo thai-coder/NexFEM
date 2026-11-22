@@ -34,5 +34,10 @@ export class Diagnostics {
     const rank: Record<ImportLevel, number> = { error: 0, warning: 1, info: 2 };
     return [...this.#map.values()].sort((a, b) => rank[a.level] - rank[b.level]);
   }
+
+  /** True if the model must not be used for analysis after import. */
+  get blocked(): boolean {
+    return [...this.#map.values()].some((d) => d.level === "error");
+  }
 }
 

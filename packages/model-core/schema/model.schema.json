@@ -925,7 +925,8 @@
             "type": "string",
             "enum": [
               "distributed",
-              "point"
+              "point",
+              "linear"
             ]
           },
           "direction": {
@@ -947,6 +948,19 @@
             "type": "number",
             "minimum": 0,
             "maximum": 1
+          },
+          "start": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "end": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "valueEnd": {
+            "type": "number"
           }
         },
         "required": [
